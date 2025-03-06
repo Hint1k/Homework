@@ -1,3 +1,4 @@
 # Основной README файл.
 
-1. здесь будет ссылка на пул реквест
+## Assignment 1
+- [Link to Assignment 1](https://github.com/Hint1k/homework/tree/main/task1)
