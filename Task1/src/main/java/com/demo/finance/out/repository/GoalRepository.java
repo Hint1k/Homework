@@ -9,7 +9,7 @@ public interface GoalRepository {
 
     void save(Goal goal);
 
-    Optional<Goal> findByUserIdAndName(String userId, String goalName);
+    Optional<Goal> findByUserIdAndName(Long userId, String goalName);
 
-    List<Goal> findByUserId(String userId);
+    List<Goal> findByUserId(Long userId);
 }

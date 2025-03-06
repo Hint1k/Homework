@@ -14,15 +14,15 @@ public class ReportService {
         this.generateReportUseCase = generateReportUseCase;
     }
 
-    public Optional<Report> generateUserReport(String userId) {
+    public Optional<Report> generateUserReport(Long userId) {
         return generateReportUseCase.generateUserReport(userId);
     }
 
-    public Optional<Report> generateReportByDate(String userId, LocalDate from, LocalDate to) {
+    public Optional<Report> generateReportByDate(Long userId, LocalDate from, LocalDate to) {
         return generateReportUseCase.generateReportByDate(userId, from, to);
     }
 
-    public Map<String, Double> analyzeExpensesByCategory(String userId, LocalDate from, LocalDate to) {
+    public Map<String, Double> analyzeExpensesByCategory(Long userId, LocalDate from, LocalDate to) {
         return generateReportUseCase.analyzeExpensesByCategory(userId, from, to);
     }
 }

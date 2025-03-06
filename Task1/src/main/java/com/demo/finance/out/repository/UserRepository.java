@@ -11,11 +11,11 @@ public interface UserRepository {
 
     List<User> findAll();
 
-    Optional<User> findById(String id);
+    Optional<User> findById(Long userId);
 
     Optional<User> findByEmail(String email);
 
     boolean update(User user);
 
-    boolean delete(String id);
+    boolean delete(Long userId);
 }

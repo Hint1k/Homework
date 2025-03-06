@@ -19,7 +19,7 @@ public class UserCommand {
 
     public void registerUser() {
         System.out.print("Enter User ID: ");
-        String id = scanner.nextLine();
+        Long userId = scanner.nextLong();
         System.out.print("Enter Name: ");
         String name = scanner.nextLine();
         System.out.print("Enter Email: ");
@@ -28,7 +28,7 @@ public class UserCommand {
         String password = scanner.nextLine();
         Role role = new Role("user"); // Default role
 
-        if (context.getUserController().registerUser(id, name, email, password, role)) {
+        if (context.getUserController().registerUser(userId, name, email, password, role)) {
             System.out.println("Registration successful.");
         } else {
             System.out.println("Registration failed. Email already exists.");
@@ -57,7 +57,7 @@ public class UserCommand {
 
     public void updateUserRole() {
         System.out.print("Enter User ID to modify: ");
-        String userId = scanner.nextLine();
+        Long userId = scanner.nextLong();
         System.out.print("Set role (1=User, 2=Admin): ");
         String roleChoice = scanner.nextLine();
         Role newRole = "2".equals(roleChoice) ? new Role("admin") : new Role("user");
@@ -71,8 +71,8 @@ public class UserCommand {
 
     public void blockUser() {
         System.out.print("Enter User ID to block: ");
-        String id = scanner.nextLine();
-        if (context.getAdminController().blockUser(id)) {
+        Long userId = scanner.nextLong();
+        if (context.getAdminController().blockUser(userId)) {
             System.out.println("User blocked successfully.");
         } else {
             System.out.println("Failed to block user.");
@@ -81,8 +81,8 @@ public class UserCommand {
 
     public void deleteUser() {
         System.out.print("Enter User ID to delete: ");
-        String id = scanner.nextLine();
-        if (context.getAdminController().deleteUser(id)) {
+        Long userId = scanner.nextLong();
+        if (context.getAdminController().deleteUser(userId)) {
             System.out.println("User deleted successfully.");
         } else {
             System.out.println("Failed to delete user.");

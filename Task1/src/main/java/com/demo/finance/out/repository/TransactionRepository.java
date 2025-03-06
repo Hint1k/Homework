@@ -1,6 +1,7 @@
 package com.demo.finance.out.repository;
 
 import com.demo.finance.domain.model.Transaction;
+import com.demo.finance.domain.utils.Type;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,14 +13,13 @@ public interface TransactionRepository {
 
     boolean update(Transaction transaction);
 
-    Optional<Transaction> findById(String id);
+    Optional<Transaction> findById(Long transactionId);
 
-    List<Transaction> findByUserId(String userId);
+    List<Transaction> findByUserId(Long userId);
 
     List<Transaction> findAll();
 
-    boolean delete(String id);
+    boolean delete(Long transactionId);
 
-    List<Transaction> findFiltered(String userId, LocalDate from, LocalDate to, String category,
-                                   Transaction.Type type);
+    List<Transaction> findFiltered(Long userId, LocalDate from, LocalDate to, String category, Type type);
 }

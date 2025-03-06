@@ -19,27 +19,27 @@ public class AdminController {
         return adminUseCase.getAllUsers();
     }
 
-    public Optional<User> getUserById(String id) {
-        return adminUseCase.getUserById(id);
+    public Optional<User> getUserById(Long userId) {
+        return adminUseCase.getUserById(userId);
     }
 
-    public boolean updateUserRole(String userId, Role newRole) {
+    public boolean updateUserRole(Long userId, Role newRole) {
         return adminUseCase.updateUserRole(userId, newRole);
     }
 
-    public boolean blockUser(String id) {
-        return adminUseCase.blockUser(id);
+    public boolean blockUser(Long userId) {
+        return adminUseCase.blockUser(userId);
     }
 
-    public boolean deleteUser(String id) {
-        return adminUseCase.deleteUser(id);
+    public boolean deleteUser(Long userId) {
+        return adminUseCase.deleteUser(userId);
     }
 
     public List<Transaction> getAllTransactions() {
         return adminUseCase.getAllTransactions();
     }
 
-    public boolean deleteTransaction(String transactionId) {
+    public boolean deleteTransaction(Long transactionId) {
         return adminUseCase.deleteTransaction(transactionId);
     }
 }

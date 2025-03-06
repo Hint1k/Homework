@@ -4,12 +4,12 @@ import java.util.Objects;
 
 public class Report {
 
-    private final String userId;
+    private final Long userId;
     private final double totalIncome;
     private final double totalExpense;
     private final double balance;
 
-    public Report(String userId, double totalIncome, double totalExpense) {
+    public Report(Long userId, double totalIncome, double totalExpense) {
         this.userId = userId;
         this.totalIncome = totalIncome;
         this.totalExpense = totalExpense;

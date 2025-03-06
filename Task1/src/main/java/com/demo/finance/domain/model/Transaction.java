@@ -2,21 +2,21 @@ package com.demo.finance.domain.model;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import com.demo.finance.domain.utils.Type;
 
 public class Transaction {
 
-    public enum Type { INCOME, EXPENSE }
-    private final String id;
-    private final String userId;
+    private final Long transactionId;
+    private final Long userId;
     private double amount;
     private String category;
     private LocalDate date;
     private String description;
     private Type type;
 
-    public Transaction(String id, String userId, double amount, String category,
+    public Transaction(Long transactionId, Long userId, double amount, String category,
                        LocalDate date, String description, Type type) {
-        this.id = id;
+        this.transactionId = transactionId;
         this.userId = userId;
         this.amount = amount;
         this.category = category;
@@ -25,11 +25,11 @@ public class Transaction {
         this.type = type;
     }
 
-    public String getId() {
-        return id;
+    public Long getTransactionId() {
+        return transactionId;
     }
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
@@ -89,7 +89,7 @@ public class Transaction {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Transaction that = (Transaction) o;
-        return Double.compare(amount, that.amount) == 0 && Objects.equals(id, that.id)
+        return Double.compare(amount, that.amount) == 0 && Objects.equals(transactionId, that.transactionId)
                 && Objects.equals(userId, that.userId) && Objects.equals(category, that.category)
                 && Objects.equals(date, that.date) && Objects.equals(description, that.description)
                 && type == that.type;
@@ -97,7 +97,7 @@ public class Transaction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, amount, category, date, description, type);
+        return Objects.hash(transactionId, userId, amount, category, date, description, type);
     }
 
     @Override

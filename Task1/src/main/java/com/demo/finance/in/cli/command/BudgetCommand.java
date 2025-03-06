@@ -19,7 +19,7 @@ public class BudgetCommand {
         System.out.print("Enter Monthly Budget: ");
         double amount = Double.parseDouble(scanner.nextLine());
 
-        if (context.getBudgetController().setBudget(context.getCurrentUser().getId(), amount)) {
+        if (context.getBudgetController().setBudget(context.getCurrentUser().getUserId(), amount)) {
             System.out.println("Budget set successfully.");
         } else {
             System.out.println("Failed to set budget.");
@@ -27,7 +27,7 @@ public class BudgetCommand {
     }
 
     public void viewBudget() {
-        Optional<Budget> budget = context.getBudgetController().getBudget(context.getCurrentUser().getId());
+        Optional<Budget> budget = context.getBudgetController().getBudget(context.getCurrentUser().getUserId());
         budget.ifPresentOrElse(
                 System.out::println,
                 () -> System.out.println("No budget set for the user.")
@@ -38,7 +38,7 @@ public class BudgetCommand {
         System.out.print("Enter Transaction Amount: ");
         double amount = Double.parseDouble(scanner.nextLine());
 
-        if (context.getBudgetController().checkBudgetLimit(context.getCurrentUser().getId(), amount)) {
+        if (context.getBudgetController().checkBudgetLimit(context.getCurrentUser().getUserId(), amount)) {
             System.out.println("⚠️ Budget limit will be exceeded!");
         } else {
             System.out.println("✅ Budget is under control.");

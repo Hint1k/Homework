@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BudgetRepositoryImpl implements BudgetRepository {
-    private final Map<String, Budget> budgets = new ConcurrentHashMap<>();
+    private final Map<Long, Budget> budgets = new ConcurrentHashMap<>();
 
     @Override
     public void save(Budget budget) {
@@ -15,7 +15,7 @@ public class BudgetRepositoryImpl implements BudgetRepository {
     }
 
     @Override
-    public Optional<Budget> findByUserId(String userId) {
+    public Optional<Budget> findByUserId(Long userId) {
         return Optional.ofNullable(budgets.get(userId));
     }
 }

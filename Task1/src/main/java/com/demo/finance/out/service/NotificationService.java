@@ -10,11 +10,11 @@ public class NotificationService {
         this.notificationUseCase = notificationUseCase;
     }
 
-    public String fetchBudgetNotification(String userId) {
+    public String fetchBudgetNotification(Long userId) {
         return notificationUseCase.getBudgetLimitNotification(userId);
     }
 
-    public String fetchGoalNotification(String userId) {
+    public String fetchGoalNotification(Long userId) {
         return notificationUseCase.getGoalCompletionNotification(userId);
     }
 }

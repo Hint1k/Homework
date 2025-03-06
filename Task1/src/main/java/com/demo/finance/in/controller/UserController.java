@@ -16,23 +16,23 @@ public class UserController {
         this.manageUsersUseCase = manageUsersUseCase;
     }
 
-    public boolean registerUser(String id, String name, String email, String password, Role role) {
-        return registerUserUseCase.registerUser(id, name, email, password, role);
+    public boolean registerUser(Long userId, String name, String email, String password, Role role) {
+        return registerUserUseCase.registerUser(userId, name, email, password, role);
     }
 
     public Optional<User> authenticateUser(String email, String password) {
-        return registerUserUseCase.authenticate(email, password);  // Use the correct use case for authentication
+        return registerUserUseCase.authenticate(email, password);
     }
 
-    public Optional<User> getUserById(String id) {
-        return manageUsersUseCase.getUserById(id);
+    public Optional<User> getUserById(Long userId) {
+        return manageUsersUseCase.getUserById(userId);
     }
 
-    public boolean updateUser(String id, String name, String email, String password, Role role) {
-        return manageUsersUseCase.updateUser(id, name, email, password, role);
+    public boolean updateUser(Long userId, String name, String email, String password, Role role) {
+        return manageUsersUseCase.updateUser(userId, name, email, password, role);
     }
 
-    public boolean deleteUser(String id) {
-        return manageUsersUseCase.deleteUser(id);
+    public boolean deleteUser(Long userId) {
+        return manageUsersUseCase.deleteUser(userId);
     }
 }

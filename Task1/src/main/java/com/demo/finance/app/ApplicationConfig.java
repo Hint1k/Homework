@@ -52,12 +52,11 @@ public class ApplicationConfig {
     }
 
     private void initializeDefaultAdminAccount() {
-        String adminId = "admin";
+        Long adminId = 1L;
         String adminEmail = "admin@demo.com";
         String hashedPassword = passwordService.hashPassword("123");
         Role role = new Role("admin");
-        User admin = new User(adminId, "System Admin", adminEmail, hashedPassword,
-                false, role);
+        User admin = new User(adminId, "Default Admin", adminEmail, hashedPassword, false, role);
         userRepository.save(admin);
     }
 }

@@ -12,20 +12,20 @@ public class ManageBudgetUseCase {
         this.budgetRepository = budgetRepository;
     }
 
-    public boolean setMonthlyBudget(String userId, double limit) {
+    public boolean setMonthlyBudget(Long userId, double limit) {
         budgetRepository.save(new Budget(userId, limit));
         return true; // Indicate success
     }
 
-    public Optional<Budget> getBudget(String userId) {
+    public Optional<Budget> getBudget(Long userId) {
         return budgetRepository.findByUserId(userId);
     }
 
-    public void trackExpense(String userId, double amount) {
+    public void trackExpense(Long userId, double amount) {
         budgetRepository.findByUserId(userId).ifPresent(budget -> budget.addExpense(amount));
     }
 
-    public boolean isBudgetExceeded(String userId, double transactionAmount) {
+    public boolean isBudgetExceeded(Long userId, double transactionAmount) {
         return budgetRepository.findByUserId(userId)
                 .map(budget -> budget.getCurrentExpenses() + transactionAmount > budget.getMonthlyLimit())
                 .orElse(false);

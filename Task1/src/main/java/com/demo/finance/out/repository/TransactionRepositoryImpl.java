@@ -1,6 +1,7 @@
 package com.demo.finance.out.repository;
 
 import com.demo.finance.domain.model.Transaction;
+import com.demo.finance.domain.utils.Type;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,26 +10,26 @@ import java.time.LocalDate;
 
 public class TransactionRepositoryImpl implements TransactionRepository {
 
-    private final Map<String, Transaction> transactions = new ConcurrentHashMap<>();
+    private final Map<Long, Transaction> transactions = new ConcurrentHashMap<>();
 
     @Override
     public void save(Transaction transaction) {
-        transactions.put(transaction.getId(), transaction);
+        transactions.put(transaction.getTransactionId(), transaction);
     }
 
     @Override
     public boolean update(Transaction transaction) {
-        if (transactions.containsKey(transaction.getId())) {
-            transactions.put(transaction.getId(), transaction);
+        if (transactions.containsKey(transaction.getTransactionId())) {
+            transactions.put(transaction.getTransactionId(), transaction);
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean delete(String id) {
-        if (transactions.containsKey(id)) {
-            transactions.remove(id);
+    public boolean delete(Long transactionId) {
+        if (transactions.containsKey(transactionId)) {
+            transactions.remove(transactionId);
             return true;
         }
         return false;
@@ -40,20 +41,19 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     }
 
     @Override
-    public Optional<Transaction> findById(String id) {
-        return Optional.ofNullable(transactions.get(id));
+    public Optional<Transaction> findById(Long transactionId) {
+        return Optional.ofNullable(transactions.get(transactionId));
     }
 
     @Override
-    public List<Transaction> findByUserId(String userId) {
+    public List<Transaction> findByUserId(Long userId) {
         return transactions.values().stream()
                 .filter(t -> t.getUserId().equals(userId))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Transaction> findFiltered(String userId, LocalDate from, LocalDate to, String category,
-                                          Transaction.Type type) {
+    public List<Transaction> findFiltered(Long userId, LocalDate from, LocalDate to, String category, Type type) {
         return transactions.values().stream()
                 .filter(t -> t.getUserId().equals(userId))
                 .filter(t -> from == null || to == null || t.isWithinDateRange(from, to))

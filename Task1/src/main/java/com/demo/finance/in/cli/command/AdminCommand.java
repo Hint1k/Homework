@@ -28,7 +28,7 @@ public class AdminCommand {
 
     public void updateUserRole() {
         System.out.print("Enter User ID to modify: ");
-        String userId = scanner.nextLine();
+        Long userId = scanner.nextLong();
         System.out.print("Set role (1=User, 2=Admin): ");
         String roleChoice = scanner.nextLine();
         Role newRole = "2".equals(roleChoice) ? new Role("admin") : new Role("user");
@@ -42,8 +42,8 @@ public class AdminCommand {
 
     public void blockUser() {
         System.out.print("Enter User ID to block: ");
-        String id = scanner.nextLine();
-        if (context.getAdminController().blockUser(id)) {
+        Long userId = scanner.nextLong();
+        if (context.getAdminController().blockUser(userId)) {
             System.out.println("User blocked successfully.");
         } else {
             System.out.println("Failed to block user.");
@@ -52,8 +52,8 @@ public class AdminCommand {
 
     public void deleteUser() {
         System.out.print("Enter User ID to delete: ");
-        String id = scanner.nextLine();
-        if (context.getAdminController().deleteUser(id)) {
+        Long userId = scanner.nextLong();
+        if (context.getAdminController().deleteUser(userId)) {
             System.out.println("User deleted successfully.");
         } else {
             System.out.println("Failed to delete user.");
@@ -71,8 +71,8 @@ public class AdminCommand {
 
     public void deleteTransaction() {
         System.out.print("Enter Transaction ID to delete: ");
-        String id = scanner.nextLine();
-        if (context.getAdminController().deleteTransaction(id)) {
+        Long transactionId = scanner.nextLong();
+        if (context.getAdminController().deleteTransaction(transactionId)) {
             System.out.println("Transaction deleted successfully.");
         } else {
             System.out.println("Failed to delete transaction.");

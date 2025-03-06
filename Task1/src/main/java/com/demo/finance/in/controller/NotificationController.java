@@ -9,11 +9,11 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    public String checkBudgetNotification(String userId) {
+    public String checkBudgetNotification(Long userId) {
         return notificationService.fetchBudgetNotification(userId);
     }
 
-    public String checkGoalNotification(String userId) {
+    public String checkGoalNotification(Long userId) {
         return notificationService.fetchGoalNotification(userId);
     }
 }

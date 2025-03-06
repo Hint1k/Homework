@@ -4,19 +4,19 @@ import java.util.Objects;
 
 public class Goal {
 
-    private final String userId;
+    private final Long userId;
     private String goalName;
     private double targetAmount;
     private double savedAmount;
 
-    public Goal(String userId, String goalName, double targetAmount) {
+    public Goal(Long userId, String goalName, double targetAmount) {
         this.userId = userId;
         this.goalName = goalName;
         this.targetAmount = targetAmount;
         this.savedAmount = 0.0;
     }
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 

@@ -17,7 +17,7 @@ public class TransactionCommand {
 
     public void addTransaction() {
         System.out.print("Enter Transaction ID: ");
-        String id = scanner.nextLine();
+        Long transactionId = scanner.nextLong();
         System.out.print("Enter Amount: ");
         double amount = Double.parseDouble(scanner.nextLine());
         System.out.print("Enter Category: ");
@@ -30,13 +30,13 @@ public class TransactionCommand {
         boolean isIncome = scanner.nextLine().equalsIgnoreCase("yes");
 
         context.getTransactionController().addTransaction(
-                id, context.getCurrentUser().getId(), amount, category, date, description, isIncome);
+                transactionId, context.getCurrentUser().getUserId(), amount, category, date, description, isIncome);
         System.out.println("Transaction added successfully!");
     }
 
     public void viewAllTransactions() {
         List<Transaction> transactions = context.getTransactionController()
-                .getTransactionsByUserId(context.getCurrentUser().getId());
+                .getTransactionsByUserId(context.getCurrentUser().getUserId());
         if (transactions.isEmpty()) {
             System.out.println("No transactions found.");
         } else {
@@ -55,7 +55,7 @@ public class TransactionCommand {
         String type = scanner.nextLine().trim();
 
         List<Transaction> transactions = context.getTransactionController().filterTransactions(
-                context.getCurrentUser().getId(), fromDate, toDate, category, type);
+                context.getCurrentUser().getUserId(), fromDate, toDate, category, type);
 
         if (transactions.isEmpty()) {
             System.out.println("No matching transactions found.");
@@ -66,8 +66,8 @@ public class TransactionCommand {
 
     public void deleteTransaction() {
         System.out.print("Enter Transaction ID to delete: ");
-        String id = scanner.nextLine();
-        context.getTransactionController().deleteTransaction(id);
+        Long transactionId = scanner.nextLong();
+        context.getTransactionController().deleteTransaction(transactionId);
         System.out.println("Transaction deleted successfully.");
     }
 }

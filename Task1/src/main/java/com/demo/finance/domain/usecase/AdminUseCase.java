@@ -23,33 +23,33 @@ public class AdminUseCase {
         return userRepository.findAll();
     }
 
-    public Optional<User> getUserById(String id) {
-        return userRepository.findById(id);
+    public Optional<User> getUserById(Long userId) {
+        return userRepository.findById(userId);
     }
 
-    public boolean updateUserRole(String userId, Role newRole) {
+    public boolean updateUserRole(Long userId, Role newRole) {
         return userRepository.findById(userId).map(user -> {
             user.setRole(newRole);
             return userRepository.update(user);
         }).orElse(false);
     }
 
-    public boolean blockUser(String id) {
-        return userRepository.findById(id).map(user -> {
+    public boolean blockUser(Long userId) {
+        return userRepository.findById(userId).map(user -> {
             user.setBlocked(true);
             return true;
         }).orElse(false);
     }
 
-    public boolean deleteUser(String id) {
-        return userRepository.delete(id);
+    public boolean deleteUser(Long userId) {
+        return userRepository.delete(userId);
     }
 
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
     }
 
-    public boolean deleteTransaction(String transactionId) {
+    public boolean deleteTransaction(Long transactionId) {
         return transactionRepository.delete(transactionId);
     }
 }

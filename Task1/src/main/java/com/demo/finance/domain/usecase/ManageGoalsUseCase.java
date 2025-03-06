@@ -13,23 +13,23 @@ public class ManageGoalsUseCase {
         this.goalRepository = goalRepository;
     }
 
-    public void createGoal(String userId, String goalName, double targetAmount) {
+    public void createGoal(Long userId, String goalName, double targetAmount) {
         goalRepository.save(new Goal(userId, goalName, targetAmount));
     }
 
-    public Optional<Goal> getGoal(String userId, String goalName) {
+    public Optional<Goal> getGoal(Long userId, String goalName) {
         return goalRepository.findByUserIdAndName(userId, goalName);
     }
 
-    public List<Goal> getUserGoals(String userId) {
+    public List<Goal> getUserGoals(Long userId) {
         return goalRepository.findByUserId(userId);
     }
 
-    public void addToGoal(String userId, String goalName, double amount) {
+    public void addToGoal(Long userId, String goalName, double amount) {
         goalRepository.findByUserIdAndName(userId, goalName).ifPresent(goal -> goal.addSavings(amount));
     }
 
-    public boolean isGoalAchieved(String userId, String goalName) {
+    public boolean isGoalAchieved(Long userId, String goalName) {
         return goalRepository.findByUserIdAndName(userId, goalName)
                 .map(Goal::isAchieved)
                 .orElse(false);

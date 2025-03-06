@@ -12,19 +12,19 @@ public class BudgetController {
         this.manageBudgetUseCase = manageBudgetUseCase;
     }
 
-    public boolean setBudget(String userId, double amount) {
+    public boolean setBudget(Long userId, double amount) {
         return manageBudgetUseCase.setMonthlyBudget(userId, amount);
     }
 
-    public Optional<Budget> getBudget(String userId) {
+    public Optional<Budget> getBudget(Long userId) {
         return manageBudgetUseCase.getBudget(userId);
     }
 
-    public boolean checkBudgetLimit(String userId, double transactionAmount) {
+    public boolean checkBudgetLimit(Long userId, double transactionAmount) {
         return manageBudgetUseCase.isBudgetExceeded(userId, transactionAmount);
     }
 
-    public void recordExpense(String userId, double transactionAmount) {
+    public void recordExpense(Long userId, double transactionAmount) {
         manageBudgetUseCase.trackExpense(userId, transactionAmount);
     }
 }

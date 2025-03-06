@@ -13,19 +13,19 @@ public class GoalController {
         this.manageGoalsUseCase = manageGoalsUseCase;
     }
 
-    public void createGoal(String userId, String name, double targetAmount) {
+    public void createGoal(Long userId, String name, double targetAmount) {
         manageGoalsUseCase.createGoal(userId, name, targetAmount);
     }
 
-    public Optional<Goal> getGoal(String userId, String name) {
+    public Optional<Goal> getGoal(Long userId, String name) {
         return manageGoalsUseCase.getGoal(userId, name);
     }
 
-    public List<Goal> getAllGoals(String userId) {
+    public List<Goal> getAllGoals(Long userId) {
         return manageGoalsUseCase.getUserGoals(userId);
     }
 
-    public void updateGoalProgress(String userId, String goalName, double amountSaved) {
+    public void updateGoalProgress(Long userId, String goalName, double amountSaved) {
         manageGoalsUseCase.addToGoal(userId, goalName, amountSaved);
     }
 }

@@ -1,6 +1,7 @@
 package com.demo.finance.domain.usecase;
 
 import com.demo.finance.domain.model.Transaction;
+import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.TransactionRepository;
 
 import java.time.LocalDate;
@@ -14,22 +15,22 @@ public class ManageTransactionsUseCase {
         this.transactionRepository = transactionRepository;
     }
 
-    public void createTransaction(String id, String userId, double amount, String category, LocalDate date,
-                                  String description, Transaction.Type type) {
-        Transaction transaction = new Transaction(id, userId, amount, category, date, description, type);
+    public void createTransaction(Long transactionId, Long userId, double amount, String category, LocalDate date,
+                                  String description, Type type) {
+        Transaction transaction = new Transaction(transactionId, userId, amount, category, date, description, type);
         transactionRepository.save(transaction);
     }
 
-    public Optional<Transaction> getTransactionById(String id) {
-        return transactionRepository.findById(id);
+    public Optional<Transaction> getTransactionById(Long transactionId) {
+        return transactionRepository.findById(transactionId);
     }
 
-    public List<Transaction> getTransactionsByUserId(String userId) {
+    public List<Transaction> getTransactionsByUserId(Long userId) {
         return transactionRepository.findByUserId(userId);
     }
 
-    public void updateTransaction(String id, double amount, String category, String description) {
-        transactionRepository.findById(id).ifPresent(transaction -> {
+    public void updateTransaction(Long transactionId, double amount, String category, String description) {
+        transactionRepository.findById(transactionId).ifPresent(transaction -> {
             transaction.setAmount(amount);
             transaction.setCategory(category);
             transaction.setDescription(description);
@@ -37,12 +38,12 @@ public class ManageTransactionsUseCase {
         });
     }
 
-    public void deleteTransaction(String id) {
-        transactionRepository.delete(id);
+    public void deleteTransaction(Long transactionId) {
+        transactionRepository.delete(transactionId);
     }
 
-    public List<Transaction> getFilteredTransactions(String userId, LocalDate from, LocalDate to, String category,
-                                                     Transaction.Type type) {
+    public List<Transaction> getFilteredTransactions(Long userId, LocalDate from, LocalDate to, String category,
+                                                     Type type) {
         return transactionRepository.findFiltered(userId, from, to, category, type);
     }
 }

@@ -17,7 +17,7 @@ public class NotificationUseCase {
         this.goalRepository = goalRepository;
     }
 
-    public String getBudgetLimitNotification(String userId) {
+    public String getBudgetLimitNotification(Long userId) {
         Optional<Budget> budgetOpt = budgetRepository.findByUserId(userId);
         if (budgetOpt.isEmpty()) {
             return "No budget set for user.";
@@ -31,7 +31,7 @@ public class NotificationUseCase {
                 (budget.getMonthlyLimit() - budget.getCurrentExpenses()) + ".";
     }
 
-    public String getGoalCompletionNotification(String userId) {
+    public String getGoalCompletionNotification(Long userId) {
         List<Goal> userGoals = goalRepository.findByUserId(userId);
         if (userGoals.isEmpty()) {
             return "No goals set.";

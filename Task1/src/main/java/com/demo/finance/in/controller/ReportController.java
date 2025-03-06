@@ -14,17 +14,17 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    public Optional<Report> generateReport(String userId) {
+    public Optional<Report> generateReport(Long userId) {
         return reportService.generateUserReport(userId);
     }
 
-    public Optional<Report> generateReportByDate(String userId, String fromDate, String toDate) {
+    public Optional<Report> generateReportByDate(Long userId, String fromDate, String toDate) {
         LocalDate from = LocalDate.parse(fromDate);
         LocalDate to = LocalDate.parse(toDate);
         return reportService.generateReportByDate(userId, from, to);
     }
 
-    public Map<String, Double> analyzeExpensesByCategory(String userId, String fromDate, String toDate) {
+    public Map<String, Double> analyzeExpensesByCategory(Long userId, String fromDate, String toDate) {
         LocalDate from = LocalDate.parse(fromDate);
         LocalDate to = LocalDate.parse(toDate);
         return reportService.analyzeExpensesByCategory(userId, from, to);

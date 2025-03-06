@@ -2,6 +2,7 @@ package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.usecase.ManageTransactionsUseCase;
+import com.demo.finance.domain.utils.Type;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,35 +15,36 @@ public class TransactionController {
         this.manageTransactionsUseCase = manageTransactionsUseCase;
     }
 
-    public void addTransaction(String id, String userId, double amount, String category, String date,
+    public void addTransaction(Long transactionId, Long userId, double amount, String category, String date,
                                String description, boolean isIncome) {
         if (amount < 0) throw new IllegalArgumentException("Amount must be positive.");
         LocalDate transactionDate = LocalDate.parse(date);
-        Transaction.Type type = isIncome ? Transaction.Type.INCOME : Transaction.Type.EXPENSE;
+        Type type = isIncome ? Type.INCOME : Type.EXPENSE;
 
-        manageTransactionsUseCase.createTransaction(id, userId, amount, category, transactionDate, description, type);
+        manageTransactionsUseCase
+                .createTransaction(transactionId, userId, amount, category, transactionDate, description, type);
     }
 
-    public Optional<Transaction> getTransactionById(String id) {
-        return manageTransactionsUseCase.getTransactionById(id);
+    public Optional<Transaction> getTransactionById(Long transactionId) {
+        return manageTransactionsUseCase.getTransactionById(transactionId);
     }
 
-    public List<Transaction> getTransactionsByUserId(String userId) {
+    public List<Transaction> getTransactionsByUserId(Long userId) {
         return manageTransactionsUseCase.getTransactionsByUserId(userId);
     }
 
-    public void updateTransaction(String id, double amount, String category, String description) {
-        manageTransactionsUseCase.updateTransaction(id, amount, category, description);
+    public void updateTransaction(Long transactionId, double amount, String category, String description) {
+        manageTransactionsUseCase.updateTransaction(transactionId, amount, category, description);
     }
 
-    public void deleteTransaction(String id) {
-        manageTransactionsUseCase.deleteTransaction(id);
+    public void deleteTransaction(Long transactionId) {
+        manageTransactionsUseCase.deleteTransaction(transactionId);
     }
 
-    public List<Transaction> filterTransactions(String userId, String from, String to, String category, String type) {
+    public List<Transaction> filterTransactions(Long userId, String from, String to, String category, String type) {
         LocalDate fromDate = from.isEmpty() ? null : LocalDate.parse(from);
         LocalDate toDate = to.isEmpty() ? null : LocalDate.parse(to);
-        Transaction.Type transactionType = type.isEmpty() ? null : Transaction.Type.valueOf(type.toUpperCase());
+        Type transactionType = type.isEmpty() ? null : Type.valueOf(type.toUpperCase());
 
         return manageTransactionsUseCase.getFilteredTransactions(userId, fromDate, toDate, category, transactionType);
     }

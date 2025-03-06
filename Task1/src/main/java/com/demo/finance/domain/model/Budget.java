@@ -4,17 +4,17 @@ import java.util.Objects;
 
 public class Budget {
 
-    private final String userId; // Associated user
+    private final Long userId; // Associated user
     private double monthlyLimit;
     private double currentExpenses;
 
-    public Budget(String userId, double monthlyLimit) {
+    public Budget(Long userId, double monthlyLimit) {
         this.userId = userId;
         this.monthlyLimit = monthlyLimit;
         this.currentExpenses = 0.0;
     }
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 

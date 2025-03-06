@@ -16,14 +16,14 @@ public class GoalRepositoryImpl implements GoalRepository {
     }
 
     @Override
-    public Optional<Goal> findByUserIdAndName(String userId, String goalName) {
+    public Optional<Goal> findByUserIdAndName(Long userId, String goalName) {
         return goals.stream()
                 .filter(goal -> goal.getUserId().equals(userId) && goal.getGoalName().equals(goalName))
                 .findFirst();
     }
 
     @Override
-    public List<Goal> findByUserId(String userId) {
+    public List<Goal> findByUserId(Long userId) {
         return goals.stream()
                 .filter(goal -> goal.getUserId().equals(userId))
                 .collect(Collectors.toList());

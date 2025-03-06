@@ -23,17 +23,17 @@ public class ManageUsersUseCase {
                 .filter(user -> passwordService.checkPassword(password, user.getPassword()));
     }
 
-    public Optional<User> getUserById(String id) {
-        return userRepository.findById(id);
+    public Optional<User> getUserById(Long userId) {
+        return userRepository.findById(userId);
     }
 
-    public boolean updateUser(String id, String name, String email, String password, Role role) {
+    public boolean updateUser(Long userId, String name, String email, String password, Role role) {
         String hashedPassword = passwordService.hashPassword(password);
-        User updatedUser = new User(id, name, email, hashedPassword, false, role);
+        User updatedUser = new User(userId, name, email, hashedPassword, false, role);
         return userRepository.update(updatedUser);
     }
 
-    public boolean deleteUser(String id) {
-        return userRepository.delete(id);
+    public boolean deleteUser(Long userId) {
+        return userRepository.delete(userId);
     }
 }

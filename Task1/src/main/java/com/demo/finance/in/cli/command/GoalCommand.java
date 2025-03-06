@@ -19,12 +19,12 @@ public class GoalCommand {
         System.out.print("Enter Target Amount: ");
         double targetAmount = Double.parseDouble(scanner.nextLine());
 
-        context.getGoalController().createGoal(context.getCurrentUser().getId(), name, targetAmount);
+        context.getGoalController().createGoal(context.getCurrentUser().getUserId(), name, targetAmount);
         System.out.println("Goal created successfully.");
     }
 
     public void viewGoals() {
-        context.getGoalController().getAllGoals(context.getCurrentUser().getId())
+        context.getGoalController().getAllGoals(context.getCurrentUser().getUserId())
                 .forEach(System.out::println);
     }
 
@@ -34,15 +34,15 @@ public class GoalCommand {
         System.out.print("Enter Amount Saved: ");
         double amount = Double.parseDouble(scanner.nextLine());
 
-        context.getGoalController().updateGoalProgress(context.getCurrentUser().getId(), goalName, amount);
+        context.getGoalController().updateGoalProgress(context.getCurrentUser().getUserId(), goalName, amount);
         System.out.println("Goal progress updated successfully.");
     }
 
     public void deleteGoal() {
         System.out.print("Enter Goal Name to Delete: ");
         String goalName = scanner.nextLine();
-        if (context.getGoalController().getGoal(context.getCurrentUser().getId(), goalName).isPresent()) {
-            context.getGoalController().getAllGoals(context.getCurrentUser().getId())
+        if (context.getGoalController().getGoal(context.getCurrentUser().getUserId(), goalName).isPresent()) {
+            context.getGoalController().getAllGoals(context.getCurrentUser().getUserId())
                     .removeIf(goal -> goal.getGoalName().equals(goalName));
             System.out.println("Goal deleted successfully.");
         } else {

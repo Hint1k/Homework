@@ -8,6 +8,6 @@ public interface BudgetRepository {
 
     void save(Budget budget);
 
-    Optional<Budget> findByUserId(String userId);
+    Optional<Budget> findByUserId(Long userId);
 }
 

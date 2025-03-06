@@ -17,7 +17,7 @@ public class ReportCommand {
     }
 
     public void generateFullReport() {
-        Optional<Report> report = context.getReportController().generateReport(context.getCurrentUser().getId());
+        Optional<Report> report = context.getReportController().generateReport(context.getCurrentUser().getUserId());
         report.ifPresentOrElse(
                 System.out::println,
                 () -> System.out.println("No transactions found.")
@@ -31,7 +31,7 @@ public class ReportCommand {
         String to = scanner.nextLine();
 
         Optional<Report> report =
-                context.getReportController().generateReportByDate(context.getCurrentUser().getId(), from, to);
+                context.getReportController().generateReportByDate(context.getCurrentUser().getUserId(), from, to);
         report.ifPresentOrElse(
                 System.out::println,
                 () -> System.out.println("No transactions found in the given period.")
@@ -44,8 +44,8 @@ public class ReportCommand {
         System.out.print("Enter End Date (YYYY-MM-DD): ");
         String to = scanner.nextLine();
 
-        Map<String, Double> categoryReport =
-                context.getReportController().analyzeExpensesByCategory(context.getCurrentUser().getId(), from, to);
+        Map<String, Double> categoryReport = context.getReportController()
+                .analyzeExpensesByCategory(context.getCurrentUser().getUserId(), from, to);
         if (categoryReport.isEmpty()) {
             System.out.println("No expenses found in the given period.");
         } else {
