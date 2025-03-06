@@ -1,5 +1,6 @@
 package com.demo.finance.domain.usecase;
 
+import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.TransactionRepository;
@@ -24,6 +25,13 @@ public class AdminUseCase {
 
     public Optional<User> getUserById(String id) {
         return userRepository.findById(id);
+    }
+
+    public boolean updateUserRole(String userId, Role newRole) {
+        return userRepository.findById(userId).map(user -> {
+            user.setRole(newRole);
+            return userRepository.update(user);
+        }).orElse(false);
     }
 
     public boolean blockUser(String id) {

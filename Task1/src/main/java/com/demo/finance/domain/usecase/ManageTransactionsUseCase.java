@@ -40,4 +40,9 @@ public class ManageTransactionsUseCase {
     public void deleteTransaction(String id) {
         transactionRepository.delete(id);
     }
+
+    public List<Transaction> getFilteredTransactions(String userId, LocalDate from, LocalDate to, String category,
+                                                     Transaction.Type type) {
+        return transactionRepository.findFiltered(userId, from, to, category, type);
+    }
 }

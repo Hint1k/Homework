@@ -1,5 +1,6 @@
 package com.demo.finance.domain.usecase;
 
+import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.UserRepository;
 
@@ -16,13 +17,13 @@ public class RegisterUserUseCase {
         this.passwordService = passwordService;
     }
 
-    public boolean registerUser(String id, String name, String email, String password) {
+    public boolean registerUser(String id, String name, String email, String password, Role role) {
         if (userRepository.findByEmail(email).isPresent()) {
             return false;
         }
 
         String hashedPassword = passwordService.hashPassword(password);
-        User newUser = new User(id, name, email, hashedPassword, false);
+        User newUser = new User(id, name, email, hashedPassword, false, role);
         userRepository.save(newUser);
         return true;
     }

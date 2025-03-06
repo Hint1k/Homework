@@ -1,5 +1,6 @@
 package com.demo.finance.domain.usecase;
 
+import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.UserRepository;
 
@@ -26,9 +27,9 @@ public class ManageUsersUseCase {
         return userRepository.findById(id);
     }
 
-    public boolean updateUser(String id, String name, String email, String password) {
+    public boolean updateUser(String id, String name, String email, String password, Role role) {
         String hashedPassword = passwordService.hashPassword(password);
-        User updatedUser = new User(id, name, email, hashedPassword, false);
+        User updatedUser = new User(id, name, email, hashedPassword, false, role);
         return userRepository.update(updatedUser);
     }
 

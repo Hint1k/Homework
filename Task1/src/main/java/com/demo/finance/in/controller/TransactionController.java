@@ -38,4 +38,12 @@ public class TransactionController {
     public void deleteTransaction(String id) {
         manageTransactionsUseCase.deleteTransaction(id);
     }
+
+    public List<Transaction> filterTransactions(String userId, String from, String to, String category, String type) {
+        LocalDate fromDate = from.isEmpty() ? null : LocalDate.parse(from);
+        LocalDate toDate = to.isEmpty() ? null : LocalDate.parse(to);
+        Transaction.Type transactionType = type.isEmpty() ? null : Transaction.Type.valueOf(type.toUpperCase());
+
+        return manageTransactionsUseCase.getFilteredTransactions(userId, fromDate, toDate, category, transactionType);
+    }
 }

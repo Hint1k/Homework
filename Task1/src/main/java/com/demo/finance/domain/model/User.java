@@ -9,13 +9,15 @@ public class User {
     private String email;
     private String password;
     private boolean blocked;
+    private Role role;
 
-    public User(String id, String name, String email, String password, boolean blocked) {
+    public User(String id, String name, String email, String password, boolean blocked, Role role) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.blocked = blocked;
+        this.role = role;
     }
 
     public String getId() {
@@ -54,16 +56,30 @@ public class User {
         this.blocked = blocked;
     }
 
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public boolean isAdmin() {
+        return role.getName().equalsIgnoreCase("admin");
+    }
+
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof User user)) return false;
-        return id.equals(user.id) && email.equals(user.email);
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return blocked == user.blocked && Objects.equals(id, user.id) && Objects.equals(name, user.name)
+                && Objects.equals(email, user.email) && Objects.equals(password, user.password)
+                && Objects.equals(role, user.role);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email);
+        return Objects.hash(id, name, email, password, blocked, role);
     }
 
     @Override
@@ -74,6 +90,7 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", blocked=" + blocked +
+                ", role=" + role +
                 '}';
     }
 }

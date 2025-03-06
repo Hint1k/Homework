@@ -1,5 +1,7 @@
 package com.demo.finance.app;
 
+import com.demo.finance.domain.model.Role;
+import com.demo.finance.domain.model.User;
 import com.demo.finance.in.cli.CliHandler;
 import com.demo.finance.in.controller.*;
 import com.demo.finance.domain.usecase.*;
@@ -24,9 +26,9 @@ public class ApplicationConfig {
     private final ManageGoalsUseCase manageGoalsUseCase = new ManageGoalsUseCase(goalRepository);
     private final GenerateReportUseCase generateReportsUseCase = new GenerateReportUseCase(transactionRepository);
     private final AdminUseCase adminUseCase = new AdminUseCase(userRepository, transactionRepository);
-    private final NotificationUseCase notificationUseCase = new NotificationUseCase(budgetRepository, goalRepository);
+//    private final NotificationUseCase notificationUseCase = new NotificationUseCase(budgetRepository, goalRepository);
 
-    private final NotificationService notificationService = new NotificationService(notificationUseCase);
+    //    private final NotificationService notificationService = new NotificationService(notificationUseCase);
     private final ReportService reportService = new ReportService(generateReportsUseCase);
 
     private final UserController userController = new UserController(registerUserUseCase, manageUsersUseCase);
@@ -35,12 +37,27 @@ public class ApplicationConfig {
     private final GoalController goalController = new GoalController(manageGoalsUseCase);
     private final ReportController reportController = new ReportController(reportService);
     private final AdminController adminController = new AdminController(adminUseCase);
-    private final NotificationController notificationController = new NotificationController(notificationService);
+//    private final NotificationController notificationController = new NotificationController(notificationService);
 
     public CliHandler getCliHandler() {
         return new CliHandler(
                 userController, transactionController, budgetController,
-                goalController, reportController, adminController, notificationController
+                goalController, reportController, adminController
+//               , notificationController
         );
+    }
+
+    public ApplicationConfig() {
+        initializeDefaultAdminAccount();
+    }
+
+    private void initializeDefaultAdminAccount() {
+        String adminId = "admin";
+        String adminEmail = "admin@demo.com";
+        String hashedPassword = passwordService.hashPassword("123");
+        Role role = new Role("admin");
+        User admin = new User(adminId, "System Admin", adminEmail, hashedPassword,
+                false, role);
+        userRepository.save(admin);
     }
 }

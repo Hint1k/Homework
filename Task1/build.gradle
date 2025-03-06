@@ -19,11 +19,11 @@ dependencies {
 }
 
 sourceSets {
-    main {
+    main(({
         java {
             srcDirs = ['src', 'Task1/src/main/java/com/demo/finance']
         }
-    }
+    } as String))
 }
 
 tasks.named('test') {

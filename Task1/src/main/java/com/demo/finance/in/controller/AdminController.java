@@ -1,5 +1,6 @@
 package com.demo.finance.in.controller;
 
+import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.usecase.AdminUseCase;
@@ -20,6 +21,10 @@ public class AdminController {
 
     public Optional<User> getUserById(String id) {
         return adminUseCase.getUserById(id);
+    }
+
+    public boolean updateUserRole(String userId, Role newRole) {
+        return adminUseCase.updateUserRole(userId, newRole);
     }
 
     public boolean blockUser(String id) {

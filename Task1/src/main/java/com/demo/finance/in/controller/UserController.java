@@ -1,5 +1,6 @@
 package com.demo.finance.in.controller;
 
+import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.usecase.RegisterUserUseCase;
 import com.demo.finance.domain.usecase.ManageUsersUseCase;
@@ -15,8 +16,8 @@ public class UserController {
         this.manageUsersUseCase = manageUsersUseCase;
     }
 
-    public boolean registerUser(String id, String name, String email, String password) {
-        return registerUserUseCase.registerUser(id, name, email, password);
+    public boolean registerUser(String id, String name, String email, String password, Role role) {
+        return registerUserUseCase.registerUser(id, name, email, password, role);
     }
 
     public Optional<User> authenticateUser(String email, String password) {
@@ -27,8 +28,8 @@ public class UserController {
         return manageUsersUseCase.getUserById(id);
     }
 
-    public boolean updateUser(String id, String name, String email, String password) {
-        return manageUsersUseCase.updateUser(id, name, email, password);
+    public boolean updateUser(String id, String name, String email, String password, Role role) {
+        return manageUsersUseCase.updateUser(id, name, email, password, role);
     }
 
     public boolean deleteUser(String id) {

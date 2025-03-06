@@ -5,6 +5,7 @@ import com.demo.finance.domain.model.Transaction;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 public class TransactionRepositoryImpl implements TransactionRepository {
 
@@ -46,7 +47,18 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     @Override
     public List<Transaction> findByUserId(String userId) {
         return transactions.values().stream()
-                .filter(transaction -> transaction.getUserId().equals(userId))
+                .filter(t -> t.getUserId().equals(userId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Transaction> findFiltered(String userId, LocalDate from, LocalDate to, String category,
+                                          Transaction.Type type) {
+        return transactions.values().stream()
+                .filter(t -> t.getUserId().equals(userId))
+                .filter(t -> from == null || to == null || t.isWithinDateRange(from, to))
+                .filter(t -> category == null || t.matchesCategory(category))
+                .filter(t -> type == null || t.matchesType(type))
                 .collect(Collectors.toList());
     }
 }

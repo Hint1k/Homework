@@ -7,15 +7,15 @@ public class Transaction {
 
     public enum Type { INCOME, EXPENSE }
     private final String id;
-    private final String userId; // Owner of the transaction
+    private final String userId;
     private double amount;
     private String category;
     private LocalDate date;
     private String description;
     private Type type;
 
-    public Transaction(String id, String userId, double amount, String category, LocalDate date, String description,
-                       Type type) {
+    public Transaction(String id, String userId, double amount, String category,
+                       LocalDate date, String description, Type type) {
         this.id = id;
         this.userId = userId;
         this.amount = amount;
@@ -71,6 +71,18 @@ public class Transaction {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public boolean matchesCategory(String category) {
+        return this.category.equalsIgnoreCase(category);
+    }
+
+    public boolean matchesType(Type type) {
+        return this.type == type;
+    }
+
+    public boolean isWithinDateRange(LocalDate from, LocalDate to) {
+        return (date.isAfter(from) || date.isEqual(from)) && (date.isBefore(to) || date.isEqual(to));
     }
 
     @Override
