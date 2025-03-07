@@ -66,4 +66,11 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     public Long generateNextId() {
         return transactions.keySet().stream().max(Long::compare).orElse(0L) + 1;
     }
+
+    @Override
+    public Optional<Transaction> findByUserIdAndId(Long userId, Long transactionId) {
+        return transactions.values().stream()
+                .filter(t -> t.getUserId().equals(userId) && t.getTransactionId().equals(transactionId))
+                .findFirst();
+    }
 }

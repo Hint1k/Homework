@@ -1,5 +1,6 @@
 package com.demo.finance.in.cli.command;
 
+import com.demo.finance.domain.utils.Type;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.domain.model.Transaction;
 
@@ -22,12 +23,39 @@ public class TransactionCommand {
         String category = promptForNonEmptyString("Enter Category: ");
         LocalDate date = promptForValidDate();
         String description = promptForNonEmptyString("Enter Description: ");
-        boolean isIncome = promptForBoolean();
+        Type type = promptForTransactionType();
 
         Long userId = context.getCurrentUser().getUserId();
         context.getTransactionController()
-                .addTransaction(userId, amount, category, date.toString(), description, isIncome);
+                .addTransaction(userId, amount, category, date.toString(), description, type);
         System.out.println("Transaction added successfully!");
+    }
+
+    public void updateTransaction() {
+        Long transactionId = promptForPositiveLong();
+        Long userId = context.getCurrentUser().getUserId();
+        double amount = promptForPositiveDouble();
+        String category = promptForNonEmptyString("Enter Category: ");
+        String description = promptForNonEmptyString("Enter Description: ");
+        boolean isUpdated = context.getTransactionController()
+                .updateTransaction(transactionId, userId, amount, category, description);
+        if (isUpdated) {
+            System.out.println("Transaction updated successfully!");
+        } else {
+            System.out.println("Failed to update transaction!" +
+                    "Either the transaction does not exist or it does not belong to you.");
+        }
+    }
+
+    public void deleteTransaction() {
+        Long transactionId = promptForPositiveLong();
+        Long userId = context.getCurrentUser().getUserId();
+        if (context.getTransactionController().deleteTransaction(userId, transactionId)) {
+            System.out.println("Transaction deleted successfully.");
+        } else {
+            System.out.println("Failed to delete transaction. " +
+                    "Either the transaction does not exist or it does not belong to you.");
+        }
     }
 
     public void viewTransactionsByUserId() {
@@ -53,7 +81,7 @@ public class TransactionCommand {
         String fromDate = promptForOptionalDate("Enter Start Date (YYYY-MM-DD) or leave empty: ");
         String toDate = promptForOptionalDate("Enter End Date (YYYY-MM-DD) or leave empty: ");
         String category = promptForNonEmptyString("Enter Category: ");
-        String type = promptForTransactionType();
+        Type type = promptForTransactionType();
 
         List<Transaction> transactions = context.getTransactionController().filterTransactions(
                 context.getCurrentUser().getUserId(), fromDate, toDate, category, type);
@@ -63,12 +91,6 @@ public class TransactionCommand {
         } else {
             transactions.forEach(System.out::println);
         }
-    }
-
-    public void deleteTransaction() {
-        long transactionId = promptForPositiveLong();
-        context.getTransactionController().deleteTransaction(transactionId);
-        System.out.println("Transaction deleted successfully.");
     }
 
     private double promptForPositiveDouble() {
@@ -87,7 +109,7 @@ public class TransactionCommand {
     private long promptForPositiveLong() {
         while (true) {
             try {
-                System.out.print("Enter Transaction ID to delete: ");
+                System.out.print("Enter Transaction ID: ");
                 long value = Long.parseLong(scanner.nextLine().trim());
                 if (value > 0) return value;
                 System.out.println("Error: Value must be positive.");
@@ -131,29 +153,15 @@ public class TransactionCommand {
         }
     }
 
-    private boolean promptForBoolean() {
-        while (true) {
-            System.out.print("Is it Income? (y = yes / n = no): ");
-            String input = scanner.nextLine().trim().toLowerCase();
-            if (input.equals("y") || input.equals("yes")) {
-                return true;
-            }
-            if (input.equals("n") || input.equals("no")) {
-                return false;
-            }
-            System.out.println("Error: Please enter 'y' for yes or 'n' for no.");
-        }
-    }
-
-    private String promptForTransactionType() {
+    private Type promptForTransactionType() {
         while (true) {
             System.out.print("What Type? (i = INCOME / e = EXPENSE): ");
             String input = scanner.nextLine().trim().toLowerCase();
             if (input.equals("i") || input.equals("income")) {
-                return "INCOME";
+                return Type.INCOME;
             }
             if (input.equals("e") || input.equals("expense")) {
-                return "EXPENSE";
+                return Type.EXPENSE;
             }
             System.out.println("Error: Please enter 'i' for INCOME, 'e' for EXPENSE");
         }

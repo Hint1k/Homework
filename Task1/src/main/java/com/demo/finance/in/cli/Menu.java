@@ -45,9 +45,10 @@ public class Menu {
     public static void showTransactionMenu() {
         System.out.println("\n=== Transaction Management ===");
         System.out.println("1. Add Transaction");
-        System.out.println("2. View All Transactions");
-        System.out.println("3. Filter Transactions");
-        System.out.println("4. Delete Transaction");
+        System.out.println("2. Update Transaction");
+        System.out.println("3. View All Transactions");
+        System.out.println("4. Filter Transactions");
+        System.out.println("5. Delete Transaction");
         System.out.println("0. Back");
         System.out.print("Enter your choice: ");
     }

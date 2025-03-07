@@ -2,37 +2,37 @@ package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.usecase.RegisterUserUseCase;
-import com.demo.finance.domain.usecase.ManageUsersUseCase;
+import com.demo.finance.domain.usecase.RegistrationUseCase;
+import com.demo.finance.domain.usecase.UsersUseCase;
 
 import java.util.Optional;
 
 public class UserController {
-    private final RegisterUserUseCase registerUserUseCase;
-    private final ManageUsersUseCase manageUsersUseCase;
+    private final RegistrationUseCase registrationUseCase;
+    private final UsersUseCase usersUseCase;
 
-    public UserController(RegisterUserUseCase registerUserUseCase, ManageUsersUseCase manageUsersUseCase) {
-        this.registerUserUseCase = registerUserUseCase;
-        this.manageUsersUseCase = manageUsersUseCase;
+    public UserController(RegistrationUseCase registrationUseCase, UsersUseCase usersUseCase) {
+        this.registrationUseCase = registrationUseCase;
+        this.usersUseCase = usersUseCase;
     }
 
     public boolean registerUser(String name, String email, String password, Role role) {
-        return registerUserUseCase.registerUser(name, email, password, role);
+        return registrationUseCase.registerUser(name, email, password, role);
     }
 
     public Optional<User> authenticateUser(String email, String password) {
-        return registerUserUseCase.authenticate(email, password);
+        return registrationUseCase.authenticate(email, password);
     }
 
     public Optional<User> getUserById(Long userId) {
-        return manageUsersUseCase.getUserById(userId);
+        return usersUseCase.getUserById(userId);
     }
 
     public boolean updateUser(Long userId, String name, String email, String password, Role role) {
-        return manageUsersUseCase.updateUser(userId, name, email, password, role);
+        return usersUseCase.updateUser(userId, name, email, password, role);
     }
 
     public boolean deleteUser(Long userId) {
-        return manageUsersUseCase.deleteUser(userId);
+        return usersUseCase.deleteUser(userId);
     }
 }

@@ -1,30 +1,30 @@
 package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.model.Budget;
-import com.demo.finance.domain.usecase.ManageBudgetUseCase;
+import com.demo.finance.domain.usecase.BudgetUseCase;
 
 import java.util.Optional;
 
 public class BudgetController {
-    private final ManageBudgetUseCase manageBudgetUseCase;
+    private final BudgetUseCase budgetUseCase;
 
-    public BudgetController(ManageBudgetUseCase manageBudgetUseCase) {
-        this.manageBudgetUseCase = manageBudgetUseCase;
+    public BudgetController(BudgetUseCase budgetUseCase) {
+        this.budgetUseCase = budgetUseCase;
     }
 
     public boolean setBudget(Long userId, double amount) {
-        return manageBudgetUseCase.setMonthlyBudget(userId, amount);
+        return budgetUseCase.setMonthlyBudget(userId, amount);
     }
 
     public Optional<Budget> getBudget(Long userId) {
-        return manageBudgetUseCase.getBudget(userId);
+        return budgetUseCase.getBudget(userId);
     }
 
     public boolean checkBudgetLimit(Long userId, double transactionAmount) {
-        return manageBudgetUseCase.isBudgetExceeded(userId, transactionAmount);
+        return budgetUseCase.isBudgetExceeded(userId, transactionAmount);
     }
 
     public void recordExpense(Long userId, double transactionAmount) {
-        manageBudgetUseCase.trackExpense(userId, transactionAmount);
+        budgetUseCase.trackExpense(userId, transactionAmount);
     }
 }

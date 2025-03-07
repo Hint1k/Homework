@@ -8,10 +8,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public class ManageTransactionsUseCase {
+public class TransactionsUseCase {
     private final TransactionRepository transactionRepository;
 
-    public ManageTransactionsUseCase(TransactionRepository transactionRepository) {
+    public TransactionsUseCase(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
     }
 
@@ -34,17 +34,27 @@ public class ManageTransactionsUseCase {
         return transactionRepository.findAll();
     }
 
-    public void updateTransaction(Long transactionId, double amount, String category, String description) {
-        transactionRepository.findById(transactionId).ifPresent(transaction -> {
-            transaction.setAmount(amount);
-            transaction.setCategory(category);
-            transaction.setDescription(description);
-            transactionRepository.update(transaction);
-        });
+    public boolean updateTransaction(Long userId, Long transactionId, double amount, String category,
+                                     String description) {
+        Optional<Transaction> transaction = transactionRepository.findByUserIdAndId(userId, transactionId);
+        if (transaction.isPresent()) {
+            Transaction updatedTransaction = transaction.get();
+            updatedTransaction.setAmount(amount);
+            updatedTransaction.setCategory(category);
+            updatedTransaction.setDescription(description);
+            transactionRepository.save(updatedTransaction);
+            return true;
+        }
+        return false;
     }
 
-    public void deleteTransaction(Long transactionId) {
-        transactionRepository.delete(transactionId);
+    public boolean deleteTransaction(Long userId, Long transactionId) {
+        Optional<Transaction> transaction = transactionRepository.findByUserIdAndId(userId, transactionId);
+        if (transaction.isPresent()) {
+            transactionRepository.delete(transactionId);
+            return true;
+        }
+        return false;
     }
 
     public List<Transaction> getFilteredTransactions(Long userId, LocalDate from, LocalDate to, String category,

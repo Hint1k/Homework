@@ -24,4 +24,6 @@ public interface TransactionRepository {
     List<Transaction> findFiltered(Long userId, LocalDate from, LocalDate to, String category, Type type);
 
     Long generateNextId();
+
+    Optional<Transaction> findByUserIdAndId(Long userId, Long transactionId);
 }

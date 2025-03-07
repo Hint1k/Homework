@@ -6,10 +6,10 @@ import com.demo.finance.out.repository.GoalRepository;
 import java.util.List;
 import java.util.Optional;
 
-public class ManageGoalsUseCase {
+public class GoalsUseCase {
     private final GoalRepository goalRepository;
 
-    public ManageGoalsUseCase(GoalRepository goalRepository) {
+    public GoalsUseCase(GoalRepository goalRepository) {
         this.goalRepository = goalRepository;
     }
 

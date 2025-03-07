@@ -5,16 +5,16 @@ import com.demo.finance.out.repository.BudgetRepository;
 
 import java.util.Optional;
 
-public class ManageBudgetUseCase {
+public class BudgetUseCase {
     private final BudgetRepository budgetRepository;
 
-    public ManageBudgetUseCase(BudgetRepository budgetRepository) {
+    public BudgetUseCase(BudgetRepository budgetRepository) {
         this.budgetRepository = budgetRepository;
     }
 
     public boolean setMonthlyBudget(Long userId, double limit) {
         budgetRepository.save(new Budget(userId, limit));
-        return true; // Indicate success
+        return true;
     }
 
     public Optional<Budget> getBudget(Long userId) {

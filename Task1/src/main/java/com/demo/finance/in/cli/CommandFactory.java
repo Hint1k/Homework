@@ -51,9 +51,10 @@ public class CommandFactory {
 
             Command command = switch (choice) {
                 case "1" -> context.getTransactionCommand()::addTransaction;
-                case "2" -> context.getTransactionCommand()::viewTransactionsByUserId;
-                case "3" -> context.getTransactionCommand()::filterTransactions;
-                case "4" -> context.getTransactionCommand()::deleteTransaction;
+                case "2" -> context.getTransactionCommand()::updateTransaction;
+                case "3" -> context.getTransactionCommand()::viewTransactionsByUserId;
+                case "4" -> context.getTransactionCommand()::filterTransactions;
+                case "5" -> context.getTransactionCommand()::deleteTransaction;
                 default -> () -> System.out.println("Invalid choice. Please try again.");
             };
             command.execute();
@@ -119,10 +120,10 @@ public class CommandFactory {
             if (choice.equals("0")) return;
 
             Command command = switch (choice) {
-            case "1" -> context.getUserCommand()::showUserDetails;
-            case "2" -> context.getUserCommand()::updateUser;
-            case "3" -> context.getUserCommand()::deleteUser;
-            default -> () -> System.out.println("Invalid choice. Please try again.");
+                case "1" -> context.getUserCommand()::showUserDetails;
+                case "2" -> context.getUserCommand()::updateUser;
+                case "3" -> context.getUserCommand()::deleteUser;
+                default -> () -> System.out.println("Invalid choice. Please try again.");
             };
             command.execute();
         }

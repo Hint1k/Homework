@@ -11,10 +11,10 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class GenerateReportUseCase {
+public class ReportUseCase {
     private final TransactionRepository transactionRepository;
 
-    public GenerateReportUseCase(TransactionRepository transactionRepository) {
+    public ReportUseCase(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
     }
 
