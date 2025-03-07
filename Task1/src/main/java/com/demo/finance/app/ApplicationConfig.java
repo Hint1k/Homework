@@ -27,7 +27,7 @@ public class ApplicationConfig {
     private final BudgetUseCase manageBudgetsUseCase = new BudgetUseCase(budgetRepository, transactionRepository);
     private final GoalsUseCase goalsUseCase = new GoalsUseCase(goalRepository, transactionRepository);
     private final ReportUseCase generateReportsUseCase = new ReportUseCase(transactionRepository);
-    private final AdminUseCase adminUseCase = new AdminUseCase(userRepository, transactionRepository);
+    private final AdminUseCase adminUseCase = new AdminUseCase(userRepository);
     private final NotificationUseCase notificationUseCase =
             new NotificationUseCase(budgetRepository, goalRepository, transactionRepository);
 

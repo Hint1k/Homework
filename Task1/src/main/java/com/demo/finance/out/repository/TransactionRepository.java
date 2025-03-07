@@ -13,11 +13,7 @@ public interface TransactionRepository {
 
     boolean update(Transaction transaction);
 
-    Optional<Transaction> findById(Long transactionId);
-
     List<Transaction> findByUserId(Long userId);
-
-    List<Transaction> findAll();
 
     boolean delete(Long transactionId);
 
@@ -25,5 +21,5 @@ public interface TransactionRepository {
 
     Long generateNextId();
 
-    Optional<Transaction> findByUserIdAndId(Long userId, Long transactionId);
+    Optional<Transaction> findByUserIdAndTransactionId(Long userId, Long transactionId);
 }

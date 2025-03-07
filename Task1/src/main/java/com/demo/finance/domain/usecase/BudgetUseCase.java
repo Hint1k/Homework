@@ -20,25 +20,11 @@ public class BudgetUseCase {
     }
 
     public boolean setMonthlyBudget(Long userId, double limit) {
-        budgetRepository.save(new Budget(userId, limit));
-        return true;
+        return budgetRepository.save(new Budget(userId, limit));
     }
 
     public Optional<Budget> getBudget(Long userId) {
         return budgetRepository.findByUserId(userId);
-    }
-
-    public void trackExpense(Long userId, double amount) {
-        budgetRepository.findByUserId(userId).ifPresent(budget -> {
-            budget.addExpense(amount);
-            budgetRepository.save(budget);
-        });
-    }
-
-    public boolean isBudgetExceeded(Long userId, double transactionAmount) {
-        return budgetRepository.findByUserId(userId)
-                .map(budget -> budget.getCurrentExpenses() + transactionAmount > budget.getMonthlyLimit())
-                .orElse(false);
     }
 
     public double calculateExpensesForMonth(Long userId, YearMonth currentMonth) {

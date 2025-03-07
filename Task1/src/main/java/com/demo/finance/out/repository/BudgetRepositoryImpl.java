@@ -10,8 +10,9 @@ public class BudgetRepositoryImpl implements BudgetRepository {
     private final Map<Long, Budget> budgets = new ConcurrentHashMap<>();
 
     @Override
-    public void save(Budget budget) {
+    public boolean save(Budget budget) {
         budgets.put(budget.getUserId(), budget);
+        return true;
     }
 
     @Override

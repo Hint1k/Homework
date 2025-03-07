@@ -2,6 +2,7 @@ package com.demo.finance.domain.model;
 
 import java.time.LocalDate;
 import java.util.Objects;
+
 import com.demo.finance.domain.utils.Type;
 
 public class Transaction {
@@ -94,6 +95,12 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return "[" + type + "] " + category + ": " + amount + " on " + date;
+        return "Transaction{" +
+                "transactionId=" + transactionId +
+                ", amount=" + amount +
+                ", category='" + category + '\'' +
+                ", date=" + date +
+                ", type=" + type +
+                '}';
     }
 }

@@ -65,14 +65,6 @@ public class Goal {
         this.startTime = startTime;
     }
 
-    public void addSavings(double amount) {
-        this.savedAmount += amount;
-    }
-
-    public boolean isAchieved() {
-        return savedAmount >= targetAmount;
-    }
-
     public boolean isExpired() {
         LocalDate endDate = startTime.plusMonths(duration);
         return LocalDate.now().isAfter(endDate);

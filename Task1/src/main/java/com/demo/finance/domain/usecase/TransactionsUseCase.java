@@ -22,34 +22,26 @@ public class TransactionsUseCase {
         transactionRepository.save(transaction);
     }
 
-    public Optional<Transaction> getTransactionById(Long transactionId) {
-        return transactionRepository.findById(transactionId);
-    }
-
     public List<Transaction> getTransactionsByUserId(Long userId) {
         return transactionRepository.findByUserId(userId);
     }
 
-    public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
-    }
-
-    public boolean updateTransaction(Long userId, Long transactionId, double amount, String category,
+    public boolean updateTransaction(Long transactionId, Long userId, double amount, String category,
                                      String description) {
-        Optional<Transaction> transaction = transactionRepository.findByUserIdAndId(userId, transactionId);
+        Optional<Transaction> transaction = transactionRepository.findByUserIdAndTransactionId(transactionId, userId);
         if (transaction.isPresent()) {
             Transaction updatedTransaction = transaction.get();
             updatedTransaction.setAmount(amount);
             updatedTransaction.setCategory(category);
             updatedTransaction.setDescription(description);
-            transactionRepository.save(updatedTransaction);
+            transactionRepository.update(updatedTransaction);
             return true;
         }
         return false;
     }
 
     public boolean deleteTransaction(Long userId, Long transactionId) {
-        Optional<Transaction> transaction = transactionRepository.findByUserIdAndId(userId, transactionId);
+        Optional<Transaction> transaction = transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
         if (transaction.isPresent()) {
             transactionRepository.delete(transactionId);
             return true;

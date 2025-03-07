@@ -1,9 +1,6 @@
 package com.demo.finance.in.cli;
 
 import com.demo.finance.in.controller.*;
-import com.demo.finance.in.controller.ReportController;
-import com.demo.finance.in.controller.TransactionController;
-import com.demo.finance.in.controller.UserController;
 
 import java.util.Scanner;
 

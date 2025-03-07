@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface BudgetRepository {
 
-    void save(Budget budget);
+    boolean save(Budget budget);
 
     Optional<Budget> findByUserId(Long userId);
 }

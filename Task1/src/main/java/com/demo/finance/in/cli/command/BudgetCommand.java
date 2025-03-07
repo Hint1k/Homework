@@ -1,6 +1,7 @@
 package com.demo.finance.in.cli.command;
 
 import com.demo.finance.in.cli.CommandContext;
+
 import java.util.Scanner;
 
 public class BudgetCommand {
@@ -13,7 +14,7 @@ public class BudgetCommand {
     }
 
     public void setBudget() {
-        double amount = promptForPositiveDouble("Enter Monthly Budget: ");
+        double amount = promptForPositiveDouble();
         if (context.getBudgetController().setBudget(context.getCurrentUser().getUserId(), amount)) {
             System.out.println("Budget set successfully.");
         } else {
@@ -27,10 +28,10 @@ public class BudgetCommand {
         System.out.println(budgetStatus);
     }
 
-    private double promptForPositiveDouble(String message) {
+    private double promptForPositiveDouble() {
         while (true) {
             try {
-                System.out.print(message);
+                System.out.print("Enter Monthly Budget: ");
                 double value = Double.parseDouble(scanner.nextLine().trim());
                 if (value > 0) return value;
                 System.out.println("Error: Value must be positive.");
