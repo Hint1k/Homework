@@ -24,25 +24,25 @@ public class AdminUseCase {
     }
 
     public Optional<User> getUserById(Long userId) {
-        return userRepository.findById(userId);
+        return userRepository.findByUserId(userId);
     }
 
     public boolean updateUserRole(Long userId, Role newRole) {
-        return userRepository.findById(userId).map(user -> {
+        return userRepository.findByUserId(userId).map(user -> {
             user.setRole(newRole);
             return userRepository.update(user);
         }).orElse(false);
     }
 
     public boolean blockUser(Long userId) {
-        return userRepository.findById(userId).map(user -> {
+        return userRepository.findByUserId(userId).map(user -> {
             user.setBlocked(true);
             return true;
         }).orElse(false);
     }
 
     public boolean unBlockUser(Long userId) {
-        return userRepository.findById(userId).map(user -> {
+        return userRepository.findByUserId(userId).map(user -> {
             user.setBlocked(false);
             return true;
         }).orElse(false);

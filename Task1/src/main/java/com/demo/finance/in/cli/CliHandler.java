@@ -15,10 +15,11 @@ public class CliHandler {
 
     public CliHandler(UserController userController, TransactionController transactionController,
                       BudgetController budgetController, GoalController goalController,
-                      ReportController reportController, AdminController adminController) {
+                      ReportController reportController, AdminController adminController,
+                      NotificationController notificationController) {
         this.scanner = new Scanner(System.in);
         this.context = new CommandContext(userController, transactionController, budgetController,
-                goalController, reportController, adminController, scanner);
+                goalController, reportController, adminController, notificationController, scanner);
         this.commandFactory = new CommandFactory(context, scanner);
     }
 

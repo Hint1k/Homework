@@ -57,7 +57,7 @@ public class Menu {
         System.out.println("\n=== Budget Management ===");
         System.out.println("1. Set Monthly Budget");
         System.out.println("2. View Budget");
-        System.out.println("3. Check Budget Limit");
+        System.out.println("3. Check Budget Notification");
         System.out.println("0. Back");
         System.out.print("Enter your choice: ");
     }
@@ -68,6 +68,7 @@ public class Menu {
         System.out.println("2. View Goals");
         System.out.println("3. Update Goal");
         System.out.println("4. Delete Goal");
+        System.out.println("5. Check Goal Notification");
         System.out.println("0. Back");
         System.out.print("Enter your choice: ");
     }

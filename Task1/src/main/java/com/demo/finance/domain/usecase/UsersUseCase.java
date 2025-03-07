@@ -24,7 +24,7 @@ public class UsersUseCase {
     }
 
     public Optional<User> getUserById(Long userId) {
-        return userRepository.findById(userId);
+        return userRepository.findByUserId(userId);
     }
 
     public boolean updateUser(Long userId, String name, String email, String password, Role role) {

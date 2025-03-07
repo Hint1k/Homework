@@ -29,7 +29,10 @@ public class BudgetUseCase {
     }
 
     public void trackExpense(Long userId, double amount) {
-        budgetRepository.findByUserId(userId).ifPresent(budget -> budget.addExpense(amount));
+        budgetRepository.findByUserId(userId).ifPresent(budget -> {
+            budget.addExpense(amount);
+            budgetRepository.save(budget);
+        });
     }
 
     public boolean isBudgetExceeded(Long userId, double transactionAmount) {

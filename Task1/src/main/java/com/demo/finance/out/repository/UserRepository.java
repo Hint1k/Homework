@@ -11,7 +11,7 @@ public interface UserRepository {
 
     List<User> findAll();
 
-    Optional<User> findById(Long userId);
+    Optional<User> findByUserId(Long userId);
 
     Optional<User> findByEmail(String email);
 

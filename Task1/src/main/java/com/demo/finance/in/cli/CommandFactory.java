@@ -70,7 +70,7 @@ public class CommandFactory {
             Command command = switch (choice) {
                 case "1" -> context.getBudgetCommand()::setBudget;
                 case "2" -> context.getBudgetCommand()::viewBudget;
-                case "3" -> context.getBudgetCommand()::checkBudgetLimit;
+                case "3" -> context.getNotificationCommand()::checkBudgetNotification;
                 default -> () -> System.out.println("Invalid choice. Please try again.");
             };
             command.execute();
@@ -88,6 +88,7 @@ public class CommandFactory {
                 case "2" -> context.getGoalCommand()::viewGoals;
                 case "3" -> context.getGoalCommand()::updateGoal;
                 case "4" -> context.getGoalCommand()::deleteGoal;
+                case "5" -> context.getNotificationCommand()::checkGoalNotification;
                 default -> () -> System.out.println("Invalid choice. Please try again.");
             };
             command.execute();

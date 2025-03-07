@@ -15,28 +15,33 @@ public class CommandContext {
     private final GoalController goalController;
     private final ReportController reportController;
     private final AdminController adminController;
+    private final NotificationController notificationController;
     private final TransactionCommand transactionCommand;
     private final UserCommand userCommand;
     private final GoalCommand goalCommand;
     private final BudgetCommand budgetCommand;
     private final ReportCommand reportCommand;
     private final AdminCommand adminCommand;
+    private final NotificationCommand notificationCommand;
 
     public CommandContext(UserController userController, TransactionController transactionController,
                           BudgetController budgetController, GoalController goalController,
-                          ReportController reportController, AdminController adminController, Scanner scanner) {
+                          ReportController reportController, AdminController adminController,
+                          NotificationController notificationController, Scanner scanner) {
         this.userController = userController;
         this.transactionController = transactionController;
         this.budgetController = budgetController;
         this.goalController = goalController;
         this.reportController = reportController;
         this.adminController = adminController;
+        this.notificationController = notificationController;
         this.transactionCommand = new TransactionCommand(this, scanner);
         this.userCommand = new UserCommand(this, scanner);
         this.goalCommand = new GoalCommand(this, scanner);
         this.budgetCommand = new BudgetCommand(this, scanner);
         this.reportCommand = new ReportCommand(this, scanner);
         this.adminCommand = new AdminCommand(this, scanner);
+        this.notificationCommand = new NotificationCommand(this, scanner);
     }
 
     public User getCurrentUser() {
@@ -71,6 +76,10 @@ public class CommandContext {
         return adminController;
     }
 
+    public NotificationController getNotificationController() {
+        return notificationController;
+    }
+
     public TransactionCommand getTransactionCommand() {
         return transactionCommand;
     }
@@ -93,5 +102,9 @@ public class CommandContext {
 
     public AdminCommand getAdminCommand() {
         return adminCommand;
+    }
+
+    public NotificationCommand getNotificationCommand() {
+        return notificationCommand;
     }
 }

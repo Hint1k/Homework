@@ -6,6 +6,8 @@ import com.demo.finance.in.cli.CliHandler;
 import com.demo.finance.in.controller.*;
 import com.demo.finance.domain.usecase.*;
 import com.demo.finance.out.repository.*;
+import com.demo.finance.out.service.MockEmailService;
+import com.demo.finance.out.service.NotificationService;
 import com.demo.finance.out.service.PasswordService;
 import com.demo.finance.out.service.ReportService;
 
@@ -16,18 +18,21 @@ public class ApplicationConfig {
     private final BudgetRepository budgetRepository = new BudgetRepositoryImpl();
     private final GoalRepository goalRepository = new GoalRepositoryImpl();
     private final PasswordService passwordService = new PasswordService();
+    private final MockEmailService mockEmailService = new MockEmailService();
 
     private final RegistrationUseCase registrationUseCase = new RegistrationUseCase(userRepository, passwordService);
     private final UsersUseCase usersUseCase = new UsersUseCase(userRepository, passwordService);
     private final TransactionsUseCase transactionsUseCase =
             new TransactionsUseCase(transactionRepository);
-    private final BudgetUseCase manageBudgetsUseCase = new BudgetUseCase(budgetRepository,transactionRepository);
+    private final BudgetUseCase manageBudgetsUseCase = new BudgetUseCase(budgetRepository, transactionRepository);
     private final GoalsUseCase goalsUseCase = new GoalsUseCase(goalRepository, transactionRepository);
     private final ReportUseCase generateReportsUseCase = new ReportUseCase(transactionRepository);
     private final AdminUseCase adminUseCase = new AdminUseCase(userRepository, transactionRepository);
-//    private final NotificationUseCase notificationUseCase = new NotificationUseCase(budgetRepository, goalRepository);
+    private final NotificationUseCase notificationUseCase =
+            new NotificationUseCase(budgetRepository, goalRepository, transactionRepository);
 
-    //    private final NotificationService notificationService = new NotificationService(notificationUseCase);
+    private final NotificationService notificationService =
+            new NotificationService(notificationUseCase, mockEmailService, userRepository);
     private final ReportService reportService = new ReportService(generateReportsUseCase);
 
     private final UserController userController = new UserController(registrationUseCase, usersUseCase);
@@ -36,13 +41,12 @@ public class ApplicationConfig {
     private final GoalController goalController = new GoalController(goalsUseCase);
     private final ReportController reportController = new ReportController(reportService);
     private final AdminController adminController = new AdminController(adminUseCase);
-//    private final NotificationController notificationController = new NotificationController(notificationService);
+    private final NotificationController notificationController = new NotificationController(notificationService);
 
     public CliHandler getCliHandler() {
         return new CliHandler(
-                userController, transactionController, budgetController,
-                goalController, reportController, adminController
-//               , notificationController
+                userController, transactionController, budgetController, goalController,
+                reportController, adminController, notificationController
         );
     }
 
