@@ -1,11 +1,11 @@
-package com.demo.finance.out.service;
+package com.demo.finance.domain.utils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.MessageDigest;
 import java.util.Base64;
 
-public class PasswordService {
+public class PasswordUtils {
 
     public String hashPassword(String password) {
         try {

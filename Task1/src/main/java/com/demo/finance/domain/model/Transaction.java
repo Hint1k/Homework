@@ -73,14 +73,6 @@ public class Transaction {
         this.type = type;
     }
 
-    public boolean matchesCategory(String category) {
-        return this.category.equalsIgnoreCase(category);
-    }
-
-    public boolean matchesType(Type type) {
-        return this.type == type;
-    }
-
     public boolean isWithinDateRange(LocalDate from, LocalDate to) {
         return (date.isAfter(from) || date.isEqual(from)) && (date.isBefore(to) || date.isEqual(to));
     }

@@ -41,7 +41,7 @@ public class CommandContext {
         this.budgetCommand = new BudgetCommand(this, scanner);
         this.reportCommand = new ReportCommand(this, scanner);
         this.adminCommand = new AdminCommand(this, scanner);
-        this.notificationCommand = new NotificationCommand(this, scanner);
+        this.notificationCommand = new NotificationCommand(this);
     }
 
     public User getCurrentUser() {

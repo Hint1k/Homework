@@ -34,10 +34,6 @@ public class Budget {
         this.currentExpenses += amount;
     }
 
-    public boolean isExceeded() {
-        return currentExpenses > monthlyLimit;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

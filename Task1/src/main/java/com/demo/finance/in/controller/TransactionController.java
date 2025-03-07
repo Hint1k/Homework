@@ -6,7 +6,6 @@ import com.demo.finance.domain.utils.Type;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public class TransactionController {
     private final TransactionsUseCase transactionsUseCase;
@@ -23,16 +22,8 @@ public class TransactionController {
         transactionsUseCase.createTransaction(userId, amount, category, transactionDate, description, type);
     }
 
-    public Optional<Transaction> getTransactionById(Long transactionId) {
-        return transactionsUseCase.getTransactionById(transactionId);
-    }
-
     public List<Transaction> getTransactionsByUserId(Long userId) {
         return transactionsUseCase.getTransactionsByUserId(userId);
-    }
-
-    public List<Transaction> getAllTransactions() {
-        return transactionsUseCase.getAllTransactions();
     }
 
     public boolean updateTransaction(Long transactionId, Long userId, double amount, String category,

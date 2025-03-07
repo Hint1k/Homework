@@ -2,16 +2,12 @@ package com.demo.finance.in.cli.command;
 
 import com.demo.finance.in.cli.CommandContext;
 
-import java.util.Scanner;
-
 public class NotificationCommand {
 
     private final CommandContext context;
-    private final Scanner scanner;
 
-    public NotificationCommand(CommandContext context, Scanner scanner) {
+    public NotificationCommand(CommandContext context) {
         this.context = context;
-        this.scanner = scanner;
     }
 
     public void checkBudgetNotification() {

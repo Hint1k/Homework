@@ -18,18 +18,6 @@ public class BudgetController {
         return budgetUseCase.setMonthlyBudget(userId, amount);
     }
 
-    public Optional<Budget> getBudget(Long userId) {
-        return budgetUseCase.getBudget(userId);
-    }
-
-    public boolean checkBudgetLimit(Long userId, double transactionAmount) {
-        return budgetUseCase.isBudgetExceeded(userId, transactionAmount);
-    }
-
-    public void recordExpense(Long userId, double transactionAmount) {
-        budgetUseCase.trackExpense(userId, transactionAmount);
-    }
-
     public String viewBudget(Long userId) {
         // Get the current month and year
         LocalDate now = LocalDate.now();

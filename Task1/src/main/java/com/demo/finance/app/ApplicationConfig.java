@@ -8,7 +8,7 @@ import com.demo.finance.domain.usecase.*;
 import com.demo.finance.out.repository.*;
 import com.demo.finance.out.service.MockEmailService;
 import com.demo.finance.out.service.NotificationService;
-import com.demo.finance.out.service.PasswordService;
+import com.demo.finance.domain.utils.PasswordUtils;
 import com.demo.finance.out.service.ReportService;
 
 public class ApplicationConfig {
@@ -17,11 +17,11 @@ public class ApplicationConfig {
     private final TransactionRepository transactionRepository = new TransactionRepositoryImpl();
     private final BudgetRepository budgetRepository = new BudgetRepositoryImpl();
     private final GoalRepository goalRepository = new GoalRepositoryImpl();
-    private final PasswordService passwordService = new PasswordService();
+    private final PasswordUtils passwordUtils = new PasswordUtils();
     private final MockEmailService mockEmailService = new MockEmailService();
 
-    private final RegistrationUseCase registrationUseCase = new RegistrationUseCase(userRepository, passwordService);
-    private final UsersUseCase usersUseCase = new UsersUseCase(userRepository, passwordService);
+    private final RegistrationUseCase registrationUseCase = new RegistrationUseCase(userRepository, passwordUtils);
+    private final UsersUseCase usersUseCase = new UsersUseCase(userRepository, passwordUtils);
     private final TransactionsUseCase transactionsUseCase =
             new TransactionsUseCase(transactionRepository);
     private final BudgetUseCase manageBudgetsUseCase = new BudgetUseCase(budgetRepository, transactionRepository);
@@ -57,7 +57,7 @@ public class ApplicationConfig {
     private void initializeDefaultAdminAccount() {
         Long adminId = 1L;
         String adminEmail = "admin@demo.com";
-        String hashedPassword = passwordService.hashPassword("123");
+        String hashedPassword = passwordUtils.hashPassword("123");
         Role role = new Role("admin");
         User admin = new User(adminId, "Default Admin", adminEmail, hashedPassword, false, role);
         userRepository.save(admin);

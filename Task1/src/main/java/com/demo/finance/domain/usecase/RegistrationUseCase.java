@@ -6,15 +6,15 @@ import com.demo.finance.out.repository.UserRepository;
 
 import java.util.Optional;
 
-import com.demo.finance.out.service.PasswordService;
+import com.demo.finance.domain.utils.PasswordUtils;
 
 public class RegistrationUseCase {
     private final UserRepository userRepository;
-    private final PasswordService passwordService;
+    private final PasswordUtils passwordUtils;
 
-    public RegistrationUseCase(UserRepository userRepository, PasswordService passwordService) {
+    public RegistrationUseCase(UserRepository userRepository, PasswordUtils passwordUtils) {
         this.userRepository = userRepository;
-        this.passwordService = passwordService;
+        this.passwordUtils = passwordUtils;
     }
 
     public boolean registerUser(String name, String email, String password, Role role) {
@@ -22,7 +22,7 @@ public class RegistrationUseCase {
             return false;
         }
         Long userId = userRepository.generateNextId();
-        String hashedPassword = passwordService.hashPassword(password);
+        String hashedPassword = passwordUtils.hashPassword(password);
         User newUser = new User(userId, name, email, hashedPassword, false, role);
         userRepository.save(newUser);
         return true;
@@ -30,6 +30,6 @@ public class RegistrationUseCase {
 
     public Optional<User> authenticate(String email, String password) {
         return userRepository.findByEmail(email)
-                .filter(user -> passwordService.checkPassword(password, user.getPassword()));
+                .filter(user -> passwordUtils.checkPassword(password, user.getPassword()));
     }
 }

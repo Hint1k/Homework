@@ -24,10 +24,6 @@ public class UserController {
         return registrationUseCase.authenticate(email, password);
     }
 
-    public Optional<User> getUserById(Long userId) {
-        return usersUseCase.getUserById(userId);
-    }
-
     public boolean updateUser(Long userId, String name, String email, String password, Role role) {
         return usersUseCase.updateUser(userId, name, email, password, role);
     }

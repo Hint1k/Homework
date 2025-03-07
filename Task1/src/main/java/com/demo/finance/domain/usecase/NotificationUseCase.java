@@ -2,6 +2,7 @@ package com.demo.finance.domain.usecase;
 
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.model.Transaction;
+import com.demo.finance.domain.utils.BalanceUtils;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.BudgetRepository;
 import com.demo.finance.out.repository.GoalRepository;
@@ -49,7 +50,7 @@ public class NotificationUseCase {
 
         StringBuilder notification = new StringBuilder();
         for (Goal goal : userGoals) {
-            double totalBalance = calculateTotalBalance(userId, goal.getStartTime());
+            double totalBalance = calculateTotalBalance(userId, goal);
             double progress = goal.calculateProgress(totalBalance);
 
             if (progress >= 100) {
@@ -78,19 +79,10 @@ public class NotificationUseCase {
                 .sum();
     }
 
-    private double calculateTotalBalance(Long userId, LocalDate goalStartDate) {
-        double totalIncome = transactionRepository.findByUserId(userId).stream()
-                .filter(t -> t.getType() == Type.INCOME)
-                .filter(t -> !t.getDate().isBefore(goalStartDate))
-                .mapToDouble(Transaction::getAmount)
-                .sum();
+    private double calculateTotalBalance(Long userId, Goal goal) {
+        LocalDate startDate = goal.getStartTime();
+        LocalDate endDate = startDate.plusMonths(goal.getDuration());
 
-        double totalExpenses = transactionRepository.findByUserId(userId).stream()
-                .filter(t -> t.getType() == Type.EXPENSE)
-                .filter(t -> !t.getDate().isBefore(goalStartDate))
-                .mapToDouble(Transaction::getAmount)
-                .sum();
-
-        return totalIncome - totalExpenses;
+        return BalanceUtils.calculateTotalBalance(userId, startDate, endDate, transactionRepository);
     }
 }

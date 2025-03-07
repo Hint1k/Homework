@@ -68,15 +68,6 @@ public class TransactionCommand {
         }
     }
 
-    public void viewAllTransactions() {
-        List<Transaction> transactions = context.getTransactionController().getAllTransactions();
-        if (transactions.isEmpty()) {
-            System.out.println("No transactions found.");
-        } else {
-            transactions.forEach(System.out::println);
-        }
-    }
-
     public void filterTransactions() {
         String fromDate = promptForOptionalDate("Enter Start Date (YYYY-MM-DD) or leave empty: ");
         String toDate = promptForOptionalDate("Enter End Date (YYYY-MM-DD) or leave empty: ");

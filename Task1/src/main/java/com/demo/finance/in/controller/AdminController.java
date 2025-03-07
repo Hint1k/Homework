@@ -2,11 +2,9 @@ package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.usecase.AdminUseCase;
 
 import java.util.List;
-import java.util.Optional;
 
 public class AdminController {
     private final AdminUseCase adminUseCase;
@@ -17,10 +15,6 @@ public class AdminController {
 
     public List<User> getAllUsers() {
         return adminUseCase.getAllUsers();
-    }
-
-    public Optional<User> getUserById(Long userId) {
-        return adminUseCase.getUserById(userId);
     }
 
     public boolean updateUserRole(Long userId, Role newRole) {
@@ -37,13 +31,5 @@ public class AdminController {
 
     public boolean deleteUser(Long userId) {
         return adminUseCase.deleteUser(userId);
-    }
-
-    public List<Transaction> getAllTransactions() {
-        return adminUseCase.getAllTransactions();
-    }
-
-    public boolean deleteTransaction(Long transactionId) {
-        return adminUseCase.deleteTransaction(transactionId);
     }
 }

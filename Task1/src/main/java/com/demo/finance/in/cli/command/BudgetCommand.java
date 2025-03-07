@@ -27,15 +27,6 @@ public class BudgetCommand {
         System.out.println(budgetStatus);
     }
 
-    public void checkBudgetLimit() {
-        double amount = promptForPositiveDouble("Enter Expense Amount: ");
-        if (context.getBudgetController().checkBudgetLimit(context.getCurrentUser().getUserId(), amount)) {
-            System.out.println("⚠️ Budget limit will be exceeded!");
-        } else {
-            System.out.println("✅ Budget is under control.");
-        }
-    }
-
     private double promptForPositiveDouble(String message) {
         while (true) {
             try {
