@@ -12,4 +12,6 @@ public interface GoalRepository {
     Optional<Goal> findByUserIdAndName(Long userId, String goalName);
 
     List<Goal> findByUserId(Long userId);
+
+    void deleteByUserIdAndName(Long userId, String goalName);
 }

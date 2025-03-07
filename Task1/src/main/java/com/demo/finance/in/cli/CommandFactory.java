@@ -26,7 +26,7 @@ public class CommandFactory {
                 case "3" -> context.getAdminCommand()::unblockUser;
                 case "4" -> context.getAdminCommand()::deleteUser;
                 case "5" -> context.getAdminCommand()::updateUserRole;
-                case "6" -> context.getTransactionCommand()::viewTransactionsByUserId;
+                case "6" -> context.getAdminCommand()::viewTransactionsByUserId;
                 case "7" -> context.getUserCommand()::logoutUser;
                 default -> () -> System.out.println("Invalid choice. Please try again.");
             };
@@ -112,7 +112,7 @@ public class CommandFactory {
     private void showAccountMenu() {
         while (true) {
             if (context.getCurrentUser() == null) {
-                return; // force users who updated their details back to main menu to re-login with new details
+                return; // force users who updated or deleted their accounts back to main menu to re-login
             }
             Menu.showAccountMenu();
             String choice = scanner.nextLine().trim();

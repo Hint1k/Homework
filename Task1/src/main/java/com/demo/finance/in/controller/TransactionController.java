@@ -15,14 +15,13 @@ public class TransactionController {
         this.manageTransactionsUseCase = manageTransactionsUseCase;
     }
 
-    public void addTransaction(Long transactionId, Long userId, double amount, String category, String date,
+    public void addTransaction(Long userId, double amount, String category, String date,
                                String description, boolean isIncome) {
         if (amount < 0) throw new IllegalArgumentException("Amount must be positive.");
         LocalDate transactionDate = LocalDate.parse(date);
         Type type = isIncome ? Type.INCOME : Type.EXPENSE;
 
-        manageTransactionsUseCase
-                .createTransaction(transactionId, userId, amount, category, transactionDate, description, type);
+        manageTransactionsUseCase.createTransaction(userId, amount, category, transactionDate, description, type);
     }
 
     public Optional<Transaction> getTransactionById(Long transactionId) {

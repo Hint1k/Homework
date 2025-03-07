@@ -6,6 +6,8 @@ import com.demo.finance.domain.model.Report;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class ReportCommand {
     private final CommandContext context;
@@ -25,13 +27,12 @@ public class ReportCommand {
     }
 
     public void generateReportByDate() {
-        System.out.print("Enter Start Date (YYYY-MM-DD): ");
-        String from = scanner.nextLine();
-        System.out.print("Enter End Date (YYYY-MM-DD): ");
-        String to = scanner.nextLine();
+        LocalDate from = promptForValidDate("Enter Start Date (YYYY-MM-DD): ");
+        LocalDate to = promptForValidDate("Enter End Date (YYYY-MM-DD): ");
 
         Optional<Report> report =
-                context.getReportController().generateReportByDate(context.getCurrentUser().getUserId(), from, to);
+                context.getReportController()
+                        .generateReportByDate(context.getCurrentUser().getUserId(), from.toString(), to.toString());
         report.ifPresentOrElse(
                 System.out::println,
                 () -> System.out.println("No transactions found in the given period.")
@@ -39,18 +40,28 @@ public class ReportCommand {
     }
 
     public void analyzeExpensesByCategory() {
-        System.out.print("Enter Start Date (YYYY-MM-DD): ");
-        String from = scanner.nextLine();
-        System.out.print("Enter End Date (YYYY-MM-DD): ");
-        String to = scanner.nextLine();
+        LocalDate from = promptForValidDate("Enter Start Date (YYYY-MM-DD): ");
+        LocalDate to = promptForValidDate("Enter End Date (YYYY-MM-DD): ");
 
         Map<String, Double> categoryReport = context.getReportController()
-                .analyzeExpensesByCategory(context.getCurrentUser().getUserId(), from, to);
+                .analyzeExpensesByCategory(context.getCurrentUser().getUserId(), from.toString(), to.toString());
         if (categoryReport.isEmpty()) {
             System.out.println("No expenses found in the given period.");
         } else {
             System.out.println("\n=== Expense Analysis by Category ===");
             categoryReport.forEach((category, total) -> System.out.println(category + ": $" + total));
+        }
+    }
+
+    private LocalDate promptForValidDate(String message) {
+        while (true) {
+            System.out.print(message);
+            String input = scanner.nextLine().trim();
+            try {
+                return LocalDate.parse(input);
+            } catch (DateTimeParseException e) {
+                System.out.println("Error: Please enter a valid date in YYYY-MM-DD format.");
+            }
         }
     }
 }

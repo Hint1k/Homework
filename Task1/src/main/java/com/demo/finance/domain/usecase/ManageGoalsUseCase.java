@@ -34,4 +34,8 @@ public class ManageGoalsUseCase {
                 .map(Goal::isAchieved)
                 .orElse(false);
     }
+
+    public void deleteGoal(Long userId, String goalName) {
+        goalRepository.deleteByUserIdAndName(userId, goalName);
+    }
 }

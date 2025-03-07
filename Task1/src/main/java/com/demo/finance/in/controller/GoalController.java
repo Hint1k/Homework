@@ -28,4 +28,8 @@ public class GoalController {
     public void updateGoalProgress(Long userId, String goalName, double amountSaved) {
         manageGoalsUseCase.addToGoal(userId, goalName, amountSaved);
     }
+
+    public void deleteGoal(Long userId, String goalName) {
+        manageGoalsUseCase.deleteGoal(userId, goalName);
+    }
 }

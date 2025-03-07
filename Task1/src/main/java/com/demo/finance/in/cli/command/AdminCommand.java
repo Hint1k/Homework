@@ -1,5 +1,6 @@
 package com.demo.finance.in.cli.command;
 
+import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.model.Role;
@@ -10,7 +11,7 @@ import java.util.Scanner;
 public class AdminCommand {
     private final CommandContext context;
     private final Scanner scanner;
-    private final static Long DEFAULT_ADMIN_ID = 1L;
+    private static final Long DEFAULT_ADMIN_ID = 1L;
 
     public AdminCommand(CommandContext context, Scanner scanner) {
         this.context = context;
@@ -27,11 +28,9 @@ public class AdminCommand {
     }
 
     public void updateUserRole() {
-        System.out.print("Enter User ID to modify: ");
-        Long userId = Long.parseLong(scanner.nextLine());
-        System.out.print("Set role (1=User, 2=Admin): ");
-        String roleChoice = scanner.nextLine();
-        Role newRole = "2".equals(roleChoice) ? new Role("admin") : new Role("user");
+        long userId = promptForPositiveLong("Enter User ID to modify: ");
+        int roleChoice = promptForIntInRange();
+        Role newRole = (roleChoice == 2) ? new Role("admin") : new Role("user");
 
         if (context.getAdminController().updateUserRole(userId, newRole)) {
             System.out.println("User role updated successfully.");
@@ -41,36 +40,74 @@ public class AdminCommand {
     }
 
     public void blockUser() {
-        System.out.print("Enter User ID to block: ");
-        Long userId = Long.parseLong(scanner.nextLine());
-        if (DEFAULT_ADMIN_ID.equals(userId)) {
-            System.out.println("Default Admin can't be blocked.");
-            return; // non default admins can be blocked
+        long userId = promptForPositiveLong("Enter User ID to block: ");
+        if (userId == DEFAULT_ADMIN_ID) {
+            System.out.println("Error: Default Admin cannot be blocked.");
+            return;
         }
         if (context.getAdminController().blockUser(userId)) {
             System.out.println("User blocked successfully.");
         } else {
-            System.out.println("Failed to block user.");
+            System.out.println("Failed to block user. User may not exist.");
         }
     }
 
     public void unblockUser() {
-        System.out.print("Enter User ID to unblock: ");
-        Long userId = Long.parseLong(scanner.nextLine());
+        long userId = promptForPositiveLong("Enter User ID to unblock: ");
         if (context.getAdminController().unBlockUser(userId)) {
             System.out.println("User unblocked successfully.");
         } else {
-            System.out.println("Failed to unblock user.");
+            System.out.println("Failed to unblock user. User may not exist.");
         }
     }
 
     public void deleteUser() {
-        System.out.print("Enter User ID to delete: ");
-        Long userId = Long.parseLong(scanner.nextLine());
+        long userId = promptForPositiveLong("Enter User ID to delete: ");
+        if (userId == DEFAULT_ADMIN_ID) {
+            System.out.println("Error: Default Admin cannot be deleted.");
+            return;
+        }
         if (context.getAdminController().deleteUser(userId)) {
             System.out.println("User deleted successfully.");
         } else {
-            System.out.println("Failed to delete user.");
+            System.out.println("Failed to delete user. User may not exist.");
+        }
+    }
+
+    public void viewTransactionsByUserId() {
+        long userId = promptForPositiveLong("Enter User ID to view transactions: ");
+        List<Transaction> transactions = context.getTransactionController()
+                .getTransactionsByUserId(userId);
+        if (transactions.isEmpty()) {
+            System.out.println("No transactions found for the user.");
+        } else {
+            transactions.forEach(System.out::println);
+        }
+    }
+
+    private long promptForPositiveLong(String message) {
+        while (true) {
+            try {
+                System.out.print(message);
+                long value = Long.parseLong(scanner.nextLine().trim());
+                if (value > 0) return value;
+                System.out.println("Error: Value must be a positive number.");
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Please enter a valid number.");
+            }
+        }
+    }
+
+    private int promptForIntInRange() {
+        while (true) {
+            try {
+                System.out.print("Set role (1 = User, 2 = Admin): ");
+                int value = Integer.parseInt(scanner.nextLine().trim());
+                if (value >= 1 && value <= 2) return value;
+                System.out.println("Error: Please enter a number between " + 1 + " and " + 2 + ".");
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Please enter a valid number.");
+            }
         }
     }
 }

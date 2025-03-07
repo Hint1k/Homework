@@ -28,4 +28,9 @@ public class GoalRepositoryImpl implements GoalRepository {
                 .filter(goal -> goal.getUserId().equals(userId))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteByUserIdAndName(Long userId, String goalName) {
+        goals.removeIf(goal -> goal.getUserId().equals(userId) && goal.getGoalName().equals(goalName));
+    }
 }

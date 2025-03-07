@@ -61,4 +61,9 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 .filter(t -> type == null || t.matchesType(type))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Long generateNextId() {
+        return transactions.keySet().stream().max(Long::compare).orElse(0L) + 1;
+    }
 }

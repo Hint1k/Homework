@@ -1,7 +1,9 @@
 package com.demo.finance.in.cli.command;
 
+import com.demo.finance.domain.model.Goal;
 import com.demo.finance.in.cli.CommandContext;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class GoalCommand {
@@ -24,8 +26,14 @@ public class GoalCommand {
     }
 
     public void viewGoals() {
-        context.getGoalController().getAllGoals(context.getCurrentUser().getUserId())
-                .forEach(System.out::println);
+        Long userId = context.getCurrentUser().getUserId();
+        List<Goal> goals = context.getGoalController().getAllGoals(userId);
+
+        if (goals.isEmpty()) {
+            System.out.println("No goals set.");
+        } else {
+            goals.forEach(System.out::println);
+        }
     }
 
     public void updateGoalProgress() {
@@ -41,9 +49,10 @@ public class GoalCommand {
     public void deleteGoal() {
         System.out.print("Enter Goal Name to Delete: ");
         String goalName = scanner.nextLine();
-        if (context.getGoalController().getGoal(context.getCurrentUser().getUserId(), goalName).isPresent()) {
-            context.getGoalController().getAllGoals(context.getCurrentUser().getUserId())
-                    .removeIf(goal -> goal.getGoalName().equals(goalName));
+        Long userId = context.getCurrentUser().getUserId();
+
+        if (context.getGoalController().getGoal(userId, goalName).isPresent()) {
+            context.getGoalController().deleteGoal(userId, goalName);
             System.out.println("Goal deleted successfully.");
         } else {
             System.out.println("Goal not found.");

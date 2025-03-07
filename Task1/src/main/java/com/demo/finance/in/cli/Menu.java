@@ -37,7 +37,7 @@ public class Menu {
         System.out.println("\n=== Account Menu ===");
         System.out.println("1. View User Account Details");
         System.out.println("2. Update User Account Details");
-        System.out.println("3. Delete User Account Details");
+        System.out.println("3. Delete User Account");
         System.out.println("0. Back");
         System.out.print("Enter your choice: ");
     }

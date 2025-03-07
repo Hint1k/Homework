@@ -3,10 +3,11 @@ package com.demo.finance.in.cli.command;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.in.cli.Menu;
 
 import java.util.Optional;
 import java.util.Scanner;
+
+import java.util.regex.Pattern;
 
 public class UserCommand {
     private final CommandContext context;
@@ -18,12 +19,9 @@ public class UserCommand {
     }
 
     public void registerUser() {
-        System.out.print("Enter Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter Email: ");
-        String email = scanner.nextLine();
-        System.out.print("Enter Password: ");
-        String password = scanner.nextLine();
+        String name = promptForNonEmptyString("Enter Name: ");
+        String email = promptForValidEmail("Enter Email: ");
+        String password = promptForValidPassword("Enter Password: ");
         Role role = new Role("user"); // Default role
 
         if (context.getUserController().registerUser(name, email, password, role)) {
@@ -34,10 +32,9 @@ public class UserCommand {
     }
 
     public void loginUser() {
-        System.out.print("Enter Email: ");
-        String email = scanner.nextLine();
-        System.out.print("Enter Password: ");
-        String password = scanner.nextLine();
+        String email = promptForValidEmail("Enter Email: ");
+        String password = promptForValidPassword("Enter Password: ");
+
         Optional<User> user = context.getUserController().authenticateUser(email, password);
         if (user.isPresent()) {
             if (user.get().isBlocked()) {
@@ -62,6 +59,7 @@ public class UserCommand {
             Long userId = user.getUserId();
             if (context.getUserController().deleteUser(userId)) {
                 System.out.println("User deleted successfully.");
+                context.setCurrentUser(null); // Log out the user
             } else {
                 System.out.println("Failed to delete user.");
             }
@@ -73,17 +71,15 @@ public class UserCommand {
     public void updateUser() {
         User user = context.getCurrentUser();
         if (user != null) {
-            System.out.print("Enter new name: ");
-            String name = scanner.nextLine();
-            System.out.print("Enter new email: ");
-            String email = scanner.nextLine();
-            System.out.print("Enter new password: ");
-            String password = scanner.nextLine();
+            String name = promptForNonEmptyString("Enter new name: ");
+            String email = promptForValidEmail("Enter new email: ");
+            String password = promptForValidPassword("Enter new password: ");
+
             Long userId = user.getUserId();
             Role role = user.getRole();
             if (context.getUserController().updateUser(userId, name, email, password, role)) {
                 System.out.println("User updated successfully. Please log in again with your new credentials.");
-                context.setCurrentUser(null); // Log out the user and force them to re-login
+                context.setCurrentUser(null); // Log out the user
             } else {
                 System.out.println("Failed to update user.");
             }
@@ -102,6 +98,34 @@ public class UserCommand {
             System.out.println("Role: " + user.getRole().getName());
         } else {
             System.out.println("No user is currently logged in.");
+        }
+    }
+
+    private String promptForNonEmptyString(String message) {
+        while (true) {
+            System.out.print(message);
+            String input = scanner.nextLine().trim();
+            if (!input.isEmpty()) return input;
+            System.out.println("Error: Input cannot be empty.");
+        }
+    }
+
+    private String promptForValidEmail(String message) {
+        Pattern emailPattern = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+        while (true) {
+            System.out.print(message);
+            String email = scanner.nextLine().trim();
+            if (emailPattern.matcher(email).matches()) return email;
+            System.out.println("Error: Invalid email format. Please enter a valid email (e.g. user@demo.com).");
+        }
+    }
+
+    private String promptForValidPassword(String message) {
+        while (true) {
+            System.out.print(message);
+            String password = scanner.nextLine().trim();
+            if (password.length() >= 3) return password;
+            System.out.println("Error: Password must be at least 3 characters long.");
         }
     }
 }

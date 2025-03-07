@@ -22,4 +22,6 @@ public interface TransactionRepository {
     boolean delete(Long transactionId);
 
     List<Transaction> findFiltered(Long userId, LocalDate from, LocalDate to, String category, Type type);
+
+    Long generateNextId();
 }

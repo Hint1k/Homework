@@ -15,8 +15,9 @@ public class ManageTransactionsUseCase {
         this.transactionRepository = transactionRepository;
     }
 
-    public void createTransaction(Long transactionId, Long userId, double amount, String category, LocalDate date,
+    public void createTransaction(Long userId, double amount, String category, LocalDate date,
                                   String description, Type type) {
+        Long transactionId = transactionRepository.generateNextId();
         Transaction transaction = new Transaction(transactionId, userId, amount, category, date, description, type);
         transactionRepository.save(transaction);
     }
