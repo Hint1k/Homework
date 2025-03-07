@@ -48,4 +48,9 @@ public class UserRepositoryImpl implements UserRepository {
                 .filter(user -> user.getEmail().equals(email))
                 .findFirst();
     }
+
+    @Override
+    public Long generateNextId() {
+        return users.keySet().stream().max(Long::compare).orElse(0L) + 1;
+    }
 }

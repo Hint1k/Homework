@@ -18,4 +18,6 @@ public interface UserRepository {
     boolean update(User user);
 
     boolean delete(Long userId);
+
+    Long generateNextId();
 }

@@ -16,8 +16,8 @@ public class UserController {
         this.manageUsersUseCase = manageUsersUseCase;
     }
 
-    public boolean registerUser(Long userId, String name, String email, String password, Role role) {
-        return registerUserUseCase.registerUser(userId, name, email, password, role);
+    public boolean registerUser(String name, String email, String password, Role role) {
+        return registerUserUseCase.registerUser(name, email, password, role);
     }
 
     public Optional<User> authenticateUser(String email, String password) {

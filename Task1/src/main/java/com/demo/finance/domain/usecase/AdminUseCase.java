@@ -41,6 +41,13 @@ public class AdminUseCase {
         }).orElse(false);
     }
 
+    public boolean unBlockUser(Long userId) {
+        return userRepository.findById(userId).map(user -> {
+            user.setBlocked(false);
+            return true;
+        }).orElse(false);
+    }
+
     public boolean deleteUser(Long userId) {
         return userRepository.delete(userId);
     }

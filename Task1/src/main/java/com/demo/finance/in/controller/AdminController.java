@@ -31,6 +31,10 @@ public class AdminController {
         return adminUseCase.blockUser(userId);
     }
 
+    public boolean unBlockUser(Long userId) {
+        return adminUseCase.unBlockUser(userId);
+    }
+
     public boolean deleteUser(Long userId) {
         return adminUseCase.deleteUser(userId);
     }

@@ -16,7 +16,8 @@ public class Menu {
         System.out.println("2. Manage Budget");
         System.out.println("3. Manage Goals");
         System.out.println("4. Generate Reports");
-        System.out.println("5. Logout");
+        System.out.println("5. Manage My Account");
+        System.out.println("6. Logout");
         System.out.print("Enter your choice: ");
     }
 
@@ -24,11 +25,20 @@ public class Menu {
         System.out.println("\n=== Admin Menu ===");
         System.out.println("1. View All Users");
         System.out.println("2. Block User");
-        System.out.println("3. Delete User");
-        System.out.println("4. Manage User Roles");
-        System.out.println("5. View All Transactions");
-        System.out.println("6. Delete Transaction");
+        System.out.println("3. UnBlock User");
+        System.out.println("4. Delete User");
+        System.out.println("5. Manage User Roles");
+        System.out.println("6. View Transactions By UserId ");
         System.out.println("7. Logout");
+        System.out.print("Enter your choice: ");
+    }
+
+    public static void showAccountMenu() {
+        System.out.println("\n=== Account Menu ===");
+        System.out.println("1. View User Account Details");
+        System.out.println("2. Update User Account Details");
+        System.out.println("3. Delete User Account Details");
+        System.out.println("0. Back");
         System.out.print("Enter your choice: ");
     }
 

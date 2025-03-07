@@ -29,6 +29,10 @@ public class ManageTransactionsUseCase {
         return transactionRepository.findByUserId(userId);
     }
 
+    public List<Transaction> getAllTransactions() {
+        return transactionRepository.findAll();
+    }
+
     public void updateTransaction(Long transactionId, double amount, String category, String description) {
         transactionRepository.findById(transactionId).ifPresent(transaction -> {
             transaction.setAmount(amount);

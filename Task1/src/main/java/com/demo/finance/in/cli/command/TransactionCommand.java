@@ -17,7 +17,7 @@ public class TransactionCommand {
 
     public void addTransaction() {
         System.out.print("Enter Transaction ID: ");
-        Long transactionId = scanner.nextLong();
+        Long transactionId = Long.parseLong(scanner.nextLine());
         System.out.print("Enter Amount: ");
         double amount = Double.parseDouble(scanner.nextLine());
         System.out.print("Enter Category: ");
@@ -34,9 +34,18 @@ public class TransactionCommand {
         System.out.println("Transaction added successfully!");
     }
 
-    public void viewAllTransactions() {
+    public void viewTransactionsByUserId() {
         List<Transaction> transactions = context.getTransactionController()
                 .getTransactionsByUserId(context.getCurrentUser().getUserId());
+        if (transactions.isEmpty()) {
+            System.out.println("No transactions found.");
+        } else {
+            transactions.forEach(System.out::println);
+        }
+    }
+
+    public void viewAllTransactions() {
+        List<Transaction> transactions = context.getTransactionController().getAllTransactions();
         if (transactions.isEmpty()) {
             System.out.println("No transactions found.");
         } else {
@@ -66,7 +75,7 @@ public class TransactionCommand {
 
     public void deleteTransaction() {
         System.out.print("Enter Transaction ID to delete: ");
-        Long transactionId = scanner.nextLong();
+        Long transactionId = Long.parseLong(scanner.nextLine());
         context.getTransactionController().deleteTransaction(transactionId);
         System.out.println("Transaction deleted successfully.");
     }

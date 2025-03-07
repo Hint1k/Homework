@@ -17,11 +17,11 @@ public class RegisterUserUseCase {
         this.passwordService = passwordService;
     }
 
-    public boolean registerUser(Long userId, String name, String email, String password, Role role) {
+    public boolean registerUser(String name, String email, String password, Role role) {
         if (userRepository.findByEmail(email).isPresent()) {
             return false;
         }
-
+        Long userId = userRepository.generateNextId();
         String hashedPassword = passwordService.hashPassword(password);
         User newUser = new User(userId, name, email, hashedPassword, false, role);
         userRepository.save(newUser);

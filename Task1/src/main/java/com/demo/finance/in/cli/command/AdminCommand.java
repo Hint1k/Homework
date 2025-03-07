@@ -1,7 +1,6 @@
 package com.demo.finance.in.cli.command;
 
 import com.demo.finance.in.cli.CommandContext;
-import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.model.Role;
 
@@ -11,6 +10,7 @@ import java.util.Scanner;
 public class AdminCommand {
     private final CommandContext context;
     private final Scanner scanner;
+    private final static Long DEFAULT_ADMIN_ID = 1L;
 
     public AdminCommand(CommandContext context, Scanner scanner) {
         this.context = context;
@@ -28,7 +28,7 @@ public class AdminCommand {
 
     public void updateUserRole() {
         System.out.print("Enter User ID to modify: ");
-        Long userId = scanner.nextLong();
+        Long userId = Long.parseLong(scanner.nextLine());
         System.out.print("Set role (1=User, 2=Admin): ");
         String roleChoice = scanner.nextLine();
         Role newRole = "2".equals(roleChoice) ? new Role("admin") : new Role("user");
@@ -42,7 +42,11 @@ public class AdminCommand {
 
     public void blockUser() {
         System.out.print("Enter User ID to block: ");
-        Long userId = scanner.nextLong();
+        Long userId = Long.parseLong(scanner.nextLine());
+        if (DEFAULT_ADMIN_ID.equals(userId)) {
+            System.out.println("Default Admin can't be blocked.");
+            return; // non default admins can be blocked
+        }
         if (context.getAdminController().blockUser(userId)) {
             System.out.println("User blocked successfully.");
         } else {
@@ -50,32 +54,23 @@ public class AdminCommand {
         }
     }
 
+    public void unblockUser() {
+        System.out.print("Enter User ID to unblock: ");
+        Long userId = Long.parseLong(scanner.nextLine());
+        if (context.getAdminController().unBlockUser(userId)) {
+            System.out.println("User unblocked successfully.");
+        } else {
+            System.out.println("Failed to unblock user.");
+        }
+    }
+
     public void deleteUser() {
         System.out.print("Enter User ID to delete: ");
-        Long userId = scanner.nextLong();
+        Long userId = Long.parseLong(scanner.nextLine());
         if (context.getAdminController().deleteUser(userId)) {
             System.out.println("User deleted successfully.");
         } else {
             System.out.println("Failed to delete user.");
-        }
-    }
-
-    public void viewAllTransactions() {
-        List<Transaction> transactions = context.getAdminController().getAllTransactions();
-        if (transactions.isEmpty()) {
-            System.out.println("No transactions found.");
-        } else {
-            transactions.forEach(System.out::println);
-        }
-    }
-
-    public void deleteTransaction() {
-        System.out.print("Enter Transaction ID to delete: ");
-        Long transactionId = scanner.nextLong();
-        if (context.getAdminController().deleteTransaction(transactionId)) {
-            System.out.println("Transaction deleted successfully.");
-        } else {
-            System.out.println("Failed to delete transaction.");
         }
     }
 }

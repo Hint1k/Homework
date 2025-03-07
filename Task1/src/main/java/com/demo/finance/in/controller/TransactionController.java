@@ -33,6 +33,10 @@ public class TransactionController {
         return manageTransactionsUseCase.getTransactionsByUserId(userId);
     }
 
+    public List<Transaction> getAllTransactions() {
+        return manageTransactionsUseCase.getAllTransactions();
+    }
+
     public void updateTransaction(Long transactionId, double amount, String category, String description) {
         manageTransactionsUseCase.updateTransaction(transactionId, amount, category, description);
     }

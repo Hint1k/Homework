@@ -23,10 +23,10 @@ public class CommandFactory {
             return switch (choice) {
                 case "1" -> context.getAdminCommand()::viewAllUsers;
                 case "2" -> context.getAdminCommand()::blockUser;
-                case "3" -> context.getAdminCommand()::deleteUser;
-                case "4" -> context.getAdminCommand()::updateUserRole;
-                case "5" -> context.getAdminCommand()::viewAllTransactions;
-                case "6" -> context.getAdminCommand()::deleteTransaction;
+                case "3" -> context.getAdminCommand()::unblockUser;
+                case "4" -> context.getAdminCommand()::deleteUser;
+                case "5" -> context.getAdminCommand()::updateUserRole;
+                case "6" -> context.getTransactionCommand()::viewTransactionsByUserId;
                 case "7" -> context.getUserCommand()::logoutUser;
                 default -> () -> System.out.println("Invalid choice. Please try again.");
             };
@@ -36,7 +36,8 @@ public class CommandFactory {
                 case "2" -> this::showBudgetMenu;
                 case "3" -> this::showGoalMenu;
                 case "4" -> this::showReportMenu;
-                case "5" -> context.getUserCommand()::logoutUser;
+                case "5" -> this::showAccountMenu;
+                case "6" -> context.getUserCommand()::logoutUser;
                 default -> () -> System.out.println("Invalid choice. Please try again.");
             };
         }
@@ -50,7 +51,7 @@ public class CommandFactory {
 
             Command command = switch (choice) {
                 case "1" -> context.getTransactionCommand()::addTransaction;
-                case "2" -> context.getTransactionCommand()::viewAllTransactions;
+                case "2" -> context.getTransactionCommand()::viewTransactionsByUserId;
                 case "3" -> context.getTransactionCommand()::filterTransactions;
                 case "4" -> context.getTransactionCommand()::deleteTransaction;
                 default -> () -> System.out.println("Invalid choice. Please try again.");
@@ -103,6 +104,25 @@ public class CommandFactory {
                 case "2" -> context.getReportCommand()::generateReportByDate;
                 case "3" -> context.getReportCommand()::analyzeExpensesByCategory;
                 default -> () -> System.out.println("Invalid choice. Please try again.");
+            };
+            command.execute();
+        }
+    }
+
+    private void showAccountMenu() {
+        while (true) {
+            if (context.getCurrentUser() == null) {
+                return; // force users who updated their details back to main menu to re-login with new details
+            }
+            Menu.showAccountMenu();
+            String choice = scanner.nextLine().trim();
+            if (choice.equals("0")) return;
+
+            Command command = switch (choice) {
+            case "1" -> context.getUserCommand()::showUserDetails;
+            case "2" -> context.getUserCommand()::updateUser;
+            case "3" -> context.getUserCommand()::deleteUser;
+            default -> () -> System.out.println("Invalid choice. Please try again.");
             };
             command.execute();
         }
