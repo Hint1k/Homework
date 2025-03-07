@@ -66,7 +66,7 @@ public class Menu {
         System.out.println("\n=== Goal Management ===");
         System.out.println("1. Create Goal");
         System.out.println("2. View Goals");
-        System.out.println("3. Update Goal Progress");
+        System.out.println("3. Update Goal");
         System.out.println("4. Delete Goal");
         System.out.println("0. Back");
         System.out.print("Enter your choice: ");

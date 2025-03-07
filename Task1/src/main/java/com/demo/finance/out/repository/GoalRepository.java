@@ -13,5 +13,7 @@ public interface GoalRepository {
 
     List<Goal> findByUserId(Long userId);
 
+    void updateGoal(Long userId, String oldGoalName, Goal updatedGoal);
+
     void deleteByUserIdAndName(Long userId, String goalName);
 }

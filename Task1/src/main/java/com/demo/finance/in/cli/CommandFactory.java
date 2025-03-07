@@ -86,7 +86,7 @@ public class CommandFactory {
             Command command = switch (choice) {
                 case "1" -> context.getGoalCommand()::createGoal;
                 case "2" -> context.getGoalCommand()::viewGoals;
-                case "3" -> context.getGoalCommand()::updateGoalProgress;
+                case "3" -> context.getGoalCommand()::updateGoal;
                 case "4" -> context.getGoalCommand()::deleteGoal;
                 default -> () -> System.out.println("Invalid choice. Please try again.");
             };

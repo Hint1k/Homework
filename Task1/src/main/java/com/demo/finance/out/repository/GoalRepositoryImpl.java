@@ -30,6 +30,12 @@ public class GoalRepositoryImpl implements GoalRepository {
     }
 
     @Override
+    public void updateGoal(Long userId, String oldGoalName, Goal updatedGoal) {
+        goals.removeIf(goal -> goal.getUserId().equals(userId) && goal.getGoalName().equals(oldGoalName));
+        goals.add(updatedGoal);
+    }
+
+    @Override
     public void deleteByUserIdAndName(Long userId, String goalName) {
         goals.removeIf(goal -> goal.getUserId().equals(userId) && goal.getGoalName().equals(goalName));
     }

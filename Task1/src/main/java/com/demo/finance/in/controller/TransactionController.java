@@ -47,7 +47,6 @@ public class TransactionController {
     public List<Transaction> filterTransactions(Long userId, String from, String to, String category, Type type) {
         LocalDate fromDate = from.isEmpty() ? null : LocalDate.parse(from);
         LocalDate toDate = to.isEmpty() ? null : LocalDate.parse(to);
-
         return transactionsUseCase.getFilteredTransactions(userId, fromDate, toDate, category, type);
     }
 }

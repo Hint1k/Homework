@@ -21,8 +21,8 @@ public class ApplicationConfig {
     private final UsersUseCase usersUseCase = new UsersUseCase(userRepository, passwordService);
     private final TransactionsUseCase transactionsUseCase =
             new TransactionsUseCase(transactionRepository);
-    private final BudgetUseCase manageBudgetsUseCase = new BudgetUseCase(budgetRepository);
-    private final GoalsUseCase goalsUseCase = new GoalsUseCase(goalRepository);
+    private final BudgetUseCase manageBudgetsUseCase = new BudgetUseCase(budgetRepository,transactionRepository);
+    private final GoalsUseCase goalsUseCase = new GoalsUseCase(goalRepository, transactionRepository);
     private final ReportUseCase generateReportsUseCase = new ReportUseCase(transactionRepository);
     private final AdminUseCase adminUseCase = new AdminUseCase(userRepository, transactionRepository);
 //    private final NotificationUseCase notificationUseCase = new NotificationUseCase(budgetRepository, goalRepository);

@@ -1,9 +1,6 @@
 package com.demo.finance.in.cli.command;
 
 import com.demo.finance.in.cli.CommandContext;
-import com.demo.finance.domain.model.Budget;
-
-import java.util.Optional;
 import java.util.Scanner;
 
 public class BudgetCommand {
@@ -25,15 +22,13 @@ public class BudgetCommand {
     }
 
     public void viewBudget() {
-        Optional<Budget> budget = context.getBudgetController().getBudget(context.getCurrentUser().getUserId());
-        budget.ifPresentOrElse(
-                System.out::println,
-                () -> System.out.println("No budget set for the user.")
-        );
+        Long userId = context.getCurrentUser().getUserId();
+        String budgetStatus = context.getBudgetController().viewBudget(userId);
+        System.out.println(budgetStatus);
     }
 
     public void checkBudgetLimit() {
-        double amount = promptForPositiveDouble("Enter Transaction Amount: ");
+        double amount = promptForPositiveDouble("Enter Expense Amount: ");
         if (context.getBudgetController().checkBudgetLimit(context.getCurrentUser().getUserId(), amount)) {
             System.out.println("⚠️ Budget limit will be exceeded!");
         } else {

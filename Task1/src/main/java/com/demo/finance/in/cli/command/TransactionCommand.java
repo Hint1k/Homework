@@ -80,11 +80,12 @@ public class TransactionCommand {
     public void filterTransactions() {
         String fromDate = promptForOptionalDate("Enter Start Date (YYYY-MM-DD) or leave empty: ");
         String toDate = promptForOptionalDate("Enter End Date (YYYY-MM-DD) or leave empty: ");
-        String category = promptForNonEmptyString("Enter Category: ");
-        Type type = promptForTransactionType();
+        String category = promptForOptionalString();
+        Type type = promptForOptionalTransactionType();
+        Long userId = context.getCurrentUser().getUserId();
 
-        List<Transaction> transactions = context.getTransactionController().filterTransactions(
-                context.getCurrentUser().getUserId(), fromDate, toDate, category, type);
+        List<Transaction> transactions =
+                context.getTransactionController().filterTransactions(userId, fromDate, toDate, category, type);
 
         if (transactions.isEmpty()) {
             System.out.println("No matching transactions found.");
@@ -128,6 +129,12 @@ public class TransactionCommand {
         }
     }
 
+    private String promptForOptionalString() {
+        System.out.print("Enter Category or leave empty: ");
+        String input = scanner.nextLine().trim();
+        return input.isEmpty() ? null : input;
+    }
+
     private LocalDate promptForValidDate() {
         while (true) {
             System.out.print("Enter Date (YYYY-MM-DD): ");
@@ -157,13 +164,27 @@ public class TransactionCommand {
         while (true) {
             System.out.print("What Type? (i = INCOME / e = EXPENSE): ");
             String input = scanner.nextLine().trim().toLowerCase();
-            if (input.equals("i") || input.equals("income")) {
+            if (input.equals("i") || input.equalsIgnoreCase("income")) {
                 return Type.INCOME;
             }
-            if (input.equals("e") || input.equals("expense")) {
+            if (input.equals("e") || input.equalsIgnoreCase("expense")) {
                 return Type.EXPENSE;
             }
             System.out.println("Error: Please enter 'i' for INCOME, 'e' for EXPENSE");
+        }
+    }
+
+    private Type promptForOptionalTransactionType() {
+        while (true) {
+            System.out.print("Input type (i = INCOME / e = EXPENSE) or leave empty: ");
+            String input = scanner.nextLine().trim().toLowerCase();
+            if (input.equals("i") || input.equalsIgnoreCase("income")) {
+                return Type.INCOME;
+            }
+            if (input.equals("e") || input.equalsIgnoreCase("expense")) {
+                return Type.EXPENSE;
+            }
+            return null;
         }
     }
 }

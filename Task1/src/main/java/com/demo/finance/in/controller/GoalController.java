@@ -13,8 +13,8 @@ public class GoalController {
         this.goalsUseCase = goalsUseCase;
     }
 
-    public void createGoal(Long userId, String name, double targetAmount) {
-        goalsUseCase.createGoal(userId, name, targetAmount);
+    public void createGoal(Long userId, String name, double targetAmount, int duration) {
+        goalsUseCase.createGoal(userId, name, targetAmount, duration);
     }
 
     public Optional<Goal> getGoal(Long userId, String name) {
@@ -25,11 +25,16 @@ public class GoalController {
         return goalsUseCase.getUserGoals(userId);
     }
 
-    public void updateGoalProgress(Long userId, String goalName, double amountSaved) {
-        goalsUseCase.addToGoal(userId, goalName, amountSaved);
+    public void updateGoal(Long userId, String oldGoalName, String newGoalName, double newTargetAmount,
+                           int newDuration) {
+        goalsUseCase.updateGoal(userId, oldGoalName, newGoalName, newTargetAmount, newDuration);
     }
 
     public void deleteGoal(Long userId, String goalName) {
         goalsUseCase.deleteGoal(userId, goalName);
+    }
+
+    public double calculateTotalBalance(Long userId, Goal goal) {
+        return goalsUseCase.calculateTotalBalance(userId, goal);
     }
 }
