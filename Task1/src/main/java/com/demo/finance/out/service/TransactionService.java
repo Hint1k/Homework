@@ -1,4 +1,4 @@
-package com.demo.finance.domain.usecase;
+package com.demo.finance.out.service;
 
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
@@ -8,10 +8,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public class TransactionsUseCase {
+public class TransactionService {
     private final TransactionRepository transactionRepository;
 
-    public TransactionsUseCase(TransactionRepository transactionRepository) {
+    public TransactionService(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
     }
 

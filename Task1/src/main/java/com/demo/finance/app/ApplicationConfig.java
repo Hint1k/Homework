@@ -2,14 +2,12 @@ package com.demo.finance.app;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.utils.MockEmailUtils;
 import com.demo.finance.in.cli.CliHandler;
 import com.demo.finance.in.controller.*;
-import com.demo.finance.domain.usecase.*;
 import com.demo.finance.out.repository.*;
-import com.demo.finance.out.service.MockEmailService;
-import com.demo.finance.out.service.NotificationService;
+import com.demo.finance.out.service.*;
 import com.demo.finance.domain.utils.PasswordUtils;
-import com.demo.finance.out.service.ReportService;
 
 public class ApplicationConfig {
 
@@ -18,29 +16,25 @@ public class ApplicationConfig {
     private final BudgetRepository budgetRepository = new BudgetRepositoryImpl();
     private final GoalRepository goalRepository = new GoalRepositoryImpl();
     private final PasswordUtils passwordUtils = new PasswordUtils();
-    private final MockEmailService mockEmailService = new MockEmailService();
+    private final MockEmailUtils mockEmailUtils = new MockEmailUtils();
 
-    private final RegistrationUseCase registrationUseCase = new RegistrationUseCase(userRepository, passwordUtils);
-    private final UsersUseCase usersUseCase = new UsersUseCase(userRepository, passwordUtils);
-    private final TransactionsUseCase transactionsUseCase =
-            new TransactionsUseCase(transactionRepository);
-    private final BudgetUseCase manageBudgetsUseCase = new BudgetUseCase(budgetRepository, transactionRepository);
-    private final GoalsUseCase goalsUseCase = new GoalsUseCase(goalRepository, transactionRepository);
-    private final ReportUseCase generateReportsUseCase = new ReportUseCase(transactionRepository);
-    private final AdminUseCase adminUseCase = new AdminUseCase(userRepository);
-    private final NotificationUseCase notificationUseCase =
-            new NotificationUseCase(budgetRepository, goalRepository, transactionRepository);
-
+    private final RegistrationService registrationService = new RegistrationService(userRepository, passwordUtils);
+    private final UserService userService = new UserService(userRepository, passwordUtils);
+    private final TransactionService transactionService =
+            new TransactionService(transactionRepository);
+    private final BudgetService manageBudgetsUseCase = new BudgetService(budgetRepository, transactionRepository);
+    private final GoalService goalService = new GoalService(goalRepository, transactionRepository);
+    private final ReportService reportService = new ReportService(transactionRepository);
+    private final AdminService adminService = new AdminService(userRepository);
     private final NotificationService notificationService =
-            new NotificationService(notificationUseCase, mockEmailService, userRepository);
-    private final ReportService reportService = new ReportService(generateReportsUseCase);
+            new NotificationService(budgetRepository, goalRepository, transactionRepository, userRepository, mockEmailUtils);
 
-    private final UserController userController = new UserController(registrationUseCase, usersUseCase);
-    private final TransactionController transactionController = new TransactionController(transactionsUseCase);
+    private final UserController userController = new UserController(registrationService, userService);
+    private final TransactionController transactionController = new TransactionController(transactionService);
     private final BudgetController budgetController = new BudgetController(manageBudgetsUseCase);
-    private final GoalController goalController = new GoalController(goalsUseCase);
+    private final GoalController goalController = new GoalController(goalService);
     private final ReportController reportController = new ReportController(reportService);
-    private final AdminController adminController = new AdminController(adminUseCase);
+    private final AdminController adminController = new AdminController(adminService);
     private final NotificationController notificationController = new NotificationController(notificationService);
 
     public CliHandler getCliHandler() {

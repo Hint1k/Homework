@@ -53,11 +53,11 @@ public class UserCommand {
         System.out.println("Logged out successfully.");
     }
 
-    public void deleteUser() {
+    public void deleteOwnAccount() {
         User user = context.getCurrentUser();
         if (user != null) {
             Long userId = user.getUserId();
-            if (context.getUserController().deleteUser(userId)) {
+            if (context.getUserController().deleteOwnAccount(userId)) {
                 System.out.println("User deleted successfully.");
                 context.setCurrentUser(null); // Log out the user
             } else {
@@ -68,7 +68,7 @@ public class UserCommand {
         }
     }
 
-    public void updateUser() {
+    public void updateOwnAccount() {
         User user = context.getCurrentUser();
         if (user != null) {
             String name = promptForNonEmptyString("Enter new name: ");
@@ -77,7 +77,7 @@ public class UserCommand {
 
             Long userId = user.getUserId();
             Role role = user.getRole();
-            if (context.getUserController().updateUser(userId, name, email, password, role)) {
+            if (context.getUserController().updateOwnAccount(userId, name, email, password, role)) {
                 System.out.println("User updated successfully. Please log in again with your new credentials.");
                 context.setCurrentUser(null); // Log out the user
             } else {
@@ -88,7 +88,7 @@ public class UserCommand {
         }
     }
 
-    public void showUserDetails() {
+    public void showOwnDetails() {
         User user = context.getCurrentUser();
         if (user != null) {
             System.out.println("User Details:");

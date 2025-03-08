@@ -1,4 +1,4 @@
-package com.demo.finance.domain.usecase;
+package com.demo.finance.out.service;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
@@ -8,11 +8,11 @@ import java.util.Optional;
 
 import com.demo.finance.domain.utils.PasswordUtils;
 
-public class RegistrationUseCase {
+public class RegistrationService {
     private final UserRepository userRepository;
     private final PasswordUtils passwordUtils;
 
-    public RegistrationUseCase(UserRepository userRepository, PasswordUtils passwordUtils) {
+    public RegistrationService(UserRepository userRepository, PasswordUtils passwordUtils) {
         this.userRepository = userRepository;
         this.passwordUtils = passwordUtils;
     }

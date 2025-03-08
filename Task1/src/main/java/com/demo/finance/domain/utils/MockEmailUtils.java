@@ -1,6 +1,6 @@
-package com.demo.finance.out.service;
+package com.demo.finance.domain.utils;
 
-public class MockEmailService {
+public class MockEmailUtils {
     public void sendEmail(String recipient, String subject, String body) {
         System.out.println("=== Simulated Email Notification ===");
         System.out.println("To: " + recipient);

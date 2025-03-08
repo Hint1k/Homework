@@ -1,4 +1,4 @@
-package com.demo.finance.domain.usecase;
+package com.demo.finance.out.service;
 
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.utils.BalanceUtils;
@@ -9,12 +9,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public class GoalsUseCase {
+public class GoalService {
 
     private final GoalRepository goalRepository;
     private final TransactionRepository transactionRepository;
 
-    public GoalsUseCase(GoalRepository goalRepository, TransactionRepository transactionRepository) {
+    public GoalService(GoalRepository goalRepository, TransactionRepository transactionRepository) {
         this.goalRepository = goalRepository;
         this.transactionRepository = transactionRepository;
     }

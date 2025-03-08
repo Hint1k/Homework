@@ -2,34 +2,34 @@ package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.usecase.AdminUseCase;
+import com.demo.finance.out.service.AdminService;
 
 import java.util.List;
 
 public class AdminController {
-    private final AdminUseCase adminUseCase;
+    private final AdminService adminService;
 
-    public AdminController(AdminUseCase adminUseCase) {
-        this.adminUseCase = adminUseCase;
+    public AdminController(AdminService adminService) {
+        this.adminService = adminService;
     }
 
     public List<User> getAllUsers() {
-        return adminUseCase.getAllUsers();
+        return adminService.getAllUsers();
     }
 
     public boolean updateUserRole(Long userId, Role newRole) {
-        return adminUseCase.updateUserRole(userId, newRole);
+        return adminService.updateUserRole(userId, newRole);
     }
 
     public boolean blockUser(Long userId) {
-        return adminUseCase.blockUser(userId);
+        return adminService.blockUser(userId);
     }
 
     public boolean unBlockUser(Long userId) {
-        return adminUseCase.unBlockUser(userId);
+        return adminService.unBlockUser(userId);
     }
 
     public boolean deleteUser(Long userId) {
-        return adminUseCase.deleteUser(userId);
+        return adminService.deleteUser(userId);
     }
 }

@@ -121,9 +121,9 @@ public class CommandFactory {
             if (choice.equals("0")) return;
 
             Command command = switch (choice) {
-                case "1" -> context.getUserCommand()::showUserDetails;
-                case "2" -> context.getUserCommand()::updateUser;
-                case "3" -> context.getUserCommand()::deleteUser;
+                case "1" -> context.getUserCommand()::showOwnDetails;
+                case "2" -> context.getUserCommand()::updateOwnAccount;
+                case "3" -> context.getUserCommand()::deleteOwnAccount;
                 default -> () -> System.out.println("Invalid choice. Please try again.");
             };
             command.execute();

@@ -2,33 +2,33 @@ package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.usecase.RegistrationUseCase;
-import com.demo.finance.domain.usecase.UsersUseCase;
+import com.demo.finance.out.service.RegistrationService;
+import com.demo.finance.out.service.UserService;
 
 import java.util.Optional;
 
 public class UserController {
-    private final RegistrationUseCase registrationUseCase;
-    private final UsersUseCase usersUseCase;
+    private final RegistrationService registrationService;
+    private final UserService userService;
 
-    public UserController(RegistrationUseCase registrationUseCase, UsersUseCase usersUseCase) {
-        this.registrationUseCase = registrationUseCase;
-        this.usersUseCase = usersUseCase;
+    public UserController(RegistrationService registrationService, UserService userService) {
+        this.registrationService = registrationService;
+        this.userService = userService;
     }
 
     public boolean registerUser(String name, String email, String password, Role role) {
-        return registrationUseCase.registerUser(name, email, password, role);
+        return registrationService.registerUser(name, email, password, role);
     }
 
     public Optional<User> authenticateUser(String email, String password) {
-        return registrationUseCase.authenticate(email, password);
+        return registrationService.authenticate(email, password);
     }
 
-    public boolean updateUser(Long userId, String name, String email, String password, Role role) {
-        return usersUseCase.updateUser(userId, name, email, password, role);
+    public boolean updateOwnAccount(Long userId, String name, String email, String password, Role role) {
+        return userService.updateOwnAccount(userId, name, email, password, role);
     }
 
-    public boolean deleteUser(Long userId) {
-        return usersUseCase.deleteUser(userId);
+    public boolean deleteOwnAccount(Long userId) {
+        return userService.deleteOwnAccount(userId);
     }
 }

@@ -1,4 +1,4 @@
-package com.demo.finance.domain.usecase;
+package com.demo.finance.out.service;
 
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.domain.model.Transaction;
@@ -10,11 +10,11 @@ import java.util.Optional;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
-public class BudgetUseCase {
+public class BudgetService {
     private final BudgetRepository budgetRepository;
     private final TransactionRepository transactionRepository;
 
-    public BudgetUseCase(BudgetRepository budgetRepository, TransactionRepository transactionRepository) {
+    public BudgetService(BudgetRepository budgetRepository, TransactionRepository transactionRepository) {
         this.budgetRepository = budgetRepository;
         this.transactionRepository = transactionRepository;
     }

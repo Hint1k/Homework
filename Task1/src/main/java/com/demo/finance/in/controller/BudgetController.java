@@ -1,33 +1,28 @@
 package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.model.Budget;
-import com.demo.finance.domain.usecase.BudgetUseCase;
+import com.demo.finance.out.service.BudgetService;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Optional;
 
 public class BudgetController {
-    private final BudgetUseCase budgetUseCase;
+    private final BudgetService budgetService;
 
-    public BudgetController(BudgetUseCase budgetUseCase) {
-        this.budgetUseCase = budgetUseCase;
+    public BudgetController(BudgetService budgetService) {
+        this.budgetService = budgetService;
     }
 
     public boolean setBudget(Long userId, double amount) {
-        return budgetUseCase.setMonthlyBudget(userId, amount);
+        return budgetService.setMonthlyBudget(userId, amount);
     }
 
     public String viewBudget(Long userId) {
-        // Get the current month and year
         LocalDate now = LocalDate.now();
         YearMonth currentMonth = YearMonth.from(now);
-
-        // Retrieve all expense transactions for the current month
-        double totalExpenses = budgetUseCase.calculateExpensesForMonth(userId, currentMonth);
-
-        // Retrieve the user's budget
-        Optional<Budget> budget = budgetUseCase.getBudget(userId);
+        double totalExpenses = budgetService.calculateExpensesForMonth(userId, currentMonth);
+        Optional<Budget> budget = budgetService.getBudget(userId);
         if (budget.isPresent()) {
             double monthlyLimit = budget.get().getMonthlyLimit();
             return String.format("Budget: %.2f/%.2f", totalExpenses, monthlyLimit);

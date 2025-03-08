@@ -1,4 +1,4 @@
-package com.demo.finance.domain.usecase;
+package com.demo.finance.out.service;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
@@ -6,11 +6,11 @@ import com.demo.finance.out.repository.UserRepository;
 
 import java.util.List;
 
-public class AdminUseCase {
+public class AdminService {
 
     private final UserRepository userRepository;
 
-    public AdminUseCase(UserRepository userRepository) {
+    public AdminService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
