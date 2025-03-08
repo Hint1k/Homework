@@ -11,31 +11,31 @@ import com.demo.finance.domain.utils.PasswordUtils;
 
 public class ApplicationConfig {
 
-    private final UserRepository userRepository = new UserRepositoryImpl();
-    private final TransactionRepository transactionRepository = new TransactionRepositoryImpl();
     private final BudgetRepository budgetRepository = new BudgetRepositoryImpl();
     private final GoalRepository goalRepository = new GoalRepositoryImpl();
-    private final PasswordUtils passwordUtils = new PasswordUtils();
+    private final TransactionRepository transactionRepository = new TransactionRepositoryImpl();
+    private final UserRepository userRepository = new UserRepositoryImpl();
+
     private final MockEmailUtils mockEmailUtils = new MockEmailUtils();
+    private final PasswordUtils passwordUtils = new PasswordUtils();
 
-    private final RegistrationService registrationService = new RegistrationService(userRepository, passwordUtils);
-    private final UserService userService = new UserService(userRepository, passwordUtils);
-    private final TransactionService transactionService =
-            new TransactionService(transactionRepository);
-    private final BudgetService manageBudgetsUseCase = new BudgetService(budgetRepository, transactionRepository);
-    private final GoalService goalService = new GoalService(goalRepository, transactionRepository);
-    private final ReportService reportService = new ReportService(transactionRepository);
-    private final AdminService adminService = new AdminService(userRepository);
-    private final NotificationService notificationService =
-            new NotificationService(budgetRepository, goalRepository, transactionRepository, userRepository, mockEmailUtils);
+    private final AdminService adminService = new AdminServiceImpl(userRepository);
+    private final BudgetService budgetService = new BudgetServiceImpl(budgetRepository, transactionRepository);
+    private final GoalService goalService = new GoalServiceImpl(goalRepository, transactionRepository);
+    private final NotificationService notificationService = new NotificationServiceImpl(budgetRepository,
+            goalRepository, transactionRepository, userRepository, mockEmailUtils);
+    private final RegistrationService registrationService = new RegistrationServiceImpl(userRepository, passwordUtils);
+    private final ReportService reportService = new ReportServiceImpl(transactionRepository);
+    private final TransactionService transactionService = new TransactionServiceImpl(transactionRepository);
+    private final UserService userService = new UserServiceImpl(userRepository, passwordUtils);
 
-    private final UserController userController = new UserController(registrationService, userService);
-    private final TransactionController transactionController = new TransactionController(transactionService);
-    private final BudgetController budgetController = new BudgetController(manageBudgetsUseCase);
-    private final GoalController goalController = new GoalController(goalService);
-    private final ReportController reportController = new ReportController(reportService);
     private final AdminController adminController = new AdminController(adminService);
+    private final BudgetController budgetController = new BudgetController(budgetService);
+    private final GoalController goalController = new GoalController(goalService);
     private final NotificationController notificationController = new NotificationController(notificationService);
+    private final ReportController reportController = new ReportController(reportService);
+    private final TransactionController transactionController = new TransactionController(transactionService);
+    private final UserController userController = new UserController(registrationService, userService);
 
     public CliHandler getCliHandler() {
         return new CliHandler(
