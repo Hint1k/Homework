@@ -22,7 +22,7 @@ public class CliHandler {
     }
 
     public void start() {
-        while (true) {
+        while (true) { // manual exit command
             if (context.getCurrentUser() == null) {
                 Menu.showMainMenu();
                 String choice = scanner.nextLine().trim();

@@ -1,6 +1,7 @@
 package com.demo.finance.in.cli.command;
 
 import com.demo.finance.domain.model.Goal;
+import com.demo.finance.domain.utils.MaxRetriesReachedException;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 
@@ -23,34 +24,39 @@ public class GoalCommand {
     }
 
     public void createGoal() {
-        String name = validationUtils.promptForNonEmptyString("Enter Goal Name: ", scanner);
-        String message = "Enter Target Amount: ";
-        double targetAmount = validationUtils.promptForPositiveDouble(message, scanner);
-        String message2 = "Enter Duration in Months (e.g. 3): ";
-        int duration = validationUtils.promptForPositiveInt(message2, scanner);
-
-        context.getGoalController().createGoal(context.getCurrentUser().getUserId(), name, targetAmount, duration);
-        System.out.println("Goal created successfully.");
+        try {
+            String name = validationUtils.promptForNonEmptyString("Enter Goal Name: ", scanner);
+            Long userId = context.getCurrentUser().getUserId();
+            List<Goal> goalList = context.getGoalController().getAllGoals(userId);
+            if (goalList.stream().anyMatch(goal -> goal.getGoalName().equalsIgnoreCase(name))) {
+                System.out.println("A goal with the name '" + name + "' already exists.");
+                return;
+            }
+            String message = "Enter Target Amount: ";
+            double targetAmount = validationUtils.promptForPositiveDouble(message, scanner);
+            String message2 = "Enter Duration in Months (e.g. 3): ";
+            int duration = validationUtils.promptForPositiveInt(message2, scanner);
+            context.getGoalController().createGoal(context.getCurrentUser().getUserId(), name, targetAmount, duration);
+            System.out.println("Goal created successfully.");
+        } catch (MaxRetriesReachedException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void viewGoals() {
         Long userId = context.getCurrentUser().getUserId();
         List<Goal> goals = context.getGoalController().getAllGoals(userId);
-
         if (goals.isEmpty()) {
             System.out.println("No goals set.");
             return;
         }
-
         for (Goal goal : goals) {
             double totalBalance = context.getGoalController().calculateTotalBalance(userId, goal);
             double progressPercentage = goal.calculateProgress(totalBalance);
-
             System.out.println("Goal: " + goal.getGoalName());
             System.out.println("Target Amount: " + goal.getTargetAmount());
             System.out.println("Duration: " + goal.getDuration() + " months");
             System.out.println("Progress: " + String.format("%.2f", progressPercentage) + "%");
-
             if (goal.isExpired()) {
                 System.out.println("Status: Expired");
             } else if (progressPercentage >= 100) {
@@ -63,8 +69,14 @@ public class GoalCommand {
     }
 
     public void updateGoal() {
-        String oldGoalName = validationUtils
-                .promptForNonEmptyString("Enter the Name of the Goal to Update: ", scanner);
+        String oldGoalName;
+        try {
+            oldGoalName = validationUtils
+                    .promptForNonEmptyString("Enter the Name of the Goal to Update: ", scanner);
+        } catch (MaxRetriesReachedException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
         Long userId = context.getCurrentUser().getUserId();
         Optional<Goal> goalToUpdate = context.getGoalController().getGoal(userId, oldGoalName);
 
@@ -96,7 +108,13 @@ public class GoalCommand {
     }
 
     public void deleteGoal() {
-        String goalName = validationUtils.promptForNonEmptyString("Enter Goal Name to Delete: ", scanner);
+        String goalName;
+        try {
+            goalName = validationUtils.promptForNonEmptyString("Enter Goal Name to Delete: ", scanner);
+        } catch (MaxRetriesReachedException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
         Long userId = context.getCurrentUser().getUserId();
 
         if (context.getGoalController().getGoal(userId, goalName).isPresent()) {

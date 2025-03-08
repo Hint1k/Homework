@@ -1,5 +1,6 @@
 package com.demo.finance.in.cli.command;
 
+import com.demo.finance.domain.utils.MaxRetriesReachedException;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
@@ -24,20 +25,30 @@ public class TransactionCommand {
     }
 
     public void addTransaction() {
-        Double amount = validationUtils.promptForPositiveDouble("Enter Amount: ", scanner);
-        String category = validationUtils.promptForNonEmptyString("Enter Category: ", scanner);
-        LocalDate date = validationUtils.promptForValidDate("Enter Date (YYYY-MM-DD): ", scanner);
-        String description = validationUtils.promptForNonEmptyString("Enter Description: ", scanner);
-        Type type = validationUtils.promptForTransactionType(scanner);
+        try {
+            Double amount = validationUtils.promptForPositiveDouble("Enter Amount: ", scanner);
+            String category = validationUtils.promptForNonEmptyString("Enter Category: ", scanner);
+            LocalDate date = validationUtils.promptForValidDate("Enter Date (YYYY-MM-DD): ", scanner);
+            String description = validationUtils.promptForNonEmptyString("Enter Description: ", scanner);
+            Type type = validationUtils.promptForTransactionType(scanner);
 
-        Long userId = context.getCurrentUser().getUserId();
-        context.getTransactionController()
-                .addTransaction(userId, amount, category, date.toString(), description, type);
-        System.out.println("Transaction added successfully!");
+            Long userId = context.getCurrentUser().getUserId();
+            context.getTransactionController()
+                    .addTransaction(userId, amount, category, date.toString(), description, type);
+            System.out.println("Transaction added successfully!");
+        } catch (MaxRetriesReachedException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void updateTransaction() {
-        Long transactionId = validationUtils.promptForPositiveLong("Enter Transaction ID: ", scanner);
+        Long transactionId;
+        try {
+            transactionId = validationUtils.promptForPositiveLong("Enter Transaction ID: ", scanner);
+        } catch (MaxRetriesReachedException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
         Transaction transactionToUpdate = context.getTransactionController().getTransaction(transactionId);
         if (transactionToUpdate == null) {
             System.out.println("Error: Transaction not found.");
@@ -73,7 +84,13 @@ public class TransactionCommand {
     }
 
     public void deleteTransaction() {
-        Long transactionId = validationUtils.promptForPositiveLong("Enter Transaction ID: ", scanner);
+        Long transactionId;
+        try {
+            transactionId = validationUtils.promptForPositiveLong("Enter Transaction ID: ", scanner);
+        } catch (MaxRetriesReachedException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
         Long userId = context.getCurrentUser().getUserId();
         if (context.getTransactionController().deleteTransaction(userId, transactionId)) {
             System.out.println("Transaction deleted successfully.");
@@ -82,6 +99,7 @@ public class TransactionCommand {
                     "Either the transaction does not exist or it does not belong to you.");
         }
     }
+
 
     public void viewTransactionsByUserId() {
         List<Transaction> transactions = context.getTransactionController()

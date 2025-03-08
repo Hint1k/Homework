@@ -1,5 +1,6 @@
 package com.demo.finance.in.cli.command;
 
+import com.demo.finance.domain.utils.MaxRetriesReachedException;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.domain.model.Report;
@@ -32,29 +33,35 @@ public class ReportCommand {
     }
 
     public void generateReportByDate() {
-        LocalDate from = validationUtils.promptForValidDate(PROMPT_START_DATE, scanner);
-        LocalDate to = validationUtils.promptForValidDate(PROMPT_END_DATE, scanner);
-
-        Optional<Report> report =
-                context.getReportController()
-                        .generateReportByDate(context.getCurrentUser().getUserId(), from.toString(), to.toString());
-        report.ifPresentOrElse(
-                System.out::println,
-                () -> System.out.println("No transactions found in the given period.")
-        );
+        try {
+            LocalDate from = validationUtils.promptForValidDate(PROMPT_START_DATE, scanner);
+            LocalDate to = validationUtils.promptForValidDate(PROMPT_END_DATE, scanner);
+            Optional<Report> report = context.getReportController()
+                    .generateReportByDate(context.getCurrentUser().getUserId(), from.toString(), to.toString());
+            report.ifPresentOrElse(
+                    System.out::println,
+                    () -> System.out.println("No transactions found in the given period.")
+            );
+        } catch (MaxRetriesReachedException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void analyzeExpensesByCategory() {
-        LocalDate from = validationUtils.promptForValidDate(PROMPT_START_DATE, scanner);
-        LocalDate to = validationUtils.promptForValidDate(PROMPT_END_DATE, scanner);
+        try {
+            LocalDate from = validationUtils.promptForValidDate(PROMPT_START_DATE, scanner);
+            LocalDate to = validationUtils.promptForValidDate(PROMPT_END_DATE, scanner);
 
-        Map<String, Double> categoryReport = context.getReportController()
-                .analyzeExpensesByCategory(context.getCurrentUser().getUserId(), from.toString(), to.toString());
-        if (categoryReport.isEmpty()) {
-            System.out.println("No expenses found in the given period.");
-        } else {
-            System.out.println("\n=== Expense Analysis by Category ===");
-            categoryReport.forEach((category, total) -> System.out.println(category + ": $" + total));
+            Map<String, Double> categoryReport = context.getReportController()
+                    .analyzeExpensesByCategory(context.getCurrentUser().getUserId(), from.toString(), to.toString());
+            if (categoryReport.isEmpty()) {
+                System.out.println("No expenses found in the given period.");
+            } else {
+                System.out.println("\n=== Expense Analysis by Category ===");
+                categoryReport.forEach((category, total) -> System.out.println(category + ": $" + total));
+            }
+        } catch (MaxRetriesReachedException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.demo.finance.in.cli.command;
 
+import com.demo.finance.domain.utils.MaxRetriesReachedException;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.domain.model.Role;
@@ -25,11 +26,16 @@ public class UserCommand {
     }
 
     public void registerUser() {
-        String name = validationUtils.promptForNonEmptyString("Enter Name: ", scanner);
-        String email = validationUtils.promptForValidEmail(PROMPT_EMAIL, scanner);
-        String password = validationUtils.promptForValidPassword(PROMPT_PASSWORD, scanner);
+        String name, email, password;
+        try {
+            name = validationUtils.promptForNonEmptyString("Enter Name: ", scanner);
+            email = validationUtils.promptForValidEmail(PROMPT_EMAIL, scanner);
+            password = validationUtils.promptForValidPassword(PROMPT_PASSWORD, scanner);
+        } catch (MaxRetriesReachedException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
         Role role = new Role("user"); // Default role
-
         if (context.getUserController().registerUser(name, email, password, role)) {
             System.out.println("Registration successful.");
         } else {
@@ -38,9 +44,14 @@ public class UserCommand {
     }
 
     public void loginUser() {
-        String email = validationUtils.promptForValidEmail(PROMPT_EMAIL, scanner);
-        String password = validationUtils.promptForValidPassword(PROMPT_PASSWORD, scanner);
-
+        String email, password;
+        try {
+            email = validationUtils.promptForValidEmail(PROMPT_EMAIL, scanner);
+            password = validationUtils.promptForValidPassword(PROMPT_PASSWORD, scanner);
+        } catch (MaxRetriesReachedException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
         Optional<User> user = context.getUserController().authenticateUser(email, password);
         if (user.isPresent()) {
             if (user.get().isBlocked()) {

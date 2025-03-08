@@ -16,7 +16,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         // Initialize default transactions
         initializeDefaultTransactions();
     }
-
+    // TODO remove it before submitting
     private void initializeDefaultTransactions() {
         // Add 10 default transactions
         save(new Transaction(1L, 2L, 500.0, "Salary", LocalDate.of(2025, 3, 1), "Monthly salary", Type.INCOME));

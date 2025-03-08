@@ -10,8 +10,7 @@ import static org.assertj.core.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class PasswordUtilsTest {
     
-    @InjectMocks
-    private final PasswordUtils passwordUtils = new PasswordUtils();
+    @InjectMocks private PasswordUtils passwordUtils;
 
     @Test
     void testHashPassword() {

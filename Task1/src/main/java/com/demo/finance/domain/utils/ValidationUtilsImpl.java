@@ -4,26 +4,43 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class ValidationUtilsImpl implements ValidationUtils {
 
     private static final String ERROR_VALUE_MUST_BE_POSITIVE = "Error: Value must be positive.";
-    private static final String ERROR_INVALID_NUMBER = "Error: Please enter a valid number.";
     private static final String ERROR_INVALID_INPUT_KEEPING_CURRENT = "Error: Invalid input. Keeping current value.";
-    private static final String PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+    private static final String PATTERN = "^[A-Za-z0-9+_.-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,}$";
+    private static final int MAX_RETRIES = 3;
+
+    private <T> T promptWithRetries(String message, Scanner scanner, Function<String, Optional<T>> parser,
+                                    String errorMessage) {
+        int retries = 0;
+        while (retries < MAX_RETRIES) {
+            System.out.print(message);
+            String input = scanner.nextLine().trim();
+            Optional<T> result = parser.apply(input);
+            if (result.isPresent()) {
+                return result.get();
+            }
+            System.out.println(errorMessage);
+            retries++;
+        }
+        throw new MaxRetriesReachedException("Maximum retries reached. Returning back to the menu.");
+    }
 
     @Override
     public Double promptForPositiveDouble(String message, Scanner scanner) {
-        while (true) {
+        return promptWithRetries(message, scanner, input -> {
             try {
-                System.out.print(message);
-                double value = Double.parseDouble(scanner.nextLine().trim());
-                if (value > 0) return value;
-                System.out.println(ERROR_VALUE_MUST_BE_POSITIVE);
+                double value = Double.parseDouble(input);
+                if (value > 0) return Optional.of(value);
             } catch (NumberFormatException e) {
-                System.out.println(ERROR_INVALID_NUMBER);
+                // Ignore and return empty
             }
-        }
+            return Optional.empty();
+        }, ERROR_VALUE_MUST_BE_POSITIVE);
     }
 
     @Override
@@ -33,39 +50,33 @@ public class ValidationUtilsImpl implements ValidationUtils {
         if (input.isEmpty()) return null;
         try {
             double value = Double.parseDouble(input);
-            if (value > 0) {
-                return value;
-            } else {
-                System.out.println(ERROR_INVALID_INPUT_KEEPING_CURRENT);
-            }
+            if (value > 0) return value;
         } catch (NumberFormatException e) {
-            System.out.println(ERROR_INVALID_INPUT_KEEPING_CURRENT);
+            // Ignore and return null
         }
+        System.out.println(ERROR_INVALID_INPUT_KEEPING_CURRENT);
         return null;
     }
 
     @Override
     public Long promptForPositiveLong(String message, Scanner scanner) {
-        while (true) {
+        return promptWithRetries(message, scanner, input -> {
             try {
-                System.out.print(message);
-                long value = Long.parseLong(scanner.nextLine().trim());
-                if (value > 0) return value;
-                System.out.println(ERROR_VALUE_MUST_BE_POSITIVE);
+                long value = Long.parseLong(input);
+                if (value > 0) return Optional.of(value);
             } catch (NumberFormatException e) {
-                System.out.println(ERROR_INVALID_NUMBER);
+                // Ignore and return empty
             }
-        }
+            return Optional.empty();
+        }, ERROR_VALUE_MUST_BE_POSITIVE);
     }
 
     @Override
     public String promptForNonEmptyString(String message, Scanner scanner) {
-        while (true) {
-            System.out.print(message);
-            String input = scanner.nextLine().trim();
-            if (!input.isEmpty()) return input;
-            System.out.println("Error: Input cannot be empty.");
-        }
+        return promptWithRetries(message, scanner, input -> {
+            if (!input.isEmpty()) return Optional.of(input);
+            return Optional.empty();
+        }, "Error: Input cannot be empty.");
     }
 
     @Override
@@ -82,12 +93,10 @@ public class ValidationUtilsImpl implements ValidationUtils {
     @Override
     public String promptForValidEmail(String message, Scanner scanner) {
         Pattern emailPattern = Pattern.compile(PATTERN);
-        while (true) {
-            System.out.print(message);
-            String email = scanner.nextLine().trim();
-            if (emailPattern.matcher(email).matches()) return email;
-            System.out.println("Error: Invalid email format. Please enter a valid email (e.g. user@demo.com).");
-        }
+        return promptWithRetries(message, scanner, input -> {
+            if (emailPattern.matcher(input).matches()) return Optional.of(input);
+            return Optional.empty();
+        }, "Error: Invalid email format. Please enter a valid email (e.g. user@demo.com).");
     }
 
     @Override
@@ -108,12 +117,10 @@ public class ValidationUtilsImpl implements ValidationUtils {
 
     @Override
     public String promptForValidPassword(String message, Scanner scanner) {
-        while (true) {
-            System.out.print(message);
-            String password = scanner.nextLine().trim();
-            if (password.length() >= 3) return password;
-            System.out.println("Error: Password must be at least 3 characters Long.");
-        }
+        return promptWithRetries(message, scanner, input -> {
+            if (input.length() >= 3) return Optional.of(input);
+            return Optional.empty();
+        }, "Error: Password must be at least 3 characters long.");
     }
 
     @Override
@@ -133,15 +140,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
 
     @Override
     public LocalDate promptForValidDate(String message, Scanner scanner) {
-        while (true) {
-            System.out.print(message);
-            String input = scanner.nextLine().trim();
+        return promptWithRetries(message, scanner, input -> {
             try {
-                return LocalDate.parse(input);
+                return Optional.of(LocalDate.parse(input));
             } catch (DateTimeParseException e) {
-                System.out.println("Error: Please enter a valid date in YYYY-MM-DD format.");
+                return Optional.empty();
             }
-        }
+        }, "Error: Please enter a valid date in YYYY-MM-DD format.");
     }
 
     @Override
@@ -158,60 +163,55 @@ public class ValidationUtilsImpl implements ValidationUtils {
 
     @Override
     public Type promptForTransactionType(Scanner scanner) {
-        while (true) {
-            System.out.print("Input Type (i = INCOME / e = EXPENSE): ");
-            String input = scanner.nextLine().trim().toLowerCase();
+        return promptWithRetries("Input Type (i = INCOME / e = EXPENSE): ", scanner, input -> {
             if (input.equalsIgnoreCase("i") || input.equalsIgnoreCase("income")) {
-                return Type.INCOME;
+                return Optional.of(Type.INCOME);
             }
             if (input.equalsIgnoreCase("e") || input.equalsIgnoreCase("expense")) {
-                return Type.EXPENSE;
+                return Optional.of(Type.EXPENSE);
             }
-            System.out.println("Error: Please enter 'i' for INCOME, 'e' for EXPENSE");
-        }
+            return Optional.empty();
+        }, "Error: Please enter 'i' for INCOME, 'e' for EXPENSE");
     }
 
     @Override
     public Type promptForOptionalTransactionType(Scanner scanner) {
-        while (true) {
-            System.out.print("Input type (i = INCOME / e = EXPENSE) or leave empty: ");
-            String input = scanner.nextLine().trim().toLowerCase();
-            if (input.equalsIgnoreCase("i") || input.equalsIgnoreCase("income")) {
-                return Type.INCOME;
-            }
-            if (input.equalsIgnoreCase("e") || input.equalsIgnoreCase("expense")) {
-                return Type.EXPENSE;
-            }
-            return null;
+        System.out.print("Input type (i = INCOME / e = EXPENSE) or leave empty: ");
+        String input = scanner.nextLine().trim().toLowerCase();
+        if (input.equalsIgnoreCase("i") || input.equalsIgnoreCase("income")) {
+            return Type.INCOME;
         }
+        if (input.equalsIgnoreCase("e") || input.equalsIgnoreCase("expense")) {
+            return Type.EXPENSE;
+        }
+        System.out.println("Invalid input type. Keeping current type.");
+        return null;
     }
 
     @Override
     public Integer promptForIntInRange(String message, Integer min, Integer max, Scanner scanner) {
-        while (true) {
+        return promptWithRetries(message, scanner, input -> {
             try {
-                System.out.print(message);
-                Integer value = Integer.parseInt(scanner.nextLine().trim());
-                if (value >= min && value <= max) return value;
-                System.out.println("Error: Please enter a number between " + min + " and " + max + ".");
+                int value = Integer.parseInt(input);
+                if (value >= min && value <= max) return Optional.of(value);
             } catch (NumberFormatException e) {
-                System.out.println(ERROR_INVALID_NUMBER);
+                // Ignore and return empty
             }
-        }
+            return Optional.empty();
+        }, "Error: Please enter a number between " + min + " and " + max + ".");
     }
 
     @Override
     public Integer promptForPositiveInt(String message, Scanner scanner) {
-        while (true) {
+        return promptWithRetries(message, scanner, input -> {
             try {
-                System.out.print(message);
-                int value = Integer.parseInt(scanner.nextLine().trim());
-                if (value > 0) return value;
-                System.out.println(ERROR_VALUE_MUST_BE_POSITIVE);
+                int value = Integer.parseInt(input);
+                if (value > 0) return Optional.of(value);
             } catch (NumberFormatException e) {
-                System.out.println(ERROR_INVALID_NUMBER);
+                // Ignore and return empty
             }
-        }
+            return Optional.empty();
+        }, ERROR_VALUE_MUST_BE_POSITIVE);
     }
 
     @Override
@@ -221,7 +221,11 @@ public class ValidationUtilsImpl implements ValidationUtils {
         if (input.isEmpty()) return null;
         try {
             int value = Integer.parseInt(input);
-            if (value > 0) return value;
+            if (value > 0) {
+                return value;
+            } else {
+                System.out.println("Error: Negative value. Keeping current value.");
+            }
         } catch (NumberFormatException e) {
             System.out.println(ERROR_INVALID_INPUT_KEEPING_CURRENT);
         }

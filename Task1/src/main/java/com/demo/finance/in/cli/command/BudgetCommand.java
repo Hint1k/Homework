@@ -1,5 +1,6 @@
 package com.demo.finance.in.cli.command;
 
+import com.demo.finance.domain.utils.MaxRetriesReachedException;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 
@@ -18,12 +19,16 @@ public class BudgetCommand {
     }
 
     public void setBudget() {
-        String message = "Enter Monthly Budget: ";
-        double amount = validationUtils.promptForPositiveDouble(message, scanner);
-        if (context.getBudgetController().setBudget(context.getCurrentUser().getUserId(), amount)) {
-            System.out.println("Budget set successfully.");
-        } else {
-            System.out.println("Failed to set budget.");
+        try {
+            String message = "Enter Monthly Budget: ";
+            double amount = validationUtils.promptForPositiveDouble(message, scanner);
+            if (context.getBudgetController().setBudget(context.getCurrentUser().getUserId(), amount)) {
+                System.out.println("Budget set successfully.");
+            } else {
+                System.out.println("Failed to set budget.");
+            }
+        } catch (MaxRetriesReachedException e) {
+            System.out.println(e.getMessage());
         }
     }
 
