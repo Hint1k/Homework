@@ -2,12 +2,17 @@ package com.demo.finance.app;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.utils.BalanceUtils;
+import com.demo.finance.domain.utils.BalanceUtilsImpl;
 import com.demo.finance.domain.utils.MockEmailUtils;
 import com.demo.finance.in.cli.CliHandler;
 import com.demo.finance.in.controller.*;
 import com.demo.finance.out.repository.*;
 import com.demo.finance.out.service.*;
 import com.demo.finance.domain.utils.PasswordUtils;
+
+import java.io.InputStream;
+import java.util.Properties;
 
 public class ApplicationConfig {
 
@@ -16,14 +21,15 @@ public class ApplicationConfig {
     private final TransactionRepository transactionRepository = new TransactionRepositoryImpl();
     private final UserRepository userRepository = new UserRepositoryImpl();
 
+    private final BalanceUtils balanceUtils = new BalanceUtilsImpl(transactionRepository);
     private final MockEmailUtils mockEmailUtils = new MockEmailUtils();
     private final PasswordUtils passwordUtils = new PasswordUtils();
 
     private final AdminService adminService = new AdminServiceImpl(userRepository);
     private final BudgetService budgetService = new BudgetServiceImpl(budgetRepository, transactionRepository);
-    private final GoalService goalService = new GoalServiceImpl(goalRepository, transactionRepository);
+    private final GoalService goalService = new GoalServiceImpl(goalRepository, balanceUtils);
     private final NotificationService notificationService = new NotificationServiceImpl(budgetRepository,
-            goalRepository, transactionRepository, userRepository, mockEmailUtils);
+            goalRepository, transactionRepository, userRepository, balanceUtils, mockEmailUtils);
     private final RegistrationService registrationService = new RegistrationServiceImpl(userRepository, passwordUtils);
     private final ReportService reportService = new ReportServiceImpl(transactionRepository);
     private final TransactionService transactionService = new TransactionServiceImpl(transactionRepository);
@@ -44,16 +50,32 @@ public class ApplicationConfig {
         );
     }
 
+    private final Properties adminProperties = new Properties();
+
     public ApplicationConfig() {
+        loadAdminProperties();  // Load properties first
         initializeDefaultAdminAccount();
     }
 
+    private void loadAdminProperties() {
+        try (InputStream input = getClass().getClassLoader()
+                .getResourceAsStream("application.properties")) {
+            adminProperties.load(input);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load application properties", e);
+        }
+    }
+
     private void initializeDefaultAdminAccount() {
-        Long adminId = 1L;
-        String adminEmail = "admin@demo.com";
-        String hashedPassword = passwordUtils.hashPassword("123");
-        Role role = new Role("admin");
-        User admin = new User(adminId, "Default Admin", adminEmail, hashedPassword, false, role);
+        Long adminId = Long.parseLong(adminProperties.getProperty("admin.id"));
+        String adminEmail = adminProperties.getProperty("admin.email");
+        String adminName = adminProperties.getProperty("admin.name");
+        String rawPassword = adminProperties.getProperty("admin.password");
+        String roleName = adminProperties.getProperty("admin.role");
+
+        String hashedPassword = passwordUtils.hashPassword(rawPassword);
+        Role role = new Role(roleName);
+        User admin = new User(adminId, adminName, adminEmail, hashedPassword, false, role);
         userRepository.save(admin);
     }
 }

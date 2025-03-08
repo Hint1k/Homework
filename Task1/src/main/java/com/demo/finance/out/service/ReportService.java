@@ -13,4 +13,8 @@ public interface ReportService {
     Optional<Report> generateReportByDate(Long userId, LocalDate from, LocalDate to);
 
     Map<String, Double> analyzeExpensesByCategory(Long userId, LocalDate from, LocalDate to);
+
+    Optional<Report> generateReportByDate(Long userId, String fromDate, String toDate);
+
+    Map<String, Double> analyzeExpensesByCategory(Long userId, String fromDate, String toDate);
 }

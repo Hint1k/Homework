@@ -69,8 +69,8 @@ public class TransactionCommand {
     }
 
     public void filterTransactions() {
-        String fromDate = promptForOptionalDate("Enter Start Date (YYYY-MM-DD) or leave empty: ");
-        String toDate = promptForOptionalDate("Enter End Date (YYYY-MM-DD) or leave empty: ");
+        LocalDate fromDate = promptForOptionalDate("Enter Start Date (YYYY-MM-DD) or leave empty: ");
+        LocalDate toDate = promptForOptionalDate("Enter End Date (YYYY-MM-DD) or leave empty: ");
         String category = promptForOptionalString();
         Type type = promptForOptionalTransactionType();
         Long userId = context.getCurrentUser().getUserId();
@@ -138,16 +138,14 @@ public class TransactionCommand {
         }
     }
 
-    private String promptForOptionalDate(String message) {
+    private LocalDate promptForOptionalDate(String message) {
         System.out.print(message);
         String input = scanner.nextLine().trim();
-        if (input.isEmpty()) return "";
         try {
-            LocalDate.parse(input);
-            return input;
+            return input.isEmpty() ? null : LocalDate.parse(input);
         } catch (DateTimeParseException e) {
             System.out.println("Error: Invalid date format. Skipping input.");
-            return "";
+            return null;
         }
     }
 

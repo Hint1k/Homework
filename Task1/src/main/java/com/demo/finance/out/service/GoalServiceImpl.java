@@ -3,20 +3,18 @@ package com.demo.finance.out.service;
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.utils.BalanceUtils;
 import com.demo.finance.out.repository.GoalRepository;
-import com.demo.finance.out.repository.TransactionRepository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
-    private final TransactionRepository transactionRepository;
+    private final BalanceUtils balanceUtils;
 
-    public GoalServiceImpl(GoalRepository goalRepository, TransactionRepository transactionRepository) {
+    public GoalServiceImpl(GoalRepository goalRepository, BalanceUtils balanceUtils) {
         this.goalRepository = goalRepository;
-        this.transactionRepository = transactionRepository;
+        this.balanceUtils = balanceUtils;
     }
 
     @Override
@@ -53,9 +51,6 @@ public class GoalServiceImpl implements GoalService {
 
     @Override
     public double calculateTotalBalance(Long userId, Goal goal) {
-        LocalDate startDate = goal.getStartTime();
-        LocalDate endDate = startDate.plusMonths(goal.getDuration());
-
-        return BalanceUtils.calculateTotalBalance(userId, startDate, endDate, transactionRepository);
+        return balanceUtils.calculateBalance(userId, goal);
     }
 }

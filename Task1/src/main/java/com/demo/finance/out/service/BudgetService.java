@@ -12,4 +12,6 @@ public interface BudgetService {
     Optional<Budget> getBudget(Long userId);
 
     double calculateExpensesForMonth(Long userId, YearMonth currentMonth);
+
+    String getFormattedBudget(Long userId);
 }

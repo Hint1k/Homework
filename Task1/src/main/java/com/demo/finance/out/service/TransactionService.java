@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface TransactionService {
 
-    void createTransaction(Long userId, double amount, String category, LocalDate date, String description, Type type);
+    void createTransaction(Long userId, double amount, String category, String date, String description, Type type);
 
     List<Transaction> getTransactionsByUserId(Long userId);
 

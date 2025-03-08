@@ -39,4 +39,13 @@ public class BudgetServiceImpl implements BudgetService {
                 .mapToDouble(Transaction::getAmount)
                 .sum();
     }
+
+    @Override
+    public String getFormattedBudget(Long userId) {
+        YearMonth currentMonth = YearMonth.now();
+        double totalExpenses = calculateExpensesForMonth(userId, currentMonth);
+        return getBudget(userId)
+                .map(budget -> String.format("Budget: %.2f/%.2f", totalExpenses, budget.getMonthlyLimit()))
+                .orElse("No budget set.");
+    }
 }

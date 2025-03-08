@@ -1,10 +1,10 @@
 package com.demo.finance.out.service;
 
+import com.demo.finance.domain.utils.BalanceUtils;
 import com.demo.finance.domain.utils.MockEmailUtils;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.model.Transaction;
-import com.demo.finance.domain.utils.BalanceUtils;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.BudgetRepository;
 import com.demo.finance.out.repository.GoalRepository;
@@ -21,15 +21,17 @@ public class NotificationServiceImpl implements NotificationService {
     private final GoalRepository goalRepository;
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final BalanceUtils balanceUtils;
     private final MockEmailUtils mockEmailUtils;
 
     public NotificationServiceImpl(BudgetRepository budgetRepository, GoalRepository goalRepository,
                                    TransactionRepository transactionRepository, UserRepository userRepository,
-                                   MockEmailUtils mockEmailUtils) {
+                                   BalanceUtils balanceUtils, MockEmailUtils mockEmailUtils) {
         this.budgetRepository = budgetRepository;
         this.goalRepository = goalRepository;
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
+        this.balanceUtils = balanceUtils;
         this.mockEmailUtils = mockEmailUtils;
     }
 
@@ -72,7 +74,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         StringBuilder notification = new StringBuilder();
         for (Goal goal : userGoals) {
-            double totalBalance = calculateTotalBalance(userId, goal);
+            double totalBalance = balanceUtils.calculateBalance(userId, goal);
             double progress = goal.calculateProgress(totalBalance);
 
             if (progress >= 100) {
@@ -106,12 +108,5 @@ public class NotificationServiceImpl implements NotificationService {
                 .filter(t -> !t.getDate().isBefore(startOfMonth) && !t.getDate().isAfter(endOfMonth))
                 .mapToDouble(Transaction::getAmount)
                 .sum();
-    }
-
-    private double calculateTotalBalance(Long userId, Goal goal) {
-        LocalDate startDate = goal.getStartTime();
-        LocalDate endDate = startDate.plusMonths(goal.getDuration());
-
-        return BalanceUtils.calculateTotalBalance(userId, startDate, endDate, transactionRepository);
     }
 }

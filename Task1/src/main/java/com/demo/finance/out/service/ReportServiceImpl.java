@@ -42,6 +42,20 @@ public class ReportServiceImpl implements ReportService {
                         Collectors.summingDouble(Transaction::getAmount)));
     }
 
+    @Override
+    public Optional<Report> generateReportByDate(Long userId, String fromDate, String toDate) {
+        LocalDate from = LocalDate.parse(fromDate);
+        LocalDate to = LocalDate.parse(toDate);
+        return generateReportByDate(userId, from, to);
+    }
+
+    @Override
+    public Map<String, Double> analyzeExpensesByCategory(Long userId, String fromDate, String toDate) {
+        LocalDate from = LocalDate.parse(fromDate);
+        LocalDate to = LocalDate.parse(toDate);
+        return analyzeExpensesByCategory(userId, from, to);
+    }
+
     private Optional<Report> generateReportFromTransactions(Long userId, List<Transaction> transactions) {
         if (transactions.isEmpty()) return Optional.empty();
 

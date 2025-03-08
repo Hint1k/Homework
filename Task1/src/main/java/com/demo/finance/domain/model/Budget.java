@@ -30,8 +30,7 @@ public class Budget {
         return currentExpenses;
     }
 
-    public void addExpense(double amount) {
-        this.currentExpenses += amount;
+    public void setCurrentExpenses(double currentExpenses) {
     }
 
     @Override

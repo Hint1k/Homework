@@ -16,10 +16,15 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void createTransaction(Long userId, double amount, String category, LocalDate date,
-                                  String description, Type type) {
+    public void createTransaction(Long userId, double amount, String category, String date, String description,
+                                  Type type) {
+        if (amount < 0) {
+            throw new IllegalArgumentException("Amount must be positive.");
+        }
+        LocalDate transactionDate = LocalDate.parse(date);
         Long transactionId = transactionRepository.generateNextId();
-        Transaction transaction = new Transaction(transactionId, userId, amount, category, date, description, type);
+        Transaction transaction =
+                new Transaction(transactionId, userId, amount, category, transactionDate, description, type);
         transactionRepository.save(transaction);
     }
 

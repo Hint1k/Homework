@@ -4,7 +4,6 @@ import com.demo.finance.out.service.ReportService;
 import com.demo.finance.domain.model.Report;
 
 import java.util.Optional;
-import java.time.LocalDate;
 import java.util.Map;
 
 public class ReportController {
@@ -19,14 +18,10 @@ public class ReportController {
     }
 
     public Optional<Report> generateReportByDate(Long userId, String fromDate, String toDate) {
-        LocalDate from = LocalDate.parse(fromDate);
-        LocalDate to = LocalDate.parse(toDate);
-        return reportService.generateReportByDate(userId, from, to);
+        return reportService.generateReportByDate(userId, fromDate, toDate);
     }
 
     public Map<String, Double> analyzeExpensesByCategory(Long userId, String fromDate, String toDate) {
-        LocalDate from = LocalDate.parse(fromDate);
-        LocalDate to = LocalDate.parse(toDate);
-        return reportService.analyzeExpensesByCategory(userId, from, to);
+        return reportService.analyzeExpensesByCategory(userId, fromDate, toDate);
     }
 }
