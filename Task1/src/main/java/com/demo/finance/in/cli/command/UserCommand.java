@@ -1,5 +1,6 @@
 package com.demo.finance.in.cli.command;
 
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
@@ -7,21 +8,26 @@ import com.demo.finance.domain.model.User;
 import java.util.Optional;
 import java.util.Scanner;
 
-import java.util.regex.Pattern;
-
 public class UserCommand {
-    private final CommandContext context;
-    private final Scanner scanner;
 
-    public UserCommand(CommandContext context, Scanner scanner) {
-        this.context = context;
+    private final Scanner scanner;
+    private final CommandContext context;
+    private final ValidationUtils validationUtils;
+    private static final String PROMPT_EMAIL = "Enter email address: ";
+    private static final String PROMPT_PASSWORD = "Enter password: ";
+    private static final String NO_USER_LOGGED_IN = "No user is currently logged in.";
+    private static final String OR_KEEP_CURRENT_VALUE = " or leave it blank to keep current value: ";
+
+    public UserCommand(CommandContext context, ValidationUtils validationUtils, Scanner scanner) {
         this.scanner = scanner;
+        this.context = context;
+        this.validationUtils = validationUtils;
     }
 
     public void registerUser() {
-        String name = promptForNonEmptyString("Enter Name: ");
-        String email = promptForValidEmail("Enter Email: ");
-        String password = promptForValidPassword("Enter Password: ");
+        String name = validationUtils.promptForNonEmptyString("Enter Name: ", scanner);
+        String email = validationUtils.promptForValidEmail(PROMPT_EMAIL, scanner);
+        String password = validationUtils.promptForValidPassword(PROMPT_PASSWORD, scanner);
         Role role = new Role("user"); // Default role
 
         if (context.getUserController().registerUser(name, email, password, role)) {
@@ -32,8 +38,8 @@ public class UserCommand {
     }
 
     public void loginUser() {
-        String email = promptForValidEmail("Enter Email: ");
-        String password = promptForValidPassword("Enter Password: ");
+        String email = validationUtils.promptForValidEmail(PROMPT_EMAIL, scanner);
+        String password = validationUtils.promptForValidPassword(PROMPT_PASSWORD, scanner);
 
         Optional<User> user = context.getUserController().authenticateUser(email, password);
         if (user.isPresent()) {
@@ -64,17 +70,28 @@ public class UserCommand {
                 System.out.println("Failed to delete user.");
             }
         } else {
-            System.out.println("No user is currently logged in.");
+            System.out.println(NO_USER_LOGGED_IN);
         }
     }
 
     public void updateOwnAccount() {
         User user = context.getCurrentUser();
         if (user != null) {
-            String name = promptForNonEmptyString("Enter new name: ");
-            String email = promptForValidEmail("Enter new email: ");
-            String password = promptForValidPassword("Enter new password: ");
-
+            String name = validationUtils.promptForOptionalString("Enter new name"
+                    + OR_KEEP_CURRENT_VALUE, scanner);
+            if (name == null) {
+                name = user.getName();
+            }
+            String email = validationUtils.promptForOptionalEmail("Enter new email"
+                    + OR_KEEP_CURRENT_VALUE, scanner);
+            if (email == null) {
+                email = user.getEmail();
+            }
+            String password = validationUtils.promptForOptionalPassword("Enter new password"
+                    + OR_KEEP_CURRENT_VALUE, scanner);
+            if (password == null) {
+                password = user.getPassword();
+            }
             Long userId = user.getUserId();
             Role role = user.getRole();
             if (context.getUserController().updateOwnAccount(userId, name, email, password, role)) {
@@ -84,7 +101,7 @@ public class UserCommand {
                 System.out.println("Failed to update user.");
             }
         } else {
-            System.out.println("No user is currently logged in.");
+            System.out.println(NO_USER_LOGGED_IN);
         }
     }
 
@@ -97,35 +114,7 @@ public class UserCommand {
             System.out.println("Email: " + user.getEmail());
             System.out.println("Role: " + user.getRole().getName());
         } else {
-            System.out.println("No user is currently logged in.");
-        }
-    }
-
-    private String promptForNonEmptyString(String message) {
-        while (true) {
-            System.out.print(message);
-            String input = scanner.nextLine().trim();
-            if (!input.isEmpty()) return input;
-            System.out.println("Error: Input cannot be empty.");
-        }
-    }
-
-    private String promptForValidEmail(String message) {
-        Pattern emailPattern = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
-        while (true) {
-            System.out.print(message);
-            String email = scanner.nextLine().trim();
-            if (emailPattern.matcher(email).matches()) return email;
-            System.out.println("Error: Invalid email format. Please enter a valid email (e.g. user@demo.com).");
-        }
-    }
-
-    private String promptForValidPassword(String message) {
-        while (true) {
-            System.out.print(message);
-            String password = scanner.nextLine().trim();
-            if (password.length() >= 3) return password;
-            System.out.println("Error: Password must be at least 3 characters long.");
+            System.out.println(NO_USER_LOGGED_IN);
         }
     }
 }

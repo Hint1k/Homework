@@ -12,6 +12,8 @@ public interface TransactionService {
 
     List<Transaction> getTransactionsByUserId(Long userId);
 
+    Transaction getTransaction(Long transactionId);
+
     boolean updateTransaction(Long transactionId, Long userId, double amount, String category, String description);
 
     boolean deleteTransaction(Long userId, Long transactionId);

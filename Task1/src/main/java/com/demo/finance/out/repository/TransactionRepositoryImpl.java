@@ -55,6 +55,14 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     }
 
     @Override
+    public Transaction findByTransactionId(Long transactionId) {
+        if (transactionId == null) {
+            throw new IllegalArgumentException("Transaction ID cannot be null.");
+        }
+        return transactions.get(transactionId);
+    }
+
+    @Override
     public List<Transaction> findByUserId(Long userId) {
         return transactions.values().stream()
                 .filter(t -> t.getUserId().equals(userId))

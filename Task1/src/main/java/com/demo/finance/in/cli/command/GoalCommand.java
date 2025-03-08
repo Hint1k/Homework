@@ -1,6 +1,7 @@
 package com.demo.finance.in.cli.command;
 
 import com.demo.finance.domain.model.Goal;
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 
 import java.util.List;
@@ -8,18 +9,25 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class GoalCommand {
-    private final CommandContext context;
-    private final Scanner scanner;
 
-    public GoalCommand(CommandContext context, Scanner scanner) {
+    private final Scanner scanner;
+    private final CommandContext context;
+    private final ValidationUtils validationUtils;
+    private static final String OR_KEEP_CURRENT_VALUE = " or leave it blank to keep current value: ";
+
+
+    public GoalCommand(CommandContext context, ValidationUtils validationUtils, Scanner scanner) {
         this.context = context;
+        this.validationUtils = validationUtils;
         this.scanner = scanner;
     }
 
     public void createGoal() {
-        String name = promptForNonEmptyString("Enter Goal Name: ");
-        double targetAmount = promptForPositiveDouble();
-        int duration = promptForPositiveInt();
+        String name = validationUtils.promptForNonEmptyString("Enter Goal Name: ", scanner);
+        String message = "Enter Target Amount: ";
+        double targetAmount = validationUtils.promptForPositiveDouble(message, scanner);
+        String message2 = "Enter Duration in Months (e.g. 3): ";
+        int duration = validationUtils.promptForPositiveInt(message2, scanner);
 
         context.getGoalController().createGoal(context.getCurrentUser().getUserId(), name, targetAmount, duration);
         System.out.println("Goal created successfully.");
@@ -55,7 +63,8 @@ public class GoalCommand {
     }
 
     public void updateGoal() {
-        String oldGoalName = promptForNonEmptyString("Enter the Name of the Goal to Update: ");
+        String oldGoalName = validationUtils
+                .promptForNonEmptyString("Enter the Name of the Goal to Update: ", scanner);
         Long userId = context.getCurrentUser().getUserId();
         Optional<Goal> goalToUpdate = context.getGoalController().getGoal(userId, oldGoalName);
 
@@ -64,17 +73,20 @@ public class GoalCommand {
             return;
         }
 
-        String newGoalName = promptForOptionalString();
-        if (newGoalName.isEmpty()) {
+        String message = "Enter New Goal Name" + OR_KEEP_CURRENT_VALUE;
+        String newGoalName = validationUtils.promptForOptionalString(message, scanner);
+        if (newGoalName == null || newGoalName.isEmpty()) {
             newGoalName = oldGoalName;
         }
 
-        Double newTargetAmount = promptForOptionalPositiveDouble();
+        String message2 = "Enter New Target Amount" + OR_KEEP_CURRENT_VALUE;
+        Double newTargetAmount = validationUtils.promptForOptionalPositiveDouble(message2, scanner);
         if (newTargetAmount == null) {
             newTargetAmount = goalToUpdate.get().getTargetAmount();
         }
 
-        Integer newDuration = promptForOptionalPositiveInt();
+        String message3 = "Enter New Duration in Months" + OR_KEEP_CURRENT_VALUE;
+        Integer newDuration = validationUtils.promptForOptionalPositiveInt(message3, scanner);
         if (newDuration == null) {
             newDuration = goalToUpdate.get().getDuration();
         }
@@ -84,7 +96,7 @@ public class GoalCommand {
     }
 
     public void deleteGoal() {
-        String goalName = promptForNonEmptyString("Enter Goal Name to Delete: ");
+        String goalName = validationUtils.promptForNonEmptyString("Enter Goal Name to Delete: ", scanner);
         Long userId = context.getCurrentUser().getUserId();
 
         if (context.getGoalController().getGoal(userId, goalName).isPresent()) {
@@ -93,71 +105,5 @@ public class GoalCommand {
         } else {
             System.out.println("Error: Goal not found.");
         }
-    }
-
-    private String promptForNonEmptyString(String message) {
-        while (true) {
-            System.out.print(message);
-            String input = scanner.nextLine().trim();
-            if (!input.isEmpty()) return input;
-            System.out.println("Error: Input cannot be empty.");
-        }
-    }
-
-    private String promptForOptionalString() {
-        System.out.print("Enter New Goal Name (or leave blank to keep current): ");
-        return scanner.nextLine().trim();
-    }
-
-    private double promptForPositiveDouble() {
-        while (true) {
-            try {
-                System.out.print("Enter Target Amount: ");
-                double value = Double.parseDouble(scanner.nextLine().trim());
-                if (value > 0) return value;
-                System.out.println("Error: Value must be positive.");
-            } catch (NumberFormatException e) {
-                System.out.println("Error: Please enter a valid number.");
-            }
-        }
-    }
-
-    private Double promptForOptionalPositiveDouble() {
-        System.out.print("Enter New Target Amount (or leave blank to keep current): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) return null;
-        try {
-            double value = Double.parseDouble(input);
-            if (value > 0) return value;
-        } catch (NumberFormatException e) {
-            System.out.println("Error: Invalid input. Keeping current value.");
-        }
-        return null;
-    }
-
-    private int promptForPositiveInt() {
-        while (true) {
-            try {
-                System.out.print("Enter Duration in Months (e.g. 3): ");
-                int value = Integer.parseInt(scanner.nextLine().trim());
-                if (value > 0) return value;
-                System.out.println("Error: Value must be a positive integer.");
-            } catch (NumberFormatException e) {
-                System.out.println("Error: Please enter a valid number.");
-            }
-        }
-    }
-
-    private Integer promptForOptionalPositiveInt() {
-        System.out.print("Enter New Duration in Months (or leave blank to keep current): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) return null;
-        try {
-            int value = Integer.parseInt(input);
-            if (value > 0) return value;
-        } catch (NumberFormatException e) {
-            System.out.println("Error: Invalid input. Keeping current value.");
-        }
-        return null;
     }
 }

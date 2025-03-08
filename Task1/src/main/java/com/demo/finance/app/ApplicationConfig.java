@@ -2,14 +2,11 @@ package com.demo.finance.app;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.utils.BalanceUtils;
-import com.demo.finance.domain.utils.BalanceUtilsImpl;
-import com.demo.finance.domain.utils.MockEmailUtils;
+import com.demo.finance.domain.utils.*;
 import com.demo.finance.in.cli.CliHandler;
 import com.demo.finance.in.controller.*;
 import com.demo.finance.out.repository.*;
 import com.demo.finance.out.service.*;
-import com.demo.finance.domain.utils.PasswordUtils;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -24,6 +21,7 @@ public class ApplicationConfig {
     private final BalanceUtils balanceUtils = new BalanceUtilsImpl(transactionRepository);
     private final MockEmailUtils mockEmailUtils = new MockEmailUtils();
     private final PasswordUtils passwordUtils = new PasswordUtils();
+    private final ValidationUtils validationUtils = new ValidationUtilsImpl();
 
     private final AdminService adminService = new AdminServiceImpl(userRepository);
     private final BudgetService budgetService = new BudgetServiceImpl(budgetRepository, transactionRepository);
@@ -46,7 +44,7 @@ public class ApplicationConfig {
     public CliHandler getCliHandler() {
         return new CliHandler(
                 userController, transactionController, budgetController, goalController,
-                reportController, adminController, notificationController
+                reportController, adminController, notificationController, validationUtils
         );
     }
 

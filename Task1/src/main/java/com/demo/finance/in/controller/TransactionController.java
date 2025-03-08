@@ -19,6 +19,10 @@ public class TransactionController {
         transactionService.createTransaction(userId, amount, category, date, description, type);
     }
 
+    public Transaction getTransaction(Long transactionId) {
+        return transactionService.getTransaction(transactionId);
+    }
+
     public List<Transaction> getTransactionsByUserId(Long userId) {
         return transactionService.getTransactionsByUserId(userId);
     }

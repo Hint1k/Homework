@@ -34,6 +34,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public Transaction getTransaction(Long transactionId) {
+        return transactionRepository.findByTransactionId(transactionId);
+    }
+
+    @Override
     public boolean updateTransaction(Long transactionId, Long userId, double amount, String category,
                                      String description) {
         Optional<Transaction> transaction = transactionRepository.findByUserIdAndTransactionId(transactionId, userId);

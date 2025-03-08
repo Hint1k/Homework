@@ -1,6 +1,7 @@
 package com.demo.finance.in.cli.command;
 
 import com.demo.finance.domain.model.Transaction;
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.model.Role;
@@ -9,12 +10,15 @@ import java.util.List;
 import java.util.Scanner;
 
 public class AdminCommand {
-    private final CommandContext context;
-    private final Scanner scanner;
-    private static final Long DEFAULT_ADMIN_ID = 1L;
 
-    public AdminCommand(CommandContext context, Scanner scanner) {
+    private static final Long DEFAULT_ADMIN_ID = 1L;
+    private final CommandContext context;
+    private final ValidationUtils validationUtils;
+    private final Scanner scanner;
+
+    public AdminCommand(CommandContext context, ValidationUtils validationUtils, Scanner scanner) {
         this.context = context;
+        this.validationUtils = validationUtils;
         this.scanner = scanner;
     }
 
@@ -28,8 +32,9 @@ public class AdminCommand {
     }
 
     public void updateUserRole() {
-        long userId = promptForPositiveLong("Enter User ID to modify: ");
-        int roleChoice = promptForIntInRange();
+        long userId = validationUtils.promptForPositiveLong("Enter User ID to modify: ", scanner);
+        int roleChoice = validationUtils
+                .promptForIntInRange("Set role (User=1, Admin=2): ", 1, 2, scanner);
         Role newRole = (roleChoice == 2) ? new Role("admin") : new Role("user");
 
         if (context.getAdminController().updateUserRole(userId, newRole)) {
@@ -40,7 +45,7 @@ public class AdminCommand {
     }
 
     public void blockUser() {
-        long userId = promptForPositiveLong("Enter User ID to block: ");
+        long userId = validationUtils.promptForPositiveLong("Enter User ID to block: ", scanner);
         if (userId == DEFAULT_ADMIN_ID) {
             System.out.println("Error: Default Admin cannot be blocked.");
             return;
@@ -53,7 +58,7 @@ public class AdminCommand {
     }
 
     public void unblockUser() {
-        long userId = promptForPositiveLong("Enter User ID to unblock: ");
+        long userId = validationUtils.promptForPositiveLong("Enter User ID to unblock: ", scanner);
         if (context.getAdminController().unBlockUser(userId)) {
             System.out.println("User unblocked successfully.");
         } else {
@@ -62,7 +67,7 @@ public class AdminCommand {
     }
 
     public void deleteUser() {
-        long userId = promptForPositiveLong("Enter User ID to delete: ");
+        long userId = validationUtils.promptForPositiveLong("Enter User ID to delete: ", scanner);
         if (userId == DEFAULT_ADMIN_ID) {
             System.out.println("Error: Default Admin cannot be deleted.");
             return;
@@ -75,39 +80,13 @@ public class AdminCommand {
     }
 
     public void viewTransactionsByUserId() {
-        long userId = promptForPositiveLong("Enter User ID to view transactions: ");
+        long userId = validationUtils.promptForPositiveLong("Enter User ID to view transactions: ", scanner);
         List<Transaction> transactions = context.getTransactionController()
                 .getTransactionsByUserId(userId);
         if (transactions.isEmpty()) {
             System.out.println("No transactions found for the user.");
         } else {
             transactions.forEach(System.out::println);
-        }
-    }
-
-    private long promptForPositiveLong(String message) {
-        while (true) {
-            try {
-                System.out.print(message);
-                long value = Long.parseLong(scanner.nextLine().trim());
-                if (value > 0) return value;
-                System.out.println("Error: Value must be a positive number.");
-            } catch (NumberFormatException e) {
-                System.out.println("Error: Please enter a valid number.");
-            }
-        }
-    }
-
-    private int promptForIntInRange() {
-        while (true) {
-            try {
-                System.out.print("Set role (1 = User, 2 = Admin): ");
-                int value = Integer.parseInt(scanner.nextLine().trim());
-                if (value >= 1 && value <= 2) return value;
-                System.out.println("Error: Please enter a number between " + 1 + " and " + 2 + ".");
-            } catch (NumberFormatException e) {
-                System.out.println("Error: Please enter a valid number.");
-            }
         }
     }
 }

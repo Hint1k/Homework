@@ -1,6 +1,7 @@
 package com.demo.finance.in.cli;
 
 import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.command.*;
 import com.demo.finance.in.controller.*;
 
@@ -23,11 +24,13 @@ public class CommandContext {
     private final ReportCommand reportCommand;
     private final AdminCommand adminCommand;
     private final NotificationCommand notificationCommand;
+    private final Scanner scanner;
 
     public CommandContext(UserController userController, TransactionController transactionController,
                           BudgetController budgetController, GoalController goalController,
                           ReportController reportController, AdminController adminController,
-                          NotificationController notificationController, Scanner scanner) {
+                          NotificationController notificationController, ValidationUtils validationUtils,
+                          Scanner scanner) {
         this.userController = userController;
         this.transactionController = transactionController;
         this.budgetController = budgetController;
@@ -35,12 +38,13 @@ public class CommandContext {
         this.reportController = reportController;
         this.adminController = adminController;
         this.notificationController = notificationController;
-        this.transactionCommand = new TransactionCommand(this, scanner);
-        this.userCommand = new UserCommand(this, scanner);
-        this.goalCommand = new GoalCommand(this, scanner);
-        this.budgetCommand = new BudgetCommand(this, scanner);
-        this.reportCommand = new ReportCommand(this, scanner);
-        this.adminCommand = new AdminCommand(this, scanner);
+        this.scanner = scanner;
+        this.transactionCommand = new TransactionCommand(this, validationUtils, scanner);
+        this.userCommand = new UserCommand(this, validationUtils, scanner);
+        this.goalCommand = new GoalCommand(this, validationUtils, scanner);
+        this.budgetCommand = new BudgetCommand(this, validationUtils, scanner);
+        this.reportCommand = new ReportCommand(this, validationUtils, scanner);
+        this.adminCommand = new AdminCommand(this, validationUtils, scanner);
         this.notificationCommand = new NotificationCommand(this);
     }
 

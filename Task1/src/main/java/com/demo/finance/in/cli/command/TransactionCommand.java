@@ -1,29 +1,34 @@
 package com.demo.finance.in.cli.command;
 
 import com.demo.finance.domain.utils.Type;
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.domain.model.Transaction;
 
 import java.util.List;
-import java.util.Scanner;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
+import java.util.Objects;
+import java.util.Scanner;
 
 public class TransactionCommand {
-    private final CommandContext context;
-    private final Scanner scanner;
 
-    public TransactionCommand(CommandContext context, Scanner scanner) {
+    private final CommandContext context;
+    private final ValidationUtils validationUtils;
+    private final Scanner scanner;
+    private static final String OR_KEEP_CURRENT_VALUE = " or leave it blank to keep current value: ";
+
+    public TransactionCommand(CommandContext context, ValidationUtils validationUtils, Scanner scanner) {
         this.context = context;
+        this.validationUtils = validationUtils;
         this.scanner = scanner;
     }
 
     public void addTransaction() {
-        double amount = promptForPositiveDouble();
-        String category = promptForNonEmptyString("Enter Category: ");
-        LocalDate date = promptForValidDate();
-        String description = promptForNonEmptyString("Enter Description: ");
-        Type type = promptForTransactionType();
+        Double amount = validationUtils.promptForPositiveDouble("Enter Amount: ", scanner);
+        String category = validationUtils.promptForNonEmptyString("Enter Category: ", scanner);
+        LocalDate date = validationUtils.promptForValidDate("Enter Date (YYYY-MM-DD): ", scanner);
+        String description = validationUtils.promptForNonEmptyString("Enter Description: ", scanner);
+        Type type = validationUtils.promptForTransactionType(scanner);
 
         Long userId = context.getCurrentUser().getUserId();
         context.getTransactionController()
@@ -32,23 +37,43 @@ public class TransactionCommand {
     }
 
     public void updateTransaction() {
-        Long transactionId = promptForPositiveLong();
+        Long transactionId = validationUtils.promptForPositiveLong("Enter Transaction ID: ", scanner);
+        Transaction transactionToUpdate = context.getTransactionController().getTransaction(transactionId);
+        if (transactionToUpdate == null) {
+            System.out.println("Error: Transaction not found.");
+            return;
+        }
         Long userId = context.getCurrentUser().getUserId();
-        double amount = promptForPositiveDouble();
-        String category = promptForNonEmptyString("Enter Category: ");
-        String description = promptForNonEmptyString("Enter Description: ");
+        if (!Objects.equals(userId, transactionToUpdate.getUserId())) {
+            System.out.println("Error: You are not the transaction owner to update this transaction.");
+            return;
+        }
+        Double amount = validationUtils.promptForOptionalPositiveDouble("Enter Amount"
+                + OR_KEEP_CURRENT_VALUE, scanner);
+        if (amount == null) {
+            amount = transactionToUpdate.getAmount();
+        }
+        String category = validationUtils.promptForOptionalString("Enter Category"
+                + OR_KEEP_CURRENT_VALUE, scanner);
+        if (category == null) {
+            category = transactionToUpdate.getCategory();
+        }
+        String description = validationUtils.promptForOptionalString("Enter Description"
+                + OR_KEEP_CURRENT_VALUE, scanner);
+        if (description == null) {
+            description = transactionToUpdate.getDescription();
+        }
         boolean isUpdated = context.getTransactionController()
                 .updateTransaction(transactionId, userId, amount, category, description);
         if (isUpdated) {
             System.out.println("Transaction updated successfully!");
         } else {
-            System.out.println("Failed to update transaction!" +
-                    "Either the transaction does not exist or it does not belong to you.");
+            System.out.println("Failed to update transaction! Server error.");
         }
     }
 
     public void deleteTransaction() {
-        Long transactionId = promptForPositiveLong();
+        Long transactionId = validationUtils.promptForPositiveLong("Enter Transaction ID: ", scanner);
         Long userId = context.getCurrentUser().getUserId();
         if (context.getTransactionController().deleteTransaction(userId, transactionId)) {
             System.out.println("Transaction deleted successfully.");
@@ -69,111 +94,21 @@ public class TransactionCommand {
     }
 
     public void filterTransactions() {
-        LocalDate fromDate = promptForOptionalDate("Enter Start Date (YYYY-MM-DD) or leave empty: ");
-        LocalDate toDate = promptForOptionalDate("Enter End Date (YYYY-MM-DD) or leave empty: ");
-        String category = promptForOptionalString();
-        Type type = promptForOptionalTransactionType();
+        LocalDate fromDate = validationUtils
+                .promptForOptionalDate("Enter Start Date (YYYY-MM-DD) or leave empty: ", scanner);
+        LocalDate toDate = validationUtils
+                .promptForOptionalDate("Enter End Date (YYYY-MM-DD) or leave empty: ", scanner);
+        String category = validationUtils.promptForOptionalString("Enter Category or leave empty: ", scanner);
+        Type type = validationUtils.promptForOptionalTransactionType(scanner);
         Long userId = context.getCurrentUser().getUserId();
 
         List<Transaction> transactions =
                 context.getTransactionController().filterTransactions(userId, fromDate, toDate, category, type);
 
         if (transactions.isEmpty()) {
-            System.out.println("No matching transactions found.");
+            System.out.println("No transactions found matching the filters.");
         } else {
             transactions.forEach(System.out::println);
-        }
-    }
-
-    private double promptForPositiveDouble() {
-        while (true) {
-            try {
-                System.out.print("Enter Amount: ");
-                double value = Double.parseDouble(scanner.nextLine().trim());
-                if (value > 0) return value;
-                System.out.println("Error: Value must be positive.");
-            } catch (NumberFormatException e) {
-                System.out.println("Error: Please enter a valid number.");
-            }
-        }
-    }
-
-    private long promptForPositiveLong() {
-        while (true) {
-            try {
-                System.out.print("Enter Transaction ID: ");
-                long value = Long.parseLong(scanner.nextLine().trim());
-                if (value > 0) return value;
-                System.out.println("Error: Value must be positive.");
-            } catch (NumberFormatException e) {
-                System.out.println("Error: Please enter a valid number.");
-            }
-        }
-    }
-
-    private String promptForNonEmptyString(String message) {
-        while (true) {
-            System.out.print(message);
-            String input = scanner.nextLine().trim();
-            if (!input.isEmpty()) return input;
-            System.out.println("Error: Input cannot be empty.");
-        }
-    }
-
-    private String promptForOptionalString() {
-        System.out.print("Enter Category or leave empty: ");
-        String input = scanner.nextLine().trim();
-        return input.isEmpty() ? null : input;
-    }
-
-    private LocalDate promptForValidDate() {
-        while (true) {
-            System.out.print("Enter Date (YYYY-MM-DD): ");
-            String input = scanner.nextLine().trim();
-            try {
-                return LocalDate.parse(input);
-            } catch (DateTimeParseException e) {
-                System.out.println("Error: Please enter a valid date in YYYY-MM-DD format.");
-            }
-        }
-    }
-
-    private LocalDate promptForOptionalDate(String message) {
-        System.out.print(message);
-        String input = scanner.nextLine().trim();
-        try {
-            return input.isEmpty() ? null : LocalDate.parse(input);
-        } catch (DateTimeParseException e) {
-            System.out.println("Error: Invalid date format. Skipping input.");
-            return null;
-        }
-    }
-
-    private Type promptForTransactionType() {
-        while (true) {
-            System.out.print("What Type? (i = INCOME / e = EXPENSE): ");
-            String input = scanner.nextLine().trim().toLowerCase();
-            if (input.equals("i") || input.equalsIgnoreCase("income")) {
-                return Type.INCOME;
-            }
-            if (input.equals("e") || input.equalsIgnoreCase("expense")) {
-                return Type.EXPENSE;
-            }
-            System.out.println("Error: Please enter 'i' for INCOME, 'e' for EXPENSE");
-        }
-    }
-
-    private Type promptForOptionalTransactionType() {
-        while (true) {
-            System.out.print("Input type (i = INCOME / e = EXPENSE) or leave empty: ");
-            String input = scanner.nextLine().trim().toLowerCase();
-            if (input.equals("i") || input.equalsIgnoreCase("income")) {
-                return Type.INCOME;
-            }
-            if (input.equals("e") || input.equalsIgnoreCase("expense")) {
-                return Type.EXPENSE;
-            }
-            return null;
         }
     }
 }
