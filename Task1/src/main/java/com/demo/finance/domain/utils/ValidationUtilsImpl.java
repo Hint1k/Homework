@@ -7,6 +7,11 @@ import java.util.regex.Pattern;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * Implementation of the {@link ValidationUtils} interface.
+ * This class provides various utility methods for prompting the user for validated input.
+ * It supports input validation with retry mechanisms and handling of optional values where applicable.
+ */
 public class ValidationUtilsImpl implements ValidationUtils {
 
     private static final String ERROR_VALUE_MUST_BE_POSITIVE = "Error: Value must be positive.";
@@ -14,6 +19,17 @@ public class ValidationUtilsImpl implements ValidationUtils {
     private static final String PATTERN = "^[A-Za-z0-9+_.-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,}$";
     private static final int MAX_RETRIES = 3;
 
+    /**
+     * Prompts the user for input and retries a specified number of times if invalid input is provided.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @param parser A function that parses the input into a desired object, returning an Optional.
+     * @param errorMessage The error message to show when input is invalid.
+     * @param <T> The type of object to return after successful input parsing.
+     * @return The successfully parsed object.
+     * @throws MaxRetriesReachedException if the maximum number of retries is exceeded.
+     */
     private <T> T promptWithRetries(String message, Scanner scanner, Function<String, Optional<T>> parser,
                                     String errorMessage) {
         int retries = 0;
@@ -30,6 +46,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
         throw new MaxRetriesReachedException("Maximum retries reached. Returning back to the menu.");
     }
 
+    /**
+     * Prompts the user for a positive double value.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A positive double entered by the user.
+     */
     @Override
     public Double promptForPositiveDouble(String message, Scanner scanner) {
         return promptWithRetries(message, scanner, input -> {
@@ -43,6 +66,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }, ERROR_VALUE_MUST_BE_POSITIVE);
     }
 
+    /**
+     * Prompts the user for an optional positive double value. If no input is given, returns null.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A positive double entered by the user, or null if no input is provided.
+     */
     @Override
     public Double promptForOptionalPositiveDouble(String message, Scanner scanner) {
         System.out.print(message);
@@ -58,6 +88,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
         return null;
     }
 
+    /**
+     * Prompts the user for a positive long value.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A positive long entered by the user.
+     */
     @Override
     public Long promptForPositiveLong(String message, Scanner scanner) {
         return promptWithRetries(message, scanner, input -> {
@@ -71,6 +108,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }, ERROR_VALUE_MUST_BE_POSITIVE);
     }
 
+    /**
+     * Prompts the user for a non-empty string value.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A non-empty string entered by the user.
+     */
     @Override
     public String promptForNonEmptyString(String message, Scanner scanner) {
         return promptWithRetries(message, scanner, input -> {
@@ -79,6 +123,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }, "Error: Input cannot be empty.");
     }
 
+    /**
+     * Prompts the user for an optional string value. If no input is provided, returns null.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A string entered by the user, or null if no input is provided.
+     */
     @Override
     public String promptForOptionalString(String message, Scanner scanner) {
         System.out.print(message);
@@ -90,6 +141,14 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    /**
+     * Prompts the user for a valid email address.
+     * The email must match the regular expression for a valid email.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A valid email entered by the user.
+     */
     @Override
     public String promptForValidEmail(String message, Scanner scanner) {
         Pattern emailPattern = Pattern.compile(PATTERN);
@@ -99,6 +158,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }, "Error: Invalid email format. Please enter a valid email (e.g. user@demo.com).");
     }
 
+    /**
+     * Prompts the user for an optional email address. If no input is given, returns null.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A valid email entered by the user, or null if no input is provided.
+     */
     @Override
     public String promptForOptionalEmail(String message, Scanner scanner) {
         System.out.println(message);
@@ -115,6 +181,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
         return null;
     }
 
+    /**
+     * Prompts the user for a valid password. The password must be at least 3 characters long.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A valid password entered by the user.
+     */
     @Override
     public String promptForValidPassword(String message, Scanner scanner) {
         return promptWithRetries(message, scanner, input -> {
@@ -123,6 +196,14 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }, "Error: Password must be at least 3 characters long.");
     }
 
+    /**
+     * Prompts the user for an optional password. If no input is given, returns null.
+     * If input is provided but invalid (too short), the old value is kept.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A valid password entered by the user, or null if no input is provided.
+     */
     @Override
     public String promptForOptionalPassword(String message, Scanner scanner) {
         System.out.println(message);
@@ -138,6 +219,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
         return null;
     }
 
+    /**
+     * Prompts the user for a valid date in the format YYYY-MM-DD.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A valid date entered by the user.
+     */
     @Override
     public LocalDate promptForValidDate(String message, Scanner scanner) {
         return promptWithRetries(message, scanner, input -> {
@@ -149,6 +237,14 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }, "Error: Please enter a valid date in YYYY-MM-DD format.");
     }
 
+    /**
+     * Prompts the user for an optional date. If no input is given, returns null.
+     * If an invalid date is entered, the old value is kept.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A valid date entered by the user, or null if no input is provided.
+     */
     @Override
     public LocalDate promptForOptionalDate(String message, Scanner scanner) {
         System.out.print(message);
@@ -161,6 +257,12 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    /**
+     * Prompts the user to select a transaction type (INCOME or EXPENSE).
+     *
+     * @param scanner The scanner used for user input.
+     * @return The selected transaction type.
+     */
     @Override
     public Type promptForTransactionType(Scanner scanner) {
         return promptWithRetries("Input Type (i = INCOME / e = EXPENSE): ", scanner, input -> {
@@ -174,6 +276,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }, "Error: Please enter 'i' for INCOME, 'e' for EXPENSE");
     }
 
+    /**
+     * Prompts the user for an optional transaction type. If no input is given, returns null.
+     * If an invalid input is provided, the old value is kept.
+     *
+     * @param scanner The scanner used for user input.
+     * @return The selected transaction type, or null if no input is provided.
+     */
     @Override
     public Type promptForOptionalTransactionType(Scanner scanner) {
         System.out.print("Input type (i = INCOME / e = EXPENSE) or leave empty: ");
@@ -188,6 +297,15 @@ public class ValidationUtilsImpl implements ValidationUtils {
         return null;
     }
 
+    /**
+     * Prompts the user for an integer value within a specified range.
+     *
+     * @param message The message to display when prompting the user.
+     * @param min The minimum valid value.
+     * @param max The maximum valid value.
+     * @param scanner The scanner used for user input.
+     * @return A valid integer within the specified range.
+     */
     @Override
     public Integer promptForIntInRange(String message, Integer min, Integer max, Scanner scanner) {
         return promptWithRetries(message, scanner, input -> {
@@ -201,6 +319,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }, "Error: Please enter a number between " + min + " and " + max + ".");
     }
 
+    /**
+     * Prompts the user for a positive integer value.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A positive integer entered by the user.
+     */
     @Override
     public Integer promptForPositiveInt(String message, Scanner scanner) {
         return promptWithRetries(message, scanner, input -> {
@@ -214,6 +339,14 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }, ERROR_VALUE_MUST_BE_POSITIVE);
     }
 
+    /**
+     * Prompts the user for an optional positive integer. If no input is given, returns null.
+     * If an invalid input is provided, the old value is kept.
+     *
+     * @param message The message to display when prompting the user.
+     * @param scanner The scanner used for user input.
+     * @return A positive integer entered by the user, or null if no input is provided.
+     */
     @Override
     public Integer promptForOptionalPositiveInt(String message, Scanner scanner) {
         System.out.print(message);

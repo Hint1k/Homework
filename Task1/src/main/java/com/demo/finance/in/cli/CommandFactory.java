@@ -2,15 +2,32 @@ package com.demo.finance.in.cli;
 
 import java.util.Scanner;
 
+/**
+ * Factory class for creating command instances based on user input choice.
+ * This class manages the creation of specific commands to be executed in the application.
+ */
 public class CommandFactory {
     private final CommandContext context;
     private final Scanner scanner;
 
+    /**
+     * Initializes the CommandFactory with the provided context and scanner.
+     *
+     * @param context The context that holds all controllers and commands.
+     * @param scanner Scanner to capture user input for creating commands.
+     */
     public CommandFactory(CommandContext context, Scanner scanner) {
         this.context = context;
         this.scanner = scanner;
     }
 
+    /**
+     * Creates a command based on the user choice.
+     * The behavior of the command depends on the user's role (e.g., admin, regular user).
+     *
+     * @param choice The user input representing a menu option.
+     * @return The appropriate command to execute.
+     */
     public Command createCommand(String choice) {
         if (context.getCurrentUser() == null) {
             return switch (choice) {
@@ -43,6 +60,11 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Displays the transaction menu and executes the corresponding command based on user input.
+     *
+     * @return Command execution result based on user choice.
+     */
     private void showTransactionMenu() {
         while (true) {
             Menu.showTransactionMenu();
@@ -61,6 +83,11 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Displays the budget menu and executes the corresponding command based on user input.
+     *
+     * @return Command execution result based on user choice.
+     */
     private void showBudgetMenu() {
         while (true) {
             Menu.showBudgetMenu();
@@ -77,6 +104,11 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Displays the goal menu and executes the corresponding command based on user input.
+     *
+     * @return Command execution result based on user choice.
+     */
     private void showGoalMenu() {
         while (true) {
             Menu.showGoalMenu();
@@ -95,6 +127,11 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Displays the report menu and executes the corresponding command based on user input.
+     *
+     * @return Command execution result based on user choice.
+     */
     private void showReportMenu() {
         while (true) {
             Menu.showReportMenu();
@@ -111,6 +148,12 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Displays the account menu and executes the corresponding command based on user input.
+     * Forces users who updated or deleted their accounts back to the main menu to re-login.
+     *
+     * @return Command execution result based on user choice.
+     */
     private void showAccountMenu() {
         while (true) {
             if (context.getCurrentUser() == null) {

@@ -10,6 +10,10 @@ import com.demo.finance.domain.model.Role;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Command class for handling admin-related actions, such as user management
+ * and viewing transactions.
+ */
 public class AdminCommand {
 
     private static final Long DEFAULT_ADMIN_ID = 1L;
@@ -17,12 +21,24 @@ public class AdminCommand {
     private final ValidationUtils validationUtils;
     private final Scanner scanner;
 
+    /**
+     * Initializes the AdminCommand with the provided context, validation utilities,
+     * and scanner.
+     *
+     * @param context The CommandContext that holds controllers.
+     * @param validationUtils Utility for validation.
+     * @param scanner Scanner to capture user input.
+     */
     public AdminCommand(CommandContext context, ValidationUtils validationUtils, Scanner scanner) {
         this.context = context;
         this.validationUtils = validationUtils;
         this.scanner = scanner;
     }
 
+    /**
+     * Displays all users and prints their details.
+     * If no users are found, a message is shown.
+     */
     public void viewAllUsers() {
         List<User> users = context.getAdminController().getAllUsers();
         if (users.isEmpty()) {
@@ -32,6 +48,10 @@ public class AdminCommand {
         }
     }
 
+    /**
+     * Prompts the admin to update a user's role (User or Admin).
+     * The default admin cannot have their role changed.
+     */
     public void updateUserRole() {
         try {
             long userId = validationUtils.promptForPositiveLong("Enter User ID to modify: ", scanner);
@@ -53,6 +73,10 @@ public class AdminCommand {
         }
     }
 
+    /**
+     * Prompts the admin to block a user by their ID.
+     * The default admin cannot be blocked.
+     */
     public void blockUser() {
         try {
             long userId = validationUtils.promptForPositiveLong("Enter User ID to block: ", scanner);
@@ -70,6 +94,9 @@ public class AdminCommand {
         }
     }
 
+    /**
+     * Prompts the admin to unblock a user by their ID.
+     */
     public void unblockUser() {
         try {
             long userId = validationUtils.promptForPositiveLong("Enter User ID to unblock: ", scanner);
@@ -83,6 +110,10 @@ public class AdminCommand {
         }
     }
 
+    /**
+     * Prompts the admin to delete a user by their ID.
+     * The default admin cannot be deleted.
+     */
     public void deleteUser() {
         try {
             long userId = validationUtils.promptForPositiveLong("Enter User ID to delete: ", scanner);
@@ -100,6 +131,9 @@ public class AdminCommand {
         }
     }
 
+    /**
+     * Prompts the admin to view all transactions of a specific user by their ID.
+     */
     public void viewTransactionsByUserId() {
         try {
             long userId = validationUtils

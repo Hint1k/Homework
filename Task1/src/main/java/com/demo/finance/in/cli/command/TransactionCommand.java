@@ -11,6 +11,10 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Scanner;
 
+/**
+ * Command class for handling transactions, including adding, updating, deleting, viewing, and filtering.
+ * This class interacts with the TransactionController to perform the operations.
+ */
 public class TransactionCommand {
 
     private final CommandContext context;
@@ -18,12 +22,23 @@ public class TransactionCommand {
     private final Scanner scanner;
     private static final String OR_KEEP_CURRENT_VALUE = " or leave it blank to keep current value: ";
 
+    /**
+     * Initializes the TransactionCommand with the provided CommandContext, ValidationUtils, and Scanner.
+     *
+     * @param context The CommandContext that holds controllers for transactions.
+     * @param validationUtils Utility class for validation operations.
+     * @param scanner The scanner used for input from the user.
+     */
     public TransactionCommand(CommandContext context, ValidationUtils validationUtils, Scanner scanner) {
         this.context = context;
         this.validationUtils = validationUtils;
         this.scanner = scanner;
     }
 
+    /**
+     * Adds a new transaction for the current user. The user is prompted for transaction details.
+     * The transaction is then added via the TransactionController.
+     */
     public void addTransaction() {
         try {
             Double amount = validationUtils.promptForPositiveDouble("Enter Amount: ", scanner);
@@ -41,6 +56,10 @@ public class TransactionCommand {
         }
     }
 
+    /**
+     * Updates an existing transaction. The user is prompted for the transaction ID and optional updated details.
+     * If the transaction is found and belongs to the user, it is updated via the TransactionController.
+     */
     public void updateTransaction() {
         Long transactionId;
         try {
@@ -83,6 +102,10 @@ public class TransactionCommand {
         }
     }
 
+    /**
+     * Deletes an existing transaction. The user is prompted for the transaction ID.
+     * If the transaction exists and belongs to the user, it is deleted via the TransactionController.
+     */
     public void deleteTransaction() {
         Long transactionId;
         try {
@@ -100,7 +123,10 @@ public class TransactionCommand {
         }
     }
 
-
+    /**
+     * Displays all transactions for the current user.
+     * If no transactions are found, a message indicating this is shown.
+     */
     public void viewTransactionsByUserId() {
         List<Transaction> transactions = context.getTransactionController()
                 .getTransactionsByUserId(context.getCurrentUser().getUserId());
@@ -111,6 +137,10 @@ public class TransactionCommand {
         }
     }
 
+    /**
+     * Filters and displays transactions based on optional criteria such as date range, category, and type.
+     * If no transactions match the filters, a message indicating this is shown.
+     */
     public void filterTransactions() {
         LocalDate fromDate = validationUtils
                 .promptForOptionalDate("Enter Start Date (YYYY-MM-DD) or leave empty: ", scanner);

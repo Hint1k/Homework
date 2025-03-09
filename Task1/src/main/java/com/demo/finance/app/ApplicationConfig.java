@@ -11,6 +11,10 @@ import com.demo.finance.out.service.*;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Configures and initializes the application by setting up repositories, services, controllers,
+ * and loading the configuration for the default admin account.
+ */
 public class ApplicationConfig {
 
     private final BudgetRepository budgetRepository = new BudgetRepositoryImpl();
@@ -41,6 +45,12 @@ public class ApplicationConfig {
     private final TransactionController transactionController = new TransactionController(transactionService);
     private final UserController userController = new UserController(registrationService, userService);
 
+    /**
+     * Initializes and returns a CLI handler that connects all controllers
+     * and validation utilities to handle user input.
+     *
+     * @return The configured {@link CliHandler} for handling user commands.
+     */
     public CliHandler getCliHandler() {
         return new CliHandler(
                 userController, transactionController, budgetController, goalController,
@@ -50,20 +60,35 @@ public class ApplicationConfig {
 
     private final Properties adminProperties = new Properties();
 
+    /**
+     * Initializes the application configuration by loading the admin properties
+     * and setting up the default admin account.
+     */
     public ApplicationConfig() {
         loadAdminProperties();
         initializeDefaultAdminAccount();
     }
 
+    /**
+     * Loads the admin properties from the "application.properties" file located in the resources folder.
+     *
+     * @throws RuntimeException if loading the properties fails.
+     */
     private void loadAdminProperties() {
         try (InputStream input = getClass().getClassLoader()
                 .getResourceAsStream("application.properties")) {
+            if (input == null) {
+                throw new RuntimeException("Failed to find application.properties file.");
+            }
             adminProperties.load(input);
         } catch (Exception e) {
             throw new RuntimeException("Failed to load application properties", e);
         }
     }
 
+    /**
+     * Initializes the default admin account using the loaded properties and saves it to the user repository.
+     */
     private void initializeDefaultAdminAccount() {
         Long adminId = Long.parseLong(adminProperties.getProperty("admin.id"));
         String adminEmail = adminProperties.getProperty("admin.email");

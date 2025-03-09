@@ -5,12 +5,29 @@ import com.demo.finance.in.controller.*;
 
 import java.util.Scanner;
 
+/**
+ * Handles the interaction between the user and the Command Line Interface (CLI).
+ * It manages the flow of the application by displaying menus and processing user inputs.
+ * Commands are created and executed based on user input.
+ */
 public class CliHandler {
 
     private final CommandContext context;
     private final CommandFactory commandFactory;
     private final Scanner scanner;
 
+    /**
+     * Initializes the CLI handler with the necessary controllers and validation utilities.
+     *
+     * @param userController          Controller for user-related actions.
+     * @param transactionController   Controller for transaction-related actions.
+     * @param budgetController        Controller for budget-related actions.
+     * @param goalController          Controller for goal-related actions.
+     * @param reportController        Controller for report-related actions.
+     * @param adminController         Controller for admin-related actions.
+     * @param notificationController Controller for notification-related actions.
+     * @param validationUtils        Utility for validation during input prompts.
+     */
     public CliHandler(UserController userController, TransactionController transactionController,
                       BudgetController budgetController, GoalController goalController,
                       ReportController reportController, AdminController adminController,
@@ -21,6 +38,10 @@ public class CliHandler {
         this.commandFactory = new CommandFactory(context, scanner);
     }
 
+    /**
+     * Starts the CLI by continuously displaying the appropriate menu and executing commands based on user input.
+     * The method loops infinitely until the application is manually exited.
+     */
     public void start() {
         while (true) { // manual exit command
             if (context.getCurrentUser() == null) {

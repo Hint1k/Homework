@@ -5,8 +5,18 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.MessageDigest;
 import java.util.Base64;
 
+/**
+ * The {@code PasswordUtils} class provides methods for securely hashing and checking passwords.
+ * It uses the PBKDF2 (Password-Based Key Derivation Function 2) algorithm for hashing passwords with a salt.
+ */
 public class PasswordUtils {
 
+    /**
+     * Hashes the provided password with a generated salt using the PBKDF2 algorithm.
+     *
+     * @param password The raw password to be hashed.
+     * @return A string containing the salt and the hashed password, separated by a colon.
+     */
     public String hashPassword(String password) {
         try {
             byte[] salt = getSalt();
@@ -17,6 +27,13 @@ public class PasswordUtils {
         }
     }
 
+    /**
+     * Checks whether the provided raw password matches the stored hashed password.
+     *
+     * @param rawPassword The raw password entered by the user.
+     * @param storedHashedPassword The stored hashed password (with salt).
+     * @return {@code true} if the raw password matches the stored hashed password, otherwise {@code false}.
+     */
     public boolean checkPassword(String rawPassword, String storedHashedPassword) {
         try {
             String[] parts = storedHashedPassword.split(":");
@@ -29,12 +46,24 @@ public class PasswordUtils {
         }
     }
 
+    /**
+     * Generates a random salt for hashing.
+     *
+     * @return A byte array containing the generated salt.
+     */
     private byte[] getSalt() {
         byte[] salt = new byte[16];
         new java.security.SecureRandom().nextBytes(salt);
         return salt;
     }
 
+    /**
+     * Hashes the provided password using the PBKDF2 algorithm with the given salt.
+     *
+     * @param password The password to be hashed.
+     * @param salt The salt to be used in the hashing process.
+     * @return A byte array containing the hashed password.
+     */
     private byte[] pbkdf2(char[] password, byte[] salt) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");

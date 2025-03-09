@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+/**
+ * Command class for managing goals such as creating, viewing, updating, and deleting goals.
+ */
 public class GoalCommand {
 
     private final Scanner scanner;
@@ -16,13 +19,26 @@ public class GoalCommand {
     private final ValidationUtils validationUtils;
     private static final String OR_KEEP_CURRENT_VALUE = " or leave it blank to keep current value: ";
 
-
+    /**
+     * Initializes the GoalCommand with the provided context, validation utilities,
+     * and scanner.
+     *
+     * @param context The CommandContext that holds controllers.
+     * @param validationUtils Utility for validation.
+     * @param scanner Scanner to capture user input.
+     */
     public GoalCommand(CommandContext context, ValidationUtils validationUtils, Scanner scanner) {
         this.context = context;
         this.validationUtils = validationUtils;
         this.scanner = scanner;
     }
 
+    /**
+     * Prompts the user to enter the details of a new goal (name, target amount, and duration),
+     * checks if the goal name already exists, and attempts to create the goal.
+     * If successful, a confirmation message is displayed.
+     * If the goal already exists, an error message is shown.
+     */
     public void createGoal() {
         try {
             String name = validationUtils.promptForNonEmptyString("Enter Goal Name: ", scanner);
@@ -43,6 +59,11 @@ public class GoalCommand {
         }
     }
 
+    /**
+     * Displays all goals of the logged-in user, along with their details such as target amount,
+     * duration, progress, and status (e.g. In Progress, Achieved, or Expired).
+     * If no goals are found, a message is shown indicating no goals set.
+     */
     public void viewGoals() {
         Long userId = context.getCurrentUser().getUserId();
         List<Goal> goals = context.getGoalController().getAllGoals(userId);
@@ -68,6 +89,12 @@ public class GoalCommand {
         }
     }
 
+    /**
+     * Prompts the user to enter the details of an existing goal to update (name, target amount, and duration).
+     * The user can keep the current values by leaving the input blank.
+     * If the goal is found and updated successfully, a confirmation message is shown.
+     * If the goal is not found, an error message is displayed.
+     */
     public void updateGoal() {
         String oldGoalName;
         try {
@@ -107,6 +134,11 @@ public class GoalCommand {
         System.out.println("Goal updated successfully.");
     }
 
+    /**
+     * Prompts the user to enter the name of a goal to delete.
+     * If the goal is found, it is deleted and a confirmation message is shown.
+     * If the goal is not found, an error message is displayed.
+     */
     public void deleteGoal() {
         String goalName;
         try {

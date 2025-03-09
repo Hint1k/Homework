@@ -1,7 +1,15 @@
 package com.demo.finance.in.cli;
 
+/**
+ * The {@code Menu} class provides various static methods to display different menus in the console-based
+ * Personal Finance Tracker application. These menus include options for users and admins to interact with
+ * the system, such as managing transactions, budgets, goals, and generating reports.
+ */
 public class Menu {
 
+    /**
+     * Displays the main menu with options to register, login, or exit the application.
+     */
     public static void showMainMenu() {
         System.out.println("\n=== Personal Finance Tracker ===");
         System.out.println("1. Register");
@@ -10,6 +18,9 @@ public class Menu {
         System.out.print("Enter your choice: ");
     }
 
+    /**
+     * Displays the user menu with options to manage transactions, budgets, goals, reports, and account details.
+     */
     public static void showUserMenu() {
         System.out.println("\n=== User Menu ===");
         System.out.println("1. Manage Transactions");
@@ -21,6 +32,9 @@ public class Menu {
         System.out.print("Enter your choice: ");
     }
 
+    /**
+     * Displays the admin menu with options to view users, block/unblock users, manage roles, and view transactions.
+     */
     public static void showAdminMenu() {
         System.out.println("\n=== Admin Menu ===");
         System.out.println("1. View All Users");
@@ -33,6 +47,9 @@ public class Menu {
         System.out.print("Enter your choice: ");
     }
 
+    /**
+     * Displays the account menu with options to view, update, or delete user account details.
+     */
     public static void showAccountMenu() {
         System.out.println("\n=== Account Menu ===");
         System.out.println("1. View User Account Details");
@@ -42,6 +59,9 @@ public class Menu {
         System.out.print("Enter your choice: ");
     }
 
+    /**
+     * Displays the transaction menu with options to add, update, view, filter, or delete transactions.
+     */
     public static void showTransactionMenu() {
         System.out.println("\n=== Transaction Management ===");
         System.out.println("1. Add Transaction");
@@ -53,6 +73,9 @@ public class Menu {
         System.out.print("Enter your choice: ");
     }
 
+    /**
+     * Displays the budget menu with options to set, view, or check notifications for the budget.
+     */
     public static void showBudgetMenu() {
         System.out.println("\n=== Budget Management ===");
         System.out.println("1. Set Monthly Budget");
@@ -62,6 +85,9 @@ public class Menu {
         System.out.print("Enter your choice: ");
     }
 
+    /**
+     * Displays the goal menu with options to create, view, update, delete, or check notifications for goals.
+     */
     public static void showGoalMenu() {
         System.out.println("\n=== Goal Management ===");
         System.out.println("1. Create Goal");
@@ -73,6 +99,10 @@ public class Menu {
         System.out.print("Enter your choice: ");
     }
 
+    /**
+     * Displays the report menu with options to generate various financial reports such as full report,
+     * report by date range, or expense analysis by category.
+     */
     public static void showReportMenu() {
         System.out.println("\n=== Generate Reports ===");
         System.out.println("1. Full Financial Report");

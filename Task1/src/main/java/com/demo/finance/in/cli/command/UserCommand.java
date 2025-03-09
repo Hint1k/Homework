@@ -9,6 +9,10 @@ import com.demo.finance.domain.model.User;
 import java.util.Optional;
 import java.util.Scanner;
 
+/**
+ * Command class for handling user-related actions such as registration,
+ * login, logout, updating user information, and viewing user details.
+ */
 public class UserCommand {
 
     private final Scanner scanner;
@@ -19,12 +23,25 @@ public class UserCommand {
     private static final String NO_USER_LOGGED_IN = "No user is currently logged in.";
     private static final String OR_KEEP_CURRENT_VALUE = " or leave it blank to keep current value: ";
 
+    /**
+     * Initializes the UserCommand with the provided context, validation utilities,
+     * and scanner.
+     *
+     * @param context The CommandContext that holds controllers.
+     * @param validationUtils Utility for validation.
+     * @param scanner Scanner to capture user input.
+     */
     public UserCommand(CommandContext context, ValidationUtils validationUtils, Scanner scanner) {
         this.scanner = scanner;
         this.context = context;
         this.validationUtils = validationUtils;
     }
 
+    /**
+     * Prompts the user for registration details (name, email, password),
+     * and attempts to register a new user.
+     * If registration is successful, a confirmation message is displayed.
+     */
     public void registerUser() {
         String name, email, password;
         try {
@@ -43,6 +60,11 @@ public class UserCommand {
         }
     }
 
+    /**
+     * Prompts the user for login credentials (email, password),
+     * and attempts to authenticate the user.
+     * If successful, the user is logged in; otherwise, an error message is displayed.
+     */
     public void loginUser() {
         String email, password;
         try {
@@ -65,11 +87,19 @@ public class UserCommand {
         }
     }
 
+    /**
+     * Logs the current user out by setting the current user to null.
+     */
     public void logoutUser() {
         context.setCurrentUser(null);
         System.out.println("Logged out successfully.");
     }
 
+    /**
+     * Deletes the current user's account after verifying their identity.
+     * If successful, the user is logged out and their account is removed.
+     * If no user is logged in, an error message is shown.
+     */
     public void deleteOwnAccount() {
         User user = context.getCurrentUser();
         if (user != null) {
@@ -85,6 +115,12 @@ public class UserCommand {
         }
     }
 
+    /**
+     * Prompts the user to update their account details (name, email, password).
+     * If the user leaves a field blank, the current value is retained.
+     * After updating, the user is logged out and required to log in again with their new credentials.
+     * If no user is logged in, an error message is shown.
+     */
     public void updateOwnAccount() {
         User user = context.getCurrentUser();
         if (user != null) {
@@ -116,6 +152,10 @@ public class UserCommand {
         }
     }
 
+    /**
+     * Displays the current user's details including ID, name, email, and role.
+     * If no user is logged in, an error message is shown.
+     */
     public void showOwnDetails() {
         User user = context.getCurrentUser();
         if (user != null) {

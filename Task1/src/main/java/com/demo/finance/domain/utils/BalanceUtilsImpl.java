@@ -6,14 +6,31 @@ import com.demo.finance.out.repository.TransactionRepository;
 
 import java.time.LocalDate;
 
+/**
+ * Implementation of the {@link BalanceUtils} interface for calculating the balance
+ * towards a user's financial goal by considering both income and expenses within the goal's timeframe.
+ */
 public class BalanceUtilsImpl implements BalanceUtils {
 
     private final TransactionRepository transactionRepository;
 
+    /**
+     * Constructor for initializing the BalanceUtilsImpl with a transaction repository.
+     *
+     * @param transactionRepository The repository to fetch the user's transactions.
+     */
     public BalanceUtilsImpl(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
     }
 
+    /**
+     * Calculates the balance for a given user and goal by considering total income and total expenses
+     * within the goal's start and end dates.
+     *
+     * @param userId The ID of the user whose balance is to be calculated.
+     * @param goal The goal for which the balance is being calculated.
+     * @return The calculated balance, which is the total income minus total expenses within the goal's timeframe.
+     */
     @Override
     public double calculateBalance(Long userId, Goal goal) {
         LocalDate startDate = goal.getStartTime();
