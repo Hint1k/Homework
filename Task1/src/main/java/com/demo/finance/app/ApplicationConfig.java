@@ -51,7 +51,7 @@ public class ApplicationConfig {
     private final Properties adminProperties = new Properties();
 
     public ApplicationConfig() {
-        loadAdminProperties();  // Load properties first
+        loadAdminProperties();
         initializeDefaultAdminAccount();
     }
 

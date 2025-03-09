@@ -1,8 +1,7 @@
 package com.demo.finance.out.service;
 
-import com.demo.finance.domain.model.Budget;
-import com.demo.finance.domain.model.Transaction;
-import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.model.*;
+import com.demo.finance.domain.utils.BalanceUtils;
 import com.demo.finance.domain.utils.MockEmailUtils;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.BudgetRepository;
@@ -25,6 +24,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
 
+    @Mock BalanceUtils balanceUtils;
     @Mock private BudgetRepository budgetRepository;
     @Mock private GoalRepository goalRepository;
     @Mock private TransactionRepository transactionRepository;
@@ -70,5 +70,67 @@ class NotificationServiceImplTest {
 
         assertThat(notification).contains("🚨 Budget exceeded!");
         verify(mockEmailUtils).sendEmail(eq("john@example.com"), any(), contains("Budget exceeded"));
+    }
+
+    @Test
+    void testFetchBudgetNotification_budgetUnderControl_sendsSuccessEmail() {
+        Long userId = 1L;
+        Budget budget = new Budget(userId, 500.0);
+        when(budgetRepository.findByUserId(userId)).thenReturn(Optional.of(budget));
+        when(transactionRepository.findByUserId(userId)).thenReturn(List.of(
+                new Transaction(1L, userId, 200.0, "Groceries", LocalDate.now(),
+                        "Grocery shopping", Type.EXPENSE)
+        ));
+        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(new User(userId, "John Doe",
+                "john@example.com", "password", false, null)));
+
+        String notification = notificationService.fetchBudgetNotification(userId);
+
+        assertThat(notification).contains("✅ Budget is under control.");
+        verify(mockEmailUtils).sendEmail(eq("john@example.com"), any(), contains("Remaining budget"));
+    }
+
+    @Test
+    void testSendNotificationViaEmail_userEmailNotFound_doesNotSendEmail() {
+        Long userId = 1L;
+        when(userRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
+        notificationService.fetchBudgetNotification(userId);
+
+        verify(mockEmailUtils, never()).sendEmail(any(), any(), any());
+    }
+
+    @Test
+    void testFetchGoalNotification_goalNotAchieved_sendsProgressEmail() {
+        Long userId = 1L;
+        String userEmail = "user@example.com";
+        Goal goal = new Goal(userId, "Vacation", 3000.0, 6);
+
+        when(goalRepository.findByUserId(userId)).thenReturn(List.of(goal));
+        when(balanceUtils.calculateBalance(userId, goal)).thenReturn(1500.0);
+        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(new User(userId, "John Doe", userEmail,
+                "password", false, new Role("user"))));
+
+        String notification = notificationService.fetchGoalNotification(userId);
+
+        assertThat(notification).contains("⏳ Goal 'Vacation' progress: 50.0%");
+        verify(mockEmailUtils).sendEmail(eq(userEmail), eq("Goal Notification"), contains("progress"));
+    }
+
+    @Test
+    void testFetchGoalNotification_goalAchieved_sendsAchievementEmail() {
+        Long userId = 1L;
+        String userEmail = "user@example.com";
+        Goal goal = new Goal(userId, "Vacation", 3000.0, 6);
+
+        when(goalRepository.findByUserId(userId)).thenReturn(List.of(goal));
+        when(balanceUtils.calculateBalance(userId, goal)).thenReturn(3000.0);
+        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(new User(userId, "John Doe", userEmail,
+                "password", false, new Role("user"))));
+
+        String notification = notificationService.fetchGoalNotification(userId);
+
+        assertThat(notification).contains("🎉 Goal achieved: 'Vacation'!");
+        verify(mockEmailUtils).sendEmail(eq(userEmail), eq("Goal Notification"), contains("Goal achieved"));
     }
 }

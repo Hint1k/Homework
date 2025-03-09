@@ -47,4 +47,49 @@ class UserServiceImplTest {
         assertThat(result).isTrue();
         verify(userRepository).delete(userId);
     }
+
+    @Test
+    void testUpdateOwnAccount_nullPassword_hashesAndUpdatesSuccessfully() {
+        Long userId = 1L;
+        Role role = new Role("USER");
+        User updatedUser = new User(userId, "John Doe", "john@example.com",
+                null, false, role);
+
+        when(passwordUtils.hashPassword(null)).thenReturn(null);
+        when(userRepository.update(updatedUser)).thenReturn(true);
+
+        boolean result = userService.updateOwnAccount(userId, "John Doe", "john@example.com",
+                null, role);
+
+        assertThat(result).isTrue();
+        verify(userRepository).update(updatedUser);
+    }
+
+    @Test
+    void testUpdateOwnAccount_updateFails_returnsFalse() {
+        Long userId = 1L;
+        Role role = new Role("USER");
+        User updatedUser = new User(userId, "John Doe", "john@example.com",
+                "hashedPassword", false, role);
+
+        when(passwordUtils.hashPassword("newPassword")).thenReturn("hashedPassword");
+        when(userRepository.update(updatedUser)).thenReturn(false);
+
+        boolean result = userService.updateOwnAccount(userId, "John Doe", "john@example.com",
+                "newPassword", role);
+
+        assertThat(result).isFalse();
+        verify(userRepository).update(updatedUser);
+    }
+
+    @Test
+    void testDeleteOwnAccount_nonExistingUser_returnsFalse() {
+        Long userId = 99L;
+        when(userRepository.delete(userId)).thenReturn(false);
+
+        boolean result = userService.deleteOwnAccount(userId);
+
+        assertThat(result).isFalse();
+        verify(userRepository).delete(userId);
+    }
 }
