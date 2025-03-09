@@ -50,19 +50,20 @@ This README provides installation and usage instructions for the application.
 ### Downloading the Application
 Clone the repository:
 ```bash
-git clone https://github.com/your-repo/personal-finance-tracker.git
-cd personal-finance-tracker
+git clone https://github.com/Hint1k/homework.git
 ```
 
 ### Building the Application
-Using Gradle:
+- Navigate to the Task1 folder located inside the root project folder
+- Use Gradle command
 ```bash
-gradle build
+../gradlew clean build
 ```
 
 ### Running the Application
+Use Java command
 ```bash
-java -jar target/personal-finance-tracker.jar
+java -cp build/classes/java/main:build/resources/main com.demo.finance.app.TaskOneMain
 ```
 
 ---
