@@ -1,7 +1,6 @@
 package com.demo.finance.out.service;
 
 import com.demo.finance.domain.utils.BalanceUtils;
-import com.demo.finance.domain.utils.MockEmailUtils;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.model.Transaction;
@@ -29,7 +28,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final BalanceUtils balanceUtils;
-    private final MockEmailUtils mockEmailUtils;
+    private final EmailService emailService;
 
     /**
      * Constructs a {@code NotificationServiceImpl} instance with the provided dependencies.
@@ -39,17 +38,17 @@ public class NotificationServiceImpl implements NotificationService {
      * @param transactionRepository   the repository for transaction data
      * @param userRepository          the repository for user data
      * @param balanceUtils            utility class for calculating balances
-     * @param mockEmailUtils         utility class for sending email notifications
+     * @param emailService            utility class for sending email notifications
      */
     public NotificationServiceImpl(BudgetRepository budgetRepository, GoalRepository goalRepository,
                                    TransactionRepository transactionRepository, UserRepository userRepository,
-                                   BalanceUtils balanceUtils, MockEmailUtils mockEmailUtils) {
+                                   BalanceUtils balanceUtils, EmailService emailService) {
         this.budgetRepository = budgetRepository;
         this.goalRepository = goalRepository;
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
         this.balanceUtils = balanceUtils;
-        this.mockEmailUtils = mockEmailUtils;
+        this.emailService = emailService;
     }
 
     /**
@@ -142,7 +141,7 @@ public class NotificationServiceImpl implements NotificationService {
      */
     private void sendNotificationViaEmail(Long userId, String subject, String body) {
         userRepository.findByUserId(userId).ifPresentOrElse(
-                user -> mockEmailUtils.sendEmail(user.getEmail(), subject, body),
+                user -> emailService.sendEmail(user.getEmail(), subject, body),
                 () -> System.out.println("User email not found.")
         );
     }

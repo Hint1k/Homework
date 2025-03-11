@@ -2,7 +2,6 @@ package com.demo.finance.out.service;
 
 import com.demo.finance.domain.model.*;
 import com.demo.finance.domain.utils.BalanceUtils;
-import com.demo.finance.domain.utils.MockEmailUtils;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.BudgetRepository;
 import com.demo.finance.out.repository.GoalRepository;
@@ -30,7 +29,7 @@ class NotificationServiceImplTest {
     @Mock private GoalRepository goalRepository;
     @Mock private TransactionRepository transactionRepository;
     @Mock private UserRepository userRepository;
-    @Mock private MockEmailUtils mockEmailUtils;
+    @Mock EmailService emailService;
     @InjectMocks private NotificationServiceImpl notificationService;
 
     @Test
@@ -41,7 +40,7 @@ class NotificationServiceImplTest {
         String notification = notificationService.fetchBudgetNotification(userId);
 
         assertThat(notification).isEqualTo("No budget set for user.");
-        verify(mockEmailUtils, never()).sendEmail(any(), any(), any());
+        verify(emailService, never()).sendEmail(any(), any(), any());
     }
 
     @Test
@@ -52,7 +51,7 @@ class NotificationServiceImplTest {
         String notification = notificationService.fetchGoalNotification(userId);
 
         assertThat(notification).isEqualTo("No goals set.");
-        verify(mockEmailUtils, never()).sendEmail(any(), any(), any());
+        verify(emailService, never()).sendEmail(any(), any(), any());
     }
 
     @Test
@@ -70,7 +69,7 @@ class NotificationServiceImplTest {
         String notification = notificationService.fetchBudgetNotification(userId);
 
         assertThat(notification).contains("🚨 Budget exceeded!");
-        verify(mockEmailUtils).sendEmail(eq("john@example.com"), any(), contains("Budget exceeded"));
+        verify(emailService).sendEmail(eq("john@example.com"), any(), contains("Budget exceeded"));
     }
 
     @Test
@@ -88,7 +87,7 @@ class NotificationServiceImplTest {
         String notification = notificationService.fetchBudgetNotification(userId);
 
         assertThat(notification).contains("✅ Budget is under control.");
-        verify(mockEmailUtils).sendEmail(eq("john@example.com"), any(), contains("Remaining budget"));
+        verify(emailService).sendEmail(eq("john@example.com"), any(), contains("Remaining budget"));
     }
 
     @Test
@@ -98,7 +97,7 @@ class NotificationServiceImplTest {
 
         notificationService.fetchBudgetNotification(userId);
 
-        verify(mockEmailUtils, never()).sendEmail(any(), any(), any());
+        verify(emailService, never()).sendEmail(any(), any(), any());
     }
 
     @Test
@@ -115,7 +114,7 @@ class NotificationServiceImplTest {
         String notification = notificationService.fetchGoalNotification(userId);
 
         assertThat(notification).contains("⏳ Goal 'Vacation' progress: 50.00%");
-        verify(mockEmailUtils).sendEmail(eq(userEmail), eq("Goal Notification"), contains("progress"));
+        verify(emailService).sendEmail(eq(userEmail), eq("Goal Notification"), contains("progress"));
     }
 
     @Test
@@ -132,6 +131,6 @@ class NotificationServiceImplTest {
         String notification = notificationService.fetchGoalNotification(userId);
 
         assertThat(notification).contains("🎉 Goal achieved: 'Vacation'!");
-        verify(mockEmailUtils).sendEmail(eq(userEmail), eq("Goal Notification"), contains("Goal achieved"));
+        verify(emailService).sendEmail(eq(userEmail), eq("Goal Notification"), contains("Goal achieved"));
     }
 }
