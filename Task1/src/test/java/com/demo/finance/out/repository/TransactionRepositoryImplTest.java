@@ -2,6 +2,7 @@ package com.demo.finance.out.repository;
 
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +13,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionRepositoryImplTest {
@@ -20,6 +22,7 @@ class TransactionRepositoryImplTest {
     @InjectMocks private TransactionRepositoryImpl repository;
 
     @Test
+    @DisplayName("Save and find transaction by user ID and transaction ID - Success scenario")
     void testSaveAndFindTransactionById() {
         Transaction transaction = new Transaction(1L, 2L, new BigDecimal(100),
                 "Groceries", LocalDate.now(), "Weekly shopping", Type.EXPENSE);
@@ -32,6 +35,7 @@ class TransactionRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Update transaction - Success scenario")
     void testUpdateTransaction() {
         Transaction transaction = new Transaction(12L, 2L, new BigDecimal(150), "Rent",
                 LocalDate.now(), "Monthly rent", Type.EXPENSE);
@@ -46,6 +50,7 @@ class TransactionRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Delete transaction - Success scenario")
     void testDeleteTransaction() {
         Transaction transaction = new Transaction(13L, 2L, new BigDecimal(50),
                 "Transport", LocalDate.now(), "Bus fare", Type.EXPENSE);
@@ -58,6 +63,7 @@ class TransactionRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Find transactions by user ID - Success scenario")
     void testFindTransactionsByUserId() {
         repository.save(new Transaction(14L, 3L, new BigDecimal(30), "Food",
                 LocalDate.now(), "Lunch", Type.EXPENSE));
@@ -70,6 +76,7 @@ class TransactionRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Find transaction by ID - Null ID throws exception")
     void testFindByTransactionId_NullId_ThrowsException() {
         assertThatThrownBy(() -> repository.findByTransactionId(null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -77,11 +84,13 @@ class TransactionRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Find transaction by ID - Non-existent transaction returns null")
     void testFindByTransactionId_NonExistentTransaction_ReturnsNull() {
         assertThat(repository.findByTransactionId(999L)).isNull();
     }
 
     @Test
+    @DisplayName("Find filtered transactions - Only by user ID")
     void testFindFiltered_OnlyByUserId_ReturnsAllTransactionsForUser() {
         repository.save(new Transaction(20L, 4L, new BigDecimal(100), "Shopping",
                 LocalDate.of(2024, 3, 1), "Bought clothes", Type.EXPENSE));
@@ -95,6 +104,7 @@ class TransactionRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Find filtered transactions - With date range")
     void testFindFiltered_WithDateRange_ReturnsMatchingTransactions() {
         repository.save(new Transaction(22L, 5L, new BigDecimal(200), "Utilities",
                 LocalDate.of(2024, 2, 10), "Electricity bill", Type.EXPENSE));
@@ -110,6 +120,7 @@ class TransactionRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Find filtered transactions - With category and type")
     void testFindFiltered_WithCategoryAndType_ReturnsMatchingTransactions() {
         repository.save(new Transaction(24L, 6L, new BigDecimal(500), "Salary",
                 LocalDate.of(2024, 3, 1), "Monthly salary", Type.INCOME));
@@ -124,11 +135,13 @@ class TransactionRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Generate next ID - Empty repository returns 1")
     void testGenerateNextId_EmptyRepository_ReturnsOne() {
         assertThat(repository.generateNextId()).isEqualTo(1L);
     }
 
     @Test
+    @DisplayName("Generate next ID - Non-empty repository returns next ID")
     void testGenerateNextId_NonEmptyRepository_ReturnsNextId() {
         repository.save(new Transaction(30L, 7L, new BigDecimal(300), "Investment",
                 LocalDate.of(2024, 3, 5), "Stocks", Type.INCOME));

@@ -4,6 +4,7 @@ import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,7 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
@@ -23,6 +26,7 @@ class UserControllerTest {
     @InjectMocks private UserController userController;
 
     @Test
+    @DisplayName("Register user - Success scenario")
     void testRegisterUser_Success() {
         Role role = new Role("user");
         when(registrationService.registerUser("Alice", "alice@mail.com", "password123", role))
@@ -37,6 +41,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Authenticate user - Success scenario")
     void testAuthenticateUser_Success() {
         User user = new User(1L, "Alice", "alice@mail.com", "password123", false,
                 new Role("user"));
@@ -51,6 +56,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Update own account - Success scenario")
     void testUpdateOwnAccount_Success() {
         Role role = new Role("user");
         when(userService.updateOwnAccount(1L, "Alice Updated", "alice_updated@mail.com",
@@ -65,6 +71,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Delete own account - Success scenario")
     void testDeleteOwnAccount_Success() {
         when(userService.deleteOwnAccount(1L)).thenReturn(true);
 

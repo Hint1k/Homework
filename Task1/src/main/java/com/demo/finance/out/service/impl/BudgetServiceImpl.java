@@ -1,10 +1,11 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.BudgetRepository;
 import com.demo.finance.out.repository.TransactionRepository;
+import com.demo.finance.out.service.BudgetService;
 
 import java.math.BigDecimal;
 import java.util.Optional;

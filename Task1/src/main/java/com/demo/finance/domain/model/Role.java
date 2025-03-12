@@ -1,41 +1,23 @@
 package com.demo.finance.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Objects;
 
 /**
  * Represents a role assigned to a user, defined by its name.
  * This class encapsulates the name of a role and provides methods for comparison and representation.
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public final class Role {
 
     private String name;
-
-    /**
-     * Constructs a new Role with the specified name.
-     *
-     * @param name The name of the role.
-     */
-    public Role(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets the name of the role.
-     *
-     * @return The name of the role.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Sets a new name for the role.
-     *
-     * @param name The new name for the role.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
 
     /**
      * Compares this role to another object for equality. Two roles are considered equal if

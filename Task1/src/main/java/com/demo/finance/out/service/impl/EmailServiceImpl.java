@@ -1,4 +1,6 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
+
+import com.demo.finance.out.service.EmailService;
 
 /**
  * The EmailServiceImpl class simulates email notifications by printing details to the console.

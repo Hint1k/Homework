@@ -1,8 +1,9 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.UserRepository;
+import com.demo.finance.out.service.AdminService;
 
 import java.util.List;
 

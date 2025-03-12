@@ -2,6 +2,7 @@ package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.out.service.GoalService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +15,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class GoalControllerTest {
@@ -23,6 +26,7 @@ class GoalControllerTest {
     @InjectMocks private GoalController goalController;
 
     @Test
+    @DisplayName("Create goal - Successfully creates a new goal")
     void testCreateGoal() {
         Long userId = 1L;
         String name = "Vacation";
@@ -35,6 +39,7 @@ class GoalControllerTest {
     }
 
     @Test
+    @DisplayName("Get goal - Successfully retrieves a goal by user and goal name")
     void testGetGoal_Success() {
         Long userId = 1L;
         String goalName = "Vacation";
@@ -49,6 +54,7 @@ class GoalControllerTest {
     }
 
     @Test
+    @DisplayName("Get all goals - Successfully retrieves all goals for a user")
     void testGetAllGoals() {
         Long userId = 1L;
         List<Goal> mockGoals = Arrays.asList(
@@ -65,6 +71,7 @@ class GoalControllerTest {
     }
 
     @Test
+    @DisplayName("Update goal - Successfully updates an existing goal")
     void testUpdateGoal() {
         Long userId = 1L;
         String oldGoalName = "Vacation";
@@ -79,6 +86,7 @@ class GoalControllerTest {
     }
 
     @Test
+    @DisplayName("Delete goal - Successfully deletes a goal")
     void testDeleteGoal() {
         Long userId = 1L;
         String goalName = "Vacation";
@@ -89,6 +97,7 @@ class GoalControllerTest {
     }
 
     @Test
+    @DisplayName("Calculate total balance - Successfully calculates the total balance of a goal")
     void testCalculateTotalBalance() {
         Long userId = 1L;
         Goal mockGoal = new Goal(userId, "Vacation", new BigDecimal(5000), 6);

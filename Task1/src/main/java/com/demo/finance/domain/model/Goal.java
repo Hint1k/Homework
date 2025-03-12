@@ -1,5 +1,9 @@
 package com.demo.finance.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -10,6 +14,9 @@ import java.util.Objects;
  * duration, and the start time of the goal. This class allows for tracking and calculating the
  * progress toward achieving the goal.
  */
+@Setter
+@Getter
+@AllArgsConstructor
 public class Goal {
 
     private final Long userId;
@@ -35,105 +42,6 @@ public class Goal {
         this.savedAmount = new BigDecimal(0);
         this.duration = duration;
         this.startTime = LocalDate.now();
-    }
-
-    /**
-     * Gets the ID of the user associated with this goal.
-     *
-     * @return The user ID.
-     */
-    public Long getUserId() {
-        return userId;
-    }
-
-    /**
-     * Gets the name of the goal.
-     *
-     * @return The goal name.
-     */
-    public String getGoalName() {
-        return goalName;
-    }
-
-    /**
-     * Sets a new name for the goal.
-     *
-     * @param goalName The new goal name.
-     */
-    public void setGoalName(String goalName) {
-        this.goalName = goalName;
-    }
-
-    /**
-     * Gets the target amount for the goal.
-     *
-     * @return The target amount.
-     */
-    public BigDecimal getTargetAmount() {
-        return targetAmount;
-    }
-
-    /**
-     * Sets a new target amount for the goal.
-     *
-     * @param targetAmount The new target amount.
-     */
-    public void setTargetAmount(BigDecimal targetAmount) {
-        this.targetAmount = targetAmount;
-    }
-
-    /**
-     * Gets the amount already saved towards the goal.
-     *
-     * @return The saved amount.
-     */
-    public BigDecimal getSavedAmount() {
-        return savedAmount;
-    }
-
-    /**
-     * Sets the amount saved towards the goal.
-     *
-     * @param savedAmount The new saved amount.
-     */
-    public void setSavedAmount(BigDecimal savedAmount) {
-        this.savedAmount = savedAmount;
-    }
-
-    /**
-     * Gets the duration (in months) for achieving the goal.
-     *
-     * @return The duration in months.
-     */
-    public int getDuration() {
-        return duration;
-    }
-
-    /**
-     * Sets a new duration (in months) for achieving the goal.
-     *
-     * @param duration The new duration in months.
-     */
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
-
-    /**
-     * Gets the start time of the goal.
-     *
-     * @return The start time of the goal.
-     */
-    public LocalDate getStartTime() {
-        return startTime;
-    }
-
-    /**
-     * Sets a new start time for the goal.
-     *
-     * @param startTime The new start time.
-     */
-    public void setStartTime(LocalDate startTime) {
-        this.startTime = startTime;
     }
 
     /**

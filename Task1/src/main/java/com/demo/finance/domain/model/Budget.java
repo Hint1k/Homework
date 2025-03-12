@@ -1,5 +1,9 @@
 package com.demo.finance.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -7,9 +11,12 @@ import java.util.Objects;
  * Represents a budget for a user, including the monthly limit and current expenses.
  * This class allows for tracking and modifying a user's budget details.
  */
+@Setter
+@Getter
+@AllArgsConstructor
 public class Budget {
 
-    private final Long userId; // Associated user
+    private final Long userId;
     private BigDecimal monthlyLimit;
     private BigDecimal currentExpenses;
 
@@ -23,50 +30,6 @@ public class Budget {
         this.userId = userId;
         this.monthlyLimit = monthlyLimit;
         this.currentExpenses = new BigDecimal(0);
-    }
-
-    /**
-     * Gets the ID of the user associated with this budget.
-     *
-     * @return The user ID.
-     */
-    public Long getUserId() {
-        return userId;
-    }
-
-    /**
-     * Gets the monthly spending limit of the budget.
-     *
-     * @return The monthly limit.
-     */
-    public BigDecimal getMonthlyLimit() {
-        return monthlyLimit;
-    }
-
-    /**
-     * Sets a new monthly spending limit for the budget.
-     *
-     * @param monthlyLimit The new monthly limit.
-     */
-    public void setMonthlyLimit(BigDecimal monthlyLimit) {
-        this.monthlyLimit = monthlyLimit;
-    }
-
-    /**
-     * Gets the current expenses of the budget.
-     *
-     * @return The current expenses.
-     */
-    public BigDecimal getCurrentExpenses() {
-        return currentExpenses;
-    }
-
-    /**
-     * Sets the current expenses of the budget.
-     *
-     * @param currentExpenses The new current expenses.
-     */
-    public void setCurrentExpenses(BigDecimal currentExpenses) {
     }
 
     /**

@@ -7,6 +7,7 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.in.controller.UserController;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,7 +16,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class UserCommandTest {
@@ -34,6 +43,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Register user - Success")
     void testRegisterUser_Success() {
         when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("John Doe");
         when(validationUtils.promptForValidEmail(any(), any())).thenReturn("john@example.com");
@@ -49,6 +59,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Login user - Success")
     void testLoginUser_Success() {
         User mockUser = new User(2L, "John Doe", "john@example.com", "securePass123",
                 false, new Role("user"));
@@ -65,6 +76,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Logout user")
     void testLogoutUser() {
         userCommand.logoutUser();
 
@@ -72,6 +84,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Update own account - Success")
     void testUpdateOwnAccount_Success() {
         when(currentUser.getRole()).thenReturn(new Role("user"));
 
@@ -89,6 +102,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Delete own account - Success")
     void testDeleteOwnAccount_Success() {
         when(userController.deleteOwnAccount(2L)).thenReturn(true);
 
@@ -99,6 +113,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Register user - Invalid email logs error")
     void testRegisterUser_InvalidEmail_LogsError() {
         when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("John Doe");
         when(validationUtils.promptForValidEmail(any(), any()))
@@ -111,6 +126,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Register user - Invalid password logs error")
     void testRegisterUser_InvalidPassword_LogsError() {
         when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("John Doe");
         when(validationUtils.promptForValidEmail(any(), any())).thenReturn("john@example.com");
@@ -124,6 +140,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Login user - Invalid email logs error")
     void testLoginUser_InvalidEmail_LogsError() {
         when(validationUtils.promptForValidEmail(any(), any()))
                 .thenThrow(new MaxRetriesReachedException("Invalid email"));
@@ -135,6 +152,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Login user - Invalid password logs error")
     void testLoginUser_InvalidPassword_LogsError() {
         when(validationUtils.promptForValidEmail(any(), any())).thenReturn("john@example.com");
         when(validationUtils.promptForValidPassword(any(), any()))
@@ -147,6 +165,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Login user - User blocked logs error")
     void testLoginUser_UserBlocked_LogsError() {
         when(validationUtils.promptForValidEmail(any(), any())).thenReturn("john@example.com");
         when(validationUtils.promptForValidPassword(any(), any())).thenReturn("securePass123");
@@ -162,6 +181,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Delete own account - User not found logs error")
     void testDeleteOwnAccount_UserNotFound_LogsError() {
         when(userController.deleteOwnAccount(2L)).thenReturn(false);
 
@@ -172,6 +192,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Update own account - Invalid email logs error")
     void testUpdateOwnAccount_InvalidEmail_LogsError() {
         when(currentUser.getRole()).thenReturn(new Role("user"));
 
@@ -191,6 +212,7 @@ class UserCommandTest {
     }
 
     @Test
+    @DisplayName("Update own account - Invalid password logs error")
     void testUpdateOwnAccount_InvalidPassword_LogsError() {
         when(currentUser.getRole()).thenReturn(new Role("user"));
 

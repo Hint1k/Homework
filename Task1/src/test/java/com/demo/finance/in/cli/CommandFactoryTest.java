@@ -3,6 +3,7 @@ package com.demo.finance.in.cli;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.in.cli.command.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -10,7 +11,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Scanner;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class CommandFactoryTest {
@@ -42,6 +47,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - No user, Register user")
     void testCreateCommand_NoUser_RegisterUser() {
         when(context.getCurrentUser()).thenReturn(null);
 
@@ -52,6 +58,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - No user, Login user")
     void testCreateCommand_NoUser_LoginUser() {
         when(context.getCurrentUser()).thenReturn(null);
 
@@ -62,6 +69,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - Admin, View all users")
     void testCreateCommand_Admin_ViewAllUsers() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(true);
@@ -73,6 +81,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - Admin, Block user")
     void testCreateCommand_Admin_BlockUser() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(true);
@@ -84,6 +93,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - Admin, Unblock user")
     void testCreateCommand_Admin_UnblockUser() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(true);
@@ -95,6 +105,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - Admin, Delete user")
     void testCreateCommand_Admin_DeleteUser() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(true);
@@ -106,6 +117,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - Admin, Update user role")
     void testCreateCommand_Admin_UpdateUserRole() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(true);
@@ -117,6 +129,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - Admin, View transactions by user ID")
     void testCreateCommand_Admin_ViewTransactionsByUserId() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(true);
@@ -128,6 +141,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - Admin, Logout user")
     void testCreateCommand_Admin_LogoutUser() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(true);
@@ -139,6 +153,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - User, Show transaction menu")
     void testCreateCommand_User_ShowTransactionMenu() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(false);
@@ -152,6 +167,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - User, Show budget menu")
     void testCreateCommand_User_ShowBudgetMenu() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(false);
@@ -164,6 +180,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - User, Show goal menu")
     void testCreateCommand_User_ShowGoalMenu() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(false);
@@ -176,6 +193,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - User, Show report menu")
     void testCreateCommand_User_ShowReportMenu() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(false);
@@ -188,6 +206,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - User, Show account menu")
     void testCreateCommand_User_ShowAccountMenu() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(false);
@@ -200,6 +219,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - User, Logout user")
     void testCreateCommand_User_LogoutUser() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(false);
@@ -211,6 +231,7 @@ class CommandFactoryTest {
     }
 
     @Test
+    @DisplayName("Create command - Invalid choice, Logs error")
     void testCreateCommand_InvalidChoice_LogsError() {
         when(context.getCurrentUser()).thenReturn(currentUser);
         when(currentUser.isAdmin()).thenReturn(false);

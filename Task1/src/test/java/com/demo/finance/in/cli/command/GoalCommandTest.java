@@ -7,6 +7,7 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.in.controller.GoalController;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +18,16 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class GoalCommandTest {
@@ -36,6 +46,7 @@ class GoalCommandTest {
     }
 
     @Test
+    @DisplayName("Create goal - Success")
     void testCreateGoal_Success() {
         when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("New Car");
         when(validationUtils.promptForPositiveBigDecimal(any(), any())).thenReturn(new BigDecimal(10000));
@@ -48,6 +59,7 @@ class GoalCommandTest {
     }
 
     @Test
+    @DisplayName("View goals - Success")
     void testViewGoals() {
         when(goalController.getAllGoals(2L))
                 .thenReturn(List.of(new Goal(2L, "Vacation", new BigDecimal(5000), 6)));
@@ -58,6 +70,7 @@ class GoalCommandTest {
     }
 
     @Test
+    @DisplayName("Delete goal - Success")
     void testDeleteGoal_Success() {
         when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("Vacation");
         Goal mockGoal = new Goal(2L, "Vacation", new BigDecimal(5000), 6);
@@ -69,6 +82,7 @@ class GoalCommandTest {
     }
 
     @Test
+    @DisplayName("Create goal - Invalid target amount logs error")
     void testCreateGoal_InvalidTargetAmount_LogsError() {
         when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("New Car");
         when(validationUtils.promptForPositiveBigDecimal(any(), any()))
@@ -81,6 +95,7 @@ class GoalCommandTest {
     }
 
     @Test
+    @DisplayName("Create goal - Invalid duration logs error")
     void testCreateGoal_InvalidDuration_LogsError() {
         when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("New Car");
         when(validationUtils.promptForPositiveBigDecimal(any(), any())).thenReturn(new BigDecimal(10000));
@@ -94,6 +109,7 @@ class GoalCommandTest {
     }
 
     @Test
+    @DisplayName("Delete goal - Invalid goal name logs error")
     void testDeleteGoal_InvalidGoalName_LogsError() {
         when(validationUtils.promptForNonEmptyString(any(), any()))
                 .thenThrow(new MaxRetriesReachedException("Invalid goal name"));
@@ -105,6 +121,7 @@ class GoalCommandTest {
     }
 
     @Test
+    @DisplayName("Delete goal - Goal not found logs error")
     void testDeleteGoal_GoalNotFound_LogsError() {
         when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("Vacation");
         when(goalController.getGoal(2L, "Vacation")).thenReturn(Optional.empty());
@@ -115,6 +132,7 @@ class GoalCommandTest {
     }
 
     @Test
+    @DisplayName("Update goal - Invalid target amount logs error")
     void testUpdateGoal_InvalidTargetAmount_LogsError() {
         when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("Vacation");
         Goal mockGoal = new Goal(2L, "Vacation", new BigDecimal(5000), 6);
@@ -138,6 +156,7 @@ class GoalCommandTest {
     }
 
     @Test
+    @DisplayName("Update goal - Invalid duration logs error")
     void testUpdateGoal_InvalidDuration_LogsError() {
         when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("Vacation");
         Goal mockGoal = new Goal(2L, "Vacation", new BigDecimal(5000), 6);

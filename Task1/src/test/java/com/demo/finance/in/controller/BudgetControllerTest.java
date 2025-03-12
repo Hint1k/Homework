@@ -1,6 +1,7 @@
 package com.demo.finance.in.controller;
 
 import com.demo.finance.out.service.BudgetService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,7 +11,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class BudgetControllerTest {
@@ -19,6 +22,7 @@ class BudgetControllerTest {
     @InjectMocks private BudgetController budgetController;
 
     @Test
+    @DisplayName("Set budget - Successfully sets the monthly budget")
     void testSetBudget_Success() {
         Long userId = 1L;
         BigDecimal amount = new BigDecimal(1000);
@@ -32,6 +36,7 @@ class BudgetControllerTest {
     }
 
     @Test
+    @DisplayName("View budget - Successfully retrieves and formats the budget")
     void testViewBudget_Success() {
         Long userId = 1L;
         String expectedBudget = "Budget: 500.00/1000.00";

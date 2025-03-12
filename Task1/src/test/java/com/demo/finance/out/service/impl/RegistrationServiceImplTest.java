@@ -1,9 +1,10 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.PasswordUtils;
 import com.demo.finance.out.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,7 +14,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class RegistrationServiceImplTest {
@@ -23,6 +29,7 @@ class RegistrationServiceImplTest {
     @InjectMocks private RegistrationServiceImpl registrationService;
 
     @Test
+    @DisplayName("Test that registerUser successfully registers a new user when email is not in use")
     void testRegisterUser_Success() {
         String name = "Alice";
         String email = "mymail@mail.com";
@@ -44,6 +51,7 @@ class RegistrationServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that registerUser fails when email is already registered")
     void testRegisterUser_EmailAlreadyExists() {
         String name = "Kate";
         String email = "maymail@mail.com";
@@ -64,6 +72,7 @@ class RegistrationServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that authenticate successfully logs in a user with valid credentials")
     void testAuthenticate_Success() {
         String email = "alice@mail.com";
         String password = "password123";
@@ -81,6 +90,7 @@ class RegistrationServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that authenticate fails when email is not registered")
     void testAuthenticate_InvalidEmail() {
         String email = "alice@mail.com";
         String password = "password123";
@@ -95,6 +105,7 @@ class RegistrationServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that authenticate fails when password is incorrect")
     void testAuthenticate_InvalidPassword() {
         String email = "alice@mail.com";
         String password = "wrongPassword";
@@ -112,6 +123,7 @@ class RegistrationServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that registerUser ensures generateNextId is called only once")
     void testRegisterUser_GenerateNextIdCalledOnce() {
         String name = "Bob";
         String email = "bob@mail.com";
@@ -129,6 +141,7 @@ class RegistrationServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that authenticate returns empty when user is not active")
     void testAuthenticate_UserNotActive_ReturnsEmpty() {
         String email = "alice@mail.com";
         String password = "password123";

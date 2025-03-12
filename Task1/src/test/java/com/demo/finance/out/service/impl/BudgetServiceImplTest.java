@@ -1,10 +1,11 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.BudgetRepository;
 import com.demo.finance.out.repository.TransactionRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +19,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BudgetServiceImplTest {
@@ -28,6 +30,7 @@ class BudgetServiceImplTest {
     @InjectMocks private BudgetServiceImpl budgetService;
 
     @Test
+    @DisplayName("Test that setMonthlyBudget saves the budget successfully")
     void setMonthlyBudget_savesSuccessfully() {
         Long userId = 1L;
         BigDecimal limit = new BigDecimal(1000);
@@ -42,6 +45,7 @@ class BudgetServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that getBudget returns the existing budget for a user")
     void getBudget_existingBudget_returnsBudget() {
         Long userId = 1L;
         Budget budget = new Budget(userId, new BigDecimal(1000));
@@ -53,6 +57,7 @@ class BudgetServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that calculateExpensesForMonth correctly sums up transactions for the month")
     void calculateExpensesForMonth_sumsTransactionsCorrectly() {
         Long userId = 1L;
         YearMonth currentMonth = YearMonth.of(2025, 3);
@@ -74,6 +79,7 @@ class BudgetServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that setMonthlyBudget fails to save the budget")
     void setMonthlyBudget_savesUnsuccessfully() {
         Long userId = 1L;
         BigDecimal limit = new BigDecimal(1000);
@@ -88,6 +94,7 @@ class BudgetServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that getBudget returns empty when no budget exists for a user")
     void getBudget_whenNoBudgetExists_returnsEmpty() {
         Long userId = 1L;
 
@@ -99,6 +106,7 @@ class BudgetServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that calculateExpensesForMonth returns zero when there are no transactions")
     void calculateExpensesForMonth_whenNoTransactions_returnsZero() {
         Long userId = 1L;
         YearMonth currentMonth = YearMonth.of(2025, 3);
@@ -114,6 +122,7 @@ class BudgetServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that getFormattedBudget returns 'No budget set' when no budget is configured")
     void getFormattedBudget_whenNoBudgetSet_returnsNoBudgetMessage() {
         Long userId = 1L;
 
@@ -125,6 +134,7 @@ class BudgetServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that getFormattedBudget returns a formatted message when a budget is set")
     void getFormattedBudget_whenBudgetSet_returnsFormattedMessage() {
         Long userId = 1L;
         Budget budget = new Budget(userId, new BigDecimal(1000));
@@ -134,7 +144,8 @@ class BudgetServiceImplTest {
         when(budgetRepository.findByUserId(userId)).thenReturn(Optional.of(budget));
         when(transactionRepository.findFiltered(userId, currentMonth.atDay(1), currentMonth.atEndOfMonth(),
                 null, Type.EXPENSE))
-                .thenReturn(List.of(new Transaction(1L, userId, new BigDecimal(100), "Food",
+                .thenReturn(List.of(
+                        new Transaction(1L, userId, new BigDecimal(100), "Food",
                                 LocalDate.of(2025, 3, 5), "Groceries", Type.EXPENSE),
                         new Transaction(2L, userId, new BigDecimal(100), "Transport",
                                 LocalDate.of(2025, 3, 10), "Taxi", Type.EXPENSE)));

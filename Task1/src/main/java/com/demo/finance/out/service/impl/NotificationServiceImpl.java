@@ -1,4 +1,4 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.utils.BalanceUtils;
 import com.demo.finance.out.repository.UserRepository;
@@ -9,6 +9,8 @@ import com.demo.finance.out.repository.BudgetRepository;
 import com.demo.finance.out.repository.GoalRepository;
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.out.repository.TransactionRepository;
+import com.demo.finance.out.service.EmailService;
+import com.demo.finance.out.service.NotificationService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

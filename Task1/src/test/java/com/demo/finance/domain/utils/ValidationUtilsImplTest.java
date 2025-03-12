@@ -1,6 +1,7 @@
 package com.demo.finance.domain.utils;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,8 +12,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Scanner;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.reset;
 
 @ExtendWith(MockitoExtension.class)
 class ValidationUtilsImplTest {
@@ -26,6 +29,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for positive BigDecimal - returns the correct value")
     void testPromptForPositiveBigDecimal_ValidInput_ReturnsValue() {
         when(scanner.nextLine()).thenReturn("100");
 
@@ -35,6 +39,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for positive BigDecimal - throws MaxRetriesReachedException after retries")
     void testPromptForPositiveBigDecimal_InvalidInput_ThrowsMaxRetriesReachedException() {
         when(scanner.nextLine()).thenReturn("invalid", "invalid", "invalid");
 
@@ -44,6 +49,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for optional positive BigDecimal - returns the correct value")
     void testPromptForOptionalPositiveBigDecimal_ValidInput_ReturnsValue() {
         when(scanner.nextLine()).thenReturn("200");
 
@@ -53,6 +59,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Empty input for optional positive BigDecimal - returns null")
     void testPromptForOptionalPositiveBigDecimal_EmptyInput_ReturnsNull() {
         when(scanner.nextLine()).thenReturn("");
 
@@ -62,6 +69,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for positive Long - returns the correct value")
     void testPromptForPositiveLong_ValidInput_ReturnsValue() {
         when(scanner.nextLine()).thenReturn("12345");
 
@@ -71,6 +79,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for positive Long - throws MaxRetriesReachedException after retries")
     void testPromptForPositiveLong_InvalidInput_ThrowsMaxRetriesReachedException() {
         when(scanner.nextLine()).thenReturn("invalid", "invalid", "invalid");
 
@@ -80,6 +89,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for non-empty String - returns the correct value")
     void testPromptForNonEmptyString_ValidInput_ReturnsValue() {
         when(scanner.nextLine()).thenReturn("Valid Input");
 
@@ -89,6 +99,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Empty input for non-empty String - throws MaxRetriesReachedException after retries")
     void testPromptForNonEmptyString_EmptyInput_ThrowsMaxRetriesReachedException() {
         when(scanner.nextLine()).thenReturn("", "", "");
 
@@ -98,6 +109,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for optional String - returns the correct value")
     void testPromptForOptionalString_ValidInput_ReturnsValue() {
         when(scanner.nextLine()).thenReturn("Optional Input");
 
@@ -107,6 +119,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Empty input for optional String - returns null")
     void testPromptForOptionalString_EmptyInput_ReturnsNull() {
         when(scanner.nextLine()).thenReturn("");
 
@@ -116,6 +129,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for valid Email - returns the correct value")
     void testPromptForValidEmail_ValidInput_ReturnsEmail() {
         when(scanner.nextLine()).thenReturn("user@example.com");
 
@@ -125,6 +139,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for valid Email - throws MaxRetriesReachedException after retries")
     void testPromptForValidEmail_InvalidInput_ThrowsMaxRetriesReachedException() {
         when(scanner.nextLine()).thenReturn("invalid-email", "invalid-email", "invalid-email");
 
@@ -134,6 +149,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for optional Email - returns the correct value")
     void testPromptForOptionalEmail_ValidInput_ReturnsEmail() {
         when(scanner.nextLine()).thenReturn("user@example.com");
 
@@ -143,6 +159,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for optional Email - returns null")
     void testPromptForOptionalEmail_InvalidInput_ReturnsNull() {
         when(scanner.nextLine()).thenReturn("invalid-email");
 
@@ -152,6 +169,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for valid Password - returns the correct value")
     void testPromptForValidPassword_ValidInput_ReturnsPassword() {
         when(scanner.nextLine()).thenReturn("password123");
 
@@ -161,6 +179,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for valid Password - throws MaxRetriesReachedException after retries")
     void testPromptForValidPassword_InvalidInput_ThrowsMaxRetriesReachedException() {
         when(scanner.nextLine()).thenReturn("pw", "pw", "pw");
 
@@ -170,6 +189,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for optional Password - returns the correct value")
     void testPromptForOptionalPassword_ValidInput_ReturnsPassword() {
         when(scanner.nextLine()).thenReturn("password123");
 
@@ -179,6 +199,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for optional Password - returns null")
     void testPromptForOptionalPassword_InvalidInput_ReturnsNull() {
         when(scanner.nextLine()).thenReturn("pw");
 
@@ -188,6 +209,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for valid Date - returns the correct value")
     void testPromptForValidDate_ValidInput_ReturnsDate() {
         when(scanner.nextLine()).thenReturn("2025-03-10");
 
@@ -197,6 +219,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for valid Date - throws MaxRetriesReachedException after retries")
     void testPromptForValidDate_InvalidInput_ThrowsMaxRetriesReachedException() {
         when(scanner.nextLine()).thenReturn("invalid-date", "invalid-date", "invalid-date");
 
@@ -206,6 +229,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for optional Date - returns the correct value")
     void testPromptForOptionalDate_ValidInput_ReturnsDate() {
         when(scanner.nextLine()).thenReturn("2025-03-10");
 
@@ -215,6 +239,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for optional Date - returns null")
     void testPromptForOptionalDate_InvalidInput_ReturnsNull() {
         when(scanner.nextLine()).thenReturn("invalid-date");
 
@@ -224,6 +249,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for Transaction Type - returns the correct type")
     void testPromptForTransactionType_ValidInput_ReturnsType() {
         when(scanner.nextLine()).thenReturn("i");
 
@@ -233,6 +259,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for Transaction Type - throws MaxRetriesReachedException after retries")
     void testPromptForTransactionType_InvalidInput_ThrowsMaxRetriesReachedException() {
         when(scanner.nextLine()).thenReturn("invalid", "invalid", "invalid");
 
@@ -242,6 +269,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for optional Transaction Type - returns the correct type")
     void testPromptForOptionalTransactionType_ValidInput_ReturnsType() {
         when(scanner.nextLine()).thenReturn("e");
 
@@ -251,6 +279,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Empty input for optional Transaction Type - returns null")
     void testPromptForOptionalTransactionType_EmptyInput_ReturnsNull() {
         when(scanner.nextLine()).thenReturn("");
 
@@ -260,6 +289,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for int in range - returns the correct value")
     void testPromptForIntInRange_ValidInput_ReturnsValue() {
         when(scanner.nextLine()).thenReturn("5");
 
@@ -269,6 +299,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for int in range - throws MaxRetriesReachedException after retries")
     void testPromptForIntInRange_InvalidInput_ThrowsMaxRetriesReachedException() {
         when(scanner.nextLine()).thenReturn("invalid", "invalid", "invalid");
 
@@ -279,6 +310,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for positive int - returns the correct value")
     void testPromptForPositiveInt_ValidInput_ReturnsValue() {
         when(scanner.nextLine()).thenReturn("10");
 
@@ -288,6 +320,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for positive int - throws MaxRetriesReachedException after retries")
     void testPromptForPositiveInt_InvalidInput_ThrowsMaxRetriesReachedException() {
         when(scanner.nextLine()).thenReturn("invalid", "invalid", "invalid");
 
@@ -297,6 +330,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Valid input for optional positive int - returns the correct value")
     void testPromptForOptionalPositiveInt_ValidInput_ReturnsValue() {
         when(scanner.nextLine()).thenReturn("15");
 
@@ -306,6 +340,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Empty input for optional positive int - returns null")
     void testPromptForOptionalPositiveInt_EmptyInput_ReturnsNull() {
         when(scanner.nextLine()).thenReturn("");
 
@@ -315,6 +350,7 @@ class ValidationUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Invalid input for optional positive int - returns null")
     void testPromptForOptionalPositiveInt_InvalidInput_ReturnsNull() {
         when(scanner.nextLine()).thenReturn("invalid");
 

@@ -1,8 +1,9 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.utils.BalanceUtils;
 import com.demo.finance.out.repository.GoalRepository;
+import com.demo.finance.out.service.GoalService;
 
 import java.math.BigDecimal;
 import java.util.List;

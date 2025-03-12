@@ -1,9 +1,10 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.utils.PasswordUtils;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.UserRepository;
+import com.demo.finance.out.service.UserService;
 
 /**
  * The {@code UserServiceImpl} class provides the implementation of the {@code UserService} interface.

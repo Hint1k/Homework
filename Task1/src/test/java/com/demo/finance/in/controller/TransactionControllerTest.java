@@ -3,6 +3,7 @@ package com.demo.finance.in.controller;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.service.TransactionService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,7 +16,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionControllerTest {
@@ -24,6 +27,7 @@ class TransactionControllerTest {
     @InjectMocks private TransactionController transactionController;
 
     @Test
+    @DisplayName("Add transaction - Success scenario")
     void testAddTransaction() {
         Long userId = 1L;
         BigDecimal amount = new BigDecimal(100);
@@ -39,6 +43,7 @@ class TransactionControllerTest {
     }
 
     @Test
+    @DisplayName("Get transaction - Success scenario")
     void testGetTransaction() {
         Long transactionId = 1L;
         Transaction mockTransaction = new Transaction(1L, 1L, new BigDecimal(100),
@@ -53,6 +58,7 @@ class TransactionControllerTest {
     }
 
     @Test
+    @DisplayName("Get transactions by user ID - Success scenario")
     void testGetTransactionsByUserId() {
         Long userId = 1L;
         List<Transaction> mockTransactions = Arrays.asList(
@@ -71,6 +77,7 @@ class TransactionControllerTest {
     }
 
     @Test
+    @DisplayName("Update transaction - Success scenario")
     void testUpdateTransaction_Success() {
         Long transactionId = 1L;
         Long userId = 1L;
@@ -90,6 +97,7 @@ class TransactionControllerTest {
     }
 
     @Test
+    @DisplayName("Delete transaction - Success scenario")
     void testDeleteTransaction_Success() {
         Long userId = 1L;
         Long transactionId = 1L;
@@ -103,6 +111,7 @@ class TransactionControllerTest {
     }
 
     @Test
+    @DisplayName("Filter transactions - Success scenario")
     void testFilterTransactions() {
         Long userId = 1L;
         LocalDate from = LocalDate.of(2023, 1, 1);

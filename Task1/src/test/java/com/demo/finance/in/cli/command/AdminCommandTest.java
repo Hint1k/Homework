@@ -7,6 +7,7 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.in.controller.AdminController;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +17,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class AdminCommandTest {
@@ -33,6 +43,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("View all users - Successful retrieval")
     void testViewAllUsers() {
         when(adminController.getAllUsers()).thenReturn(List.of(
                 new User(2L, "John Doe", "john@example.com", "pass123", false,
@@ -44,6 +55,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Block user - Successful operation")
     void testBlockUser_Success() {
         when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(2L);
         when(adminController.blockUser(2L)).thenReturn(true);
@@ -54,6 +66,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Unblock user - Successful operation")
     void testUnblockUser_Success() {
         when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(2L);
         when(adminController.unBlockUser(2L)).thenReturn(true);
@@ -64,6 +77,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Delete user - Successful operation")
     void testDeleteUser_Success() {
         when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(2L);
         when(adminController.deleteUser(2L)).thenReturn(true);
@@ -74,6 +88,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Update user role - Successful operation")
     void testUpdateUserRole_Success() {
         when(validationUtils.promptForPositiveLong(anyString(), any())).thenReturn(2L);
         when(validationUtils.promptForIntInRange(anyString(), anyInt(), anyInt(), any())).thenReturn(2);
@@ -86,6 +101,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("View all users - No users available")
     void testViewAllUsers_NoUsers_ReturnsEmptyList() {
         when(adminController.getAllUsers()).thenReturn(List.of());
 
@@ -95,6 +111,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Block user - Invalid user ID input")
     void testBlockUser_InvalidUserId_LogsError() {
         when(validationUtils.promptForPositiveLong(any(), any()))
                 .thenThrow(new MaxRetriesReachedException("Invalid user ID"));
@@ -106,6 +123,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Block user - User not found")
     void testBlockUser_UserNotFound_LogsError() {
         when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(2L);
         when(adminController.blockUser(2L)).thenReturn(false);
@@ -116,6 +134,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Unblock user - Invalid user ID input")
     void testUnblockUser_InvalidUserId_LogsError() {
         when(validationUtils.promptForPositiveLong(any(), any()))
                 .thenThrow(new MaxRetriesReachedException("Invalid user ID"));
@@ -127,6 +146,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Unblock user - User not found")
     void testUnblockUser_UserNotFound_LogsError() {
         when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(2L);
         when(adminController.unBlockUser(2L)).thenReturn(false);
@@ -137,6 +157,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Delete user - Invalid user ID input")
     void testDeleteUser_InvalidUserId_LogsError() {
         when(validationUtils.promptForPositiveLong(any(), any()))
                 .thenThrow(new MaxRetriesReachedException("Invalid user ID"));
@@ -148,6 +169,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Delete user - User not found")
     void testDeleteUser_UserNotFound_LogsError() {
         when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(2L);
         when(adminController.deleteUser(2L)).thenReturn(false);
@@ -158,6 +180,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Update user role - Invalid user ID input")
     void testUpdateUserRole_InvalidUserId_LogsError() {
         when(validationUtils.promptForPositiveLong(any(), any()))
                 .thenThrow(new MaxRetriesReachedException("Invalid user ID"));
@@ -169,6 +192,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Update user role - Invalid role input")
     void testUpdateUserRole_InvalidRole_LogsError() {
         when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(2L);
         when(validationUtils.promptForIntInRange(any(), anyInt(), anyInt(), any()))
@@ -181,6 +205,7 @@ class AdminCommandTest {
     }
 
     @Test
+    @DisplayName("Update user role - User not found")
     void testUpdateUserRole_UserNotFound_LogsError() {
         when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(2L);
         when(validationUtils.promptForIntInRange(any(), anyInt(), anyInt(), any())).thenReturn(1);

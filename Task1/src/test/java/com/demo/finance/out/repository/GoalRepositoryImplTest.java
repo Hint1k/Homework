@@ -1,6 +1,7 @@
 package com.demo.finance.out.repository;
 
 import com.demo.finance.domain.model.Goal;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class GoalRepositoryImplTest {
@@ -17,6 +18,7 @@ class GoalRepositoryImplTest {
     @InjectMocks private GoalRepositoryImpl repository;
 
     @Test
+    @DisplayName("Save and find goal by user ID and name - Success scenario")
     void testSaveAndFindGoal() {
         Goal goal = new Goal(1L, "Buy a Car", new BigDecimal(5000), 12);
         repository.save(goal);
@@ -27,6 +29,7 @@ class GoalRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Update existing goal - Success scenario")
     void testUpdateGoal() {
         Goal goal = new Goal(2L, "Vacation", new BigDecimal(3000), 6);
         repository.save(goal);
@@ -38,6 +41,7 @@ class GoalRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Delete goal - Success scenario")
     void testDeleteGoal() {
         Goal goal = new Goal(3L, "Emergency Fund", new BigDecimal(10000), 24);
         repository.save(goal);
@@ -48,11 +52,13 @@ class GoalRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Find goals by user ID - No goals for user")
     void testFindByUserId_noGoalsForUser_returnsEmptyList() {
         assertThat(repository.findByUserId(99L)).isEmpty();
     }
 
     @Test
+    @DisplayName("Find goals by user ID - Multiple goals for user")
     void testFindByUserId_multipleGoalsForUser_returnsAllGoals() {
         Goal goal1 = new Goal(4L, "New Laptop", new BigDecimal(2000), 6);
         Goal goal2 = new Goal(4L, "Home Renovation", new BigDecimal(5000), 12);
@@ -63,6 +69,7 @@ class GoalRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Update non-existing goal - No duplicate added")
     void testUpdateGoal_nonExistingGoal_doesNotAddDuplicate() {
         Goal updatedGoal = new Goal(5L, "Fitness", new BigDecimal(1500), 4);
 
@@ -72,6 +79,7 @@ class GoalRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Delete non-existing goal - Does nothing")
     void testDeleteGoal_nonExistingGoal_doesNothing() {
         repository.deleteByUserIdAndName(6L, "NonExistingGoal");
 

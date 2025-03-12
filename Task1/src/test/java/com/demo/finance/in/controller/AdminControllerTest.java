@@ -3,6 +3,7 @@ package com.demo.finance.in.controller;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.service.AdminService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,7 +14,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class AdminControllerTest {
@@ -22,6 +25,7 @@ class AdminControllerTest {
     @InjectMocks private AdminController adminController;
 
     @Test
+    @DisplayName("Get all users - Returns a list of users")
     void testGetAllUsers() {
         List<User> mockUsers = Arrays.asList(
                 new User(1L, "Alice", "alice@mail.com", "password123", false,
@@ -39,6 +43,7 @@ class AdminControllerTest {
     }
 
     @Test
+    @DisplayName("Update user role - Successfully updates the user's role")
     void testUpdateUserRole_Success() {
         Long userId = 1L;
         Role newRole = new Role("admin");
@@ -52,6 +57,7 @@ class AdminControllerTest {
     }
 
     @Test
+    @DisplayName("Block user - Successfully blocks the user")
     void testBlockUser_Success() {
         Long userId = 1L;
 
@@ -64,6 +70,7 @@ class AdminControllerTest {
     }
 
     @Test
+    @DisplayName("Unblock user - Successfully unblocks the user")
     void testUnBlockUser_Success() {
         Long userId = 1L;
 
@@ -76,6 +83,7 @@ class AdminControllerTest {
     }
 
     @Test
+    @DisplayName("Delete user - Successfully deletes the user")
     void testDeleteUser_Success() {
         Long userId = 1L;
 

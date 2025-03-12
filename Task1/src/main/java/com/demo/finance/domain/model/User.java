@@ -1,11 +1,18 @@
 package com.demo.finance.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Objects;
 
 /**
  * Represents a user of the finance tracker system, with personal details, authentication information,
  * account status, and role within the system.
  */
+@Setter
+@Getter
+@AllArgsConstructor
 public class User {
 
     private final Long userId;
@@ -14,124 +21,6 @@ public class User {
     private String password;
     private boolean blocked;
     private Role role;
-
-    /**
-     * Constructs a new User with the specified details.
-     *
-     * @param userId The unique ID of the user.
-     * @param name The name of the user.
-     * @param email The email address of the user.
-     * @param password The user's password.
-     * @param blocked Indicates whether the user is blocked.
-     * @param role The role assigned to the user (e.g., admin, regular user).
-     */
-    public User(Long userId, String name, String email, String password, boolean blocked, Role role) {
-        this.userId = userId;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.blocked = blocked;
-        this.role = role;
-    }
-
-    /**
-     * Gets the unique ID of the user.
-     *
-     * @return The user ID.
-     */
-    public Long getUserId() {
-        return userId;
-    }
-
-    /**
-     * Gets the name of the user.
-     *
-     * @return The user's name.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Sets a new name for the user.
-     *
-     * @param name The new name of the user.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets the email address of the user.
-     *
-     * @return The user's email address.
-     */
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * Sets a new email address for the user.
-     *
-     * @param email The new email address of the user.
-     */
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    /**
-     * Gets the password of the user.
-     *
-     * @return The user's password.
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Sets a new password for the user.
-     *
-     * @param password The new password for the user.
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    /**
-     * Gets the blocked status of the user.
-     *
-     * @return {@code true} if the user is blocked, otherwise {@code false}.
-     */
-    public boolean isBlocked() {
-        return blocked;
-    }
-
-    /**
-     * Sets the blocked status of the user.
-     *
-     * @param blocked {@code true} to block the user, otherwise {@code false}.
-     */
-    public void setBlocked(boolean blocked) {
-        this.blocked = blocked;
-    }
-
-    /**
-     * Sets the role for the user.
-     *
-     * @param role The new role to assign to the user.
-     */
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    /**
-     * Gets the role assigned to the user.
-     *
-     * @return The user's role.
-     */
-    public Role getRole() {
-        return role;
-    }
 
     /**
      * Checks if the user has the admin role.

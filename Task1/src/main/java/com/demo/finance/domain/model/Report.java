@@ -1,5 +1,9 @@
 package com.demo.finance.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -7,6 +11,9 @@ import java.util.Objects;
  * Represents a financial report for a user, including the total income, total expenses,
  * and the resulting balance (income - expenses).
  */
+@Setter
+@Getter
+@AllArgsConstructor
 public class Report {
 
     private final Long userId;

@@ -1,4 +1,4 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
@@ -8,13 +8,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AdminServiceImplTest {
@@ -23,6 +26,7 @@ class AdminServiceImplTest {
     @InjectMocks private AdminServiceImpl adminService;
 
     @Test
+    @DisplayName("Test that getAllUsers returns all users when users exist")
     void testGetAllUsers() {
         List<User> mockUsers = Arrays.asList(
                 new User(1L, "Alice", "alice@mail.com", "password123", false,
@@ -40,6 +44,7 @@ class AdminServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that updateUserRole updates the user's role successfully")
     void testUpdateUserRole_Success() {
         Long userId = 1L;
         Role newRole = new Role("admin");
@@ -58,6 +63,7 @@ class AdminServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that blockUser blocks the user successfully")
     void testBlockUser_Success() {
         Long userId = 1L;
         User user = new User(userId, "Alice", "alice@mail.com", "password123", false,
@@ -73,6 +79,7 @@ class AdminServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that unBlockUser unblocks the user successfully")
     void testUnBlockUser_Success() {
         Long userId = 1L;
         User user = new User(userId, "Alice", "alice@mail.com", "password123", true,
@@ -88,6 +95,7 @@ class AdminServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that deleteUser deletes the user successfully")
     void testDeleteUser_Success() {
         Long userId = 1L;
 
@@ -100,6 +108,7 @@ class AdminServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that getAllUsers returns an empty list when no users exist")
     void testGetAllUsersWhenNoUsersExist() {
         when(userRepository.findAll()).thenReturn(List.of());
 
@@ -109,6 +118,7 @@ class AdminServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that updateUserRole fails when the user does not exist")
     void testUpdateUserRoleWhenUserDoesNotExist() {
         Long userId = 1L;
         Role newRole = new Role("admin");
@@ -121,6 +131,7 @@ class AdminServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that blockUser fails when the user does not exist")
     void testBlockUserWhenUserDoesNotExist() {
         Long userId = 1L;
 
@@ -132,6 +143,7 @@ class AdminServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that unBlockUser fails when the user does not exist")
     void testUnBlockUserWhenUserDoesNotExist() {
         Long userId = 1L;
 
@@ -143,6 +155,7 @@ class AdminServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that deleteUser fails when the user does not exist")
     void testDeleteUserWhenUserDoesNotExist() {
         Long userId = 3L;
 

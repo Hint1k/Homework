@@ -1,8 +1,9 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.TransactionRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,8 +15,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceImplTest {
@@ -24,6 +31,7 @@ class TransactionServiceImplTest {
     @InjectMocks private TransactionServiceImpl transactionService;
 
     @Test
+    @DisplayName("Create transaction - valid transaction - saves successfully")
     void testCreateTransaction_validTransaction_savesSuccessfully() {
         Long userId = 1L;
         BigDecimal amount = new BigDecimal(100);
@@ -43,6 +51,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    @DisplayName("Get transaction - existing transaction - returns transaction")
     void testGetTransaction_existingTransaction_returnsTransaction() {
         Long transactionId = 1L;
         Transaction transaction = new Transaction(transactionId, 2L, new BigDecimal(100),
@@ -55,6 +64,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    @DisplayName("Delete transaction - transaction exists - deletes successfully")
     void testDeleteTransaction_transactionExists_deletesSuccessfully() {
         Long transactionId = 1L;
         Long userId = 2L;
@@ -70,6 +80,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    @DisplayName("Create transaction - negative amount - throws exception")
     void testCreateTransaction_negativeAmount_throwsException() {
         Long userId = 1L;
         BigDecimal amount = new BigDecimal(-50);
@@ -85,6 +96,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    @DisplayName("Get transaction - non-existing transaction - returns null")
     void testGetTransaction_nonExistingTransaction_returnsNull() {
         Long transactionId = 99L;
         when(transactionRepository.findByTransactionId(transactionId)).thenReturn(null);
@@ -95,6 +107,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    @DisplayName("Update transaction - transaction does not exist - returns false")
     void testUpdateTransaction_transactionDoesNotExist_returnsFalse() {
         Long transactionId = 1L;
         Long userId = 2L;
@@ -109,6 +122,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    @DisplayName("Delete transaction - transaction does not exist - returns false")
     void testDeleteTransaction_transactionDoesNotExist_returnsFalse() {
         Long transactionId = 99L;
         Long userId = 2L;
@@ -122,6 +136,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    @DisplayName("Get filtered transactions - matching transactions - returns list")
     void testGetFilteredTransactions_matchingTransactions_returnsList() {
         Long userId = 1L;
         LocalDate from = LocalDate.of(2025, 3, 1);
@@ -144,6 +159,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    @DisplayName("Get filtered transactions - no matching transactions - returns empty list")
     void testGetFilteredTransactions_noMatchingTransactions_returnsEmptyList() {
         Long userId = 1L;
         LocalDate from = LocalDate.of(2025, 3, 1);
@@ -159,6 +175,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    @DisplayName("Update transaction - transaction exists - updates successfully")
     void testUpdateTransaction_transactionExists_updatesSuccessfully() {
         Long transactionId = 1L;
         Long userId = 2L;

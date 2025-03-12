@@ -1,8 +1,9 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.utils.BalanceUtils;
 import com.demo.finance.out.repository.GoalRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +15,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 class GoalServiceImplTest {
@@ -24,6 +29,7 @@ class GoalServiceImplTest {
     @InjectMocks private GoalServiceImpl goalService;
 
     @Test
+    @DisplayName("Test that createGoal saves the goal successfully")
     void testCreateGoal_savesGoalSuccessfully() {
         Goal goal = new Goal(1L, "Car", new BigDecimal(5000), 12);
 
@@ -33,6 +39,7 @@ class GoalServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that getGoal returns an existing goal")
     void testGetGoal_existingGoal_returnsGoal() {
         Goal goal = new Goal(1L, "Vacation", new BigDecimal(3000), 6);
         when(goalRepository.findByUserIdAndName(1L, "Vacation")).thenReturn(Optional.of(goal));
@@ -43,6 +50,7 @@ class GoalServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that deleteGoal deletes an existing goal successfully")
     void testDeleteGoal_existingGoal_deletesSuccessfully() {
         doNothing().when(goalRepository).deleteByUserIdAndName(1L, "Vacation");
 
@@ -52,6 +60,7 @@ class GoalServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that getGoal returns empty when the goal does not exist")
     void testGetGoal_whenGoalDoesNotExist_returnsEmpty() {
         when(goalRepository.findByUserIdAndName(1L, "NonExistentGoal")).thenReturn(Optional.empty());
 
@@ -61,6 +70,7 @@ class GoalServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that updateGoal successfully updates an existing goal")
     void testUpdateGoal_successfullyUpdatesGoal() {
         Goal existingGoal = new Goal(1L, "Car", new BigDecimal(5000), 12);
         Goal updatedGoal = new Goal(1L, "NewCar", new BigDecimal(7000), 18);
@@ -74,6 +84,7 @@ class GoalServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that updateGoal throws an exception when the goal does not exist")
     void testUpdateGoal_throwsExceptionWhenGoalDoesNotExist() {
         when(goalRepository.findByUserIdAndName(1L, "NonExistentGoal"))
                 .thenReturn(Optional.empty());
@@ -87,6 +98,7 @@ class GoalServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that createGoal fails to save the goal due to a runtime exception")
     void testCreateGoal_failsToSaveGoal() {
         Goal goal = new Goal(1L, "Car", new BigDecimal(5000), 12);
 
@@ -101,6 +113,7 @@ class GoalServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test that calculateTotalBalance calls BalanceUtils and returns the correct value")
     void testCalculateTotalBalance_callsBalanceUtilsAndReturnsCorrectValue() {
         Goal goal = new Goal(1L, "Vacation", new BigDecimal(3000), 6);
 

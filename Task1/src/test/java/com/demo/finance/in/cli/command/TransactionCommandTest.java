@@ -8,6 +8,7 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.in.controller.TransactionController;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +19,15 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionCommandTest {
@@ -37,6 +46,7 @@ class TransactionCommandTest {
     }
 
     @Test
+    @DisplayName("Add transaction - Success")
     void testAddTransaction_Success() {
         when(validationUtils.promptForPositiveBigDecimal(any(), any())).thenReturn(new BigDecimal(100));
         when(validationUtils.promptForNonEmptyString(eq("Enter Category: "), any())).thenReturn("Food");
@@ -53,6 +63,7 @@ class TransactionCommandTest {
     }
 
     @Test
+    @DisplayName("Delete transaction - Success")
     void testDeleteTransaction_Success() {
         when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(1L);
         when(transactionController.deleteTransaction(anyLong(), anyLong())).thenReturn(true);
@@ -63,6 +74,7 @@ class TransactionCommandTest {
     }
 
     @Test
+    @DisplayName("View transactions by user ID - Success")
     void testViewTransactionsByUserId() {
         when(transactionController.getTransactionsByUserId(anyLong()))
                 .thenReturn(List.of(new Transaction(1L, 1L, new BigDecimal(50),
@@ -74,6 +86,7 @@ class TransactionCommandTest {
     }
 
     @Test
+    @DisplayName("Add transaction - Invalid amount logs error")
     void testAddTransaction_InvalidAmount_LogsError() {
         when(validationUtils.promptForPositiveBigDecimal(any(), any()))
                 .thenThrow(new MaxRetriesReachedException("Invalid amount"));
@@ -86,6 +99,7 @@ class TransactionCommandTest {
     }
 
     @Test
+    @DisplayName("Update transaction - Invalid transaction ID logs error")
     void testUpdateTransaction_InvalidTransactionId_LogsError() {
         when(validationUtils.promptForPositiveLong(any(), any()))
                 .thenThrow(new MaxRetriesReachedException("Invalid transaction ID"));
@@ -97,6 +111,7 @@ class TransactionCommandTest {
     }
 
     @Test
+    @DisplayName("Update transaction - Transaction not found returns error")
     void testUpdateTransaction_TransactionNotFound_ReturnsError() {
         when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(1L);
         when(transactionController.getTransaction(1L)).thenReturn(null);
@@ -108,6 +123,7 @@ class TransactionCommandTest {
     }
 
     @Test
+    @DisplayName("Delete transaction - Invalid transaction ID logs error")
     void testDeleteTransaction_InvalidTransactionId_LogsError() {
         when(validationUtils.promptForPositiveLong(any(), any()))
                 .thenThrow(new MaxRetriesReachedException("Invalid transaction ID"));
@@ -119,6 +135,7 @@ class TransactionCommandTest {
     }
 
     @Test
+    @DisplayName("Filter transactions - No filters returns all transactions")
     void testFilterTransactions_NoFilters_ReturnsAllTransactions() {
         when(validationUtils.promptForOptionalDate(any(), any())).thenReturn(null);
         when(validationUtils.promptForOptionalString(any(), any())).thenReturn(null);

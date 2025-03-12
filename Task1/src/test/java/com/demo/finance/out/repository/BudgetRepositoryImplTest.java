@@ -1,6 +1,7 @@
 package com.demo.finance.out.repository;
 
 import com.demo.finance.domain.model.Budget;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +18,7 @@ class BudgetRepositoryImplTest {
     @InjectMocks private BudgetRepositoryImpl repository;
 
     @Test
+    @DisplayName("Save and find by user ID - Success scenario")
     void testSaveAndFindByUserId() {
         Budget budget = new Budget(1L, new BigDecimal(1000));
         boolean saved = repository.save(budget);
@@ -29,6 +31,7 @@ class BudgetRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Find by user ID - No budget exists scenario")
     void testFindByUserId_NoBudgetExists() {
         Optional<Budget> found = repository.findByUserId(2L);
 
@@ -36,6 +39,7 @@ class BudgetRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("Save - Overwrite existing budget scenario")
     void testSave_OverwriteExistingBudget() {
         Budget initialBudget = new Budget(1L, new BigDecimal(1000));
         repository.save(initialBudget);

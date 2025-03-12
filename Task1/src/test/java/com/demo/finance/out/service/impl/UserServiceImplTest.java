@@ -1,9 +1,10 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.PasswordUtils;
 import com.demo.finance.out.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,7 +12,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -21,6 +23,7 @@ class UserServiceImplTest {
     @InjectMocks private UserServiceImpl userService;
 
     @Test
+    @DisplayName("Update own account - existing user - updates successfully")
     void testUpdateOwnAccount_existingUser_updatesSuccessfully() {
         Long userId = 1L;
         Role role = new Role("USER");
@@ -38,6 +41,7 @@ class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Delete own account - existing user - deletes successfully")
     void testDeleteOwnAccount_existingUser_deletesSuccessfully() {
         Long userId = 1L;
         when(userRepository.delete(userId)).thenReturn(true);
@@ -49,6 +53,7 @@ class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Update own account - null password - hashes and updates successfully")
     void testUpdateOwnAccount_nullPassword_hashesAndUpdatesSuccessfully() {
         Long userId = 1L;
         Role role = new Role("USER");
@@ -66,6 +71,7 @@ class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Update own account - update fails - returns false")
     void testUpdateOwnAccount_updateFails_returnsFalse() {
         Long userId = 1L;
         Role role = new Role("USER");
@@ -83,6 +89,7 @@ class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Delete own account - non-existing user - returns false")
     void testDeleteOwnAccount_nonExistingUser_returnsFalse() {
         Long userId = 99L;
         when(userRepository.delete(userId)).thenReturn(false);

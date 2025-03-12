@@ -2,6 +2,7 @@ package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.model.Report;
 import com.demo.finance.out.service.ReportService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,7 +14,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class ReportControllerTest {
@@ -22,6 +25,7 @@ class ReportControllerTest {
     @InjectMocks private ReportController reportController;
 
     @Test
+    @DisplayName("Generate report - Success scenario")
     void testGenerateReport_Success() {
         Long userId = 1L;
         Report mockReport = new Report(userId, new BigDecimal(5000), new BigDecimal(3000));
@@ -35,6 +39,7 @@ class ReportControllerTest {
     }
 
     @Test
+    @DisplayName("Generate report - No report found scenario")
     void testGenerateReport_NoReportFound() {
         Long userId = 1L;
 
@@ -47,6 +52,7 @@ class ReportControllerTest {
     }
 
     @Test
+    @DisplayName("Generate report by date - Success scenario")
     void testGenerateReportByDate_Success() {
         Long userId = 1L;
         String fromDate = "2023-01-01";
@@ -62,6 +68,7 @@ class ReportControllerTest {
     }
 
     @Test
+    @DisplayName("Generate report by date - No report found scenario")
     void testGenerateReportByDate_NoReportFound() {
         Long userId = 1L;
         String fromDate = "2023-01-01";
@@ -76,6 +83,7 @@ class ReportControllerTest {
     }
 
     @Test
+    @DisplayName("Analyze expenses by category - Success scenario")
     void testAnalyzeExpensesByCategory() {
         Long userId = 1L;
         String fromDate = "2023-01-01";

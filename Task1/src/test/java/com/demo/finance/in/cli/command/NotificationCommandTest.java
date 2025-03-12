@@ -4,13 +4,16 @@ import com.demo.finance.domain.model.User;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.in.controller.NotificationController;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationCommandTest {
@@ -28,6 +31,7 @@ class NotificationCommandTest {
     }
 
     @Test
+    @DisplayName("Check budget notification - Budget is within limits")
     void testCheckBudgetNotification() {
         when(notificationController.checkBudgetNotification(2L)).thenReturn("Budget is within limits.");
 
@@ -37,6 +41,7 @@ class NotificationCommandTest {
     }
 
     @Test
+    @DisplayName("Check goal notification - Goal achieved")
     void testCheckGoalNotification() {
         when(notificationController.checkGoalNotification(2L)).thenReturn("Goal achieved: New Car!");
 
@@ -46,6 +51,7 @@ class NotificationCommandTest {
     }
 
     @Test
+    @DisplayName("Check budget notification - No budget set")
     void testCheckBudgetNotification_NoBudgetSet_ReturnsNoBudgetMessage() {
         when(notificationController.checkBudgetNotification(2L)).thenReturn("No budget set for user.");
 
@@ -55,6 +61,7 @@ class NotificationCommandTest {
     }
 
     @Test
+    @DisplayName("Check budget notification - Budget exceeded")
     void testCheckBudgetNotification_BudgetExceeded_ReturnsWarningMessage() {
         when(notificationController.checkBudgetNotification(2L))
                 .thenReturn("🚨 Budget exceeded! Limit: 500.0, Expenses: 600.0");
@@ -65,6 +72,7 @@ class NotificationCommandTest {
     }
 
     @Test
+    @DisplayName("Check budget notification - Budget under control")
     void testCheckBudgetNotification_BudgetUnderControl_ReturnsSuccessMessage() {
         when(notificationController.checkBudgetNotification(2L))
                 .thenReturn("✅ Budget is under control. Remaining budget: 100.0");
@@ -75,6 +83,7 @@ class NotificationCommandTest {
     }
 
     @Test
+    @DisplayName("Check goal notification - No goals set")
     void testCheckGoalNotification_NoGoalsSet_ReturnsNoGoalsMessage() {
         when(notificationController.checkGoalNotification(2L)).thenReturn("No goals set.");
 
@@ -84,6 +93,7 @@ class NotificationCommandTest {
     }
 
     @Test
+    @DisplayName("Check goal notification - Goal achieved")
     void testCheckGoalNotification_GoalAchieved_ReturnsSuccessMessage() {
         when(notificationController.checkGoalNotification(2L))
                 .thenReturn("🎉 Goal achieved: 'New Car'! Target: 10000.0, Balance: 12000.0");
@@ -94,6 +104,7 @@ class NotificationCommandTest {
     }
 
     @Test
+    @DisplayName("Check goal notification - Goal in progress")
     void testCheckGoalNotification_GoalInProgress_ReturnsProgressMessage() {
         when(notificationController.checkGoalNotification(2L))
                 .thenReturn("⏳ Goal 'New Car' progress: 75.0% (Balance: 7500.0 / Target: 10000.0)");

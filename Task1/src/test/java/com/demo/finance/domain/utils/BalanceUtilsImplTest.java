@@ -4,6 +4,7 @@ import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.out.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +17,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class BalanceUtilsImplTest {
@@ -33,6 +36,7 @@ class BalanceUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Calculate balance - successful calculation with valid transactions")
     void testCalculateBalance_Success() {
         List<Transaction> mockTransactions = Arrays.asList(
                 new Transaction(1L, 1L, new BigDecimal(1000), "Salary",
@@ -52,6 +56,7 @@ class BalanceUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Calculate balance - returns zero when no transactions are found")
     void testCalculateBalance_NoTransactions() {
         when(transactionRepository.findByUserId(1L)).thenReturn(List.of());
 
@@ -62,6 +67,7 @@ class BalanceUtilsImplTest {
     }
 
     @Test
+    @DisplayName("Calculate balance - returns zero when transactions are outside the goal period")
     void testCalculateBalance_TransactionsOutsideGoalPeriod() {
         List<Transaction> mockTransactions = Arrays.asList(
                 new Transaction(1L, 1L, new BigDecimal(1000), "Salary",

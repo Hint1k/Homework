@@ -1,9 +1,10 @@
-package com.demo.finance.out.service;
+package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Report;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.TransactionRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ReportServiceImplTest {
@@ -25,6 +26,7 @@ class ReportServiceImplTest {
     @InjectMocks private ReportServiceImpl reportService;
 
     @Test
+    @DisplayName("Generate user report - transactions exist - returns report")
     void testGenerateUserReport_transactionsExist_returnsReport() {
         Long userId = 1L;
         List<Transaction> transactions = List.of(
@@ -42,6 +44,7 @@ class ReportServiceImplTest {
     }
 
     @Test
+    @DisplayName("Analyze expenses by category - valid range - returns expense summary")
     void testAnalyzeExpensesByCategory_validRange_returnsExpenseSummary() {
         Long userId = 1L;
         LocalDate from = LocalDate.of(2025, 3, 1);
@@ -62,6 +65,7 @@ class ReportServiceImplTest {
     }
 
     @Test
+    @DisplayName("Generate user report - no transactions - returns empty")
     void testGenerateUserReport_noTransactions_returnsEmpty() {
         Long userId = 1L;
         when(transactionRepository.findByUserId(userId)).thenReturn(List.of());
@@ -72,6 +76,7 @@ class ReportServiceImplTest {
     }
 
     @Test
+    @DisplayName("Generate report by date - transactions within range - returns report")
     void testGenerateReportByDate_transactionsWithinRange_returnsReport() {
         Long userId = 1L;
         LocalDate from = LocalDate.of(2025, 3, 1);
@@ -92,6 +97,7 @@ class ReportServiceImplTest {
     }
 
     @Test
+    @DisplayName("Generate report by date - no transactions within range - returns empty")
     void testGenerateReportByDate_noTransactionsWithinRange_returnsEmpty() {
         Long userId = 1L;
         LocalDate from = LocalDate.of(2025, 3, 1);
@@ -105,6 +111,7 @@ class ReportServiceImplTest {
     }
 
     @Test
+    @DisplayName("Analyze expenses by category - no expenses - returns empty map")
     void testAnalyzeExpensesByCategory_noExpenses_returnsEmptyMap() {
         Long userId = 1L;
         LocalDate from = LocalDate.of(2025, 3, 1);
@@ -123,6 +130,7 @@ class ReportServiceImplTest {
     }
 
     @Test
+    @DisplayName("Generate report by date - string dates - returns correct report")
     void testGenerateReportByDate_stringDates_returnsCorrectReport() {
         Long userId = 1L;
         String fromDate = "2025-03-01";
@@ -143,6 +151,7 @@ class ReportServiceImplTest {
     }
 
     @Test
+    @DisplayName("Analyze expenses by category - string dates - returns correct summary")
     void testAnalyzeExpensesByCategory_stringDates_returnsCorrectSummary() {
         Long userId = 1L;
         String fromDate = "2025-03-01";

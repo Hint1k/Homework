@@ -1,5 +1,6 @@
 package com.demo.finance.app;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -16,6 +17,7 @@ class ApplicationConfigTest {
     @InjectMocks private ApplicationConfig applicationConfig;
 
     @Test
+    @DisplayName("Load admin properties - verifies default admin configurations")
     void testLoadAdminProperties() {
         try {
             Properties adminProps = getPrivateAdminProperties(applicationConfig);
