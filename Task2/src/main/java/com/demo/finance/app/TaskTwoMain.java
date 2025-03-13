@@ -1,5 +1,8 @@
 package com.demo.finance.app;
 
+import com.demo.finance.app.config.ApplicationConfig;
+import com.demo.finance.app.config.DatabaseConfig;
+import com.demo.finance.app.liquibase.LiquibaseMigrationService;
 import com.demo.finance.in.cli.CliHandler;
 
 /**
@@ -15,11 +18,16 @@ public class TaskTwoMain {
      * @param args Command line arguments (not used in this application).
      */
     public static void main(String[] args) {
-        // Initialize the application configuration and CLI handler
+        // Step 1: Initialize configuration
+        DatabaseConfig databaseConfig = DatabaseConfig.getInstance();
+
+        // Step 2: Run Liquibase migrations
+        LiquibaseMigrationService migrationService = new LiquibaseMigrationService(databaseConfig);
+        migrationService.runMigrations();
+
+        // Step 3: Start the application
         ApplicationConfig config = new ApplicationConfig();
         CliHandler cliHandler = config.getCliHandler();
-
-        // Start the CLI to handle user input and commands
         cliHandler.start();
     }
 }

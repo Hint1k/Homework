@@ -1,4 +1,4 @@
-package com.demo.finance.app;
+package com.demo.finance.app.config;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;

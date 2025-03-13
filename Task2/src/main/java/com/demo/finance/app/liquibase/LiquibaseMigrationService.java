@@ -6,10 +6,12 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+@Slf4j
 public class LiquibaseMigrationService {
 
     private final DatabaseConfig databaseConfig;
@@ -29,10 +31,10 @@ public class LiquibaseMigrationService {
                     .findCorrectDatabaseImplementation(new JdbcConnection(connection));
             Liquibase liquibase = new Liquibase(changeLogFile, new ClassLoaderResourceAccessor(), database);
             liquibase.update("");
-            System.out.println("Liquibase migration completed successfully.");
+            log.info("Liquibase migration completed successfully.");
         } catch (Exception e) {
-            System.err.println("Failed to run Liquibase migrations: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Failed to run Liquibase migrations: {}", e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 }

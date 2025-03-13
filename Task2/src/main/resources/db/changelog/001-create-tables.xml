@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog/001-create-tables.xml">
+
+    <changeSet id="001-create-tables" author="hint1k">
+        <!-- Create custom schema -->
+        <sql>CREATE SCHEMA IF NOT EXISTS finance;</sql>
+
+        <!-- Users Table -->
+        <createTable tableName="users" schemaName="finance">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)" nullable="false"/>
+            <column name="role" type="VARCHAR(50)" defaultValue="USER"/>
+        </createTable>
+
+        <!-- I will add other tables here (e.g., transactions, accounts) later -->
+    </changeSet>
+</databaseChangeLog>

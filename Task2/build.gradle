@@ -23,12 +23,18 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.10.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.10.0'
     testImplementation 'org.assertj:assertj-core:3.24.2'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'
     compileOnly 'org.projectlombok:lombok:1.18.36'
     annotationProcessor 'org.projectlombok:lombok:1.18.36'
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.5'
+    implementation group: 'org.liquibase', name: 'liquibase-core', version: '4.31.1'
+    testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.20.6'
+    testImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.20.6'
+    testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.20.6'
 }
 
 application {
-    mainClass = 'com.demo.finance.app.TaskOneMain'
+    mainClass = 'com.demo.finance.app.TaskTwoMain'
 }
 
 sourceSets {
