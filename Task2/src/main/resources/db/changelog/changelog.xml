@@ -1,0 +1,4 @@
+<databaseChangeLog>
+    <include file="001-create-tables.xml"/>
+    <include file="002-insert-data.xml"/>
+</databaseChangeLog>
