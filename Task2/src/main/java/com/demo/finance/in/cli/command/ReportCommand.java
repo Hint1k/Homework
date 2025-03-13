@@ -1,6 +1,6 @@
 package com.demo.finance.in.cli.command;
 
-import com.demo.finance.domain.utils.MaxRetriesReachedException;
+import com.demo.finance.exception.MaxRetriesReachedException;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.CommandContext;
 import com.demo.finance.domain.model.Report;

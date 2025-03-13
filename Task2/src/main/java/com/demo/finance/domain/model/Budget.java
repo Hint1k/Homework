@@ -2,6 +2,7 @@ package com.demo.finance.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -14,18 +15,15 @@ import java.util.Objects;
 @Setter
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class Budget {
 
-    private final Long userId;
+    private Long budgetId;
+    private Long userId;
     private BigDecimal monthlyLimit;
     private BigDecimal currentExpenses;
 
-    /**
-     * Constructs a new Budget for a user with a specified monthly limit.
-     *
-     * @param userId The ID of the user this budget is associated with.
-     * @param monthlyLimit The maximum amount the user can spend in a month.
-     */
+    // no budget id constructor
     public Budget(Long userId, BigDecimal monthlyLimit) {
         this.userId = userId;
         this.monthlyLimit = monthlyLimit;
@@ -43,7 +41,8 @@ public class Budget {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Budget budget = (Budget) o;
-        return Objects.equals(userId, budget.userId) && Objects.equals(monthlyLimit, budget.monthlyLimit)
+        return Objects.equals(budgetId, budget.budgetId) && Objects.equals(userId, budget.userId)
+                && Objects.equals(monthlyLimit, budget.monthlyLimit)
                 && Objects.equals(currentExpenses, budget.currentExpenses);
     }
 
@@ -55,7 +54,7 @@ public class Budget {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(userId, monthlyLimit, currentExpenses);
+        return Objects.hash(budgetId, userId, monthlyLimit, currentExpenses);
     }
 
     /**

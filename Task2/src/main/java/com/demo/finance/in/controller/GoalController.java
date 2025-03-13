@@ -54,7 +54,7 @@ public class GoalController {
      * @return a list of the user's goals
      */
     public List<Goal> getAllGoals(Long userId) {
-        return goalService.getUserGoals(userId);
+        return goalService.getGoalsByUserId(userId);
     }
 
     /**

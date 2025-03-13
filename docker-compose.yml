@@ -3,31 +3,28 @@ services:
     image: postgres:16
     container_name: hint1k_postgres
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: 123
-      POSTGRES_DB: myapp2
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: financedb
     ports:
       - "5432:5432"
-    volumes:
-      - ./src/main/resources/sql-scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME}" ]
       interval: 30s
       timeout: 10s
       retries: 5
     restart: unless-stopped
 
-  tms:
+  finance:
     build:
       context: ./Task2
-      dockerfile: Dockerfile
-    container_name: hint1k_tms
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/financedb
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: 123
+      dockerfile: Task2/Dockerfile
+    container_name: hint1k_finance
+    env_file:
+      - Task2/.env
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     ports:
       - "8080:8080"
     healthcheck:

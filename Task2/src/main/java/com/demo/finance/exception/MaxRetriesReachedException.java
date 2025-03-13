@@ -1,4 +1,4 @@
-package com.demo.finance.domain.utils;
+package com.demo.finance.exception;
 
 /**
  * Custom exception thrown when the maximum number of retries has been reached.

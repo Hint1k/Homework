@@ -2,6 +2,7 @@ package com.demo.finance.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -17,9 +18,11 @@ import java.util.Objects;
 @Setter
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class Goal {
 
-    private final Long userId;
+    private Long goalId;
+    private Long userId;
     private String goalName;
     private BigDecimal targetAmount;
     private BigDecimal savedAmount;
@@ -81,7 +84,7 @@ public class Goal {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Goal goal = (Goal) o;
-        return duration == goal.duration && Objects.equals(userId, goal.userId)
+        return duration == goal.duration && Objects.equals(goalId, goal.goalId) && Objects.equals(userId, goal.userId)
                 && Objects.equals(goalName, goal.goalName) && Objects.equals(targetAmount, goal.targetAmount)
                 && Objects.equals(savedAmount, goal.savedAmount) && Objects.equals(startTime, goal.startTime);
     }
@@ -94,7 +97,7 @@ public class Goal {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(userId, goalName, targetAmount, savedAmount, duration, startTime);
+        return Objects.hash(goalId, userId, goalName, targetAmount, savedAmount, duration, startTime);
     }
 
     /**

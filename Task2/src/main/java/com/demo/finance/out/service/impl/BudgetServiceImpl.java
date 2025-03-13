@@ -41,7 +41,15 @@ public class BudgetServiceImpl implements BudgetService {
      */
     @Override
     public boolean setMonthlyBudget(Long userId, BigDecimal limit) {
-        return budgetRepository.save(new Budget(userId, limit));
+        Optional<Budget> existingBudget = budgetRepository.findByUserId(userId);
+        if (existingBudget.isPresent()) {
+            Budget updatedBudget = existingBudget.get();
+            updatedBudget.setMonthlyLimit(limit);
+            return budgetRepository.update(updatedBudget);
+        } else {
+            Budget newBudget = new Budget(userId, limit);
+            return budgetRepository.save(newBudget);
+        }
     }
 
     /**

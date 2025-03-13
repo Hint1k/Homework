@@ -18,14 +18,7 @@ public interface GoalRepository {
      */
     void save(Goal goal);
 
-    /**
-     * Finds a Goal entity by the user ID and goal name.
-     *
-     * @param userId the ID of the user associated with the goal
-     * @param goalName the name of the goal
-     * @return an Optional containing the Goal entity if found, otherwise an empty Optional
-     */
-    Optional<Goal> findByUserIdAndName(Long userId, String goalName);
+    Optional<Goal> findById(Long goalId);
 
     /**
      * Finds all Goal entities associated with a specific user ID.
@@ -35,20 +28,7 @@ public interface GoalRepository {
      */
     List<Goal> findByUserId(Long userId);
 
-    /**
-     * Updates an existing Goal entity with new details.
-     *
-     * @param userId the ID of the user associated with the goal
-     * @param oldGoalName the current name of the goal to be updated
-     * @param updatedGoal the updated Goal entity
-     */
-    void updateGoal(Long userId, String oldGoalName, Goal updatedGoal);
+    void update(Long goalId, Goal updatedGoal);
 
-    /**
-     * Deletes a Goal entity by the user ID and goal name.
-     *
-     * @param userId the ID of the user associated with the goal
-     * @param goalName the name of the goal to be deleted
-     */
-    void deleteByUserIdAndName(Long userId, String goalName);
+    void delete(Long goalId);
 }

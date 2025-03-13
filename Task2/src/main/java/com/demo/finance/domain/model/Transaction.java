@@ -7,6 +7,7 @@ import java.util.Objects;
 import com.demo.finance.domain.utils.Type;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -16,15 +17,27 @@ import lombok.Setter;
 @Setter
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class Transaction {
 
-    private final Long transactionId;
-    private final Long userId;
+    private Long transactionId;
+    private Long userId;
     private BigDecimal amount;
     private String category;
     private LocalDate date;
     private String description;
     private Type type;
+
+    // no transaction id constructor
+    public Transaction(Long userId, BigDecimal amount, String category, LocalDate date, String description,
+                       Type type) {
+        this.userId = userId;
+        this.amount = amount;
+        this.category = category;
+        this.date = date;
+        this.description = description;
+        this.type = type;
+    }
 
     /**
      * Checks if the transaction date is within the specified date range.

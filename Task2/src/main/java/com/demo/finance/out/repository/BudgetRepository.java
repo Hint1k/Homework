@@ -24,7 +24,13 @@ public interface BudgetRepository {
      *
      * @param userId the ID of the user whose budget is to be retrieved
      * @return an {@code Optional<Budget>} containing the user's budget if it exists,
-     *         or an empty {@code Optional} if no budget is found
+     * or an empty {@code Optional} if no budget is found
      */
     Optional<Budget> findByUserId(Long userId);
+
+    boolean delete(Long budgetId);
+
+    boolean update(Long budgetId, Budget updatedBudget);
+
+    Optional<Budget> findById(Long budgetId);
 }

@@ -2,7 +2,7 @@ package com.demo.finance.app;
 
 import com.demo.finance.app.config.ApplicationConfig;
 import com.demo.finance.app.config.DatabaseConfig;
-import com.demo.finance.app.liquibase.LiquibaseMigrationService;
+import com.demo.finance.app.config.LiquibaseManager;
 import com.demo.finance.in.cli.CliHandler;
 
 /**
@@ -22,7 +22,7 @@ public class TaskTwoMain {
         DatabaseConfig databaseConfig = DatabaseConfig.getInstance();
 
         // Step 2: Run Liquibase migrations
-        LiquibaseMigrationService migrationService = new LiquibaseMigrationService(databaseConfig);
+        LiquibaseManager migrationService = new LiquibaseManager(databaseConfig);
         migrationService.runMigrations();
 
         // Step 3: Start the application

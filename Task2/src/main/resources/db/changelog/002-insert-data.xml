@@ -7,12 +7,12 @@
         logicalFilePath="db/changelog/002-insert-data.xml">
 
     <changeSet id="002-insert-data" author="hint1k">
-        <!-- Insert Admin User (explicit ID for consistency with application.properties) -->
+        <!-- Insert Admin User -->
         <insert tableName="users" schemaName="finance">
             <column name="id" valueNumeric="1"/>
-            <column name="email" value="admin@demo.com"/>
-            <column name="password" value="123"/>
-            <column name="role" value="ADMIN"/>
+            <column name="email" value="${ADMIN_EMAIL}"/>
+            <column name="password" value="${ADMIN_PASSWORD}"/>
+            <column name="role" value="admin"/>
         </insert>
 
         <!-- Reset sequence to avoid ID conflicts -->

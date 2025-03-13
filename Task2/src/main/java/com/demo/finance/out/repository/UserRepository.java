@@ -31,7 +31,7 @@ public interface UserRepository {
      * @param userId the ID of the user to be retrieved
      * @return an {@code Optional<User>} containing the user if found, or an empty {@code Optional} if not found
      */
-    Optional<User> findByUserId(Long userId);
+    Optional<User> findById(Long userId);
 
     /**
      * Retrieves the {@code User} associated with the specified email.

@@ -44,7 +44,7 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public boolean updateUserRole(Long userId, Role newRole) {
-        return userRepository.findByUserId(userId).map(user -> {
+        return userRepository.findById(userId).map(user -> {
             user.setRole(newRole);
             return userRepository.update(user);
         }).orElse(false);
@@ -58,7 +58,7 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public boolean blockUser(Long userId) {
-        return userRepository.findByUserId(userId).map(user -> {
+        return userRepository.findById(userId).map(user -> {
             user.setBlocked(true);
             return true;
         }).orElse(false);
@@ -72,7 +72,7 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public boolean unBlockUser(Long userId) {
-        return userRepository.findByUserId(userId).map(user -> {
+        return userRepository.findById(userId).map(user -> {
             user.setBlocked(false);
             return true;
         }).orElse(false);

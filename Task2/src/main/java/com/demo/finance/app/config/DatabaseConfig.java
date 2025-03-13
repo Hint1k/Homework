@@ -12,7 +12,7 @@ public class DatabaseConfig {
 
     private DatabaseConfig() {
         // Load environment variables from .env file
-        envVars = EnvLoader.loadEnv(".env");
+        envVars = EnvLoader.loadEnv("../.env");
     }
 
     public static DatabaseConfig getInstance() {
@@ -34,6 +34,14 @@ public class DatabaseConfig {
 
     public String getDbDriver() {
         return envVars.get("DB_DRIVER");
+    }
+
+    public String getAdminEmail() {
+        return envVars.get("ADMIN_EMAIL");
+    }
+
+    public String getAdminPassword() {
+        return envVars.get("ADMIN_PASSWORD");
     }
 
     // Liquibase properties

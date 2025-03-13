@@ -2,6 +2,7 @@ package com.demo.finance.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Objects;
@@ -13,14 +14,24 @@ import java.util.Objects;
 @Setter
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
-    private final Long userId;
+    private Long userId;
     private String name;
     private String email;
     private String password;
     private boolean blocked;
     private Role role;
+
+    // no user id constructor
+    public User(String name, String email, String password, boolean blocked, Role role) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.blocked = blocked;
+        this.role = role;
+    }
 
     /**
      * Checks if the user has the admin role.

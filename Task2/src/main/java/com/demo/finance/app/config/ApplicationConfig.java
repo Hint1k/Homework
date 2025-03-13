@@ -6,6 +6,7 @@ import com.demo.finance.domain.utils.*;
 import com.demo.finance.in.cli.CliHandler;
 import com.demo.finance.in.controller.*;
 import com.demo.finance.out.repository.*;
+import com.demo.finance.out.repository.impl.*;
 import com.demo.finance.out.service.*;
 import com.demo.finance.out.service.impl.*;
 

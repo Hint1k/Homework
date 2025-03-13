@@ -51,8 +51,8 @@ public class GoalServiceImpl implements GoalService {
      * @return an {@code Optional<Goal>} containing the goal, or an empty optional if the goal does not exist
      */
     @Override
-    public Optional<Goal> getGoal(Long userId, String goalName) {
-        return goalRepository.findByUserIdAndName(userId, goalName);
+    public Optional<Goal> getGoal(Long goalId, String goalName) {
+        return goalRepository.findByUserIdAndName(goalId, goalName);
     }
 
     /**
@@ -62,7 +62,7 @@ public class GoalServiceImpl implements GoalService {
      * @return a list of goals associated with the user
      */
     @Override
-    public List<Goal> getUserGoals(Long userId) {
+    public List<Goal> getGoalsByUserId(Long userId) {
         return goalRepository.findByUserId(userId);
     }
 
@@ -77,12 +77,12 @@ public class GoalServiceImpl implements GoalService {
      * @throws IllegalArgumentException if the goal to update does not exist
      */
     @Override
-    public void updateGoal(Long userId, String oldGoalName, String newGoalName, BigDecimal newTargetAmount,
-                           int newDuration) {
+    public void updateGoal(Long goalId, Long userId, String oldGoalName, String newGoalName,
+                           BigDecimal newTargetAmount, int newDuration) {
         Optional<Goal> existingGoal = goalRepository.findByUserIdAndName(userId, oldGoalName);
         if (existingGoal.isPresent()) {
             Goal updatedGoal = new Goal(userId, newGoalName, newTargetAmount, newDuration);
-            goalRepository.updateGoal(userId, oldGoalName, updatedGoal);
+            goalRepository.update(userId, oldGoalName, updatedGoal);
         } else {
             throw new IllegalArgumentException("Goal not found.");
         }
@@ -95,7 +95,7 @@ public class GoalServiceImpl implements GoalService {
      * @param goalName the name of the goal to delete
      */
     @Override
-    public void deleteGoal(Long userId, String goalName) {
+    public void deleteGoal(Long goalId, Long userId, String goalName) {
         goalRepository.deleteByUserIdAndName(userId, goalName);
     }
 
@@ -107,7 +107,7 @@ public class GoalServiceImpl implements GoalService {
      * @return the total balance accumulated towards the goal
      */
     @Override
-    public BigDecimal calculateTotalBalance(Long userId, Goal goal) {
+    public BigDecimal calculateTotalBalance(Long goalId, Long userId, Goal goal) {
         return balanceUtils.calculateBalance(userId, goal);
     }
 }

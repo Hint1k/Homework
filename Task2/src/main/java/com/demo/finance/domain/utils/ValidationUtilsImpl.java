@@ -1,5 +1,7 @@
 package com.demo.finance.domain.utils;
 
+import com.demo.finance.exception.MaxRetriesReachedException;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;

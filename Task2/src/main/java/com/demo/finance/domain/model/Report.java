@@ -2,6 +2,7 @@ package com.demo.finance.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -14,19 +15,21 @@ import java.util.Objects;
 @Setter
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class Report {
 
-    private final Long userId;
-    private final BigDecimal totalIncome;
-    private final BigDecimal totalExpense;
-    private final BigDecimal balance;
+    private Long reportId;
+    private Long userId;
+    private BigDecimal totalIncome;
+    private BigDecimal totalExpense;
+    private BigDecimal balance;
 
     /**
      * Constructs a new Report for a user with the specified total income and total expenses.
      * The balance is calculated as the difference between total income and total expenses.
      *
-     * @param userId The ID of the user this report is associated with.
-     * @param totalIncome The total income for the user.
+     * @param userId       The ID of the user this report is associated with.
+     * @param totalIncome  The total income for the user.
      * @param totalExpense The total expenses for the user.
      */
     public Report(Long userId, BigDecimal totalIncome, BigDecimal totalExpense) {
@@ -47,8 +50,9 @@ public class Report {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Report report = (Report) o;
-        return Objects.equals(userId, report.userId) && Objects.equals(totalIncome, report.totalIncome)
-                && Objects.equals(totalExpense, report.totalExpense) && Objects.equals(balance, report.balance);
+        return Objects.equals(reportId, report.reportId) && Objects.equals(userId, report.userId)
+                && Objects.equals(totalIncome, report.totalIncome) && Objects.equals(totalExpense, report.totalExpense)
+                && Objects.equals(balance, report.balance);
     }
 
     /**
@@ -59,7 +63,7 @@ public class Report {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(userId, totalIncome, totalExpense, balance);
+        return Objects.hash(reportId, userId, totalIncome, totalExpense, balance);
     }
 
     /**

@@ -142,7 +142,7 @@ public class NotificationServiceImpl implements NotificationService {
      * @param body the body content of the email
      */
     private void sendNotificationViaEmail(Long userId, String subject, String body) {
-        userRepository.findByUserId(userId).ifPresentOrElse(
+        userRepository.findById(userId).ifPresentOrElse(
                 user -> emailService.sendEmail(user.getEmail(), subject, body),
                 () -> System.out.println("User email not found.")
         );
