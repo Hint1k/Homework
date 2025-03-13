@@ -18,10 +18,10 @@ services:
   finance:
     build:
       context: ./Task2
-      dockerfile: Task2/Dockerfile
+      dockerfile: Dockerfile
     container_name: hint1k_finance
     env_file:
-      - Task2/.env
+      - .env
     depends_on:
       postgres:
         condition: service_healthy
