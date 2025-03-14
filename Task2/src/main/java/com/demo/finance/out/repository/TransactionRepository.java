@@ -65,13 +65,6 @@ public interface TransactionRepository {
     List<Transaction> findFiltered(Long userId, LocalDate from, LocalDate to, String category, Type type);
 
     /**
-     * Generates the next available transaction ID.
-     *
-     * @return the next transaction ID
-     */
-    Long generateNextId();
-
-    /**
      * Finds a Transaction entity by its ID and associated user ID.
      *
      * @param userId the ID of the user associated with the transaction

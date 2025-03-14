@@ -61,6 +61,22 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
+     * Generates a report for a specific user within a given date range, using string representations of dates.
+     *
+     * @param userId   the ID of the user for whom the report is generated
+     * @param fromDate the start date of the range, represented as a string
+     * @param toDate   the end date of the range, represented as a string
+     * @return an {@link Optional} containing the generated {@link Report}, or {@code Optional.empty()}
+     * if no transactions are found
+     */
+    @Override
+    public Optional<Report> generateReportByDate(Long userId, String fromDate, String toDate) {
+        LocalDate from = LocalDate.parse(fromDate);
+        LocalDate to = LocalDate.parse(toDate);
+        return generateReportByDate(userId, from, to);
+    }
+
+    /**
      * Analyzes the user's expenses by category within a specified date range.
      *
      * @param userId the ID of the user whose expenses are analyzed
@@ -77,22 +93,6 @@ public class ReportServiceImpl implements ReportService {
                 .collect(Collectors.groupingBy(Transaction::getCategory,
                         Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)
                 ));
-    }
-
-    /**
-     * Generates a report for a specific user within a given date range, using string representations of dates.
-     *
-     * @param userId   the ID of the user for whom the report is generated
-     * @param fromDate the start date of the range, represented as a string
-     * @param toDate   the end date of the range, represented as a string
-     * @return an {@link Optional} containing the generated {@link Report}, or {@code Optional.empty()}
-     * if no transactions are found
-     */
-    @Override
-    public Optional<Report> generateReportByDate(Long userId, String fromDate, String toDate) {
-        LocalDate from = LocalDate.parse(fromDate);
-        LocalDate to = LocalDate.parse(toDate);
-        return generateReportByDate(userId, from, to);
     }
 
     /**

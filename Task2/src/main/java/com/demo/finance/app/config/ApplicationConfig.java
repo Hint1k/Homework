@@ -1,7 +1,5 @@
 package com.demo.finance.app.config;
 
-import com.demo.finance.domain.model.Role;
-import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.*;
 import com.demo.finance.in.cli.CliHandler;
 import com.demo.finance.in.controller.*;
@@ -9,9 +7,6 @@ import com.demo.finance.out.repository.*;
 import com.demo.finance.out.repository.impl.*;
 import com.demo.finance.out.service.*;
 import com.demo.finance.out.service.impl.*;
-
-import java.io.InputStream;
-import java.util.Properties;
 
 /**
  * Configures and initializes the application by setting up repositories, services, controllers,
@@ -60,47 +55,10 @@ public class ApplicationConfig {
         );
     }
 
-    private final Properties adminProperties = new Properties();
-
     /**
      * Initializes the application configuration by loading the admin properties
      * and setting up the default admin account.
      */
     public ApplicationConfig() {
-        loadAdminProperties();
-        initializeDefaultAdminAccount();
-    }
-
-    /**
-     * Loads the admin properties from the "application.properties" file located in the resources folder.
-     *
-     * @throws RuntimeException if loading the properties fails.
-     */
-    private void loadAdminProperties() {
-        try (InputStream input = getClass().getClassLoader()
-                .getResourceAsStream("application.properties")) {
-            if (input == null) {
-                throw new RuntimeException("Failed to find application.properties file.");
-            }
-            adminProperties.load(input);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load application properties", e);
-        }
-    }
-
-    /**
-     * Initializes the default admin account using the loaded properties and saves it to the user repository.
-     */
-    private void initializeDefaultAdminAccount() {
-        Long adminId = Long.parseLong(adminProperties.getProperty("admin.id"));
-        String adminEmail = adminProperties.getProperty("admin.email");
-        String adminName = adminProperties.getProperty("admin.name");
-        String rawPassword = adminProperties.getProperty("admin.password");
-        String roleName = adminProperties.getProperty("admin.role");
-
-        String hashedPassword = passwordUtils.hashPassword(rawPassword);
-        Role role = new Role(roleName);
-        User admin = new User(adminId, adminName, adminEmail, hashedPassword, false, role);
-        userRepository.save(admin);
     }
 }

@@ -44,9 +44,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         if (userRepository.findByEmail(email).isPresent()) {
             return false;
         }
-        Long userId = userRepository.generateNextId();
         String hashedPassword = passwordUtils.hashPassword(password);
-        User newUser = new User(userId, name, email, hashedPassword, false, role);
+        User newUser = new User(name, email, hashedPassword, false, role);
         userRepository.save(newUser);
         return true;
     }

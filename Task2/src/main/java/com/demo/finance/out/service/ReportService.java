@@ -34,6 +34,17 @@ public interface ReportService {
     Optional<Report> generateReportByDate(Long userId, LocalDate from, LocalDate to);
 
     /**
+     * Generates a report for a specific user within a given date range, using string representations of dates.
+     *
+     * @param userId the ID of the user for whom the report is generated
+     * @param fromDate the start date of the range, represented as a string
+     * @param toDate the end date of the range, represented as a string
+     * @return an {@link Optional} containing the generated {@link Report}, or {@code Optional.empty()}
+     * if no report is found
+     */
+    Optional<Report> generateReportByDate(Long userId, String fromDate, String toDate);
+
+    /**
      * Analyzes the user's expenses by category within a specified date range.
      *
      * @param userId the ID of the user whose expenses are analyzed
@@ -44,16 +55,6 @@ public interface ReportService {
      */
     Map<String, BigDecimal> analyzeExpensesByCategory(Long userId, LocalDate from, LocalDate to);
 
-    /**
-     * Generates a report for a specific user within a given date range, using string representations of dates.
-     *
-     * @param userId the ID of the user for whom the report is generated
-     * @param fromDate the start date of the range, represented as a string
-     * @param toDate the end date of the range, represented as a string
-     * @return an {@link Optional} containing the generated {@link Report}, or {@code Optional.empty()}
-     * if no report is found
-     */
-    Optional<Report> generateReportByDate(Long userId, String fromDate, String toDate);
 
     /**
      * Analyzes the user's expenses by category within a specified date range, using string representations of dates.

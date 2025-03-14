@@ -37,8 +37,10 @@ public class UserServiceImpl implements UserService {
      * @return {@code true} if the account was successfully updated, {@code false} otherwise
      */
     @Override
-    public boolean updateOwnAccount(Long userId, String name, String email, String password, Role role) {
-        String hashedPassword = passwordUtils.hashPassword(password);
+    public boolean updateOwnAccount(Long userId, String name, String email, String password, Role role,
+                                    boolean isPasswordUpdated) {
+        User existingUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        String hashedPassword = isPasswordUpdated ? passwordUtils.hashPassword(password) : existingUser.getPassword();
         User updatedUser = new User(userId, name, email, hashedPassword, false, role);
         return userRepository.update(updatedUser);
     }

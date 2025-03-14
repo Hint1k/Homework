@@ -16,14 +16,19 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TransactionRepositoryImpl implements TransactionRepository {
 
+    private static final Logger log = Logger.getLogger(TransactionRepositoryImpl.class.getName());
+
     @Override
     public void save(Transaction transaction) {
-        String sql = "INSERT INTO transactions (user_id, amount, category, date, description, type) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO finance.transactions (user_id, amount, category, date, description, type) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setLong(1, transaction.getUserId());
@@ -40,19 +45,23 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                         transaction.setTransactionId(generatedKeys.getLong(1));
                     }
                 }
-                conn.commit(); // Commit the transaction if successful
+                conn.commit();
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "Error saving transaction", e);
                 throw new DatabaseException("Error saving transaction", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "Error saving transaction", e);
             throw new DatabaseException("Error handling transaction", e);
         }
     }
 
     @Override
     public boolean update(Transaction transaction) {
-        String sql = "UPDATE transactions SET user_id = ?, amount = ?, category = ?, date = ?, description = ?, type = ? WHERE transaction_id = ?";
+        String sql = "UPDATE finance.transactions "
+                + "SET user_id = ?, amount = ?, category = ?, date = ?, description = ?, type = ? "
+                + "WHERE transaction_id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false); // Start transaction
 
@@ -66,57 +75,63 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 stmt.setLong(7, transaction.getTransactionId());
 
                 boolean result = stmt.executeUpdate() > 0;
-                conn.commit(); // Commit the transaction if successful
+                conn.commit();
                 return result;
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "Error updating transaction", e);
                 throw new DatabaseException("Error updating transaction", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "Error updating transaction", e);
             throw new DatabaseException("Error handling transaction", e);
         }
     }
 
     @Override
     public boolean delete(Long transactionId) {
-        String sql = "DELETE FROM transactions WHERE transaction_id = ?";
+        String sql = "DELETE FROM finance.transactions WHERE transaction_id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, transactionId);
 
                 boolean result = stmt.executeUpdate() > 0;
-                conn.commit(); // Commit the transaction if successful
+                conn.commit();
                 return result;
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "Error deleting transaction", e);
                 throw new DatabaseException("Error deleting transaction", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "Error deleting transaction", e);
             throw new DatabaseException("Error handling transaction", e);
         }
     }
 
     @Override
     public Transaction findByTransactionId(Long transactionId) {
-        String sql = "SELECT * FROM transactions WHERE transaction_id = ?";
+        String sql = "SELECT * FROM finance.transactions WHERE transaction_id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, transactionId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        conn.commit(); // Commit the transaction if successful
+                        conn.commit();
                         return mapResultSetToTransaction(rs);
                     }
                 }
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "Error finding transaction by id", e);
                 throw new DatabaseException("Error finding transaction", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "Error finding transaction by id", e);
             throw new DatabaseException("Error handling transaction", e);
         }
         return null;
@@ -124,10 +139,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
     @Override
     public List<Transaction> findByUserId(Long userId) {
-        String sql = "SELECT * FROM transactions WHERE user_id = ?";
+        String sql = "SELECT * FROM finance.transactions WHERE user_id = ?";
         List<Transaction> transactions = new ArrayList<>();
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, userId);
@@ -135,13 +150,15 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                     while (rs.next()) {
                         transactions.add(mapResultSetToTransaction(rs));
                     }
-                    conn.commit(); // Commit the transaction if successful
+                    conn.commit();
                 }
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "Error finding transaction by user id", e);
                 throw new DatabaseException("Error finding transactions by user ID", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "Error finding transaction by user id", e);
             throw new DatabaseException("Error handling transaction", e);
         }
         return transactions;
@@ -149,7 +166,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
     @Override
     public List<Transaction> findFiltered(Long userId, LocalDate from, LocalDate to, String category, Type type) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM transactions WHERE user_id = ?");
+        StringBuilder sql = new StringBuilder("SELECT * FROM finance.transactions WHERE user_id = ?");
         List<Object> params = new ArrayList<>();
         params.add(userId);
 
@@ -172,7 +189,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
         List<Transaction> transactions = new ArrayList<>();
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
                 for (int i = 0; i < params.size(); i++) {
@@ -183,61 +200,42 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                     while (rs.next()) {
                         transactions.add(mapResultSetToTransaction(rs));
                     }
-                    conn.commit(); // Commit the transaction if successful
+                    conn.commit();
                 }
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "Error filtering transactions", e);
                 throw new DatabaseException("Error filtering transactions", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "Error filtering transactions", e);
             throw new DatabaseException("Error handling transaction", e);
         }
         return transactions;
     }
 
     @Override
-    public Long generateNextId() {
-        String sql = "SELECT COALESCE(MAX(transaction_id), 0) + 1 FROM transactions";
-        try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
-
-            try (Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery(sql)) {
-
-                if (rs.next()) {
-                    conn.commit(); // Commit the transaction if successful
-                    return rs.getLong(1);
-                }
-            } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
-                throw new DatabaseException("Error generating next transaction ID", e);
-            }
-        } catch (SQLException e)            {
-            throw new DatabaseException("Error handling transaction", e);
-        }
-        return 1L;
-    }
-
-    @Override
     public Optional<Transaction> findByUserIdAndTransactionId(Long transactionId, Long userId) {
-        String sql = "SELECT * FROM transactions WHERE transaction_id = ? AND user_id = ?";
+        String sql = "SELECT * FROM finance.transactions WHERE transaction_id = ? AND user_id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, transactionId);
                 stmt.setLong(2, userId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        conn.commit(); // Commit the transaction if successful
+                        conn.commit();
                         return Optional.of(mapResultSetToTransaction(rs));
                     }
                 }
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "Error finding transaction by id and user id", e);
                 throw new DatabaseException("Error finding transaction by user ID and transaction ID", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "Error finding transaction by id and user id", e);
             throw new DatabaseException("Error handling transaction", e);
         }
         return Optional.empty();

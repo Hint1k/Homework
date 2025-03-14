@@ -40,19 +40,12 @@ public class GoalServiceImpl implements GoalService {
      */
     @Override
     public void createGoal(Long userId, String goalName, BigDecimal targetAmount, int duration) {
-        goalRepository.save(new Goal(userId, goalName, targetAmount, duration));
+        goalRepository.saveGoal(new Goal(userId, goalName, targetAmount, duration));
     }
 
-    /**
-     * Retrieves a specific goal for a user.
-     *
-     * @param userId the ID of the user whose goal is being retrieved
-     * @param goalName the name of the goal to retrieve
-     * @return an {@code Optional<Goal>} containing the goal, or an empty optional if the goal does not exist
-     */
     @Override
-    public Optional<Goal> getGoal(Long goalId, String goalName) {
-        return goalRepository.findByUserIdAndName(goalId, goalName);
+    public Optional<Goal> getGoal(Long goalId) {
+        return goalRepository.findGoalById(goalId);
     }
 
     /**
@@ -63,40 +56,22 @@ public class GoalServiceImpl implements GoalService {
      */
     @Override
     public List<Goal> getGoalsByUserId(Long userId) {
-        return goalRepository.findByUserId(userId);
+        return goalRepository.findGoalByUserId(userId);
     }
 
-    /**
-     * Updates an existing goal for a user.
-     *
-     * @param userId the ID of the user whose goal is being updated
-     * @param oldGoalName the name of the goal to be updated
-     * @param newGoalName the new name for the goal
-     * @param newTargetAmount the new target amount for the goal
-     * @param newDuration the new duration (in months) to achieve the goal
-     * @throws IllegalArgumentException if the goal to update does not exist
-     */
     @Override
-    public void updateGoal(Long goalId, Long userId, String oldGoalName, String newGoalName,
-                           BigDecimal newTargetAmount, int newDuration) {
-        Optional<Goal> existingGoal = goalRepository.findByUserIdAndName(userId, oldGoalName);
+    public void updateGoal(Goal updatedGoal) {
+        Optional<Goal> existingGoal = goalRepository.findGoalById(updatedGoal.getGoalId());
         if (existingGoal.isPresent()) {
-            Goal updatedGoal = new Goal(userId, newGoalName, newTargetAmount, newDuration);
-            goalRepository.update(userId, oldGoalName, updatedGoal);
+            goalRepository.updateGoal(updatedGoal);
         } else {
             throw new IllegalArgumentException("Goal not found.");
         }
     }
 
-    /**
-     * Deletes a goal for a user.
-     *
-     * @param userId the ID of the user whose goal is to be deleted
-     * @param goalName the name of the goal to delete
-     */
     @Override
-    public void deleteGoal(Long goalId, Long userId, String goalName) {
-        goalRepository.deleteByUserIdAndName(userId, goalName);
+    public void deleteGoal(Long goalId) {
+        goalRepository.deleteGoal(goalId);
     }
 
     /**
@@ -107,7 +82,7 @@ public class GoalServiceImpl implements GoalService {
      * @return the total balance accumulated towards the goal
      */
     @Override
-    public BigDecimal calculateTotalBalance(Long goalId, Long userId, Goal goal) {
+    public BigDecimal calculateTotalBalance(Long userId, Goal goal) {
         return balanceUtils.calculateBalance(userId, goal);
     }
 }

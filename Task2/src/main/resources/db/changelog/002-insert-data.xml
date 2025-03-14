@@ -10,8 +10,10 @@
         <!-- Insert Admin User -->
         <insert tableName="users" schemaName="finance">
             <column name="id" valueNumeric="1"/>
+            <column name="name" value="admin"/>
             <column name="email" value="${ADMIN_EMAIL}"/>
             <column name="password" value="${ADMIN_PASSWORD}"/>
+            <column name="blocked" value="false"/>
             <column name="role" value="admin"/>
         </insert>
 

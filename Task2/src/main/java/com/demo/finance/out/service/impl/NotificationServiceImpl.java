@@ -109,7 +109,7 @@ public class NotificationServiceImpl implements NotificationService {
      * @return the goal completion notification message
      */
     private String getGoalCompletionNotification(Long userId) {
-        List<Goal> userGoals = goalRepository.findByUserId(userId);
+        List<Goal> userGoals = goalRepository.findGoalByUserId(userId);
         if (userGoals.isEmpty()) {
             return "No goals set.";
         }

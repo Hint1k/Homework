@@ -46,9 +46,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Amount must be positive.");
         }
         LocalDate transactionDate = LocalDate.parse(date);
-        Long transactionId = transactionRepository.generateNextId();
-        Transaction transaction =
-                new Transaction(transactionId, userId, amount, category, transactionDate, description, type);
+        Transaction transaction = new Transaction(userId, amount, category, transactionDate, description, type);
         transactionRepository.save(transaction);
     }
 

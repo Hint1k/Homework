@@ -136,12 +136,13 @@ public class UserCommand {
             }
             String password = validationUtils.promptForOptionalPassword("Enter new password"
                     + OR_KEEP_CURRENT_VALUE, scanner);
-            if (password == null) {
+            boolean isPasswordUpdated = (password != null);
+            if (!isPasswordUpdated) {
                 password = user.getPassword();
             }
             Long userId = user.getUserId();
             Role role = user.getRole();
-            if (context.getUserController().updateOwnAccount(userId, name, email, password, role)) {
+            if (context.getUserController().updateOwnAccount(userId, name, email, password, role, isPasswordUpdated)) {
                 System.out.println("User updated successfully. Please log in again with your new credentials.");
                 context.setCurrentUser(null); // Log out the user
             } else {

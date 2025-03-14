@@ -3,6 +3,7 @@ package com.demo.finance.in.cli;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.controller.*;
 
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -43,22 +44,26 @@ public class CliHandler {
      * The method loops infinitely until the application is manually exited.
      */
     public void start() {
-        while (true) { // manual exit command
-            if (context.getCurrentUser() == null) {
-                Menu.showMainMenu();
-                String choice = scanner.nextLine().trim();
-                Command command = commandFactory.createCommand(choice);
-                command.execute();
-            } else if (context.getCurrentUser().isAdmin()) {
-                Menu.showAdminMenu();
-                String choice = scanner.nextLine().trim();
-                Command command = commandFactory.createCommand(choice);
-                command.execute();
-            } else {
-                Menu.showUserMenu();
-                String choice = scanner.nextLine().trim();
-                Command command = commandFactory.createCommand(choice);
-                command.execute();
+        while (true) { // Manual exit command
+            try {
+                if (context.getCurrentUser() == null) {
+                    Menu.showMainMenu();
+                    String choice = scanner.nextLine().trim();
+                    Command command = commandFactory.createCommand(choice);
+                    command.execute();
+                } else if (context.getCurrentUser().isAdmin()) {
+                    Menu.showAdminMenu();
+                    String choice = scanner.nextLine().trim();
+                    Command command = commandFactory.createCommand(choice);
+                    command.execute();
+                } else {
+                    Menu.showUserMenu();
+                    String choice = scanner.nextLine().trim();
+                    Command command = commandFactory.createCommand(choice);
+                    command.execute();
+                }
+            } catch (Exception e) {
+                System.out.println("An error occurred: " + e.getMessage());
             }
         }
     }

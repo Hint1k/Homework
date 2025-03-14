@@ -36,15 +36,8 @@ public class GoalController {
         goalService.createGoal(userId, name, targetAmount, duration);
     }
 
-    /**
-     * Retrieves a goal for a user by the goal name.
-     *
-     * @param userId the ID of the user whose goal is to be retrieved
-     * @param name the name of the goal to retrieve
-     * @return an {@code Optional} containing the goal if found, otherwise {@code Optional.empty()}
-     */
-    public Optional<Goal> getGoal(Long userId, String name) {
-        return goalService.getGoal(userId, name);
+    public Optional<Goal> getGoal(Long goalId) {
+        return goalService.getGoal(goalId);
     }
 
     /**
@@ -53,32 +46,16 @@ public class GoalController {
      * @param userId the ID of the user whose goals are to be retrieved
      * @return a list of the user's goals
      */
-    public List<Goal> getAllGoals(Long userId) {
+    public List<Goal> getAllGoalsByUserId(Long userId) {
         return goalService.getGoalsByUserId(userId);
     }
 
-    /**
-     * Updates an existing goal for a user with new details.
-     *
-     * @param userId the ID of the user whose goal is to be updated
-     * @param oldGoalName the current name of the goal to be updated
-     * @param newGoalName the new name for the goal
-     * @param newTargetAmount the new target amount for the goal
-     * @param newDuration the new duration for the goal in months
-     */
-    public void updateGoal(Long userId, String oldGoalName, String newGoalName, BigDecimal newTargetAmount,
-                           int newDuration) {
-        goalService.updateGoal(userId, oldGoalName, newGoalName, newTargetAmount, newDuration);
+    public void updateGoal(Goal updatedGoal) {
+        goalService.updateGoal(updatedGoal);
     }
 
-    /**
-     * Deletes a goal for a user.
-     *
-     * @param userId the ID of the user whose goal is to be deleted
-     * @param goalName the name of the goal to delete
-     */
-    public void deleteGoal(Long userId, String goalName) {
-        goalService.deleteGoal(userId, goalName);
+    public void deleteGoal(Long goalId) {
+        goalService.deleteGoal(goalId);
     }
 
     /**

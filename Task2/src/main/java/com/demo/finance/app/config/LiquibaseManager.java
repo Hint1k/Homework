@@ -5,97 +5,106 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import lombok.extern.slf4j.Slf4j;
 
-import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@Slf4j
 public class LiquibaseManager {
 
     private final DatabaseConfig databaseConfig;
+    private static final Logger log = Logger.getLogger(LiquibaseManager.class.getName());
 
     public LiquibaseManager(DatabaseConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
     }
 
-    /**
-     * Injects the admin credentials into the Liquibase changelog XML file
-     * by replacing placeholders with values from the .env file.
-     *
-     * @param changeLogFile Path to the Liquibase changelog XML file
-     * @throws IOException If there's an issue reading or writing the file
-     */
-    public Path injectAdminCredentialsIntoChangelog(String changeLogFile) throws IOException {
-        String adminEmail = databaseConfig.getAdminEmail();
-        String adminPassword = databaseConfig.getAdminPassword();
+    private void createDatabaseIfNotExists() {
+        String adminUrl = "jdbc:postgresql://postgres:5432/postgres?user=" + databaseConfig.getLiquibaseUsername()
+                + "&password=" + databaseConfig.getLiquibasePassword();
 
-        // Read the original XML changelog file
-        Path originalPath = Paths.get(changeLogFile);
-        String changelog = Files.readString(originalPath);
+        try (Connection conn = DriverManager.getConnection(adminUrl);
+             Statement stmt = conn.createStatement()) {
 
-        // Replace placeholders with actual values from the .env file
-        changelog = changelog.replace("${ADMIN_EMAIL}", adminEmail);
-        changelog = changelog.replace("${ADMIN_PASSWORD_HASH}", adminPassword);
+            // Check if the database exists before trying to create it
+            ResultSet rs = conn.getMetaData().getCatalogs();
+            boolean dbExists = false;
+            while (rs.next()) {
+                if ("financedb".equalsIgnoreCase(rs.getString(1))) {
+                    dbExists = true;
+                    break;
+                }
+            }
 
-        // Create a temporary file
-        Path tempFile = Files.createTempFile("changelog", ".xml");
-        Files.writeString(tempFile, changelog);
+            if (!dbExists) {
+                stmt.executeUpdate("CREATE DATABASE financedb;");
+                log.info("Database 'financedb' created successfully.");
+            } else {
+                log.info("Database 'financedb' already exists. Skipping creation.");
+            }
+        } catch (SQLException e) {
+            log.info("Database might already exist or an error occurred: " + e.getMessage());
+        }
+    }
 
-        log.info("Created temporary changelog file: {}", tempFile.toString());
+    private void ensureSchemaExists() {
+        String dbUrl = databaseConfig.getLiquibaseUrl(); // This should now be financedb
+        String username = databaseConfig.getLiquibaseUsername();
+        String password = databaseConfig.getLiquibasePassword();
 
-        // Return the path to the temporary file
-        return tempFile;
+        try (Connection conn = DriverManager.getConnection(dbUrl, username, password);
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("CREATE SCHEMA IF NOT EXISTS finance;");
+            log.info("Schema 'finance' ensured.");
+        } catch (SQLException e) {
+            log.severe("Failed to create schema: " + e.getMessage());
+        }
     }
 
     /**
-     * Runs Liquibase migrations after injecting the admin credentials
-     * into the changelog XML file.
+     * Runs Liquibase migrations using the changelog inside the JAR.
      */
     public void runMigrations() {
-        String changeLogFile = databaseConfig.getLiquibaseChangeLogFile();
+        createDatabaseIfNotExists(); // Ensure database exists
+        ensureSchemaExists();
+
+        // Path inside the JAR
+        String changeLogFile = "db/changelog/changelog.xml";
+
         String url = databaseConfig.getLiquibaseUrl();
         String username = databaseConfig.getLiquibaseUsername();
         String password = databaseConfig.getLiquibasePassword();
 
-        Path tempFile = null;
         try {
-            // Inject admin credentials into the changelog file and get the temporary file path
-            tempFile = injectAdminCredentialsIntoChangelog(changeLogFile);
+            log.info("Attempting to load changelog file from classpath: " + changeLogFile);
 
             // Connect to the database
             try (Connection connection = DriverManager.getConnection(url, username, password)) {
                 Database database = DatabaseFactory.getInstance()
                         .findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
-                // Use ClassLoaderResourceAccessor for Liquibase migration
+                // Set the default schema programmatically
+                database.setDefaultSchemaName(databaseConfig.getLiquibaseDefaultSchema());
+
+                // Load changelog from the JAR using ClassLoaderResourceAccessor
                 Liquibase liquibase = new Liquibase(
-                        tempFile.toString(), // Use the temporary file
-                        new ClassLoaderResourceAccessor(getClass().getClassLoader()),
+                        changeLogFile,
+                        new ClassLoaderResourceAccessor(),
                         database
                 );
+                 // little trick
+                database.setDefaultSchemaName("finance");
+                database.setLiquibaseSchemaName("finance");
+                database.setOutputDefaultSchema(true);  // Ensure Liquibase applies schema changes
+                database.setOutputDefaultCatalog(true);
+
                 liquibase.update("");
                 log.info("Liquibase migration completed successfully.");
             }
 
         } catch (Exception e) {
-            log.error("Failed to run Liquibase migrations: {}", e.getMessage());
+            log.log(Level.SEVERE, "Failed to run Liquibase migrations: " + e.getMessage(), e);
             throw new RuntimeException(e);
-
-        } finally {
-            // Clean up the temporary file
-            if (tempFile != null) {
-                try {
-                    Files.deleteIfExists(tempFile);
-                    log.info("Deleted temporary changelog file: {}", tempFile.toString());
-                } catch (IOException e) {
-                    log.warn("Failed to delete temporary changelog file: {}", tempFile.toString(), e);
-                }
-            }
         }
     }
 }

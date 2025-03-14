@@ -1,10 +1,7 @@
 package com.demo.finance.app.config;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Map;
 
-@Slf4j
 public class DatabaseConfig {
 
     private static final DatabaseConfig INSTANCE = new DatabaseConfig();
@@ -12,7 +9,7 @@ public class DatabaseConfig {
 
     private DatabaseConfig() {
         // Load environment variables from .env file
-        envVars = EnvLoader.loadEnv("../.env");
+        envVars = EnvLoader.loadEnv("/app/.env");
     }
 
     public static DatabaseConfig getInstance() {
@@ -50,7 +47,7 @@ public class DatabaseConfig {
     }
 
     public String getLiquibaseDefaultSchema() {
-        return "finance"; // Hardcoded as it’s unlikely to change
+        return "finance";
     }
 
     public String getLiquibaseUrl() {

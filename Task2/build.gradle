@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'jacoco'
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'com.demo'
@@ -23,7 +24,6 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.10.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.10.0'
     testImplementation 'org.assertj:assertj-core:3.24.2'
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'
     compileOnly 'org.projectlombok:lombok:1.18.36'
     annotationProcessor 'org.projectlombok:lombok:1.18.36'
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.5'
@@ -58,4 +58,11 @@ sourceSets {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+shadowJar {
+    mergeServiceFiles()
+    manifest {
+        attributes 'Main-Class': 'com.demo.finance.app.TaskTwoMain'
+    }
 }

@@ -1,15 +1,16 @@
 package com.demo.finance.app.config;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@Slf4j
 public class EnvLoader {
+
+    private static final Logger log = Logger.getLogger(EnvLoader.class.getName());
 
     /**
      * Loads environment variables from a .env file.
@@ -50,11 +51,11 @@ public class EnvLoader {
                 envVars.put(key, value);
             }
         } catch (IOException e) {
-            log.error("Error loading .env file: {}", filePath, e);
+            log.log(Level.SEVERE, "Error loading .env file: " + filePath, e);
             throw new RuntimeException("Unable to find or read .env file: " + filePath, e);
         }
 
-        log.info("Successfully loaded {} environment variables from {}", envVars.size(), filePath);
+        log.info("Successfully loaded " + envVars.size() + " environment variables from " + filePath);
         return envVars;
     }
 }

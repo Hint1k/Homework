@@ -30,7 +30,7 @@ public interface BudgetRepository {
 
     boolean delete(Long budgetId);
 
-    boolean update(Long budgetId, Budget updatedBudget);
+    boolean update(Budget updatedBudget);
 
     Optional<Budget> findById(Long budgetId);
 }

@@ -18,6 +18,8 @@ public class TaskTwoMain {
      * @param args Command line arguments (not used in this application).
      */
     public static void main(String[] args) {
+        System.out.println("Starting Personal Finance App...");
+
         // Step 1: Initialize configuration
         DatabaseConfig databaseConfig = DatabaseConfig.getInstance();
 
@@ -25,9 +27,28 @@ public class TaskTwoMain {
         LiquibaseManager migrationService = new LiquibaseManager(databaseConfig);
         migrationService.runMigrations();
 
-        // Step 3: Start the application
-        ApplicationConfig config = new ApplicationConfig();
-        CliHandler cliHandler = config.getCliHandler();
-        cliHandler.start();
+        // Step 3: Check if running in Docker (non-interactive mode)
+        if (System.console() == null) {
+            System.out.println("Running in non-interactive mode (Docker detected). Keeping application alive...");
+            System.out.println("No console detected. Application will not accept user input.");
+
+            // Keep the application running indefinitely to prevent container restarts
+            while (true) {
+                try {
+                    Thread.sleep(10000); // Sleep for 10 seconds before checking again
+                } catch (InterruptedException e) {
+                    System.out.println("Application interrupted. Shutting down...");
+                    return;
+                }
+            }
+        } else {
+            System.out.println("Running in interactive mode.");
+            System.out.println("Console detected. Starting CLI interaction...");
+
+            // Step 4: Start CLI mode (only if interactive)
+            ApplicationConfig config = new ApplicationConfig();
+            CliHandler cliHandler = config.getCliHandler();
+            cliHandler.start();
+        }
     }
 }

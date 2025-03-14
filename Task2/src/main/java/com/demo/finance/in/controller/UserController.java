@@ -61,8 +61,9 @@ public class UserController {
      * @param role the updated role of the user
      * @return {@code true} if the account was successfully updated, {@code false} otherwise
      */
-    public boolean updateOwnAccount(Long userId, String name, String email, String password, Role role) {
-        return userService.updateOwnAccount(userId, name, email, password, role);
+    public boolean updateOwnAccount(Long userId, String name, String email, String password, Role role,
+                                    boolean isPasswordUpdated) {
+        return userService.updateOwnAccount(userId, name, email, password, role, isPasswordUpdated);
     }
 
     /**

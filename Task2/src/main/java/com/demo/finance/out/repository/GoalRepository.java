@@ -16,9 +16,9 @@ public interface GoalRepository {
      *
      * @param goal the Goal entity to be saved
      */
-    void save(Goal goal);
+    void saveGoal(Goal goal);
 
-    Optional<Goal> findById(Long goalId);
+    Optional<Goal> findGoalById(Long goalId);
 
     /**
      * Finds all Goal entities associated with a specific user ID.
@@ -26,9 +26,9 @@ public interface GoalRepository {
      * @param userId the ID of the user
      * @return a list of Goal entities associated with the user
      */
-    List<Goal> findByUserId(Long userId);
+    List<Goal> findGoalByUserId(Long userId);
 
-    void update(Long goalId, Goal updatedGoal);
+    void updateGoal(Goal updatedGoal);
 
-    void delete(Long goalId);
+    void deleteGoal(Long goalId);
 }

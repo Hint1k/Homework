@@ -56,11 +56,4 @@ public interface UserRepository {
      * @return {@code true} if the user was successfully deleted, {@code false} otherwise
      */
     boolean delete(Long userId);
-
-    /**
-     * Generates the next available user ID for a new {@code User}.
-     *
-     * @return the next available user ID
-     */
-    Long generateNextId();
 }

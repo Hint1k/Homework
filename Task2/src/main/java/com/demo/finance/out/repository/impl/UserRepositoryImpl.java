@@ -5,7 +5,6 @@ import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.exception.DatabaseException;
 import com.demo.finance.out.repository.UserRepository;
-import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,92 +14,110 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The {@code UserRepositoryImpl} class provides an in-memory implementation of the {@code UserRepository} interface.
  * It manages a collection of {@code User} objects using a concurrent hash map.
  */
-@Slf4j
 public class UserRepositoryImpl implements UserRepository {
+
+    private static final Logger log = Logger.getLogger(UserRepositoryImpl.class.getName());
 
     @Override
     public void save(User user) {
-        String sql = "INSERT INTO users (user_id, name, email, password_hash, role, is_blocked) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO finance.users (name, email, password, blocked, role) "
+                + "VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setLong(1, user.getUserId());
-                stmt.setString(2, user.getName());
-                stmt.setString(3, user.getEmail());
-                stmt.setString(4, user.getPassword());
+            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setString(1, user.getName());
+                stmt.setString(2, user.getEmail());
+                stmt.setString(3, user.getPassword());
+                stmt.setBoolean(4, user.isBlocked());
                 stmt.setString(5, user.getRole().getName());
-                stmt.setBoolean(6, user.isBlocked());
 
                 stmt.executeUpdate();
-                conn.commit(); // Commit the transaction if successful
+
+                // Retrieve and set the generated ID
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        user.setUserId(rs.getLong(1));
+                    }
+                }
+
+                conn.commit();
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "User save failed", e);
                 throw new DatabaseException("Error saving user", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "User save failed", e);
             throw new DatabaseException("Error handling transaction", e);
         }
     }
 
     @Override
     public boolean update(User user) {
-        String sql = "UPDATE users SET name = ?, email = ?, password_hash = ?, role = ?, is_blocked = ? WHERE user_id = ?";
+        String sql = "UPDATE finance.users SET name = ?, email = ?, password = ?, blocked = ?, role = ? "
+                + "WHERE id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, user.getName());
                 stmt.setString(2, user.getEmail());
                 stmt.setString(3, user.getPassword());
-                stmt.setString(4, user.getRole().getName());
-                stmt.setBoolean(5, user.isBlocked());
+                stmt.setBoolean(4, user.isBlocked());
+                stmt.setString(5, user.getRole().getName());
                 stmt.setLong(6, user.getUserId());
 
                 boolean result = stmt.executeUpdate() > 0;
-                conn.commit(); // Commit the transaction if successful
+                conn.commit();
                 return result;
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "User update failed", e);
                 throw new DatabaseException("Error updating user", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "User update failed", e);
             throw new DatabaseException("Error handling transaction", e);
         }
     }
 
     @Override
     public boolean delete(Long userId) {
-        String sql = "DELETE FROM users WHERE user_id = ?";
+        String sql = "DELETE FROM finance.users WHERE id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, userId);
 
                 boolean result = stmt.executeUpdate() > 0;
-                conn.commit(); // Commit the transaction if successful
+                conn.commit();
                 return result;
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "User delete failed", e);
                 throw new DatabaseException("Error deleting user", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "User delete failed", e);
             throw new DatabaseException("Error handling transaction", e);
         }
     }
 
     @Override
     public List<User> findAll() {
-        String sql = "SELECT * FROM users";
+        String sql = "SELECT * FROM finance.users";
         List<User> users = new ArrayList<>();
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql);
                  ResultSet rs = stmt.executeQuery()) {
@@ -108,12 +125,14 @@ public class UserRepositoryImpl implements UserRepository {
                 while (rs.next()) {
                     users.add(mapResultSetToUser(rs));
                 }
-                conn.commit(); // Commit the transaction if successful
+                conn.commit();
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "User findAll failed", e);
                 throw new DatabaseException("Error retrieving all users", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "User findAll failed", e);
             throw new DatabaseException("Error handling transaction", e);
         }
         return users;
@@ -121,23 +140,25 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findById(Long userId) {
-        String sql = "SELECT * FROM users WHERE user_id = ?";
+        String sql = "SELECT * FROM finance.users WHERE id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, userId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        conn.commit(); // Commit the transaction if successful
+                        conn.commit();
                         return Optional.of(mapResultSetToUser(rs));
                     }
                 }
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "User findById failed", e);
                 throw new DatabaseException("Error finding user by ID", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "User findById failed", e);
             throw new DatabaseException("Error handling transaction", e);
         }
         return Optional.empty();
@@ -145,58 +166,38 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByEmail(String email) {
-        String sql = "SELECT * FROM users WHERE email = ?";
+        String sql = "SELECT * FROM finance.users WHERE email = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, email);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        conn.commit(); // Commit the transaction if successful
+                        conn.commit();
                         return Optional.of(mapResultSetToUser(rs));
                     }
                 }
             } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
+                conn.rollback();
+                log.log(Level.SEVERE, "User findByEmail failed", e);
                 throw new DatabaseException("Error finding user by email", e);
             }
         } catch (SQLException e) {
+            log.log(Level.SEVERE, "User findByEmail failed", e);
             throw new DatabaseException("Error handling transaction", e);
         }
         return Optional.empty();
     }
 
-    @Override
-    public Long generateNextId() {
-        String sql = "SELECT COALESCE(MAX(user_id), 0) + 1 FROM users";
-        try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
-
-            try (Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery(sql)) {
-
-                if (rs.next()) {
-                    conn.commit(); // Commit the transaction if successful
-                    return rs.getLong(1);
-                }
-            } catch (SQLException e) {
-                conn.rollback(); // Rollback if any exception occurs
-                throw new DatabaseException("Error generating next user ID", e);
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException("Error handling transaction", e);
-        }
-        return 1L;
-    }
-
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         return new User(
-                rs.getLong("user_id"),
+//                rs.getLong("user_id"), // TODO change later to user_id instead
+                rs.getLong("id"),
                 rs.getString("name"),
                 rs.getString("email"),
-                rs.getString("password_hash"),
-                rs.getBoolean("is_blocked"),
+                rs.getString("password"),
+                rs.getBoolean("blocked"),
                 new Role(rs.getString("role"))
         );
     }

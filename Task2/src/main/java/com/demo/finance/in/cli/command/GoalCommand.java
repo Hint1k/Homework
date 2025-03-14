@@ -24,9 +24,9 @@ public class GoalCommand {
      * Initializes the GoalCommand with the provided context, validation utilities,
      * and scanner.
      *
-     * @param context The CommandContext that holds controllers.
+     * @param context         The CommandContext that holds controllers.
      * @param validationUtils Utility for validation.
-     * @param scanner Scanner to capture user input.
+     * @param scanner         Scanner to capture user input.
      */
     public GoalCommand(CommandContext context, ValidationUtils validationUtils, Scanner scanner) {
         this.context = context;
@@ -44,7 +44,7 @@ public class GoalCommand {
         try {
             String name = validationUtils.promptForNonEmptyString("Enter Goal Name: ", scanner);
             Long userId = context.getCurrentUser().getUserId();
-            List<Goal> goalList = context.getGoalController().getAllGoals(userId);
+            List<Goal> goalList = context.getGoalController().getAllGoalsByUserId(userId);
             if (goalList.stream().anyMatch(goal -> goal.getGoalName().equalsIgnoreCase(name))) {
                 System.out.println("A goal with the name '" + name + "' already exists.");
                 return;
@@ -67,7 +67,7 @@ public class GoalCommand {
      */
     public void viewGoals() {
         Long userId = context.getCurrentUser().getUserId();
-        List<Goal> goals = context.getGoalController().getAllGoals(userId);
+        List<Goal> goals = context.getGoalController().getAllGoalsByUserId(userId);
         if (goals.isEmpty()) {
             System.out.println("No goals set.");
             return;
@@ -97,16 +97,14 @@ public class GoalCommand {
      * If the goal is not found, an error message is displayed.
      */
     public void updateGoal() {
-        String oldGoalName;
+        Long goalId;
         try {
-            oldGoalName = validationUtils
-                    .promptForNonEmptyString("Enter the Name of the Goal to Update: ", scanner);
+            goalId = validationUtils.promptForPositiveLong("Enter the Goal Id to Update: ", scanner);
         } catch (MaxRetriesReachedException e) {
             System.out.println(e.getMessage());
             return;
         }
-        Long userId = context.getCurrentUser().getUserId();
-        Optional<Goal> goalToUpdate = context.getGoalController().getGoal(userId, oldGoalName);
+        Optional<Goal> goalToUpdate = context.getGoalController().getGoal(goalId);
 
         if (goalToUpdate.isEmpty()) {
             System.out.println("Error: Goal not found.");
@@ -116,7 +114,7 @@ public class GoalCommand {
         String message = "Enter New Goal Name" + OR_KEEP_CURRENT_VALUE;
         String newGoalName = validationUtils.promptForOptionalString(message, scanner);
         if (newGoalName == null || newGoalName.isEmpty()) {
-            newGoalName = oldGoalName;
+            newGoalName = goalToUpdate.get().getGoalName();
         }
 
         String message2 = "Enter New Target Amount" + OR_KEEP_CURRENT_VALUE;
@@ -131,7 +129,7 @@ public class GoalCommand {
             newDuration = goalToUpdate.get().getDuration();
         }
 
-        context.getGoalController().updateGoal(userId, oldGoalName, newGoalName, newTargetAmount, newDuration);
+        context.getGoalController().updateGoal(new Goal(goalId, newGoalName, newTargetAmount, newDuration));
         System.out.println("Goal updated successfully.");
     }
 
@@ -141,17 +139,15 @@ public class GoalCommand {
      * If the goal is not found, an error message is displayed.
      */
     public void deleteGoal() {
-        String goalName;
+        Long goalId;
         try {
-            goalName = validationUtils.promptForNonEmptyString("Enter Goal Name to Delete: ", scanner);
+            goalId = validationUtils.promptForPositiveLong("Enter Goal Id to Delete: ", scanner);
         } catch (MaxRetriesReachedException e) {
             System.out.println(e.getMessage());
             return;
         }
-        Long userId = context.getCurrentUser().getUserId();
-
-        if (context.getGoalController().getGoal(userId, goalName).isPresent()) {
-            context.getGoalController().deleteGoal(userId, goalName);
+        if (context.getGoalController().getGoal(goalId).isPresent()) {
+            context.getGoalController().deleteGoal(goalId);
             System.out.println("Goal deleted successfully.");
         } else {
             System.out.println("Error: Goal not found.");

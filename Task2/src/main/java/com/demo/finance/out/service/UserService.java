@@ -18,7 +18,8 @@ public interface UserService {
      * @param role the new role assigned to the user (e.g., user, admin)
      * @return {@code true} if the account was successfully updated, {@code false} otherwise
      */
-    boolean updateOwnAccount(Long userId, String name, String email, String password, Role role);
+    boolean updateOwnAccount(Long userId, String name, String email, String password, Role role,
+                             boolean isPasswordUpdated);
 
     /**
      * Deletes the account of the user who is performing the action.
