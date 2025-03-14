@@ -4,6 +4,8 @@ import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.cli.command.*;
 import com.demo.finance.in.controller.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Scanner;
 
@@ -12,6 +14,8 @@ import java.util.Scanner;
  * It serves as a container for various controller and command objects, and provides
  * access to them throughout the execution of the application.
  */
+@Getter
+@Setter
 public class CommandContext {
 
     private User currentUser;
@@ -65,149 +69,5 @@ public class CommandContext {
         this.reportCommand = new ReportCommand(this, validationUtils, scanner);
         this.adminCommand = new AdminCommand(this, validationUtils, scanner);
         this.notificationCommand = new NotificationCommand(this);
-    }
-
-    /**
-     * Gets the current user.
-     *
-     * @return The current user.
-     */
-    public User getCurrentUser() {
-        return currentUser;
-    }
-
-    /**
-     * Sets the current user.
-     *
-     * @param currentUser The user to set as the current user.
-     */
-    public void setCurrentUser(User currentUser) {
-        this.currentUser = currentUser;
-    }
-
-    /**
-     * Gets the user controller.
-     *
-     * @return The user controller.
-     */
-    public UserController getUserController() {
-        return userController;
-    }
-
-    /**
-     * Gets the transaction controller.
-     *
-     * @return The transaction controller.
-     */
-    public TransactionController getTransactionController() {
-        return transactionController;
-    }
-
-    /**
-     * Gets the budget controller.
-     *
-     * @return The budget controller.
-     */
-    public BudgetController getBudgetController() {
-        return budgetController;
-    }
-
-    /**
-     * Gets the goal controller.
-     *
-     * @return The goal controller.
-     */
-    public GoalController getGoalController() {
-        return goalController;
-    }
-
-    /**
-     * Gets the report controller.
-     *
-     * @return The report controller.
-     */
-    public ReportController getReportController() {
-        return reportController;
-    }
-
-    /**
-     * Gets the admin controller.
-     *
-     * @return The admin controller.
-     */
-    public AdminController getAdminController() {
-        return adminController;
-    }
-
-    /**
-     * Gets the notification controller.
-     *
-     * @return The notification controller.
-     */
-    public NotificationController getNotificationController() {
-        return notificationController;
-    }
-
-    /**
-     * Gets the transaction command.
-     *
-     * @return The transaction command.
-     */
-    public TransactionCommand getTransactionCommand() {
-        return transactionCommand;
-    }
-
-    /**
-     * Gets the user command.
-     *
-     * @return The user command.
-     */
-    public UserCommand getUserCommand() {
-        return userCommand;
-    }
-
-    /**
-     * Gets the goal command.
-     *
-     * @return The goal command.
-     */
-    public GoalCommand getGoalCommand() {
-        return goalCommand;
-    }
-
-    /**
-     * Gets the budget command.
-     *
-     * @return The budget command.
-     */
-    public BudgetCommand getBudgetCommand() {
-        return budgetCommand;
-    }
-
-    /**
-     * Gets the report command.
-     *
-     * @return The report command.
-     */
-    public ReportCommand getReportCommand() {
-        return reportCommand;
-    }
-
-    /**
-     * Gets the admin command.
-     *
-     * @return The admin command.
-     */
-    public AdminCommand getAdminCommand() {
-        return adminCommand;
-    }
-
-    /**
-     * Gets the notification command.
-     *
-     * @return The notification command.
-     */
-    public NotificationCommand getNotificationCommand() {
-        return notificationCommand;
     }
 }

@@ -1,0 +1,17 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog/001-create-schema.xml">
+
+    <!-- Create the "finance" schema for application entity tables -->
+    <changeSet id="001-create-finance-schema" author="hint1k" runAlways="true">
+        <sql>CREATE SCHEMA IF NOT EXISTS finance;</sql>
+    </changeSet>
+
+    <!-- Set the default schema for application entity tables -->
+    <changeSet id="001-set-application-schema" author="hint1k" runAlways="true">
+        <sql>SET search_path TO finance;</sql>
+    </changeSet>
+</databaseChangeLog>

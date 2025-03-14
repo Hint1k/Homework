@@ -56,7 +56,7 @@ public abstract class BaseRepository {
         });
     }
 
-    protected Connection getConnection() throws SQLException {
+    protected Connection getConnection() {
         return DataSourceManager.getConnection();
     }
 
