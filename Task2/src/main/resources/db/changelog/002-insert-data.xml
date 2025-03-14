@@ -9,7 +9,7 @@
     <changeSet id="002-insert-data" author="hint1k">
         <!-- Insert Admin User -->
         <insert tableName="users" schemaName="finance">
-            <column name="id" valueNumeric="1"/>
+            <column name="user_id" valueNumeric="1"/>
             <column name="name" value="admin"/>
             <column name="email" value="${ADMIN_EMAIL}"/>
             <column name="password" value="${ADMIN_PASSWORD}"/>
@@ -19,7 +19,7 @@
 
         <!-- Reset sequence to avoid ID conflicts -->
         <sql>
-            SELECT setval('finance.users_id_seq', (SELECT MAX(id) FROM finance.users));
+            SELECT setval('finance.users_user_id_seq', (SELECT MAX(user_id) FROM finance.users));
         </sql>
     </changeSet>
 </databaseChangeLog>

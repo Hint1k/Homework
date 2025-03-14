@@ -33,16 +33,12 @@ public class BudgetRepositoryImpl implements BudgetRepository {
                 stmt.setLong(1, budget.getUserId());
                 stmt.setBigDecimal(2, budget.getMonthlyLimit());
                 stmt.setBigDecimal(3, budget.getCurrentExpenses());
-
                 int rowsInserted = stmt.executeUpdate();
-
-                // Retrieve the generated ID
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         budget.setBudgetId(rs.getLong(1));
                     }
                 }
-
                 conn.commit();
                 return rowsInserted > 0;
             } catch (SQLException e) {
@@ -57,44 +53,6 @@ public class BudgetRepositoryImpl implements BudgetRepository {
     }
 
     @Override
-    public Optional<Budget> findByUserId(Long userId) {
-        String sql = "SELECT * FROM finance.budgets WHERE user_id = ?";
-        try (Connection conn = DataSourceManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setLong(1, userId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToBudget(rs));
-                }
-            }
-        } catch (SQLException e) {
-            log.log(Level.SEVERE, "Error finding budget by user id", e);
-            throw new DatabaseException("Error finding budget by user ID", e);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Budget> findById(Long budgetId) {
-        String sql = "SELECT * FROM finance.budgets WHERE budget_id = ?";
-        try (Connection conn = DataSourceManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setLong(1, budgetId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToBudget(rs));
-                }
-            }
-        } catch (SQLException e) {
-            log.log(Level.SEVERE, "Error finding budget by id", e);
-            throw new DatabaseException("Error finding budget by ID", e);
-        }
-        return Optional.empty();
-    }
-
-    @Override
     public boolean update(Budget updatedBudget) {
         String sql = "UPDATE finance.budgets SET user_id = ?, monthly_limit = ?, current_expenses = ? "
                 + "WHERE budget_id = ?";
@@ -105,7 +63,6 @@ public class BudgetRepositoryImpl implements BudgetRepository {
                 stmt.setBigDecimal(2, updatedBudget.getMonthlyLimit());
                 stmt.setBigDecimal(3, updatedBudget.getCurrentExpenses());
                 stmt.setLong(4, updatedBudget.getBudgetId());
-
                 int rowsUpdated = stmt.executeUpdate();
                 conn.commit();
                 return rowsUpdated > 0;
@@ -139,6 +96,42 @@ public class BudgetRepositoryImpl implements BudgetRepository {
             log.log(Level.SEVERE, "Error deleting budget", e);
             throw new DatabaseException("Error establishing connection or committing transaction", e);
         }
+    }
+
+    @Override
+    public Optional<Budget> findById(Long budgetId) {
+        String sql = "SELECT * FROM finance.budgets WHERE budget_id = ?";
+        try (Connection conn = DataSourceManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, budgetId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToBudget(rs));
+                }
+            }
+        } catch (SQLException e) {
+            log.log(Level.SEVERE, "Error finding budget by id", e);
+            throw new DatabaseException("Error finding budget by ID", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Budget> findByUserId(Long userId) {
+        String sql = "SELECT * FROM finance.budgets WHERE user_id = ?";
+        try (Connection conn = DataSourceManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToBudget(rs));
+                }
+            }
+        } catch (SQLException e) {
+            log.log(Level.SEVERE, "Error finding budget by user id", e);
+            throw new DatabaseException("Error finding budget by user ID", e);
+        }
+        return Optional.empty();
     }
 
     private Budget mapResultSetToBudget(ResultSet rs) throws SQLException {

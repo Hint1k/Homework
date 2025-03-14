@@ -19,6 +19,22 @@ public interface UserRepository {
     void save(User user);
 
     /**
+     * Updates the details of the specified {@code User}.
+     *
+     * @param user the {@code User} object containing updated details
+     * @return {@code true} if the user was successfully updated, {@code false} otherwise
+     */
+    boolean update(User user);
+
+    /**
+     * Deletes the {@code User} associated with the specified user ID from the repository.
+     *
+     * @param userId the ID of the user to be deleted
+     * @return {@code true} if the user was successfully deleted, {@code false} otherwise
+     */
+    boolean delete(Long userId);
+
+    /**
      * Retrieves all {@code User} objects from the repository.
      *
      * @return a {@code List<User>} containing all users in the repository
@@ -40,20 +56,4 @@ public interface UserRepository {
      * @return an {@code Optional<User>} containing the user if found, or an empty {@code Optional} if not found
      */
     Optional<User> findByEmail(String email);
-
-    /**
-     * Updates the details of the specified {@code User}.
-     *
-     * @param user the {@code User} object containing updated details
-     * @return {@code true} if the user was successfully updated, {@code false} otherwise
-     */
-    boolean update(User user);
-
-    /**
-     * Deletes the {@code User} associated with the specified user ID from the repository.
-     *
-     * @param userId the ID of the user to be deleted
-     * @return {@code true} if the user was successfully deleted, {@code false} otherwise
-     */
-    boolean delete(Long userId);
 }

@@ -8,9 +8,8 @@ public class DataSourceManager {
 
     private static final DatabaseConfig config = DatabaseConfig.getInstance();
 
-    // Private constructor to prevent instantiation
     private DataSourceManager() {
-    }
+    } // Private constructor to prevent instantiation
 
     public static Connection getConnection() throws SQLException {
         String url = config.getDbUrl();

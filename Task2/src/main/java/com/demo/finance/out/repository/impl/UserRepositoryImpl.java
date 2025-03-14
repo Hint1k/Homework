@@ -31,23 +31,18 @@ public class UserRepositoryImpl implements UserRepository {
                 + "VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, user.getName());
                 stmt.setString(2, user.getEmail());
                 stmt.setString(3, user.getPassword());
                 stmt.setBoolean(4, user.isBlocked());
                 stmt.setString(5, user.getRole().getName());
-
                 stmt.executeUpdate();
-
-                // Retrieve and set the generated ID
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         user.setUserId(rs.getLong(1));
                     }
                 }
-
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -66,7 +61,6 @@ public class UserRepositoryImpl implements UserRepository {
                 + "WHERE id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, user.getName());
                 stmt.setString(2, user.getEmail());
@@ -74,7 +68,6 @@ public class UserRepositoryImpl implements UserRepository {
                 stmt.setBoolean(4, user.isBlocked());
                 stmt.setString(5, user.getRole().getName());
                 stmt.setLong(6, user.getUserId());
-
                 boolean result = stmt.executeUpdate() > 0;
                 conn.commit();
                 return result;
@@ -94,10 +87,8 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "DELETE FROM finance.users WHERE id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, userId);
-
                 boolean result = stmt.executeUpdate() > 0;
                 conn.commit();
                 return result;
@@ -118,10 +109,8 @@ public class UserRepositoryImpl implements UserRepository {
         List<User> users = new ArrayList<>();
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql);
                  ResultSet rs = stmt.executeQuery()) {
-
                 while (rs.next()) {
                     users.add(mapResultSetToUser(rs));
                 }
@@ -143,7 +132,6 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "SELECT * FROM finance.users WHERE id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, userId);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -169,7 +157,6 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "SELECT * FROM finance.users WHERE email = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, email);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -192,8 +179,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         return new User(
-//                rs.getLong("user_id"), // TODO change later to user_id instead
-                rs.getLong("id"),
+                rs.getLong("user_id"),
                 rs.getString("name"),
                 rs.getString("email"),
                 rs.getString("password"),

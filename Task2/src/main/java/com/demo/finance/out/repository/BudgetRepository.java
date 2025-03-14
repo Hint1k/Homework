@@ -19,6 +19,12 @@ public interface BudgetRepository {
      */
     boolean save(Budget budget);
 
+    boolean delete(Long budgetId);
+
+    boolean update(Budget updatedBudget);
+
+    Optional<Budget> findById(Long budgetId);
+
     /**
      * Retrieves the {@code Budget} associated with the specified user ID.
      *
@@ -27,10 +33,4 @@ public interface BudgetRepository {
      * or an empty {@code Optional} if no budget is found
      */
     Optional<Budget> findByUserId(Long userId);
-
-    boolean delete(Long budgetId);
-
-    boolean update(Budget updatedBudget);
-
-    Optional<Budget> findById(Long budgetId);
 }

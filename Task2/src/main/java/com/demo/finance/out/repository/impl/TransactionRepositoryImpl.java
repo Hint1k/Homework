@@ -29,7 +29,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 + "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setLong(1, transaction.getUserId());
                 stmt.setBigDecimal(2, transaction.getAmount());
@@ -37,9 +36,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 stmt.setDate(4, Date.valueOf(transaction.getDate()));
                 stmt.setString(5, transaction.getDescription());
                 stmt.setString(6, transaction.getType().name());
-
                 stmt.executeUpdate();
-
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         transaction.setTransactionId(generatedKeys.getLong(1));
@@ -64,7 +61,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 + "WHERE transaction_id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false); // Start transaction
-
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, transaction.getUserId());
                 stmt.setBigDecimal(2, transaction.getAmount());
@@ -73,7 +69,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 stmt.setString(5, transaction.getDescription());
                 stmt.setString(6, transaction.getType().name());
                 stmt.setLong(7, transaction.getTransactionId());
-
                 boolean result = stmt.executeUpdate() > 0;
                 conn.commit();
                 return result;
@@ -93,10 +88,8 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         String sql = "DELETE FROM finance.transactions WHERE transaction_id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, transactionId);
-
                 boolean result = stmt.executeUpdate() > 0;
                 conn.commit();
                 return result;
@@ -112,11 +105,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     }
 
     @Override
-    public Transaction findByTransactionId(Long transactionId) {
+    public Transaction findById(Long transactionId) {
         String sql = "SELECT * FROM finance.transactions WHERE transaction_id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, transactionId);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -143,7 +135,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         List<Transaction> transactions = new ArrayList<>();
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, userId);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -169,7 +160,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         StringBuilder sql = new StringBuilder("SELECT * FROM finance.transactions WHERE user_id = ?");
         List<Object> params = new ArrayList<>();
         params.add(userId);
-
         if (from != null) {
             sql.append(" AND date >= ?");
             params.add(Date.valueOf(from));
@@ -186,16 +176,13 @@ public class TransactionRepositoryImpl implements TransactionRepository {
             sql.append(" AND type = ?");
             params.add(type.name());
         }
-
         List<Transaction> transactions = new ArrayList<>();
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
                 for (int i = 0; i < params.size(); i++) {
                     stmt.setObject(i + 1, params.get(i));
                 }
-
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         transactions.add(mapResultSetToTransaction(rs));
@@ -219,7 +206,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         String sql = "SELECT * FROM finance.transactions WHERE transaction_id = ? AND user_id = ?";
         try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setLong(1, transactionId);
                 stmt.setLong(2, userId);

@@ -69,7 +69,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Transaction getTransaction(Long transactionId) {
-        return transactionRepository.findByTransactionId(transactionId);
+        return transactionRepository.findById(transactionId);
     }
 
     /**

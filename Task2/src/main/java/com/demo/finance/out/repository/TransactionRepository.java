@@ -29,12 +29,12 @@ public interface TransactionRepository {
     boolean update(Transaction transaction);
 
     /**
-     * Finds all Transaction entities associated with a specific user ID.
+     * Deletes a Transaction entity from the repository by its ID.
      *
-     * @param userId the ID of the user
-     * @return a list of Transaction entities associated with the user
+     * @param transactionId the ID of the transaction to be deleted
+     * @return true if the transaction was deleted successfully, false otherwise
      */
-    List<Transaction> findByUserId(Long userId);
+    boolean delete(Long transactionId);
 
     /**
      * Finds a Transaction entity by its ID.
@@ -42,15 +42,15 @@ public interface TransactionRepository {
      * @param transactionId the ID of the transaction to be found
      * @return the Transaction entity if found, otherwise null
      */
-    Transaction findByTransactionId(Long transactionId);
+    Transaction findById(Long transactionId);
 
     /**
-     * Deletes a Transaction entity from the repository by its ID.
+     * Finds all Transaction entities associated with a specific user ID.
      *
-     * @param transactionId the ID of the transaction to be deleted
-     * @return true if the transaction was deleted successfully, false otherwise
+     * @param userId the ID of the user
+     * @return a list of Transaction entities associated with the user
      */
-    boolean delete(Long transactionId);
+    List<Transaction> findByUserId(Long userId);
 
     /**
      * Finds Transaction entities associated with a specific user ID, filtered by date range, category, and type.

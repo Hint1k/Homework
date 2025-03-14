@@ -29,21 +29,16 @@ public class TaskTwoMain {
 
         // Step 3: Check if running in Docker (non-interactive mode)
         if (System.console() == null) {
-            System.out.println("Running in non-interactive mode (Docker detected). Keeping application alive...");
-            System.out.println("No console detected. Application will not accept user input.");
-
             // Keep the application running indefinitely to prevent container restarts
             while (true) {
                 try {
-                    Thread.sleep(10000); // Sleep for 10 seconds before checking again
+                    Thread.sleep(10000);
                 } catch (InterruptedException e) {
                     System.out.println("Application interrupted. Shutting down...");
                     return;
                 }
             }
         } else {
-            System.out.println("Running in interactive mode.");
-            System.out.println("Console detected. Starting CLI interaction...");
 
             // Step 4: Start CLI mode (only if interactive)
             ApplicationConfig config = new ApplicationConfig();

@@ -22,7 +22,7 @@ public class GoalRepositoryImpl implements GoalRepository {
     private static final Logger log = Logger.getLogger(GoalRepositoryImpl.class.getName());
 
     @Override
-    public void saveGoal(Goal goal) {
+    public void save(Goal goal) {
         String sql = "INSERT INTO finance.goals "
                 + "(user_id, goal_name, target_amount, saved_amount, duration, start_time) "
                 + "VALUES (?, ?, ?, ?, ?, ?)";
@@ -35,16 +35,12 @@ public class GoalRepositoryImpl implements GoalRepository {
                 stmt.setBigDecimal(4, goal.getSavedAmount());
                 stmt.setInt(5, goal.getDuration());
                 stmt.setDate(6, Date.valueOf(goal.getStartTime()));
-
                 stmt.executeUpdate();
-
-                // Retrieve and set the generated ID
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         goal.setGoalId(rs.getLong(1));
                     }
                 }
-
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -58,7 +54,55 @@ public class GoalRepositoryImpl implements GoalRepository {
     }
 
     @Override
-    public Optional<Goal> findGoalById(Long goalId) {
+    public void update(Goal updatedGoal) {
+        String sql = "UPDATE finance.goals "
+                + "SET user_id = ?, goal_name = ?, target_amount = ?, saved_amount = ?, duration = ?, start_time = ? "
+                + "WHERE goal_id = ?";
+        try (Connection conn = DataSourceManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setLong(1, updatedGoal.getUserId());
+                stmt.setString(2, updatedGoal.getGoalName());
+                stmt.setBigDecimal(3, updatedGoal.getTargetAmount());
+                stmt.setBigDecimal(4, updatedGoal.getSavedAmount());
+                stmt.setInt(5, updatedGoal.getDuration());
+                stmt.setDate(6, Date.valueOf(updatedGoal.getStartTime()));
+                stmt.setLong(7, updatedGoal.getGoalId());
+                stmt.executeUpdate();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                log.log(Level.SEVERE, "Error updating goal", e);
+                throw new DatabaseException("Error updating goal", e);
+            }
+        } catch (SQLException e) {
+            log.log(Level.SEVERE, "Error updating goal", e);
+            throw new DatabaseException("Error establishing connection or committing transaction", e);
+        }
+    }
+
+    @Override
+    public void delete(Long goalId) {
+        String sql = "DELETE FROM finance.goals WHERE goal_id = ?";
+        try (Connection conn = DataSourceManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setLong(1, goalId);
+                stmt.executeUpdate();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                log.log(Level.SEVERE, "Error deleting goal", e);
+                throw new DatabaseException("Error deleting goal by ID", e);
+            }
+        } catch (SQLException e) {
+            log.log(Level.SEVERE, "Error deleting goal", e);
+            throw new DatabaseException("Error establishing connection or committing transaction", e);
+        }
+    }
+
+    @Override
+    public Optional<Goal> findById(Long goalId) {
         String sql = "SELECT * FROM finance.goals WHERE goal_id = ?";
         try (Connection conn = DataSourceManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -77,7 +121,7 @@ public class GoalRepositoryImpl implements GoalRepository {
     }
 
     @Override
-    public List<Goal> findGoalByUserId(Long userId) {
+    public List<Goal> findByUserId(Long userId) {
         String sql = "SELECT * FROM finance.goals WHERE user_id = ?";
         List<Goal> goals = new ArrayList<>();
         try (Connection conn = DataSourceManager.getConnection();
@@ -94,55 +138,6 @@ public class GoalRepositoryImpl implements GoalRepository {
             throw new DatabaseException("Error finding goals by user ID", e);
         }
         return goals;
-    }
-
-    @Override
-    public void updateGoal(Goal updatedGoal) {
-        String sql = "UPDATE finance.goals "
-                + "SET user_id = ?, goal_name = ?, target_amount = ?, saved_amount = ?, duration = ?, start_time = ? "
-                + "WHERE goal_id = ?";
-        try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false);
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setLong(1, updatedGoal.getUserId());
-                stmt.setString(2, updatedGoal.getGoalName());
-                stmt.setBigDecimal(3, updatedGoal.getTargetAmount());
-                stmt.setBigDecimal(4, updatedGoal.getSavedAmount());
-                stmt.setInt(5, updatedGoal.getDuration());
-                stmt.setDate(6, Date.valueOf(updatedGoal.getStartTime()));
-                stmt.setLong(7, updatedGoal.getGoalId());
-
-                stmt.executeUpdate();
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                log.log(Level.SEVERE, "Error updating goal", e);
-                throw new DatabaseException("Error updating goal", e);
-            }
-        } catch (SQLException e) {
-            log.log(Level.SEVERE, "Error updating goal", e);
-            throw new DatabaseException("Error establishing connection or committing transaction", e);
-        }
-    }
-
-    @Override
-    public void deleteGoal(Long goalId) {
-        String sql = "DELETE FROM finance.goals WHERE goal_id = ?";
-        try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false);
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setLong(1, goalId);
-                stmt.executeUpdate();
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                log.log(Level.SEVERE, "Error deleting goal", e);
-                throw new DatabaseException("Error deleting goal by ID", e);
-            }
-        } catch (SQLException e) {
-            log.log(Level.SEVERE, "Error deleting goal", e);
-            throw new DatabaseException("Error establishing connection or committing transaction", e);
-        }
     }
 
     private Goal mapResultSetToGoal(ResultSet rs) throws SQLException {

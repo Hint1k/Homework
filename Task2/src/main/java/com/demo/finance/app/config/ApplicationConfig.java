@@ -54,11 +54,4 @@ public class ApplicationConfig {
                 reportController, adminController, notificationController, validationUtils
         );
     }
-
-    /**
-     * Initializes the application configuration by loading the admin properties
-     * and setting up the default admin account.
-     */
-    public ApplicationConfig() {
-    }
 }

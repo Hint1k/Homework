@@ -40,12 +40,12 @@ public class GoalServiceImpl implements GoalService {
      */
     @Override
     public void createGoal(Long userId, String goalName, BigDecimal targetAmount, int duration) {
-        goalRepository.saveGoal(new Goal(userId, goalName, targetAmount, duration));
+        goalRepository.save(new Goal(userId, goalName, targetAmount, duration));
     }
 
     @Override
     public Optional<Goal> getGoal(Long goalId) {
-        return goalRepository.findGoalById(goalId);
+        return goalRepository.findById(goalId);
     }
 
     /**
@@ -56,14 +56,14 @@ public class GoalServiceImpl implements GoalService {
      */
     @Override
     public List<Goal> getGoalsByUserId(Long userId) {
-        return goalRepository.findGoalByUserId(userId);
+        return goalRepository.findByUserId(userId);
     }
 
     @Override
     public void updateGoal(Goal updatedGoal) {
-        Optional<Goal> existingGoal = goalRepository.findGoalById(updatedGoal.getGoalId());
+        Optional<Goal> existingGoal = goalRepository.findById(updatedGoal.getGoalId());
         if (existingGoal.isPresent()) {
-            goalRepository.updateGoal(updatedGoal);
+            goalRepository.update(updatedGoal);
         } else {
             throw new IllegalArgumentException("Goal not found.");
         }
@@ -71,7 +71,7 @@ public class GoalServiceImpl implements GoalService {
 
     @Override
     public void deleteGoal(Long goalId) {
-        goalRepository.deleteGoal(goalId);
+        goalRepository.delete(goalId);
     }
 
     /**

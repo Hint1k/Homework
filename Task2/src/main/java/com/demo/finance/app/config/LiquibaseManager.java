@@ -25,7 +25,6 @@ public class LiquibaseManager {
 
         try (Connection conn = DriverManager.getConnection(adminUrl);
              Statement stmt = conn.createStatement()) {
-
             // Check if the database exists before trying to create it
             ResultSet rs = conn.getMetaData().getCatalogs();
             boolean dbExists = false;
@@ -35,7 +34,6 @@ public class LiquibaseManager {
                     break;
                 }
             }
-
             if (!dbExists) {
                 stmt.executeUpdate("CREATE DATABASE financedb;");
                 log.info("Database 'financedb' created successfully.");
@@ -65,7 +63,7 @@ public class LiquibaseManager {
      * Runs Liquibase migrations using the changelog inside the JAR.
      */
     public void runMigrations() {
-        createDatabaseIfNotExists(); // Ensure database exists
+        createDatabaseIfNotExists();
         ensureSchemaExists();
 
         // Path inside the JAR
@@ -92,11 +90,6 @@ public class LiquibaseManager {
                         new ClassLoaderResourceAccessor(),
                         database
                 );
-                 // little trick
-                database.setDefaultSchemaName("finance");
-                database.setLiquibaseSchemaName("finance");
-                database.setOutputDefaultSchema(true);  // Ensure Liquibase applies schema changes
-                database.setOutputDefaultCatalog(true);
 
                 liquibase.update("");
                 log.info("Liquibase migration completed successfully.");

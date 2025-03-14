@@ -5,16 +5,10 @@
   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
         logicalFilePath="db/changelog/001-create-tables.xml">
 
-    <!-- Set schema for the Liquibase changelog table -->
-        <property name="databasechangelog-schema" value="finance"/>
-
     <changeSet id="001-create-tables" author="hint1k">
-        <!-- Create custom schema -->
-        <sql>CREATE SCHEMA IF NOT EXISTS finance;</sql>
-
         <!-- Users Table -->
         <createTable tableName="users" schemaName="finance">
-            <column name="id" type="BIGSERIAL">
+            <column name="user_id" type="BIGSERIAL">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)">
