@@ -18,9 +18,9 @@ public interface GoalRepository {
      */
     void save(Goal goal);
 
-    void update(Goal updatedGoal);
+    boolean update(Goal goal);
 
-    void delete(Long goalId);
+    boolean delete(Long goalId);
 
     Optional<Goal> findById(Long goalId);
 
