@@ -5,6 +5,8 @@ import com.demo.finance.app.config.DatabaseConfig;
 import com.demo.finance.app.config.LiquibaseManager;
 import com.demo.finance.in.cli.CliHandler;
 
+import java.util.concurrent.CountDownLatch;
+
 /**
  * The entry point for the TaskOne application. It initializes the application configuration
  * and starts the Command Line Interface (CLI) handler to interact with the user.
@@ -30,16 +32,13 @@ public class TaskTwoMain {
         // Step 3: Check if running in Docker (non-interactive mode)
         if (System.console() == null) {
             // Keep the application running indefinitely to prevent container restarts
-            while (true) {
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    System.out.println("Application interrupted. Shutting down...");
-                    return;
-                }
+            CountDownLatch latch = new CountDownLatch(1);
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                System.out.println("Application interrupted. Shutting down...");
             }
         } else {
-
             // Step 4: Start CLI mode (only if interactive)
             ApplicationConfig config = new ApplicationConfig();
             CliHandler cliHandler = config.getCliHandler();

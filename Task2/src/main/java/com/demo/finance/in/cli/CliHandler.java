@@ -3,7 +3,6 @@ package com.demo.finance.in.cli;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.in.controller.*;
 
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**

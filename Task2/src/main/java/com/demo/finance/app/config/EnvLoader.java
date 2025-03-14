@@ -37,6 +37,7 @@ public class EnvLoader {
                 // Split line into key-value pair
                 String[] parts = line.split("=", 2);
                 if (parts.length != 2) {
+                    log.severe("Malformed line in .env file at line " + lineNumber + ": " + line);
                     throw new RuntimeException("Malformed line in .env file at line " + lineNumber + ": " + line);
                 }
 
@@ -45,6 +46,7 @@ public class EnvLoader {
 
                 // Check for duplicate keys
                 if (envVars.containsKey(key)) {
+                    log.severe("Duplicate key found in .env file at line " + lineNumber + ": " + key);
                     throw new RuntimeException("Duplicate key found in .env file: " + key);
                 }
 

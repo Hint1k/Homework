@@ -1,12 +1,7 @@
-FROM gradle:jdk21 AS builder
-WORKDIR /home/app
-COPY --chown=gradle:gradle . .
-RUN gradle build --no-daemon -x test --build-cache
-FROM openjdk:21-jdk-slim-buster
-WORKDIR /app
-RUN groupadd -g 1000 appuser && useradd -u 1000 -g appuser -s /bin/bash appuser
-RUN mkdir -p /app && chown -R appuser:appuser /app
-COPY --from=builder /home/app/build/libs/*.jar app.jar
-USER appuser
+FROM openjdk:17-jdk-slim-buster
+ENV PORT 8080
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+COPY Task2/build/libs/Task2-0.0.1-SNAPSHOT-all.jar /app.jar
+COPY .env /app/.env
+WORKDIR /app
+ENTRYPOINT ["java","-jar","/app.jar"]
