@@ -44,7 +44,7 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public Optional<Goal> getGoal(Long goalId) {
+    public Goal getGoal(Long goalId) {
         return goalRepository.findById(goalId);
     }
 
@@ -60,18 +60,23 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public void updateGoal(Goal updatedGoal) {
-        Optional<Goal> existingGoal = goalRepository.findById(updatedGoal.getGoalId());
-        if (existingGoal.isPresent()) {
+    public boolean updateGoal(Long goalId, Long userId, String newGoalName, BigDecimal newTargetAmount,
+                              int newDuration) {
+        Optional<Goal> goal = goalRepository.findUserIdAndGoalId(goalId, userId);
+        if (goal.isPresent()) {
+            Goal updatedGoal = goal.get();
+            updatedGoal.setGoalName(newGoalName);
+            updatedGoal.setTargetAmount(newTargetAmount);
+            updatedGoal.setDuration(newDuration);
             goalRepository.update(updatedGoal);
-        } else {
-            throw new IllegalArgumentException("Goal not found.");
+            return true;
         }
+          return false;
     }
 
     @Override
-    public void deleteGoal(Long goalId) {
-        goalRepository.delete(goalId);
+    public boolean deleteGoal(Long userId, Long goalId) {
+        return goalRepository.delete(goalId);
     }
 
     /**

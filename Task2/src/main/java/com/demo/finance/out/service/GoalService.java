@@ -4,7 +4,6 @@ import com.demo.finance.domain.model.Goal;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * {@code GoalService} defines the contract for services related to managing user financial goals.
@@ -23,7 +22,7 @@ public interface GoalService {
      */
     void createGoal(Long userId, String goalName, BigDecimal targetAmount, int duration);
 
-    Optional<Goal> getGoal(Long goalId);
+    Goal getGoal(Long goalId);
 
     /**
      * Retrieves all goals associated with a user.
@@ -33,9 +32,9 @@ public interface GoalService {
      */
     List<Goal> getGoalsByUserId(Long userId);
 
-    void updateGoal(Goal updatedGoal);
+    boolean updateGoal(Long goalId, Long userId, String newGoalName, BigDecimal newTargetAmount, int newDuration);
 
-    void deleteGoal(Long goalId);
+    boolean deleteGoal(Long userId, Long goalId);
 
     /**
      * Calculates the total balance of a user's goal.

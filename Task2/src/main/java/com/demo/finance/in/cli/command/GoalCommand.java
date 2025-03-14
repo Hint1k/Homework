@@ -7,7 +7,7 @@ import com.demo.finance.in.cli.CommandContext;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Scanner;
 
 /**
@@ -104,33 +104,41 @@ public class GoalCommand {
             System.out.println(e.getMessage());
             return;
         }
-        Optional<Goal> goalToUpdate = context.getGoalController().getGoal(goalId);
-
-        if (goalToUpdate.isEmpty()) {
+        Goal goalToUpdate = context.getGoalController().getGoal(goalId);
+        if (goalToUpdate == null) {
             System.out.println("Error: Goal not found.");
+            return;
+        }
+        Long userId = context.getCurrentUser().getUserId();
+        if (!Objects.equals(userId, goalToUpdate.getUserId())) {
+            System.out.println("Error: You are not the transaction owner to update this transaction.");
             return;
         }
 
         String message = "Enter New Goal Name" + OR_KEEP_CURRENT_VALUE;
         String newGoalName = validationUtils.promptForOptionalString(message, scanner);
         if (newGoalName == null || newGoalName.isEmpty()) {
-            newGoalName = goalToUpdate.get().getGoalName();
+            newGoalName = goalToUpdate.getGoalName();
         }
 
         String message2 = "Enter New Target Amount" + OR_KEEP_CURRENT_VALUE;
         BigDecimal newTargetAmount = validationUtils.promptForOptionalPositiveBigDecimal(message2, scanner);
         if (newTargetAmount == null) {
-            newTargetAmount = goalToUpdate.get().getTargetAmount();
+            newTargetAmount = goalToUpdate.getTargetAmount();
         }
 
         String message3 = "Enter New Duration in Months" + OR_KEEP_CURRENT_VALUE;
         Integer newDuration = validationUtils.promptForOptionalPositiveInt(message3, scanner);
         if (newDuration == null) {
-            newDuration = goalToUpdate.get().getDuration();
+            newDuration = goalToUpdate.getDuration();
         }
-
-        context.getGoalController().updateGoal(new Goal(goalId, newGoalName, newTargetAmount, newDuration));
-        System.out.println("Goal updated successfully.");
+        boolean isUpdated = context.getGoalController()
+                .updateGoal(goalId, userId, newGoalName, newTargetAmount, newDuration);
+        if(isUpdated) {
+            System.out.println("Goal updated successfully.");
+        } else {
+            System.out.println("Failed to update goal! Server error.");
+        }
     }
 
     /**
@@ -146,11 +154,12 @@ public class GoalCommand {
             System.out.println(e.getMessage());
             return;
         }
-        if (context.getGoalController().getGoal(goalId).isPresent()) {
-            context.getGoalController().deleteGoal(goalId);
+        Long userId = context.getCurrentUser().getUserId();
+        if (context.getGoalController().deleteGoal(userId, goalId)) {
             System.out.println("Goal deleted successfully.");
         } else {
-            System.out.println("Error: Goal not found.");
+            System.out.println("Failed to delete goal. "
+                    + "Either the goal does not exist or it does not belong to you.");
         }
     }
 }

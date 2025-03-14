@@ -20,6 +20,8 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
     private static final String DELETE_SQL = "DELETE FROM finance.goals WHERE goal_id = ?";
     private static final String FIND_BY_ID_SQL = "SELECT * FROM finance.goals WHERE goal_id = ?";
     private static final String FIND_BY_USER_ID_SQL = "SELECT * FROM finance.goals WHERE user_id = ?";
+    private static final String FIND_BY_USER_AND_GOAL_SQL = "SELECT * FROM finance.goals WHERE "
+            + "goal_id = ? AND user_id = ?";
 
     @Override
     public void save(Goal goal) {
@@ -46,9 +48,9 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
     }
 
     @Override
-    public Optional<Goal> findById(Long goalId) {
+    public Goal findById(Long goalId) {
         return findByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, goalId),
-                this::mapResultSetToGoal);
+                this::mapResultSetToGoal).orElse(null);
     }
 
     @Override
@@ -65,6 +67,14 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
             }
             return goals;
         });
+    }
+
+    @Override
+    public Optional<Goal> findUserIdAndGoalId(Long goalId, Long userId) {
+        return findByCriteria(FIND_BY_USER_AND_GOAL_SQL, stmt -> {
+            stmt.setLong(1, goalId);
+            stmt.setLong(2, userId);
+        }, this::mapResultSetToGoal);
     }
 
     private void setGoalParameters(PreparedStatement stmt, Goal goal) throws SQLException {

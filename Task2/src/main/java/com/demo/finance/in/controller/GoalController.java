@@ -5,7 +5,6 @@ import com.demo.finance.out.service.GoalService;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * The {@code GoalController} class handles incoming requests related to goal management. It provides
@@ -27,16 +26,16 @@ public class GoalController {
     /**
      * Creates a new goal for a user with the specified details.
      *
-     * @param userId the ID of the user for whom the goal is to be created
-     * @param name the name of the goal
+     * @param userId       the ID of the user for whom the goal is to be created
+     * @param name         the name of the goal
      * @param targetAmount the target amount for the goal
-     * @param duration the duration of the goal in months
+     * @param duration     the duration of the goal in months
      */
     public void createGoal(Long userId, String name, BigDecimal targetAmount, int duration) {
         goalService.createGoal(userId, name, targetAmount, duration);
     }
 
-    public Optional<Goal> getGoal(Long goalId) {
+    public Goal getGoal(Long goalId) {
         return goalService.getGoal(goalId);
     }
 
@@ -50,19 +49,20 @@ public class GoalController {
         return goalService.getGoalsByUserId(userId);
     }
 
-    public void updateGoal(Goal updatedGoal) {
-        goalService.updateGoal(updatedGoal);
+    public boolean updateGoal(Long goalId, Long userId, String newGoalName, BigDecimal newTargetAmount,
+                              int newDuration) {
+        return goalService.updateGoal(goalId, userId, newGoalName, newTargetAmount, newDuration);
     }
 
-    public void deleteGoal(Long goalId) {
-        goalService.deleteGoal(goalId);
+    public boolean deleteGoal(Long userId, Long goalId) {
+        return goalService.deleteGoal(userId, goalId);
     }
 
     /**
      * Calculates the total balance towards a specific goal for a user.
      *
      * @param userId the ID of the user whose goal balance is to be calculated
-     * @param goal the goal for which the balance is to be calculated
+     * @param goal   the goal for which the balance is to be calculated
      * @return the total balance towards the specified goal
      */
     public BigDecimal calculateTotalBalance(Long userId, Goal goal) {

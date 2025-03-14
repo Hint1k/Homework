@@ -22,7 +22,7 @@ public interface GoalRepository {
 
     boolean delete(Long goalId);
 
-    Optional<Goal> findById(Long goalId);
+    Goal findById(Long goalId);
 
     /**
      * Finds all Goal entities associated with a specific user ID.
@@ -31,4 +31,6 @@ public interface GoalRepository {
      * @return a list of Goal entities associated with the user
      */
     List<Goal> findByUserId(Long userId);
+
+    Optional<Goal> findUserIdAndGoalId(Long goalId, Long userId);
 }
