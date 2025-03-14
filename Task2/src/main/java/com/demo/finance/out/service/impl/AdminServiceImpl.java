@@ -38,7 +38,7 @@ public class AdminServiceImpl implements AdminService {
     /**
      * Updates the role of a user with the specified user ID.
      *
-     * @param userId the ID of the user whose role needs to be updated
+     * @param userId  the ID of the user whose role needs to be updated
      * @param newRole the new role to assign to the user
      * @return {@code true} if the role was updated successfully, {@code false} if the user was not found
      */
@@ -60,7 +60,7 @@ public class AdminServiceImpl implements AdminService {
     public boolean blockUser(Long userId) {
         return userRepository.findById(userId).map(user -> {
             user.setBlocked(true);
-            return true;
+            return userRepository.update(user);
         }).orElse(false);
     }
 
@@ -74,7 +74,7 @@ public class AdminServiceImpl implements AdminService {
     public boolean unBlockUser(Long userId) {
         return userRepository.findById(userId).map(user -> {
             user.setBlocked(false);
-            return true;
+            return userRepository.update(user);
         }).orElse(false);
     }
 

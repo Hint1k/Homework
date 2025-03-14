@@ -5,133 +5,112 @@ import com.demo.finance.domain.model.Budget;
 import com.demo.finance.exception.DatabaseException;
 import com.demo.finance.out.repository.BudgetRepository;
 
-import java.util.Optional;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * The {@code BudgetRepositoryImpl} class provides an in-memory implementation of the {@code BudgetRepository}.
- * It uses a {@code ConcurrentHashMap} to store budgets, indexed by the user ID.
- * This implementation provides methods to save and retrieve budgets for users.
- */
 public class BudgetRepositoryImpl implements BudgetRepository {
 
     private static final Logger log = Logger.getLogger(BudgetRepositoryImpl.class.getName());
 
+    private static final String INSERT_BUDGET_SQL = "INSERT INTO finance.budgets "
+            + "(user_id, monthly_limit, current_expenses)  VALUES (?, ?, ?)";
+    private static final String UPDATE_BUDGET_SQL = "UPDATE finance.budgets "
+            + "SET user_id = ?, monthly_limit = ?, current_expenses = ? WHERE budget_id = ?";
+    private static final String DELETE_BUDGET_SQL = "DELETE FROM finance.budgets WHERE budget_id = ?";
+    private static final String FIND_BUDGET_BY_ID_SQL = "SELECT * FROM finance.budgets WHERE budget_id = ?";
+    private static final String FIND_BUDGET_BY_USER_ID_SQL = "SELECT * FROM finance.budgets WHERE user_id = ?";
+
     @Override
     public boolean save(Budget budget) {
-        String sql = "INSERT INTO finance.budgets (user_id, monthly_limit, current_expenses) "
-                + "VALUES (?, ?, ?)";
-        try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false);
-            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                stmt.setLong(1, budget.getUserId());
-                stmt.setBigDecimal(2, budget.getMonthlyLimit());
-                stmt.setBigDecimal(3, budget.getCurrentExpenses());
+        return Boolean.TRUE.equals(executeInTransaction(getConnection(), conn -> {
+            try (PreparedStatement stmt = conn.prepareStatement(INSERT_BUDGET_SQL,
+                    PreparedStatement.RETURN_GENERATED_KEYS)) {
+                setBudgetParameters(stmt, budget);
                 int rowsInserted = stmt.executeUpdate();
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         budget.setBudgetId(rs.getLong(1));
                     }
                 }
-                conn.commit();
                 return rowsInserted > 0;
-            } catch (SQLException e) {
-                conn.rollback();
-                log.log(Level.SEVERE, "Error saving budget", e);
-                throw new DatabaseException("Error saving budget", e);
             }
-        } catch (SQLException e) {
-            log.log(Level.SEVERE, "Error saving budget", e);
-            throw new DatabaseException("Error establishing connection or committing transaction", e);
-        }
+        }));
     }
 
     @Override
     public boolean update(Budget updatedBudget) {
-        String sql = "UPDATE finance.budgets SET user_id = ?, monthly_limit = ?, current_expenses = ? "
-                + "WHERE budget_id = ?";
-        try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false);
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setLong(1, updatedBudget.getUserId());
-                stmt.setBigDecimal(2, updatedBudget.getMonthlyLimit());
-                stmt.setBigDecimal(3, updatedBudget.getCurrentExpenses());
-                stmt.setLong(4, updatedBudget.getBudgetId());
-                int rowsUpdated = stmt.executeUpdate();
-                conn.commit();
-                return rowsUpdated > 0;
-            } catch (SQLException e) {
-                conn.rollback();
-                log.log(Level.SEVERE, "Error updating budget", e);
-                throw new DatabaseException("Error updating budget", e);
-            }
-        } catch (SQLException e) {
-            log.log(Level.SEVERE, "Error updating budget", e);
-            throw new DatabaseException("Error establishing connection or committing transaction", e);
-        }
+        return executeUpdate(UPDATE_BUDGET_SQL, stmt -> {
+            setBudgetParameters(stmt, updatedBudget);
+            stmt.setLong(4, updatedBudget.getBudgetId());
+        });
     }
 
     @Override
     public boolean delete(Long budgetId) {
-        String sql = "DELETE FROM finance.budgets WHERE budget_id = ?";
-        try (Connection conn = DataSourceManager.getConnection()) {
-            conn.setAutoCommit(false);
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setLong(1, budgetId);
-                int rowsDeleted = stmt.executeUpdate();
-                conn.commit();
-                return rowsDeleted > 0;
-            } catch (SQLException e) {
-                conn.rollback();
-                log.log(Level.SEVERE, "Error deleting budget", e);
-                throw new DatabaseException("Error deleting budget", e);
-            }
-        } catch (SQLException e) {
-            log.log(Level.SEVERE, "Error deleting budget", e);
-            throw new DatabaseException("Error establishing connection or committing transaction", e);
-        }
+        return executeUpdate(DELETE_BUDGET_SQL, stmt -> stmt.setLong(1, budgetId));
     }
 
     @Override
     public Optional<Budget> findById(Long budgetId) {
-        String sql = "SELECT * FROM finance.budgets WHERE budget_id = ?";
-        try (Connection conn = DataSourceManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, budgetId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToBudget(rs));
-                }
-            }
-        } catch (SQLException e) {
-            log.log(Level.SEVERE, "Error finding budget by id", e);
-            throw new DatabaseException("Error finding budget by ID", e);
-        }
-        return Optional.empty();
+        return findBudgetByCriteria(FIND_BUDGET_BY_ID_SQL, stmt ->
+                stmt.setLong(1, budgetId));
     }
 
     @Override
     public Optional<Budget> findByUserId(Long userId) {
-        String sql = "SELECT * FROM finance.budgets WHERE user_id = ?";
-        try (Connection conn = DataSourceManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, userId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToBudget(rs));
+        return findBudgetByCriteria(FIND_BUDGET_BY_USER_ID_SQL, stmt ->
+                stmt.setLong(1, userId));
+    }
+
+    private void setBudgetParameters(PreparedStatement stmt, Budget budget) throws SQLException {
+        stmt.setLong(1, budget.getUserId());
+        stmt.setBigDecimal(2, budget.getMonthlyLimit());
+        stmt.setBigDecimal(3, budget.getCurrentExpenses());
+    }
+
+    private <T> T executeInTransaction(Connection conn, TransactionalOperation<T> operation) {
+        try {
+            conn.setAutoCommit(false);
+            T result = operation.execute(conn);
+            conn.commit();
+            return result;
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackEx) {
+                logError("Rollback failed", rollbackEx);
+            }
+            logError("Transaction failed", e);
+            return null; // Or throw an exception if appropriate
+        }
+    }
+
+    private boolean executeUpdate(String sql, PreparedStatementSetter setter) {
+        return Boolean.TRUE.equals(executeInTransaction(getConnection(), conn -> {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                setter.setValues(stmt);
+                return stmt.executeUpdate() > 0;
+            }
+        }));
+    }
+
+    private Optional<Budget> findBudgetByCriteria(String sql, PreparedStatementSetter setter) {
+        return executeInTransaction(getConnection(), conn -> {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                setter.setValues(stmt);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return Optional.of(mapResultSetToBudget(rs));
+                    }
                 }
             }
-        } catch (SQLException e) {
-            log.log(Level.SEVERE, "Error finding budget by user id", e);
-            throw new DatabaseException("Error finding budget by user ID", e);
-        }
-        return Optional.empty();
+            return Optional.empty();
+        });
     }
 
     private Budget mapResultSetToBudget(ResultSet rs) throws SQLException {
@@ -141,5 +120,29 @@ public class BudgetRepositoryImpl implements BudgetRepository {
                 rs.getBigDecimal("monthly_limit"),
                 rs.getBigDecimal("current_expenses")
         );
+    }
+
+    private Connection getConnection() {
+        try {
+            return DataSourceManager.getConnection();
+        } catch (SQLException e) {
+            logError("Failed to obtain database connection", e);
+            throw new DatabaseException("Error obtaining database connection", e);
+        }
+    }
+
+    @FunctionalInterface
+    private interface TransactionalOperation<T> {
+        T execute(Connection conn) throws SQLException;
+    }
+
+    @FunctionalInterface
+    private interface PreparedStatementSetter {
+        void setValues(PreparedStatement stmt) throws SQLException;
+    }
+
+    private void logError(String message, Exception e) {
+        log.log(Level.SEVERE, message + ": " + e.getMessage(), e);
+        throw new DatabaseException(message, e);
     }
 }
