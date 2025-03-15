@@ -1,152 +1,188 @@
-//package com.demo.finance.out.repository;
-//
-//import com.demo.finance.domain.model.Transaction;
-//import com.demo.finance.domain.utils.Type;
-//import com.demo.finance.out.repository.impl.TransactionRepositoryImpl;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//
-//import java.math.BigDecimal;
-//import java.time.LocalDate;
-//import java.util.List;
-//import java.util.Optional;
-//
-//import static org.assertj.core.api.Assertions.assertThat;
-//import static org.assertj.core.api.Assertions.assertThatThrownBy;
-//
-//@ExtendWith(MockitoExtension.class)
-//class TransactionRepositoryImplTest {
-//
-//    @InjectMocks private TransactionRepositoryImpl repository;
-//
-//    @Test
-//    @DisplayName("Save and find transaction by user ID and transaction ID - Success scenario")
-//    void testSaveAndFindTransactionById() {
-//        Transaction transaction = new Transaction(1L, 2L, new BigDecimal(100),
-//                "Groceries", LocalDate.now(), "Weekly shopping", Type.EXPENSE);
-//        repository.save(transaction);
-//
-//        Optional<Transaction> found = repository.findByUserIdAndTransactionId(1L, 2L);
-//
-//        assertThat(found).isPresent();
-//        assertThat(found.get()).isEqualTo(transaction);
-//    }
-//
-//    @Test
-//    @DisplayName("Update transaction - Success scenario")
-//    void testUpdateTransaction() {
-//        Transaction transaction = new Transaction(12L, 2L, new BigDecimal(150), "Rent",
-//                LocalDate.now(), "Monthly rent", Type.EXPENSE);
-//        repository.save(transaction);
-//
-//        Transaction updatedTransaction = new Transaction(12L, 2L, new BigDecimal(200),
-//                "Rent", LocalDate.now(), "Updated rent", Type.EXPENSE);
-//        boolean updated = repository.update(updatedTransaction);
-//
-//        assertThat(updated).isTrue();
-//        assertThat(repository.findByUserIdAndTransactionId(12L, 2L)).contains(updatedTransaction);
-//    }
-//
-//    @Test
-//    @DisplayName("Delete transaction - Success scenario")
-//    void testDeleteTransaction() {
-//        Transaction transaction = new Transaction(13L, 2L, new BigDecimal(50),
-//                "Transport", LocalDate.now(), "Bus fare", Type.EXPENSE);
-//        repository.save(transaction);
-//
-//        boolean deleted = repository.delete(13L);
-//
-//        assertThat(deleted).isTrue();
-//        assertThat(repository.findByUserIdAndTransactionId(13L, 2L)).isEmpty();
-//    }
-//
-//    @Test
-//    @DisplayName("Find transactions by user ID - Success scenario")
-//    void testFindTransactionsByUserId() {
-//        repository.save(new Transaction(14L, 3L, new BigDecimal(30), "Food",
-//                LocalDate.now(), "Lunch", Type.EXPENSE));
-//        repository.save(new Transaction(15L, 3L, new BigDecimal(70), "Entertainment",
-//                LocalDate.now(), "Concert ticket", Type.EXPENSE));
-//
-//        List<Transaction> transactions = repository.findByUserId(3L);
-//
-//        assertThat(transactions).hasSize(2);
-//    }
-//
-//    @Test
-//    @DisplayName("Find transaction by ID - Null ID throws exception")
-//    void testFindByTransactionId_NullId_ThrowsException() {
-//        assertThatThrownBy(() -> repository.findByTransactionId(null))
-//                .isInstanceOf(IllegalArgumentException.class)
-//                .hasMessage("Transaction ID cannot be null.");
-//    }
-//
-//    @Test
-//    @DisplayName("Find transaction by ID - Non-existent transaction returns null")
-//    void testFindByTransactionId_NonExistentTransaction_ReturnsNull() {
-//        assertThat(repository.findByTransactionId(999L)).isNull();
-//    }
-//
-//    @Test
-//    @DisplayName("Find filtered transactions - Only by user ID")
-//    void testFindFiltered_OnlyByUserId_ReturnsAllTransactionsForUser() {
-//        repository.save(new Transaction(20L, 4L, new BigDecimal(100), "Shopping",
-//                LocalDate.of(2024, 3, 1), "Bought clothes", Type.EXPENSE));
-//        repository.save(new Transaction(21L, 4L, new BigDecimal(50), "Transport",
-//                LocalDate.of(2024, 3, 2), "Bus fare", Type.EXPENSE));
-//
-//        List<Transaction> transactions =
-//                repository.findFiltered(4L, null, null, null, null);
-//
-//        assertThat(transactions).hasSize(2);
-//    }
-//
-//    @Test
-//    @DisplayName("Find filtered transactions - With date range")
-//    void testFindFiltered_WithDateRange_ReturnsMatchingTransactions() {
-//        repository.save(new Transaction(22L, 5L, new BigDecimal(200), "Utilities",
-//                LocalDate.of(2024, 2, 10), "Electricity bill", Type.EXPENSE));
-//        repository.save(new Transaction(23L, 5L, new BigDecimal(100), "Utilities",
-//                LocalDate.of(2024, 3, 5), "Water bill", Type.EXPENSE));
-//
-//        List<Transaction> transactions = repository.findFiltered(5L,
-//                LocalDate.of(2024, 3, 1),
-//                LocalDate.of(2024, 3, 31), null, null);
-//
-//        assertThat(transactions).hasSize(1);
-//        assertThat(transactions.get(0).getTransactionId()).isEqualTo(23L);
-//    }
-//
-//    @Test
-//    @DisplayName("Find filtered transactions - With category and type")
-//    void testFindFiltered_WithCategoryAndType_ReturnsMatchingTransactions() {
-//        repository.save(new Transaction(24L, 6L, new BigDecimal(500), "Salary",
-//                LocalDate.of(2024, 3, 1), "Monthly salary", Type.INCOME));
-//        repository.save(new Transaction(25L, 6L, new BigDecimal(50), "Groceries",
-//                LocalDate.of(2024, 3, 2), "Supermarket shopping", Type.EXPENSE));
-//
-//        List<Transaction> transactions =
-//                repository.findFiltered(6L, null, null, "Salary", Type.INCOME);
-//
-//        assertThat(transactions).hasSize(1);
-//        assertThat(transactions.get(0).getTransactionId()).isEqualTo(24L);
-//    }
-//
-//    @Test
-//    @DisplayName("Generate next ID - Empty repository returns 1")
-//    void testGenerateNextId_EmptyRepository_ReturnsOne() {
-//        assertThat(repository.generateNextId()).isEqualTo(1L);
-//    }
-//
-//    @Test
-//    @DisplayName("Generate next ID - Non-empty repository returns next ID")
-//    void testGenerateNextId_NonEmptyRepository_ReturnsNextId() {
-//        repository.save(new Transaction(30L, 7L, new BigDecimal(300), "Investment",
-//                LocalDate.of(2024, 3, 5), "Stocks", Type.INCOME));
-//
-//        assertThat(repository.generateNextId()).isEqualTo(31L);
-//    }
-//}
+package com.demo.finance.out.repository;
+
+import com.demo.finance.domain.model.Transaction;
+import com.demo.finance.domain.utils.Type;
+import com.demo.finance.out.repository.impl.TransactionRepositoryImpl;
+import org.junit.jupiter.api.*;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@Testcontainers
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class TransactionRepositoryImplTest  {
+
+    @Container
+    private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER =
+            new PostgreSQLContainer<>("postgres:16")
+                    .withDatabaseName("testdb")
+                    .withUsername("testuser")
+                    .withPassword("testpass");
+
+    private TransactionRepositoryImpl repository;
+
+    @BeforeAll
+    void setupDatabase() throws Exception {
+        System.setProperty("ENV_PATH", "src/test/resources/.env");
+        System.setProperty("DB_URL", POSTGRESQL_CONTAINER.getJdbcUrl());
+        System.setProperty("DB_USERNAME", POSTGRESQL_CONTAINER.getUsername());
+        System.setProperty("DB_PASSWORD", POSTGRESQL_CONTAINER.getPassword());
+
+        repository = new TransactionRepositoryImpl();
+
+        try (Connection conn = DriverManager.getConnection(
+                POSTGRESQL_CONTAINER.getJdbcUrl(),
+                POSTGRESQL_CONTAINER.getUsername(),
+                POSTGRESQL_CONTAINER.getPassword());
+             Statement stmt = conn.createStatement()) {
+
+            stmt.execute("CREATE SCHEMA IF NOT EXISTS finance");
+
+            stmt.execute("CREATE TABLE IF NOT EXISTS finance.transactions (" +
+                    "transaction_id SERIAL PRIMARY KEY, " +
+                    "user_id BIGINT NOT NULL, " +
+                    "amount DECIMAL(19,2) NOT NULL, " +
+                    "category VARCHAR(255) NOT NULL, " +
+                    "date DATE NOT NULL, " +
+                    "description VARCHAR(255), " +
+                    "type VARCHAR(50) NOT NULL" +
+                    ");");
+        }
+    }
+
+    @BeforeEach
+    void cleanDatabase() throws Exception {
+        try (Connection conn = DriverManager.getConnection(
+                POSTGRESQL_CONTAINER.getJdbcUrl(),
+                POSTGRESQL_CONTAINER.getUsername(),
+                POSTGRESQL_CONTAINER.getPassword());
+             Statement stmt = conn.createStatement()) {
+            stmt.execute("DELETE FROM finance.transactions");
+        }
+    }
+
+    @Test
+    @DisplayName("Save and find transaction by ID - Success scenario")
+    void testSaveAndFindById() {
+        Transaction transaction = new Transaction(null, 1L, new BigDecimal("500.00"),
+                "Groceries", LocalDate.of(2025, 3, 10), "Supermarket",
+                Type.EXPENSE);
+        repository.save(transaction);
+
+        Transaction found = repository.findById(transaction.getTransactionId());
+
+        assertThat(found).isNotNull();
+        assertThat(found.getAmount()).isEqualTo(new BigDecimal("500.00"));
+        assertThat(found.getCategory()).isEqualTo("Groceries");
+    }
+
+    @Test
+    @DisplayName("Update transaction - Success scenario")
+    void testUpdateTransaction() {
+        Transaction transaction = new Transaction(null, 2L, new BigDecimal("300.00"),
+                "Transport", LocalDate.of(2025, 3, 15), "Bus fare",
+                Type.EXPENSE);
+        repository.save(transaction);
+
+        Transaction updatedTransaction = new Transaction(transaction.getTransactionId(), 2L,
+                new BigDecimal("400.00"), "Transport", LocalDate.of(2025, 3, 15),
+                "Taxi fare", Type.EXPENSE);
+        boolean updated = repository.update(updatedTransaction);
+
+        assertThat(updated).isTrue();
+        Transaction found = repository.findById(transaction.getTransactionId());
+        assertThat(found.getAmount()).isEqualTo(new BigDecimal("400.00"));
+        assertThat(found.getDescription()).isEqualTo("Taxi fare");
+    }
+
+    @Test
+    @DisplayName("Delete transaction - Success scenario")
+    void testDeleteTransaction() {
+        Transaction transaction = new Transaction(null, 3L, new BigDecimal("200.00"),
+                "Bills", LocalDate.of(2025, 3, 20), "Electricity",
+                Type.EXPENSE);
+        repository.save(transaction);
+
+        boolean deleted = repository.delete(transaction.getTransactionId());
+
+        assertThat(deleted).isTrue();
+        assertThat(repository.findById(transaction.getTransactionId())).isNull();
+    }
+
+    @Test
+    @DisplayName("Find by user ID - Transactions exist returns transactions")
+    void testFindByUserId_TransactionsExist_ReturnsTransactions() {
+        repository.save(new Transaction(null, 4L, new BigDecimal("150.00"), "Dining",
+                LocalDate.of(2025, 3, 5), "Restaurant", Type.EXPENSE));
+        repository.save(new Transaction(null, 4L, new BigDecimal("80.00"), "Transport",
+                LocalDate.of(2025, 3, 7), "Bus fare", Type.EXPENSE));
+
+        List<Transaction> transactions = repository.findByUserId(4L);
+
+        assertThat(transactions).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("Find by user ID - No transactions returns empty list")
+    void testFindByUserId_NoTransactions_ReturnsEmptyList() {
+        List<Transaction> transactions = repository.findByUserId(999L);
+        assertThat(transactions).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Find by user and transaction ID - Success scenario")
+    void testFindByUserIdAndTransactionId() {
+        Transaction transaction = new Transaction(null, 5L, new BigDecimal("300.00"),
+                "Freelance", LocalDate.of(2025, 3, 10), "Project payment",
+                Type.INCOME);
+        repository.save(transaction);
+
+        Optional<Transaction> found = repository.findByUserIdAndTransactionId(
+                transaction.getTransactionId(), 5L);
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getCategory()).isEqualTo("Freelance");
+    }
+
+    @Test
+    @DisplayName("Find filtered transactions - Success scenario")
+    void testFindFilteredTransactions() {
+        repository.save(new Transaction(null, 6L, new BigDecimal("200.00"), "Dining",
+                LocalDate.of(2025, 3, 5), "Restaurant", Type.EXPENSE));
+        repository.save(new Transaction(null, 6L, new BigDecimal("100.00"), "Transport",
+                LocalDate.of(2025, 3, 10), "Taxi", Type.EXPENSE));
+
+        LocalDate from = LocalDate.of(2025, 3, 1);
+        LocalDate to = LocalDate.of(2025, 3, 31);
+        List<Transaction> transactions = repository.findFiltered(6L, from, to, "Dining", Type.EXPENSE);
+
+        assertThat(transactions).hasSize(1);
+        assertThat(transactions.get(0).getCategory()).isEqualTo("Dining");
+    }
+
+    @Test
+    @DisplayName("Find filtered transactions - No matches return empty list")
+    void testFindFilteredTransactions_NoMatches_ReturnsEmptyList() {
+        LocalDate from = LocalDate.of(2025, 3, 1);
+        LocalDate to = LocalDate.of(2025, 3, 31);
+        List<Transaction> transactions =
+                repository.findFiltered(7L, from, to, "NonExistent", Type.INCOME);
+
+        assertThat(transactions).isEmpty();
+    }
+
+    @AfterAll
+    static void stopContainer() {
+        POSTGRESQL_CONTAINER.stop();
+    }
+}

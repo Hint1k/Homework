@@ -9,26 +9,29 @@ public class DatabaseConfig {
 
     private static final Logger log = Logger.getLogger(DatabaseConfig.class.getName());
     private final Map<String, String> envVars;
-    private static final String ENV = "/app/.env";
+    private static final String DEFAULT_ENV = "/app/.env";
     private static final String DB_URL = "DB_URL";
     private static final String DB_USERNAME = "DB_USERNAME";
     private static final String DB_PASSWORD = "DB_PASSWORD";
     private static final DatabaseConfig INSTANCE = new DatabaseConfig();
 
     private DatabaseConfig() {
-        File envFile = new File(ENV);
-        if (!envFile.exists()) {
-            log.severe("The .env file was not found at path: " + ENV);
-            throw new RuntimeException("The .env file is missing. Please ensure it is located at " + ENV);
+        String envFilePath = System.getProperty("ENV_PATH", DEFAULT_ENV);
+        File envFile = new File(envFilePath);
+         if (!envFile.exists()) {
+            log.severe("The .env file was not found at path: " + envFilePath);
+            throw new RuntimeException("The .env file is missing. Please ensure it is located at " + envFilePath);
         }
 
         try {
-            log.info("Loading environment variables from .env file at path: " + ENV);
-            envVars = EnvLoader.loadEnv(ENV);
+            log.info("Loading environment variables from .env file at path: " + envFilePath);
+            envVars = EnvLoader.loadEnv(envFilePath);
         } catch (Exception e) {
             log.log(Level.SEVERE, "Failed to load environment variables from .env file: " + e.getMessage(), e);
             throw new RuntimeException("Failed to load environment variables from .env file.", e);
         }
+
+        overrideWithSystemProperties();
     }
 
     public static DatabaseConfig getInstance() {
@@ -60,5 +63,17 @@ public class DatabaseConfig {
             throw new RuntimeException(DB_PASSWORD + " is not configured in the .env file.");
         }
         return dbPassword;
+    }
+
+    private void overrideWithSystemProperties() {
+        String dbUrl = System.getProperty(DB_URL, envVars.get(DB_URL));
+        String dbUsername = System.getProperty(DB_USERNAME, envVars.get(DB_USERNAME));
+        String dbPassword = System.getProperty(DB_PASSWORD, envVars.get(DB_PASSWORD));
+
+        envVars.put(DB_URL, dbUrl);
+        envVars.put(DB_USERNAME, dbUsername);
+        envVars.put(DB_PASSWORD, dbPassword);
+
+        log.info("Database connection details overridden with system properties if they exist.");
     }
 }
