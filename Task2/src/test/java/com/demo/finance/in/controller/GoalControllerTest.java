@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -41,16 +40,16 @@ class GoalControllerTest {
     @Test
     @DisplayName("Get goal - Successfully retrieves a goal by user and goal name")
     void testGetGoal_Success() {
-        Long userId = 1L;
+        Long goalId = 3L;
         String goalName = "Vacation";
-        Goal mockGoal = new Goal(userId, goalName, new BigDecimal(5000), 6);
+        Goal mockGoal = new Goal(2L, goalName, new BigDecimal(5000), 6);
 
-        when(goalService.getGoal(userId, goalName)).thenReturn(Optional.of(mockGoal));
+        when(goalService.getGoal(goalId)).thenReturn(mockGoal);
 
-        Optional<Goal> result = goalController.getGoal(userId, goalName);
+        Goal result = goalController.getGoal(goalId);
 
-        assertThat(result).isPresent().contains(mockGoal);
-        verify(goalService, times(1)).getGoal(userId, goalName);
+        assertThat(result).isEqualTo(mockGoal);
+        verify(goalService, times(1)).getGoal(goalId);
     }
 
     @Test
@@ -62,38 +61,38 @@ class GoalControllerTest {
                 new Goal(userId, "Car", new BigDecimal(10000), 12)
         );
 
-        when(goalService.getUserGoals(userId)).thenReturn(mockGoals);
+        when(goalService.getGoalsByUserId(userId)).thenReturn(mockGoals);
 
-        List<Goal> goals = goalController.getAllGoals(userId);
+        List<Goal> goals = goalController.getAllGoalsByUserId(userId);
 
         assertThat(goals).hasSize(2).containsExactlyElementsOf(mockGoals);
-        verify(goalService, times(1)).getUserGoals(userId);
+        verify(goalService, times(1)).getGoalsByUserId(userId);
     }
 
     @Test
     @DisplayName("Update goal - Successfully updates an existing goal")
     void testUpdateGoal() {
-        Long userId = 1L;
-        String oldGoalName = "Vacation";
+        Long goalId = 3L;
+        Long userId = 2L;
         String newGoalName = "Updated Vacation";
         BigDecimal newTargetAmount = new BigDecimal(7000);
         int newDuration = 8;
 
-        goalController.updateGoal(userId, oldGoalName, newGoalName, newTargetAmount, newDuration);
+        goalController.updateGoal(goalId, userId, newGoalName, newTargetAmount, newDuration);
 
         verify(goalService, times(1))
-                .updateGoal(userId, oldGoalName, newGoalName, newTargetAmount, newDuration);
+                .updateGoal(goalId, userId, newGoalName, newTargetAmount, newDuration);
     }
 
     @Test
     @DisplayName("Delete goal - Successfully deletes a goal")
     void testDeleteGoal() {
-        Long userId = 1L;
-        String goalName = "Vacation";
+        Long goalId = 2L;
+        Long userId = 3L;
 
-        goalController.deleteGoal(userId, goalName);
+        goalController.deleteGoal(userId, goalId);
 
-        verify(goalService, times(1)).deleteGoal(userId, goalName);
+        verify(goalService, times(1)).deleteGoal(userId, goalId);
     }
 
     @Test

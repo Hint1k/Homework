@@ -39,9 +39,7 @@ class TransactionServiceImplTest {
         String date = "2025-03-05";
         String description = "Dinner";
         Type type = Type.EXPENSE;
-        Long transactionId = 10L;
 
-        when(transactionRepository.generateNextId()).thenReturn(transactionId);
         doNothing().when(transactionRepository).save(any());
 
         assertThatCode(() -> transactionService.createTransaction(userId, amount, category, date, description, type))
@@ -56,7 +54,7 @@ class TransactionServiceImplTest {
         Long transactionId = 1L;
         Transaction transaction = new Transaction(transactionId, 2L, new BigDecimal(100),
                 "Groceries", LocalDate.now(), "Shopping", Type.EXPENSE);
-        when(transactionRepository.findByTransactionId(transactionId)).thenReturn(transaction);
+        when(transactionRepository.findById(transactionId)).thenReturn(transaction);
 
         Transaction result = transactionService.getTransaction(transactionId);
 
@@ -99,7 +97,7 @@ class TransactionServiceImplTest {
     @DisplayName("Get transaction - non-existing transaction - returns null")
     void testGetTransaction_nonExistingTransaction_returnsNull() {
         Long transactionId = 99L;
-        when(transactionRepository.findByTransactionId(transactionId)).thenReturn(null);
+        when(transactionRepository.findById(transactionId)).thenReturn(null);
 
         Transaction result = transactionService.getTransaction(transactionId);
 

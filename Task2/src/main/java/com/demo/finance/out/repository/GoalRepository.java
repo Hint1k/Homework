@@ -32,5 +32,5 @@ public interface GoalRepository {
      */
     List<Goal> findByUserId(Long userId);
 
-    Optional<Goal> findUserIdAndGoalId(Long goalId, Long userId);
+    Optional<Goal> findByUserIdAndGoalId(Long goalId, Long userId);
 }

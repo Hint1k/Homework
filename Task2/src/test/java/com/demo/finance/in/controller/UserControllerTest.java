@@ -60,14 +60,14 @@ class UserControllerTest {
     void testUpdateOwnAccount_Success() {
         Role role = new Role("user");
         when(userService.updateOwnAccount(1L, "Alice Updated", "alice_updated@mail.com",
-                "newpassword123", role)).thenReturn(true);
+                "newpassword123", role, true)).thenReturn(true);
 
         boolean result = userController.updateOwnAccount(1L, "Alice Updated",
-                "alice_updated@mail.com", "newpassword123", role);
+                "alice_updated@mail.com", "newpassword123", role, true);
 
         assertThat(result).isTrue();
         verify(userService, times(1)).updateOwnAccount(1L, "Alice Updated",
-                "alice_updated@mail.com", "newpassword123", role);
+                "alice_updated@mail.com", "newpassword123", role, true);
     }
 
     @Test

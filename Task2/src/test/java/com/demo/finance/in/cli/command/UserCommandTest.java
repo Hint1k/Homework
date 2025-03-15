@@ -19,6 +19,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -93,12 +94,13 @@ class UserCommandTest {
         when(validationUtils.promptForOptionalPassword(any(), any())).thenReturn("newSecurePass123");
 
         when(userController.updateOwnAccount(eq(2L), eq("John Updated"), eq("updated@example.com"),
-                eq("newSecurePass123"), eq(new Role("user")))).thenReturn(true);
+                eq("newSecurePass123"), eq(new Role("user")), eq(true))).thenReturn(true);
 
         userCommand.updateOwnAccount();
 
         verify(userController, times(1)).updateOwnAccount(eq(2L), eq("John Updated"),
-                eq("updated@example.com"), eq("newSecurePass123"), eq(new Role("user")));
+                eq("updated@example.com"), eq("newSecurePass123"), eq(new Role("user")),
+                eq(true));
     }
 
     @Test
@@ -208,7 +210,8 @@ class UserCommandTest {
         userCommand.updateOwnAccount();
 
         verify(validationUtils).promptForOptionalEmail(any(), any());
-        verify(userController, never()).updateOwnAccount(anyLong(), anyString(), anyString(), anyString(), any());
+        verify(userController, never())
+                .updateOwnAccount(anyLong(), anyString(), anyString(), anyString(), any(), anyBoolean());
     }
 
     @Test
@@ -228,6 +231,7 @@ class UserCommandTest {
         userCommand.updateOwnAccount();
 
         verify(validationUtils).promptForOptionalPassword(any(), any());
-        verify(userController, never()).updateOwnAccount(anyLong(), anyString(), anyString(), anyString(), any());
+        verify(userController, never())
+                .updateOwnAccount(anyLong(), anyString(), anyString(), anyString(), any(), anyBoolean());
     }
 }

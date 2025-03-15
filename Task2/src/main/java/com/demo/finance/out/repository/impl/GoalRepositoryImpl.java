@@ -70,7 +70,7 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
     }
 
     @Override
-    public Optional<Goal> findUserIdAndGoalId(Long goalId, Long userId) {
+    public Optional<Goal> findByUserIdAndGoalId(Long goalId, Long userId) {
         return findByCriteria(FIND_BY_USER_AND_GOAL_SQL, stmt -> {
             stmt.setLong(1, goalId);
             stmt.setLong(2, userId);

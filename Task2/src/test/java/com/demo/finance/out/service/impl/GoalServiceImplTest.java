@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,56 +40,56 @@ class GoalServiceImplTest {
     @Test
     @DisplayName("Test that getGoal returns an existing goal")
     void testGetGoal_existingGoal_returnsGoal() {
-        Goal goal = new Goal(1L, "Vacation", new BigDecimal(3000), 6);
-        when(goalRepository.findByUserIdAndName(1L, "Vacation")).thenReturn(Optional.of(goal));
+        Goal goal = new Goal(2L, "Vacation", new BigDecimal(3000), 6);
+        when(goalRepository.findById(3L)).thenReturn(goal);
 
-        Optional<Goal> result = goalService.getGoal(1L, "Vacation");
+        Goal result = goalService.getGoal(3L);
 
-        assertThat(result).contains(goal);
+        assertThat(result).isEqualTo(goal);
     }
 
     @Test
     @DisplayName("Test that deleteGoal deletes an existing goal successfully")
     void testDeleteGoal_existingGoal_deletesSuccessfully() {
-        doNothing().when(goalRepository).deleteByUserIdAndName(1L, "Vacation");
+        when(goalRepository.delete(3L)).thenReturn(true);
 
-        goalService.deleteGoal(1L, "Vacation");
+        Boolean result = goalService.deleteGoal(2L, 3L);
 
-        verify(goalRepository, times(1)).deleteByUserIdAndName(1L, "Vacation");
+        assertThat(result).isTrue();
+        verify(goalRepository, times(1)).delete(3L);
     }
 
     @Test
     @DisplayName("Test that getGoal returns empty when the goal does not exist")
     void testGetGoal_whenGoalDoesNotExist_returnsEmpty() {
-        when(goalRepository.findByUserIdAndName(1L, "NonExistentGoal")).thenReturn(Optional.empty());
+        when(goalRepository.findById(3L)).thenReturn(null);
 
-        Optional<Goal> result = goalService.getGoal(1L, "NonExistentGoal");
+        Goal result = goalService.getGoal(3L);
 
-        assertThat(result).isEmpty();
+        assertThat(result).isNull();
     }
 
     @Test
     @DisplayName("Test that updateGoal successfully updates an existing goal")
     void testUpdateGoal_successfullyUpdatesGoal() {
-        Goal existingGoal = new Goal(1L, "Car", new BigDecimal(5000), 12);
-        Goal updatedGoal = new Goal(1L, "NewCar", new BigDecimal(7000), 18);
+        Goal existingGoal = new Goal(2L, "Car", new BigDecimal(5000), 12);
+        Goal updatedGoal = new Goal(2L, "NewCar", new BigDecimal(7000), 18);
 
-        when(goalRepository.findByUserIdAndName(1L, "Car")).thenReturn(Optional.of(existingGoal));
+        when(goalRepository.findByUserIdAndGoalId(3L, 2L)).thenReturn(Optional.of(existingGoal));
 
-        goalService.updateGoal(1L, "Car", "NewCar",
-                new BigDecimal(7000), 18);
+        goalService.updateGoal(3L, 2L, "NewCar", new BigDecimal(7000), 18);
 
-        verify(goalRepository, times(1)).updateGoal(1L, "Car", updatedGoal);
+        verify(goalRepository, times(1)).update(updatedGoal);
     }
 
     @Test
     @DisplayName("Test that updateGoal throws an exception when the goal does not exist")
     void testUpdateGoal_throwsExceptionWhenGoalDoesNotExist() {
-        when(goalRepository.findByUserIdAndName(1L, "NonExistentGoal"))
+        when(goalRepository.findByUserIdAndGoalId(3L, 2L))
                 .thenReturn(Optional.empty());
 
         try {
-            goalService.updateGoal(1L, "NonExistentGoal", "NewGoal",
+            goalService.updateGoal(3L, 2L, "NewGoal",
                     new BigDecimal(7000), 18);
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage()).isEqualTo("Goal not found.");

@@ -51,14 +51,14 @@ class AdminServiceImplTest {
         User user = new User(userId, "Alice", "alice@mail.com", "password123", false,
                 new Role("user"));
 
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userRepository.update(user)).thenReturn(true);
 
         boolean updated = adminService.updateUserRole(userId, newRole);
 
         assertThat(updated).isTrue();
         assertThat(user.getRole()).isEqualTo(newRole);
-        verify(userRepository, times(1)).findByUserId(userId);
+        verify(userRepository, times(1)).findById(userId);
         verify(userRepository, times(1)).update(user);
     }
 
@@ -68,14 +68,15 @@ class AdminServiceImplTest {
         Long userId = 1L;
         User user = new User(userId, "Alice", "alice@mail.com", "password123", false,
                 new Role("user"));
-
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.update(user)).thenReturn(true);
 
         boolean blocked = adminService.blockUser(userId);
 
         assertThat(blocked).isTrue();
         assertThat(user.isBlocked()).isTrue();
-        verify(userRepository, times(1)).findByUserId(userId);
+        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(1)).update(user);
     }
 
     @Test
@@ -84,14 +85,15 @@ class AdminServiceImplTest {
         Long userId = 1L;
         User user = new User(userId, "Alice", "alice@mail.com", "password123", true,
                 new Role("user"));
-
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.update(user)).thenReturn(true);
 
         boolean unblocked = adminService.unBlockUser(userId);
 
         assertThat(unblocked).isTrue();
         assertThat(user.isBlocked()).isFalse();
-        verify(userRepository, times(1)).findByUserId(userId);
+        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(1)).update(user);
     }
 
     @Test
@@ -123,7 +125,7 @@ class AdminServiceImplTest {
         Long userId = 1L;
         Role newRole = new Role("admin");
 
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         boolean result = adminService.updateUserRole(userId, newRole);
 
@@ -135,7 +137,7 @@ class AdminServiceImplTest {
     void testBlockUserWhenUserDoesNotExist() {
         Long userId = 1L;
 
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         boolean result = adminService.blockUser(userId);
 
@@ -147,7 +149,7 @@ class AdminServiceImplTest {
     void testUnBlockUserWhenUserDoesNotExist() {
         Long userId = 1L;
 
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         boolean result = adminService.unBlockUser(userId);
 

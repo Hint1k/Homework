@@ -62,7 +62,7 @@ public class GoalServiceImpl implements GoalService {
     @Override
     public boolean updateGoal(Long goalId, Long userId, String newGoalName, BigDecimal newTargetAmount,
                               int newDuration) {
-        Optional<Goal> goal = goalRepository.findUserIdAndGoalId(goalId, userId);
+        Optional<Goal> goal = goalRepository.findByUserIdAndGoalId(goalId, userId);
         if (goal.isPresent()) {
             Goal updatedGoal = goal.get();
             updatedGoal.setGoalName(newGoalName);

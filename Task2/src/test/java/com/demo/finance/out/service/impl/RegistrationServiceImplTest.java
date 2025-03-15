@@ -35,17 +35,14 @@ class RegistrationServiceImplTest {
         String email = "mymail@mail.com";
         String password = "password123";
         Role role = new Role("user");
-        Long userId = 1L;
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
-        when(userRepository.generateNextId()).thenReturn(userId);
         when(passwordUtils.hashPassword(password)).thenReturn("hashedPassword");
 
         boolean result = registrationService.registerUser(name, email, password, role);
 
         assertThat(result).isTrue();
         verify(userRepository, times(1)).findByEmail(email);
-        verify(userRepository, times(1)).generateNextId();
         verify(passwordUtils, times(1)).hashPassword(password);
         verify(userRepository, times(1)).save(any(User.class));
     }
@@ -66,7 +63,6 @@ class RegistrationServiceImplTest {
 
         assertThat(result).isFalse();
         verify(userRepository, times(1)).findByEmail(email);
-        verify(userRepository, never()).generateNextId();
         verify(passwordUtils, never()).hashPassword(password);
         verify(userRepository, never()).save(any(User.class));
     }
@@ -129,15 +125,14 @@ class RegistrationServiceImplTest {
         String email = "bob@mail.com";
         String password = "password123";
         Role role = new Role("user");
-        Long userId = 1L;
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
-        when(userRepository.generateNextId()).thenReturn(userId);
         when(passwordUtils.hashPassword(password)).thenReturn("hashedPassword");
 
         registrationService.registerUser(name, email, password, role);
 
-        verify(userRepository, times(1)).generateNextId();
+        verify(userRepository, times(1)).findByEmail(email);
+        verify(passwordUtils, times(1)).hashPassword(password);
     }
 
     @Test

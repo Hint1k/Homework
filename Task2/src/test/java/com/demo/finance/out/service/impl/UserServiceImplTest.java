@@ -11,9 +11,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.any;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -27,17 +32,24 @@ class UserServiceImplTest {
     void testUpdateOwnAccount_existingUser_updatesSuccessfully() {
         Long userId = 1L;
         Role role = new Role("USER");
-        User updatedUser = new User(userId, "John Doe", "john@example.com", "hashedPassword",
-                false, role);
+        String name = "John Doe";
+        String email = "john@example.com";
+        String newPassword = "newPassword";
+        String hashedPassword = "hashedPassword";
 
-        when(passwordUtils.hashPassword("newPassword")).thenReturn("hashedPassword");
+        User existingUser = new User(userId, "Old Name", "old@example.com", "oldHashedPassword",
+                false, role);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(passwordUtils.hashPassword(newPassword)).thenReturn(hashedPassword);
+        User updatedUser = new User(userId, name, email, hashedPassword, false, role);
         when(userRepository.update(updatedUser)).thenReturn(true);
 
-        boolean result = userService.updateOwnAccount(userId, "John Doe", "john@example.com",
-                "newPassword", role);
+        boolean result = userService.updateOwnAccount(userId, name, email, newPassword, role, true);
 
         assertThat(result).isTrue();
-        verify(userRepository).update(updatedUser);
+        verify(userRepository, times(1)).findById(userId);
+        verify(passwordUtils, times(1)).hashPassword(newPassword);
+        verify(userRepository, times(1)).update(updatedUser);
     }
 
     @Test
@@ -53,21 +65,27 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Update own account - null password - hashes and updates successfully")
-    void testUpdateOwnAccount_nullPassword_hashesAndUpdatesSuccessfully() {
+    @DisplayName("Update own account - password not provided - updates successfully")
+    void testUpdateOwnAccount_nullPassword_UpdatesSuccessfully() {
         Long userId = 1L;
-        Role role = new Role("USER");
-        User updatedUser = new User(userId, "John Doe", "john@example.com",
-                null, false, role);
+        String name = "John Doe";
+        String email = "john@example.com";
+        Role role = new Role("user");
+        String existingHashedPassword = "existingHashedPassword";
 
-        when(passwordUtils.hashPassword(null)).thenReturn(null);
+        User existingUser = new User(userId, "Old Name", "old@example.com", existingHashedPassword,
+                false, role);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+
+        User updatedUser = new User(userId, name, email, existingHashedPassword, false, role);
         when(userRepository.update(updatedUser)).thenReturn(true);
 
-        boolean result = userService.updateOwnAccount(userId, "John Doe", "john@example.com",
-                null, role);
+        boolean result = userService.updateOwnAccount(userId, name, email, null, role, false);
 
         assertThat(result).isTrue();
-        verify(userRepository).update(updatedUser);
+        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(1)).update(updatedUser);
+        verify(passwordUtils, never()).hashPassword(any());
     }
 
     @Test
@@ -75,17 +93,24 @@ class UserServiceImplTest {
     void testUpdateOwnAccount_updateFails_returnsFalse() {
         Long userId = 1L;
         Role role = new Role("USER");
-        User updatedUser = new User(userId, "John Doe", "john@example.com",
-                "hashedPassword", false, role);
+        String name = "John Doe";
+        String email = "john@example.com";
+        String newPassword = "newPassword";
+        String hashedPassword = "hashedPassword";
 
-        when(passwordUtils.hashPassword("newPassword")).thenReturn("hashedPassword");
+        User existingUser = new User(userId, "Old Name", "old@example.com", "oldHashedPassword",
+                false, role);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(passwordUtils.hashPassword(newPassword)).thenReturn(hashedPassword);
+        User updatedUser = new User(userId, name, email, hashedPassword, false, role);
         when(userRepository.update(updatedUser)).thenReturn(false);
 
-        boolean result = userService.updateOwnAccount(userId, "John Doe", "john@example.com",
-                "newPassword", role);
+        boolean result = userService.updateOwnAccount(userId, name, email, newPassword, role, true);
 
         assertThat(result).isFalse();
-        verify(userRepository).update(updatedUser);
+        verify(userRepository, times(1)).findById(userId);
+        verify(passwordUtils, times(1)).hashPassword(newPassword);
+        verify(userRepository, times(1)).update(updatedUser);
     }
 
     @Test

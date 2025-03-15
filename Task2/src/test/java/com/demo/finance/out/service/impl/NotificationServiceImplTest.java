@@ -73,7 +73,7 @@ class NotificationServiceImplTest {
                 new Transaction(1L, userId, new BigDecimal(600), "Shopping", LocalDate.now(),
                         "Exceeded budget", Type.EXPENSE)
         ));
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(new User(userId, "John Doe",
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User(userId, "John Doe",
                 "john@example.com", "password", false, null)));
 
         String notification = notificationService.fetchBudgetNotification(userId);
@@ -92,7 +92,7 @@ class NotificationServiceImplTest {
                 new Transaction(1L, userId, new BigDecimal(200), "Groceries", LocalDate.now(),
                         "Grocery shopping", Type.EXPENSE)
         ));
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(new User(userId, "John Doe",
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User(userId, "John Doe",
                 "john@example.com", "password", false, null)));
 
         String notification = notificationService.fetchBudgetNotification(userId);
@@ -105,7 +105,7 @@ class NotificationServiceImplTest {
     @DisplayName("Test that fetchBudgetNotification does not send an email when user email is not found")
     void testSendNotificationViaEmail_userEmailNotFound_doesNotSendEmail() {
         Long userId = 1L;
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         notificationService.fetchBudgetNotification(userId);
 
@@ -121,7 +121,7 @@ class NotificationServiceImplTest {
 
         when(goalRepository.findByUserId(userId)).thenReturn(List.of(goal));
         when(balanceUtils.calculateBalance(userId, goal)).thenReturn(new BigDecimal(1500));
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(new User(userId, "John Doe", userEmail,
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User(userId, "John Doe", userEmail,
                 "password", false, new Role("user"))));
 
         String notification = notificationService.fetchGoalNotification(userId);
@@ -139,7 +139,7 @@ class NotificationServiceImplTest {
 
         when(goalRepository.findByUserId(userId)).thenReturn(List.of(goal));
         when(balanceUtils.calculateBalance(userId, goal)).thenReturn(new BigDecimal(3000));
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(new User(userId, "John Doe", userEmail,
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User(userId, "John Doe", userEmail,
                 "password", false, new Role("user"))));
 
         String notification = notificationService.fetchGoalNotification(userId);

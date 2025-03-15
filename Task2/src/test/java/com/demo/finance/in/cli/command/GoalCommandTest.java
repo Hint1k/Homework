@@ -16,18 +16,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.eq;
 
 @ExtendWith(MockitoExtension.class)
 class GoalCommandTest {
@@ -61,24 +60,24 @@ class GoalCommandTest {
     @Test
     @DisplayName("View goals - Success")
     void testViewGoals() {
-        when(goalController.getAllGoals(2L))
+        when(goalController.getAllGoalsByUserId(2L))
                 .thenReturn(List.of(new Goal(2L, "Vacation", new BigDecimal(5000), 6)));
 
         goalCommand.viewGoals();
 
-        verify(goalController, times(1)).getAllGoals(2L);
+        verify(goalController, times(1)).getAllGoalsByUserId(2L);
     }
 
     @Test
     @DisplayName("Delete goal - Success")
     void testDeleteGoal_Success() {
-        when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("Vacation");
-        Goal mockGoal = new Goal(2L, "Vacation", new BigDecimal(5000), 6);
-        when(goalController.getGoal(2L, "Vacation")).thenReturn(Optional.of(mockGoal));
+        when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(3L);
+        when(goalController.deleteGoal(2L, 3L)).thenReturn(true);
 
         goalCommand.deleteGoal();
 
-        verify(goalController, times(1)).deleteGoal(2L, "Vacation");
+        verify(validationUtils, times(1)).promptForPositiveLong(any(), any());
+        verify(goalController, times(1)).deleteGoal(2L, 3L);
     }
 
     @Test
@@ -111,59 +110,58 @@ class GoalCommandTest {
     @Test
     @DisplayName("Delete goal - Invalid goal name logs error")
     void testDeleteGoal_InvalidGoalName_LogsError() {
-        when(validationUtils.promptForNonEmptyString(any(), any()))
+        when(validationUtils.promptForPositiveLong(any(), any()))
                 .thenThrow(new MaxRetriesReachedException("Invalid goal name"));
 
         goalCommand.deleteGoal();
 
-        verify(validationUtils).promptForNonEmptyString(any(), any());
-        verify(goalController, never()).deleteGoal(anyLong(), anyString());
+        verify(validationUtils, times(1)).promptForPositiveLong(any(), any());
+        verify(goalController, never()).deleteGoal(anyLong(), anyLong());
     }
 
     @Test
     @DisplayName("Delete goal - Goal not found logs error")
     void testDeleteGoal_GoalNotFound_LogsError() {
-        when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("Vacation");
-        when(goalController.getGoal(2L, "Vacation")).thenReturn(Optional.empty());
+        when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(3L);
+        when(goalController.deleteGoal(2L, 3L)).thenReturn(false);
 
         goalCommand.deleteGoal();
 
-        verify(goalController, never()).deleteGoal(anyLong(), anyString());
+        verify(validationUtils, times(1)).promptForPositiveLong(any(), any());
+        verify(goalController, times(1)).deleteGoal(2L, 3L);
     }
 
     @Test
     @DisplayName("Update goal - Invalid target amount logs error")
     void testUpdateGoal_InvalidTargetAmount_LogsError() {
-        when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("Vacation");
+        when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(3L);
         Goal mockGoal = new Goal(2L, "Vacation", new BigDecimal(5000), 6);
-        when(goalController.getGoal(2L, "Vacation")).thenReturn(Optional.of(mockGoal));
-
+        when(goalController.getGoal(3L)).thenReturn(mockGoal);
+        when(validationUtils.promptForOptionalString(any(), any())).thenReturn("Vacation");
         when(validationUtils.promptForOptionalPositiveBigDecimal(any(), any()))
                 .thenAnswer(invocation -> {
                     System.out.println("Simulating invalid input for target amount.");
                     return null; // Return null to simulate keeping the current value
                 });
 
-        when(validationUtils.promptForOptionalPositiveInt(any(), any()))
-                .thenReturn(12);
-
         goalCommand.updateGoal();
 
-        verify(validationUtils).promptForOptionalPositiveBigDecimal(any(), any());
-        verify(validationUtils).promptForOptionalPositiveInt(any(), any());
-        verify(goalController, times(1)).updateGoal(eq(2L), eq("Vacation"),
-                eq("Vacation"), eq(new BigDecimal(5000)), eq(12));
+        verify(validationUtils, times(1)).promptForPositiveLong(any(), any());
+        verify(validationUtils, times(1)).promptForOptionalString(any(), any());
+        verify(validationUtils, times(1)).promptForOptionalPositiveBigDecimal(any(), any());
+        verify(goalController, times(1)).getGoal(3L);
+        verify(goalController, never()).updateGoal(eq(3L), eq(2L), eq("Vacation"),
+                eq(new BigDecimal(5000)), eq(12));
     }
 
     @Test
     @DisplayName("Update goal - Invalid duration logs error")
     void testUpdateGoal_InvalidDuration_LogsError() {
-        when(validationUtils.promptForNonEmptyString(any(), any())).thenReturn("Vacation");
+        when(validationUtils.promptForPositiveLong(any(), any())).thenReturn(3L);
         Goal mockGoal = new Goal(2L, "Vacation", new BigDecimal(5000), 6);
-        when(goalController.getGoal(2L, "Vacation")).thenReturn(Optional.of(mockGoal));
-
-        when(validationUtils.promptForOptionalPositiveBigDecimal(any(), any()))
-                .thenReturn(new BigDecimal(10000));
+        when(goalController.getGoal(3L)).thenReturn(mockGoal);
+        when(validationUtils.promptForOptionalString(any(), any())).thenReturn("Vacation");
+        when(validationUtils.promptForOptionalPositiveBigDecimal(any(), any())).thenReturn(new BigDecimal(10000));
 
         when(validationUtils.promptForOptionalPositiveInt(any(), any()))
                 .thenAnswer(invocation -> {
@@ -173,9 +171,12 @@ class GoalCommandTest {
 
         goalCommand.updateGoal();
 
-        verify(validationUtils).promptForOptionalPositiveBigDecimal(any(), any());
-        verify(validationUtils).promptForOptionalPositiveInt(any(), any());
-        verify(goalController, times(1)).updateGoal(eq(2L), eq("Vacation"),
-                eq("Vacation"), eq(new BigDecimal(10000)), eq(6));
+        verify(validationUtils, times(1)).promptForPositiveLong(any(), any());
+        verify(validationUtils, times(1)).promptForOptionalString(any(), any());
+        verify(validationUtils, times(1)).promptForOptionalPositiveBigDecimal(any(), any());
+        verify(validationUtils, times(1)).promptForOptionalPositiveInt(any(), any());
+        verify(goalController, times(1)).getGoal(3L);
+        verify(goalController, never()).updateGoal(eq(3L), eq(2L), eq("Vacation"),
+                eq(new BigDecimal(5000)), eq(12));
     }
 }
