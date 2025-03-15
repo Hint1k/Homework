@@ -4,10 +4,6 @@ import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.impl.TransactionRepositoryImpl;
 import org.junit.jupiter.api.*;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -18,46 +14,14 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TransactionRepositoryImplTest  {
-
-    @Container
-    private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER =
-            new PostgreSQLContainer<>("postgres:16")
-                    .withDatabaseName("testdb")
-                    .withUsername("testuser")
-                    .withPassword("testpass");
+class TransactionRepositoryImplTest extends AbstractContainerBaseTest {
 
     private TransactionRepositoryImpl repository;
 
     @BeforeAll
-    void setupDatabase() throws Exception {
-        System.setProperty("ENV_PATH", "src/test/resources/.env");
-        System.setProperty("DB_URL", POSTGRESQL_CONTAINER.getJdbcUrl());
-        System.setProperty("DB_USERNAME", POSTGRESQL_CONTAINER.getUsername());
-        System.setProperty("DB_PASSWORD", POSTGRESQL_CONTAINER.getPassword());
-
+    void setupRepository() {
         repository = new TransactionRepositoryImpl();
-
-        try (Connection conn = DriverManager.getConnection(
-                POSTGRESQL_CONTAINER.getJdbcUrl(),
-                POSTGRESQL_CONTAINER.getUsername(),
-                POSTGRESQL_CONTAINER.getPassword());
-             Statement stmt = conn.createStatement()) {
-
-            stmt.execute("CREATE SCHEMA IF NOT EXISTS finance");
-
-            stmt.execute("CREATE TABLE IF NOT EXISTS finance.transactions (" +
-                    "transaction_id SERIAL PRIMARY KEY, " +
-                    "user_id BIGINT NOT NULL, " +
-                    "amount DECIMAL(19,2) NOT NULL, " +
-                    "category VARCHAR(255) NOT NULL, " +
-                    "date DATE NOT NULL, " +
-                    "description VARCHAR(255), " +
-                    "type VARCHAR(50) NOT NULL" +
-                    ");");
-        }
     }
 
     @BeforeEach

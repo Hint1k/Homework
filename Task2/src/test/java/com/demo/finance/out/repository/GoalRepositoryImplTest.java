@@ -3,10 +3,6 @@ package com.demo.finance.out.repository;
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.out.repository.impl.GoalRepositoryImpl;
 import org.junit.jupiter.api.*;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,46 +13,14 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GoalRepositoryImplTest {
-
-    @Container
-    private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER =
-            new PostgreSQLContainer<>("postgres:16")
-                    .withDatabaseName("testdb")
-                    .withUsername("testuser")
-                    .withPassword("testpass");
+class GoalRepositoryImplTest extends AbstractContainerBaseTest {
 
     private GoalRepositoryImpl repository;
 
     @BeforeAll
-    void setupDatabase() throws Exception {
-        System.setProperty("ENV_PATH", "src/test/resources/.env");
-        System.setProperty("DB_URL", POSTGRESQL_CONTAINER.getJdbcUrl());
-        System.setProperty("DB_USERNAME", POSTGRESQL_CONTAINER.getUsername());
-        System.setProperty("DB_PASSWORD", POSTGRESQL_CONTAINER.getPassword());
-
+    void setupRepository() {
         repository = new GoalRepositoryImpl();
-
-        try (Connection conn = DriverManager.getConnection(
-                POSTGRESQL_CONTAINER.getJdbcUrl(),
-                POSTGRESQL_CONTAINER.getUsername(),
-                POSTGRESQL_CONTAINER.getPassword());
-             Statement stmt = conn.createStatement()) {
-
-            stmt.execute("CREATE SCHEMA IF NOT EXISTS finance");
-
-            stmt.execute("CREATE TABLE IF NOT EXISTS finance.goals (" +
-                    "goal_id SERIAL PRIMARY KEY, " +
-                    "user_id BIGINT NOT NULL, " +
-                    "goal_name VARCHAR(255) NOT NULL, " +
-                    "target_amount DECIMAL(19,2) NOT NULL, " +
-                    "saved_amount DECIMAL(19,2) NOT NULL, " +
-                    "duration INT NOT NULL, " +
-                    "start_time DATE NOT NULL" +
-                    ");");
-        }
     }
 
     @BeforeEach

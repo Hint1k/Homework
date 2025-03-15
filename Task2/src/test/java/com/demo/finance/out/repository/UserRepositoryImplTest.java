@@ -1,62 +1,24 @@
 package com.demo.finance.out.repository;
 
-import com.demo.finance.app.config.EnvLoader;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.impl.UserRepositoryImpl;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.*;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.Optional;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UserRepositoryImplTest {
-
-    @Container
-    private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER =
-            new PostgreSQLContainer<>("postgres:16")
-                    .withDatabaseName("testdb")
-                    .withUsername("testuser")
-                    .withPassword("testpass");
+class UserRepositoryImplTest extends AbstractContainerBaseTest {
 
     private UserRepositoryImpl repository;
 
     @BeforeAll
-    void setupDatabase() throws Exception {
-        System.setProperty("ENV_PATH", "src/test/resources/.env");
-        System.setProperty("DB_URL", POSTGRESQL_CONTAINER.getJdbcUrl());
-        System.setProperty("DB_USERNAME", POSTGRESQL_CONTAINER.getUsername());
-        System.setProperty("DB_PASSWORD", POSTGRESQL_CONTAINER.getPassword());
-
+    void setupRepository() {
         repository = new UserRepositoryImpl();
-
-        try (Connection conn = DriverManager.getConnection(
-                POSTGRESQL_CONTAINER.getJdbcUrl(),
-                POSTGRESQL_CONTAINER.getUsername(),
-                POSTGRESQL_CONTAINER.getPassword());
-             Statement stmt = conn.createStatement()) {
-
-            stmt.execute("CREATE SCHEMA IF NOT EXISTS finance");
-
-            stmt.execute("CREATE TABLE IF NOT EXISTS finance.users (" +
-                    "user_id SERIAL PRIMARY KEY, " +
-                    "name VARCHAR(255) NOT NULL, " +
-                    "email VARCHAR(255) UNIQUE NOT NULL, " +
-                    "password VARCHAR(255) NOT NULL, " +
-                    "blocked BOOLEAN NOT NULL DEFAULT FALSE, " +
-                    "role VARCHAR(50) NOT NULL" +
-                    ");");
-        }
     }
 
     @BeforeEach
