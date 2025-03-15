@@ -1,9 +1,10 @@
-Dummy Readme for Task2
+Readme for Task2
 
 connecting to database:
 - docker ps
-- psql -h localhost -p 5432 -U user -d financedb
-- enter the user password (123)
+- psql -h localhost -p 5432 -U user -d financedb # with password
+- enter the user password
+- docker exec -it hint1k_postgres psql -U user -d financedb  # without password
 
 running docker
 - ./gradlew clean shadowJar

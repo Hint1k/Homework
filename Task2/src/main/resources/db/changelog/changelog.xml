@@ -5,7 +5,8 @@
                         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
         logicalFilePath="db/changelog/changelog.xml">
 
-    <include file="001-create-schema.xml" relativeToChangelogFile="true"/>
+    <include file="000-create-schema.xml" relativeToChangelogFile="true"/>
+    <include file="001-create-sequences.xml" relativeToChangelogFile="true"/>
     <include file="002-create-tables.xml" relativeToChangelogFile="true"/>
     <include file="003-insert-data.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
