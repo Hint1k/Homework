@@ -3,9 +3,9 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
-        logicalFilePath="db/changelog/002-create-tables.xml">
+        logicalFilePath="db/changelog/003-create-tables.xml">
 
-    <changeSet id="002-create-tables" author="hint1k">
+    <changeSet id="003-create-tables" author="hint1k">
         <!-- Users Table -->
         <createTable tableName="users" schemaName="finance">
             <column name="user_id" type="BIGINT" defaultValueComputed="nextval('finance.users_user_id_seq')">

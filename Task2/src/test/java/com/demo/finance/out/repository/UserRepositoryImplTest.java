@@ -3,10 +3,11 @@ package com.demo.finance.out.repository;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.impl.UserRepositoryImpl;
-import org.junit.jupiter.api.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,17 +20,6 @@ class UserRepositoryImplTest extends AbstractContainerBaseTest {
     @BeforeAll
     void setupRepository() {
         repository = new UserRepositoryImpl();
-    }
-
-    @BeforeEach
-    void cleanDatabase() throws Exception {
-        try (Connection conn = DriverManager.getConnection(
-                POSTGRESQL_CONTAINER.getJdbcUrl(),
-                POSTGRESQL_CONTAINER.getUsername(),
-                POSTGRESQL_CONTAINER.getPassword());
-             Statement stmt = conn.createStatement()) {
-            stmt.execute("DELETE FROM finance.users");
-        }
     }
 
     @Test
@@ -122,10 +112,5 @@ class UserRepositoryImplTest extends AbstractContainerBaseTest {
     @DisplayName("Find all users - No users returns empty list")
     void testFindAll_NoUsers_ReturnsEmptyList() {
         assertThat(repository.findAll()).isEmpty();
-    }
-
-    @AfterAll
-    static void stopContainer() {
-        POSTGRESQL_CONTAINER.stop();
     }
 }

@@ -3,11 +3,12 @@ package com.demo.finance.out.repository;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.impl.TransactionRepositoryImpl;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -22,17 +23,6 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseTest {
     @BeforeAll
     void setupRepository() {
         repository = new TransactionRepositoryImpl();
-    }
-
-    @BeforeEach
-    void cleanDatabase() throws Exception {
-        try (Connection conn = DriverManager.getConnection(
-                POSTGRESQL_CONTAINER.getJdbcUrl(),
-                POSTGRESQL_CONTAINER.getUsername(),
-                POSTGRESQL_CONTAINER.getPassword());
-             Statement stmt = conn.createStatement()) {
-            stmt.execute("DELETE FROM finance.transactions");
-        }
     }
 
     @Test
@@ -143,10 +133,5 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseTest {
                 repository.findFiltered(7L, from, to, "NonExistent", Type.INCOME);
 
         assertThat(transactions).isEmpty();
-    }
-
-    @AfterAll
-    static void stopContainer() {
-        POSTGRESQL_CONTAINER.stop();
     }
 }

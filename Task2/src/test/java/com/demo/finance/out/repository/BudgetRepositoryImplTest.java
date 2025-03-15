@@ -2,11 +2,11 @@ package com.demo.finance.out.repository;
 
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.out.repository.impl.BudgetRepositoryImpl;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,17 +19,6 @@ class BudgetRepositoryImplTest extends AbstractContainerBaseTest {
     @BeforeAll
     void setupRepository() {
         repository = new BudgetRepositoryImpl();
-    }
-
-    @BeforeEach
-    void cleanDatabase() throws Exception {
-        try (Connection conn = DriverManager.getConnection(
-                POSTGRESQL_CONTAINER.getJdbcUrl(),
-                POSTGRESQL_CONTAINER.getUsername(),
-                POSTGRESQL_CONTAINER.getPassword());
-             Statement stmt = conn.createStatement()) {
-            stmt.execute("DELETE FROM finance.budgets");
-        }
     }
 
     @Test
@@ -101,10 +90,5 @@ class BudgetRepositoryImplTest extends AbstractContainerBaseTest {
     @DisplayName("Find by user ID - No budget returns empty optional")
     void testFindByUserId_NoBudget_ReturnsEmptyOptional() {
         assertThat(repository.findByUserId(999L)).isEmpty();
-    }
-
-    @AfterAll
-    static void stopContainer() {
-        POSTGRESQL_CONTAINER.stop();
     }
 }

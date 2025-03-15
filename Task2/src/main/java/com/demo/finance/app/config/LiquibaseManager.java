@@ -22,9 +22,6 @@ public class LiquibaseManager {
         this.databaseConfig = databaseConfig;
     }
 
-    /**
-     * Runs Liquibase migrations using the changelog inside the JAR.
-     */
     public void runMigrations() {
         try (InputStream changelogStream = getClass().getClassLoader().getResourceAsStream(CHANGELOG)) {
             if (changelogStream == null) {

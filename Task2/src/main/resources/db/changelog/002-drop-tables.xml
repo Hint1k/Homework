@@ -1,0 +1,47 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog/002-drop-tables.xml">
+
+    <!-- Drop users table if it exists -->
+    <changeSet id="drop-users-table" author="hint1k">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="users" schemaName="finance"/>
+        </preConditions>
+        <dropTable tableName="users" schemaName="finance"/>
+    </changeSet>
+
+    <!-- Drop transactions table if it exists -->
+    <changeSet id="drop-transactions-table" author="hint1k">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="transactions" schemaName="finance"/>
+        </preConditions>
+        <dropTable tableName="transactions" schemaName="finance"/>
+    </changeSet>
+
+    <!-- Drop reports table if it exists -->
+    <changeSet id="drop-reports-table" author="hint1k">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="reports" schemaName="finance"/>
+        </preConditions>
+        <dropTable tableName="reports" schemaName="finance"/>
+    </changeSet>
+
+    <!-- Drop goals table if it exists -->
+    <changeSet id="drop-goals-table" author="hint1k">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="goals" schemaName="finance"/>
+        </preConditions>
+        <dropTable tableName="goals" schemaName="finance"/>
+    </changeSet>
+
+    <!-- Drop budgets table if it exists -->
+    <changeSet id="drop-budgets-table" author="hint1k">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="budgets" schemaName="finance"/>
+        </preConditions>
+        <dropTable tableName="budgets" schemaName="finance"/>
+    </changeSet>
+</databaseChangeLog>
