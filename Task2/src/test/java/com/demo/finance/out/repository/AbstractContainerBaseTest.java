@@ -1,11 +1,10 @@
 package com.demo.finance.out.repository;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,21 +15,24 @@ import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.fail;
 
-@Testcontainers
 public abstract class AbstractContainerBaseTest {
 
     private static final Logger log = Logger.getLogger(AbstractContainerBaseTest.class.getName());
 
-    @Container
-    protected static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER;
+    private static class SingletonContainer {
+        private static final PostgreSQLContainer<?> INSTANCE =
+                new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"))
+                        .withDatabaseName("testdb")
+                        .withUsername("testuser")
+                        .withPassword("testpass");
 
-    static {
-        POSTGRESQL_CONTAINER = new PostgreSQLContainer<>("postgres:16")
-                .withDatabaseName("testdb")
-                .withUsername("testuser")
-                .withPassword("testpass");
-        POSTGRESQL_CONTAINER.start();
+        static {
+            INSTANCE.start();
+        }
     }
+
+    @Container
+    protected static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER = SingletonContainer.INSTANCE;
 
     @BeforeAll
     static void setupDatabase() {
@@ -48,7 +50,6 @@ public abstract class AbstractContainerBaseTest {
 
                 stmt.execute("CREATE SCHEMA IF NOT EXISTS finance");
 
-                // Create tables for all entities
                 stmt.execute("CREATE TABLE IF NOT EXISTS finance.budgets (" +
                         "budget_id SERIAL PRIMARY KEY, " +
                         "user_id BIGINT NOT NULL, " +
@@ -93,24 +94,18 @@ public abstract class AbstractContainerBaseTest {
 
     @BeforeEach
     void cleanDatabase() {
-        try {
-            try (Connection conn = DriverManager.getConnection(
-                    POSTGRESQL_CONTAINER.getJdbcUrl(),
-                    POSTGRESQL_CONTAINER.getUsername(),
-                    POSTGRESQL_CONTAINER.getPassword());
-                 Statement stmt = conn.createStatement()) {
+        try (Connection conn = DriverManager.getConnection(
+                POSTGRESQL_CONTAINER.getJdbcUrl(),
+                POSTGRESQL_CONTAINER.getUsername(),
+                POSTGRESQL_CONTAINER.getPassword());
+             Statement stmt = conn.createStatement()) {
 
-                stmt.execute("TRUNCATE TABLE finance.goals, finance.transactions, "
-                        + "finance.users, finance.budgets CASCADE");
-            }
+            stmt.execute(
+                    "TRUNCATE TABLE finance.goals, finance.transactions, finance.users, finance.budgets CASCADE"
+            );
         } catch (SQLException e) {
             log.log(Level.SEVERE, "Failed to clean up the database: " + e.getMessage(), e);
             fail("Database cleanup failed: " + e.getMessage());
         }
-    }
-
-    @AfterAll
-    static void stopContainer() {
-        POSTGRESQL_CONTAINER.stop();
     }
 }

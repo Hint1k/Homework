@@ -19,6 +19,12 @@ class LiquibaseManagerTest extends AbstractContainerBaseTest {
     @BeforeAll
     void setup() {
         DatabaseConfig databaseConfig = DatabaseConfig.getInstance();
+
+        // Log the DB configuration to ensure correct initialization
+        log.info("Database URL: " + databaseConfig.getDbUrl());
+        log.info("Database Username: " + databaseConfig.getDbUsername());
+        log.info("Database Password: " + databaseConfig.getDbPassword());
+
         liquibaseManager = new LiquibaseManager(databaseConfig);
     }
 

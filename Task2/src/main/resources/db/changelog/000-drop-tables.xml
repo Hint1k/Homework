@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
-        logicalFilePath="db/changelog/002-drop-tables.xml">
+        logicalFilePath="db/changelog/000-drop-tables.xml">
 
     <!-- Drop users table if it exists -->
     <changeSet id="drop-users-table" author="hint1k">
@@ -11,6 +11,7 @@
             <tableExists tableName="users" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="users" schemaName="finance"/>
+        <sql>DROP SEQUENCE IF EXISTS finance.users_user_id_seq;</sql>
     </changeSet>
 
     <!-- Drop transactions table if it exists -->
@@ -19,6 +20,7 @@
             <tableExists tableName="transactions" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="transactions" schemaName="finance"/>
+        <sql>DROP SEQUENCE IF EXISTS finance.transactions_user_id_seq;</sql>
     </changeSet>
 
     <!-- Drop reports table if it exists -->
@@ -27,6 +29,7 @@
             <tableExists tableName="reports" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="reports" schemaName="finance"/>
+        <sql>DROP SEQUENCE IF EXISTS finance.reports_user_id_seq;</sql>
     </changeSet>
 
     <!-- Drop goals table if it exists -->
@@ -35,6 +38,7 @@
             <tableExists tableName="goals" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="goals" schemaName="finance"/>
+        <sql>DROP SEQUENCE IF EXISTS finance.goals_user_id_seq;</sql>
     </changeSet>
 
     <!-- Drop budgets table if it exists -->
@@ -43,5 +47,6 @@
             <tableExists tableName="budgets" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="budgets" schemaName="finance"/>
+        <sql>DROP SEQUENCE IF EXISTS finance.budgets_user_id_seq;</sql>
     </changeSet>
 </databaseChangeLog>

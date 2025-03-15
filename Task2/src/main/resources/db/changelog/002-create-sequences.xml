@@ -3,9 +3,9 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
-        logicalFilePath="db/changelog/001-create-sequences.xml">
+        logicalFilePath="db/changelog/002-create-sequences.xml">
 
-    <changeSet id="001-create-sequences" author="hint1k">
+    <changeSet id="002-create-sequences" author="hint1k">
         <createSequence sequenceName="users_user_id_seq" schemaName="finance" startValue="1" incrementBy="1"/>
         <createSequence sequenceName="transactions_transaction_id_seq" schemaName="finance" startValue="1"
                         incrementBy="1"/>
