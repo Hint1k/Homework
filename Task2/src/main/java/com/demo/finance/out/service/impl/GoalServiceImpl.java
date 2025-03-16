@@ -23,7 +23,7 @@ public class GoalServiceImpl implements GoalService {
      * Constructs a new {@code GoalServiceImpl} instance with the provided repository and utility classes.
      *
      * @param goalRepository the repository for accessing and modifying goals
-     * @param balanceUtils the utility class for calculating balance towards goals
+     * @param balanceUtils   the utility class for calculating balance towards goals
      */
     public GoalServiceImpl(GoalRepository goalRepository, BalanceUtils balanceUtils) {
         this.goalRepository = goalRepository;
@@ -33,16 +33,22 @@ public class GoalServiceImpl implements GoalService {
     /**
      * Creates a new goal for a user.
      *
-     * @param userId the ID of the user for whom the goal is being created
-     * @param goalName the name of the goal
+     * @param userId       the ID of the user for whom the goal is being created
+     * @param goalName     the name of the goal
      * @param targetAmount the target amount to be saved for the goal
-     * @param duration the duration (in months) to achieve the goal
+     * @param duration     the duration (in months) to achieve the goal
      */
     @Override
     public void createGoal(Long userId, String goalName, BigDecimal targetAmount, int duration) {
         goalRepository.save(new Goal(userId, goalName, targetAmount, duration));
     }
 
+    /**
+     * Retrieves a goal by its ID.
+     *
+     * @param goalId the ID of the goal to retrieve
+     * @return the goal if found, or {@code null} if not found
+     */
     @Override
     public Goal getGoal(Long goalId) {
         return goalRepository.findById(goalId);
@@ -59,6 +65,16 @@ public class GoalServiceImpl implements GoalService {
         return goalRepository.findByUserId(userId);
     }
 
+    /**
+     * Updates an existing goal with new details.
+     *
+     * @param goalId          the ID of the goal to update
+     * @param userId          the ID of the user who owns the goal
+     * @param newGoalName     the new name for the goal
+     * @param newTargetAmount the new target amount for the goal
+     * @param newDuration     the new duration (in months) to achieve the goal
+     * @return {@code true} if the goal was successfully updated, {@code false} otherwise
+     */
     @Override
     public boolean updateGoal(Long goalId, Long userId, String newGoalName, BigDecimal newTargetAmount,
                               int newDuration) {
@@ -71,9 +87,16 @@ public class GoalServiceImpl implements GoalService {
             goalRepository.update(updatedGoal);
             return true;
         }
-          return false;
+        return false;
     }
 
+    /**
+     * Deletes a goal by its ID.
+     *
+     * @param userId the ID of the user who owns the goal
+     * @param goalId the ID of the goal to delete
+     * @return {@code true} if the goal was successfully deleted, {@code false} otherwise
+     */
     @Override
     public boolean deleteGoal(Long userId, Long goalId) {
         return goalRepository.delete(goalId);
@@ -83,7 +106,7 @@ public class GoalServiceImpl implements GoalService {
      * Calculates the total balance accumulated towards a user's goal.
      *
      * @param userId the ID of the user whose goal balance is being calculated
-     * @param goal the goal for which the balance is being calculated
+     * @param goal   the goal for which the balance is being calculated
      * @return the total balance accumulated towards the goal
      */
     @Override

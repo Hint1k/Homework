@@ -19,7 +19,7 @@ public class UserServiceImpl implements UserService {
      * Constructor to initialize the {@code UserServiceImpl} with the necessary dependencies.
      *
      * @param userRepository the repository for user data storage and retrieval
-     * @param passwordUtils utility for password encryption and verification
+     * @param passwordUtils  utility for password encryption and verification
      */
     public UserServiceImpl(UserRepository userRepository, PasswordUtilsImpl passwordUtils) {
         this.userRepository = userRepository;
@@ -29,11 +29,12 @@ public class UserServiceImpl implements UserService {
     /**
      * Updates the account details of the user performing the action.
      *
-     * @param userId the ID of the user whose account is to be updated
-     * @param name the new name of the user
-     * @param email the new email address of the user
-     * @param password the new password for the user
-     * @param role the new role assigned to the user
+     * @param userId            the ID of the user whose account is to be updated
+     * @param name              the new name of the user
+     * @param email             the new email address of the user
+     * @param password          the new password for the user
+     * @param role              the new role assigned to the user
+     * @param isPasswordUpdated indicates whether the password has been updated
      * @return {@code true} if the account was successfully updated, {@code false} otherwise
      */
     @Override

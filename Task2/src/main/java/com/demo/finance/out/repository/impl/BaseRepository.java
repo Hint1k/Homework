@@ -11,10 +11,22 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Abstract base class providing common database operations and utility methods for repository implementations.
+ * It includes transaction management, query execution, and error handling.
+ */
 public abstract class BaseRepository {
 
     protected static final Logger log = Logger.getLogger(BaseRepository.class.getName());
 
+    /**
+     * Executes a database operation within a transaction. Handles committing or rolling back the transaction
+     * based on the success or failure of the operation.
+     *
+     * @param operation the database operation to execute within the transaction
+     * @param <T>       the type of result returned by the operation
+     * @return the result of the operation if successful, or {@code null} if an error occurs
+     */
     protected <T> T executeInTransaction(TransactionalOperation<T> operation) {
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
@@ -33,6 +45,13 @@ public abstract class BaseRepository {
         }
     }
 
+    /**
+     * Executes an update SQL statement using the provided SQL query and parameter setter.
+     *
+     * @param sql    the SQL update query to execute
+     * @param setter the parameter setter to populate the prepared statement
+     * @return {@code true} if the update was successful, otherwise {@code false}
+     */
     protected boolean executeUpdate(String sql, PreparedStatementSetter setter) {
         return Boolean.TRUE.equals(executeInTransaction(conn -> {
             //noinspection SqlSourceToSinkFlow
@@ -43,6 +62,15 @@ public abstract class BaseRepository {
         }));
     }
 
+    /**
+     * Finds a single entity in the database based on the provided SQL query, parameter setter, and result mapper.
+     *
+     * @param sql    the SQL query to execute
+     * @param setter the parameter setter to populate the prepared statement
+     * @param mapper the result set mapper to convert the result into the desired type
+     * @param <T>    the type of the result
+     * @return an {@code Optional} containing the mapped result if found, or an empty {@code Optional} if not found
+     */
     protected <T> Optional<T> findByCriteria(String sql, PreparedStatementSetter setter, ResultSetMapper<T> mapper) {
         return executeInTransaction(conn -> {
             //noinspection SqlSourceToSinkFlow
@@ -58,25 +86,49 @@ public abstract class BaseRepository {
         });
     }
 
+    /**
+     * Retrieves a database connection from the {@code DataSourceManager}.
+     *
+     * @return a {@code Connection} object for database operations
+     */
     protected Connection getConnection() {
         return DataSourceManager.getConnection();
     }
 
+    /**
+     * Logs an error message and wraps the exception in a {@code DatabaseException}.
+     *
+     * @param message the error message to log
+     * @param e       the exception that caused the error
+     */
     protected void logError(String message, Exception e) {
         log.log(Level.SEVERE, message + ": " + e.getMessage(), e);
         throw new DatabaseException(message, e);
     }
 
+    /**
+     * Functional interface representing a database operation that can be executed within a transaction.
+     *
+     * @param <T> the type of result returned by the operation
+     */
     @FunctionalInterface
     protected interface TransactionalOperation<T> {
         T execute(Connection conn) throws SQLException;
     }
 
+    /**
+     * Functional interface for setting parameters on a prepared statement.
+     */
     @FunctionalInterface
     protected interface PreparedStatementSetter {
         void setValues(PreparedStatement stmt) throws SQLException;
     }
 
+    /**
+     * Functional interface for mapping a result set to a specific type.
+     *
+     * @param <T> the type of the result
+     */
     @FunctionalInterface
     protected interface ResultSetMapper<T> {
         T map(ResultSet rs) throws SQLException;

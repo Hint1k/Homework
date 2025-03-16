@@ -8,6 +8,13 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * A utility class for loading environment variables from a .env file.
+ * This class reads key-value pairs from the specified file and provides
+ * them as a map for use in the application. It ensures that the file is
+ * properly formatted and handles errors such as missing files, malformed lines,
+ * or duplicate keys.
+ */
 public class EnvLoader {
 
     private static final Logger log = Logger.getLogger(EnvLoader.class.getName());

@@ -35,6 +35,12 @@ public class GoalController {
         goalService.createGoal(userId, name, targetAmount, duration);
     }
 
+    /**
+     * Retrieves a specific goal by its ID.
+     *
+     * @param goalId the ID of the goal to retrieve
+     * @return the {@code Goal} object corresponding to the specified ID, or null if not found
+     */
     public Goal getGoal(Long goalId) {
         return goalService.getGoal(goalId);
     }
@@ -49,11 +55,28 @@ public class GoalController {
         return goalService.getGoalsByUserId(userId);
     }
 
+    /**
+     * Updates an existing goal with new details.
+     *
+     * @param goalId         the ID of the goal to update
+     * @param userId         the ID of the user who owns the goal
+     * @param newGoalName    the new name for the goal
+     * @param newTargetAmount the new target amount for the goal
+     * @param newDuration    the new duration of the goal in months
+     * @return {@code true} if the goal was successfully updated, otherwise {@code false}
+     */
     public boolean updateGoal(Long goalId, Long userId, String newGoalName, BigDecimal newTargetAmount,
                               int newDuration) {
         return goalService.updateGoal(goalId, userId, newGoalName, newTargetAmount, newDuration);
     }
 
+    /**
+     * Deletes a specific goal for a user.
+     *
+     * @param userId the ID of the user who owns the goal
+     * @param goalId the ID of the goal to delete
+     * @return {@code true} if the goal was successfully deleted, otherwise {@code false}
+     */
     public boolean deleteGoal(Long userId, Long goalId) {
         return goalService.deleteGoal(userId, goalId);
     }

@@ -28,7 +28,17 @@ public class Transaction {
     private String description;
     private Type type;
 
-    // no transaction id constructor
+    /**
+     * Constructs a new {@code Transaction} object without a transaction ID.
+     * This constructor is typically used when creating a new transaction that has not yet been persisted.
+     *
+     * @param userId       the ID of the user who owns the transaction
+     * @param amount       the monetary amount of the transaction
+     * @param category     the category of the transaction (e.g., "Food", "Transport")
+     * @param date         the date of the transaction
+     * @param description  a brief description of the transaction
+     * @param type         the type of the transaction (either income or expense)
+     */
     public Transaction(Long userId, BigDecimal amount, String category, LocalDate date, String description,
                        Type type) {
         this.userId = userId;
@@ -42,9 +52,9 @@ public class Transaction {
     /**
      * Checks if the transaction date is within the specified date range.
      *
-     * @param from The start date of the range.
-     * @param to The end date of the range.
-     * @return {@code true} if the transaction date is within the range, otherwise {@code false}.
+     * @param from the start date of the range (inclusive)
+     * @param to   the end date of the range (inclusive)
+     * @return {@code true} if the transaction date is within the range, otherwise {@code false}
      */
     public boolean isWithinDateRange(LocalDate from, LocalDate to) {
         return (date.isAfter(from) || date.isEqual(from)) && (date.isBefore(to) || date.isEqual(to));
@@ -54,8 +64,8 @@ public class Transaction {
      * Compares this transaction to another object for equality. Two transactions are considered equal if
      * their transaction ID, user ID, amount, category, date, description, and type are the same.
      *
-     * @param o The object to compare to.
-     * @return {@code true} if this transaction is equal to the provided object, otherwise {@code false}.
+     * @param o the object to compare to
+     * @return {@code true} if this transaction is equal to the provided object, otherwise {@code false}
      */
     @Override
     public boolean equals(Object o) {
@@ -71,7 +81,7 @@ public class Transaction {
      * Generates a hash code for this transaction. The hash code is based on the transaction ID, user ID,
      * amount, category, date, description, and type.
      *
-     * @return A hash code for this transaction.
+     * @return a hash code for this transaction
      */
     @Override
     public int hashCode() {
@@ -82,7 +92,7 @@ public class Transaction {
      * Returns a string representation of the transaction, including the transaction ID, amount, category,
      * date, and type.
      *
-     * @return A string representation of the transaction.
+     * @return a string representation of the transaction
      */
     @Override
     public String toString() {

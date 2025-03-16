@@ -59,6 +59,7 @@ public class UserController {
      * @param email the updated email of the user
      * @param password the updated password of the user
      * @param role the updated role of the user
+     * @param isPasswordUpdated indicates whether the password has been updated
      * @return {@code true} if the account was successfully updated, {@code false} otherwise
      */
     public boolean updateOwnAccount(Long userId, String name, String email, String password, Role role,

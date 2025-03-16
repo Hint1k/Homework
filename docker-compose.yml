@@ -17,22 +17,5 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  finance:
-    build:
-      context: .
-      dockerfile: Task2/Dockerfile
-    container_name: hint1k_finance
-    env_file:
-      - .env
-    environment:
-      DB_URL: jdbc:postgresql://postgres:5432/financedb
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-    stdin_open: true
-    tty: true
-    restart: unless-stopped
-
 volumes:
   postgres_data:

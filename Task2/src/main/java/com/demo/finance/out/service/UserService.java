@@ -11,11 +11,12 @@ public interface UserService {
     /**
      * Updates the account details of the user who is performing the action.
      *
-     * @param userId the ID of the user whose account is to be updated
-     * @param name the new name of the user
-     * @param email the new email address of the user
-     * @param password the new password for the user
-     * @param role the new role assigned to the user (e.g., user, admin)
+     * @param userId            the ID of the user whose account is to be updated
+     * @param name              the new name of the user
+     * @param email             the new email address of the user
+     * @param password          the new password for the user
+     * @param role              the new role assigned to the user (e.g., user, admin)
+     * @param isPasswordUpdated indicates whether the password has been updated
      * @return {@code true} if the account was successfully updated, {@code false} otherwise
      */
     boolean updateOwnAccount(Long userId, String name, String email, String password, Role role,

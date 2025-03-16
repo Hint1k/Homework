@@ -60,6 +60,10 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Displays the transaction menu and processes user input for transaction-related actions.
+     * The menu allows users to add, update, view, filter, or delete transactions.
+     */
     private void showTransactionMenu() {
         while (true) {
             Menu.showTransactionMenu();
@@ -78,6 +82,10 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Displays the budget menu and processes user input for budget-related actions.
+     * The menu allows users to set a budget, view their current budget, or check budget notifications.
+     */
     private void showBudgetMenu() {
         while (true) {
             Menu.showBudgetMenu();
@@ -94,6 +102,10 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Displays the goal menu and processes user input for goal-related actions.
+     * The menu allows users to create, view, update, delete goals, or check goal notifications.
+     */
     private void showGoalMenu() {
         while (true) {
             Menu.showGoalMenu();
@@ -112,6 +124,10 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Displays the report menu and processes user input for report-related actions.
+     * The menu allows users to generate full reports, reports by date, or analyze expenses by category.
+     */
     private void showReportMenu() {
         while (true) {
             Menu.showReportMenu();
@@ -128,6 +144,10 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Displays the account menu and processes user input for account-related actions.
+     * The menu allows users to view their details, update their account, or delete their account.
+     */
     private void showAccountMenu() {
         while (true) {
             if (context.getCurrentUser() == null) {

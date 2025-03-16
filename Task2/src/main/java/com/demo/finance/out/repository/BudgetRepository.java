@@ -19,10 +19,29 @@ public interface BudgetRepository {
      */
     boolean save(Budget budget);
 
+    /**
+     * Deletes the budget associated with the specified budget ID.
+     *
+     * @param budgetId the ID of the budget to delete
+     * @return {@code true} if the budget was successfully deleted, {@code false} otherwise
+     */
     boolean delete(Long budgetId);
 
+    /**
+     * Updates the specified {@code Budget} object.
+     *
+     * @param updatedBudget the {@code Budget} object with updated details
+     * @return {@code true} if the budget was successfully updated, {@code false} otherwise
+     */
     boolean update(Budget updatedBudget);
 
+    /**
+     * Retrieves the {@code Budget} associated with the specified budget ID.
+     *
+     * @param budgetId the ID of the budget to retrieve
+     * @return an {@code Optional<Budget>} containing the budget if found,
+     * or an empty {@code Optional} if no budget is found
+     */
     Optional<Budget> findById(Long budgetId);
 
     /**

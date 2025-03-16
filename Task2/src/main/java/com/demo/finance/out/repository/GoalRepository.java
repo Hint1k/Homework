@@ -18,10 +18,28 @@ public interface GoalRepository {
      */
     void save(Goal goal);
 
+    /**
+     * Updates the specified Goal entity in the repository.
+     *
+     * @param goal the Goal entity with updated details
+     * @return {@code true} if the goal was successfully updated, {@code false} otherwise
+     */
     boolean update(Goal goal);
 
+    /**
+     * Deletes the Goal entity associated with the specified goal ID.
+     *
+     * @param goalId the ID of the goal to delete
+     * @return {@code true} if the goal was successfully deleted, {@code false} otherwise
+     */
     boolean delete(Long goalId);
 
+    /**
+     * Retrieves the Goal entity associated with the specified goal ID.
+     *
+     * @param goalId the ID of the goal to retrieve
+     * @return the Goal entity if found, or {@code null} if not found
+     */
     Goal findById(Long goalId);
 
     /**
@@ -32,5 +50,13 @@ public interface GoalRepository {
      */
     List<Goal> findByUserId(Long userId);
 
+    /**
+     * Finds a Goal entity by its ID and the associated user ID.
+     *
+     * @param goalId the ID of the goal to retrieve
+     * @param userId the ID of the user who owns the goal
+     * @return an {@code Optional<Goal>} containing the goal if found,
+     * or an empty {@code Optional} if not found
+     */
     Optional<Goal> findByUserIdAndGoalId(Long goalId, Long userId);
 }

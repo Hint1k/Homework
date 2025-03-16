@@ -22,6 +22,12 @@ public interface GoalService {
      */
     void createGoal(Long userId, String goalName, BigDecimal targetAmount, int duration);
 
+    /**
+     * Retrieves a goal by its ID.
+     *
+     * @param goalId the ID of the goal to retrieve
+     * @return the goal if found, or {@code null} if not found
+     */
     Goal getGoal(Long goalId);
 
     /**
@@ -32,12 +38,29 @@ public interface GoalService {
      */
     List<Goal> getGoalsByUserId(Long userId);
 
+    /**
+     * Updates an existing goal with new details.
+     *
+     * @param goalId          the ID of the goal to update
+     * @param userId          the ID of the user who owns the goal
+     * @param newGoalName     the new name for the goal
+     * @param newTargetAmount the new target amount for the goal
+     * @param newDuration     the new duration (in months) to achieve the goal
+     * @return {@code true} if the goal was successfully updated, {@code false} otherwise
+     */
     boolean updateGoal(Long goalId, Long userId, String newGoalName, BigDecimal newTargetAmount, int newDuration);
 
+    /**
+     * Deletes a goal by its ID.
+     *
+     * @param userId the ID of the user who owns the goal
+     * @param goalId the ID of the goal to delete
+     * @return {@code true} if the goal was successfully deleted, {@code false} otherwise
+     */
     boolean deleteGoal(Long userId, Long goalId);
 
     /**
-     * Calculates the total balance of a user's goal.
+     * Calculates the total balance accumulated towards a user's goal.
      *
      * @param userId the ID of the user whose goal balance is being calculated
      * @param goal   the goal for which the balance is being calculated

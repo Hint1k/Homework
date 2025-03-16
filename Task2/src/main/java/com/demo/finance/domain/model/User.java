@@ -24,7 +24,16 @@ public class User {
     private boolean blocked;
     private Role role;
 
-    // no user id constructor
+    /**
+     * Constructs a new {@code User} object without a user ID.
+     * This constructor is typically used when creating a new user that has not yet been persisted.
+     *
+     * @param name     the name of the user
+     * @param email    the email address of the user
+     * @param password the password of the user
+     * @param blocked  whether the user's account is blocked
+     * @param role     the role assigned to the user
+     */
     public User(String name, String email, String password, boolean blocked, Role role) {
         this.name = name;
         this.email = email;
