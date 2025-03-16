@@ -139,7 +139,6 @@ class BudgetServiceImplTest {
         Long userId = 1L;
         Budget budget = new Budget(userId, new BigDecimal(1000));
         YearMonth currentMonth = YearMonth.now();
-        BigDecimal totalExpenses = new BigDecimal(200);
 
         when(budgetRepository.findByUserId(userId)).thenReturn(Optional.of(budget));
         when(transactionRepository.findFiltered(userId, currentMonth.atDay(1), currentMonth.atEndOfMonth(),

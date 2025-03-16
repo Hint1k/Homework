@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.sql.Connection;
@@ -20,6 +21,7 @@ public abstract class AbstractContainerBaseTest {
     private static final Logger log = Logger.getLogger(AbstractContainerBaseTest.class.getName());
 
     private static class SingletonContainer {
+        @SuppressWarnings("resource")
         private static final PostgreSQLContainer<?> INSTANCE =
                 new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"))
                         .withDatabaseName("testdb")

@@ -103,9 +103,8 @@ class GoalServiceImplTest {
 
         doThrow(new RuntimeException("Save failed")).when(goalRepository).save(goal);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            goalService.createGoal(1L, "Car", new BigDecimal(5000), 12);
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                goalService.createGoal(1L, "Car", new BigDecimal(5000), 12));
 
         assertThat(exception.getMessage()).isEqualTo("Save failed");
         verify(goalRepository, times(1)).save(goal);

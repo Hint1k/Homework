@@ -1,5 +1,7 @@
-package com.demo.finance.domain.utils;
+package com.demo.finance.domain.utils.impl;
 
+import com.demo.finance.domain.utils.Type;
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.MaxRetriesReachedException;
 
 import java.math.BigDecimal;

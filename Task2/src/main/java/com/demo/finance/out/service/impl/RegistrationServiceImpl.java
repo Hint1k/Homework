@@ -3,7 +3,7 @@ package com.demo.finance.out.service.impl;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.UserRepository;
-import com.demo.finance.domain.utils.PasswordUtils;
+import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.out.service.RegistrationService;
 
 import java.util.Optional;
@@ -15,7 +15,7 @@ import java.util.Optional;
 public class RegistrationServiceImpl implements RegistrationService {
 
     private final UserRepository userRepository;
-    private final PasswordUtils passwordUtils;
+    private final PasswordUtilsImpl passwordUtils;
 
     /**
      * Constructs a new {@code RegistrationServiceImpl} with the provided {@code UserRepository}
@@ -24,7 +24,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @param userRepository the repository to interact with user data
      * @param passwordUtils the utility class for password hashing and validation
      */
-    public RegistrationServiceImpl(UserRepository userRepository, PasswordUtils passwordUtils) {
+    public RegistrationServiceImpl(UserRepository userRepository, PasswordUtilsImpl passwordUtils) {
         this.userRepository = userRepository;
         this.passwordUtils = passwordUtils;
     }

@@ -35,6 +35,7 @@ public abstract class BaseRepository {
 
     protected boolean executeUpdate(String sql, PreparedStatementSetter setter) {
         return Boolean.TRUE.equals(executeInTransaction(conn -> {
+            //noinspection SqlSourceToSinkFlow
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 setter.setValues(stmt);
                 return stmt.executeUpdate() > 0;
@@ -44,6 +45,7 @@ public abstract class BaseRepository {
 
     protected <T> Optional<T> findByCriteria(String sql, PreparedStatementSetter setter, ResultSetMapper<T> mapper) {
         return executeInTransaction(conn -> {
+            //noinspection SqlSourceToSinkFlow
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 setter.setValues(stmt);
                 try (ResultSet rs = stmt.executeQuery()) {

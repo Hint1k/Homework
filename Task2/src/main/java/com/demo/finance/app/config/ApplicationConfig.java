@@ -1,6 +1,9 @@
 package com.demo.finance.app.config;
 
 import com.demo.finance.domain.utils.*;
+import com.demo.finance.domain.utils.impl.BalanceUtilsImpl;
+import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
+import com.demo.finance.domain.utils.impl.ValidationUtilsImpl;
 import com.demo.finance.in.cli.CliHandler;
 import com.demo.finance.in.controller.*;
 import com.demo.finance.out.repository.*;
@@ -21,7 +24,7 @@ public class ApplicationConfig {
 
     private final BalanceUtils balanceUtils = new BalanceUtilsImpl(transactionRepository);
     private final EmailService emailService = new EmailServiceImpl();
-    private final PasswordUtils passwordUtils = new PasswordUtils();
+    private final PasswordUtilsImpl passwordUtils = new PasswordUtilsImpl();
     private final ValidationUtils validationUtils = new ValidationUtilsImpl();
 
     private final AdminService adminService = new AdminServiceImpl(userRepository);

@@ -1,4 +1,4 @@
-package com.demo.finance.domain.utils;
+package com.demo.finance.domain.utils.impl;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,9 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-class PasswordUtilsTest {
+class PasswordUtilsImplTest {
     
-    @InjectMocks private PasswordUtils passwordUtils;
+    @InjectMocks private PasswordUtilsImpl passwordUtils;
 
     @Test
     @DisplayName("Hash password - ensures the password is hashed successfully")

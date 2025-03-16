@@ -1,7 +1,9 @@
-package com.demo.finance.domain.utils;
+package com.demo.finance.domain.utils.impl;
 
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.model.Transaction;
+import com.demo.finance.domain.utils.BalanceUtils;
+import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.TransactionRepository;
 
 import java.math.BigDecimal;

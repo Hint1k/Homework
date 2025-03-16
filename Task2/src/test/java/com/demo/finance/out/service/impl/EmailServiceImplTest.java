@@ -40,11 +40,7 @@ class EmailServiceImplTest {
     @Test
     @DisplayName("Test that sendEmail does not throw an exception when all values are null")
     void testSendEmail_withNullValues_doesNotThrowException() {
-        String recipient = null;
-        String subject = null;
-        String body = null;
-
-        emailService.sendEmail(recipient, subject, body);
+        emailService.sendEmail(null, null, null);
 
         assertThat(emailService).isNotNull();
     }

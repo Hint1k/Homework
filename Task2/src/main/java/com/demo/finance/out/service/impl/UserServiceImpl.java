@@ -1,6 +1,6 @@
 package com.demo.finance.out.service.impl;
 
-import com.demo.finance.domain.utils.PasswordUtils;
+import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.UserRepository;
@@ -13,7 +13,7 @@ import com.demo.finance.out.service.UserService;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final PasswordUtils passwordUtils;
+    private final PasswordUtilsImpl passwordUtils;
 
     /**
      * Constructor to initialize the {@code UserServiceImpl} with the necessary dependencies.
@@ -21,7 +21,7 @@ public class UserServiceImpl implements UserService {
      * @param userRepository the repository for user data storage and retrieval
      * @param passwordUtils utility for password encryption and verification
      */
-    public UserServiceImpl(UserRepository userRepository, PasswordUtils passwordUtils) {
+    public UserServiceImpl(UserRepository userRepository, PasswordUtilsImpl passwordUtils) {
         this.userRepository = userRepository;
         this.passwordUtils = passwordUtils;
     }

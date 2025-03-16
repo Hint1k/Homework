@@ -1,5 +1,6 @@
-package com.demo.finance.domain.utils;
+package com.demo.finance.domain.utils.impl;
 
+import com.demo.finance.domain.utils.Type;
 import com.demo.finance.exception.MaxRetriesReachedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

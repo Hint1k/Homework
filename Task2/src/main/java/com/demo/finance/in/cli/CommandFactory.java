@@ -60,11 +60,6 @@ public class CommandFactory {
         }
     }
 
-    /**
-     * Displays the transaction menu and executes the corresponding command based on user input.
-     *
-     * @return Command execution result based on user choice.
-     */
     private void showTransactionMenu() {
         while (true) {
             Menu.showTransactionMenu();
@@ -83,11 +78,6 @@ public class CommandFactory {
         }
     }
 
-    /**
-     * Displays the budget menu and executes the corresponding command based on user input.
-     *
-     * @return Command execution result based on user choice.
-     */
     private void showBudgetMenu() {
         while (true) {
             Menu.showBudgetMenu();
@@ -104,11 +94,6 @@ public class CommandFactory {
         }
     }
 
-    /**
-     * Displays the goal menu and executes the corresponding command based on user input.
-     *
-     * @return Command execution result based on user choice.
-     */
     private void showGoalMenu() {
         while (true) {
             Menu.showGoalMenu();
@@ -127,11 +112,6 @@ public class CommandFactory {
         }
     }
 
-    /**
-     * Displays the report menu and executes the corresponding command based on user input.
-     *
-     * @return Command execution result based on user choice.
-     */
     private void showReportMenu() {
         while (true) {
             Menu.showReportMenu();
@@ -148,12 +128,6 @@ public class CommandFactory {
         }
     }
 
-    /**
-     * Displays the account menu and executes the corresponding command based on user input.
-     * Forces users who updated or deleted their accounts back to the main menu to re-login.
-     *
-     * @return Command execution result based on user choice.
-     */
     private void showAccountMenu() {
         while (true) {
             if (context.getCurrentUser() == null) {

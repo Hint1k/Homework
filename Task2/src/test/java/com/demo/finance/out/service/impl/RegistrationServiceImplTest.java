@@ -2,7 +2,7 @@ package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.utils.PasswordUtils;
+import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.out.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.times;
 class RegistrationServiceImplTest {
 
     @Mock private UserRepository userRepository;
-    @Mock private PasswordUtils passwordUtils;
+    @Mock private PasswordUtilsImpl passwordUtils;
     @InjectMocks private RegistrationServiceImpl registrationService;
 
     @Test
