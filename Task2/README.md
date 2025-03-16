@@ -3,7 +3,7 @@
 ## Introduction
 
 The **Personal Finance Tracker** is a Java-based console application that helps users manage their finances effectively.
-It allows users to track transactions, set budgets, define financial goals, generate reports, and receive notifications—all.
+It allows users to track transactions, set budgets, define financial goals, generate reports, and receive notifications.
 
 This README provides installation and usage instructions for the application.
 
@@ -45,27 +45,26 @@ This README provides installation and usage instructions for the application.
 ### Prerequisites
 - **Java 17+** installed.
 - **Gradle** for dependency and build management.
-- **Docker** to run PostgreSQL database
+- **Docker** to run PostgreSQL database.
 
 ### Downloading the Application
 Clone or download the application via link:
-```bash
+```
 https://github.com/Hint1k/homework
 ```
 
-### Building the Application
-- Navigate to the Task2 folder located inside the root project folder
-- Use Gradle command
+### Building and Running the Application
+Navigate to project root folder and run command:
 ```bash
-../gradlew clean build 
+docker-compose up --build
+```
+Once docker is up and PostgreSQL database is ready run Gradle command:
+```bash
 ./gradlew clean shadowJar 
 ```
-
-### Running the Application
-Use Java command
+Once the process is completed run Java command:
 ```bash
-docker-compose up --build # then wait until the process is finished it may take some time
-java -cp build/classes/java/main:build/resources/main com.demo.finance.app.TaskOneMain
+java -cp Task2/build/libs/* com.demo.finance.app.TaskTwoMain
 ```
 
 ---
@@ -80,7 +79,7 @@ Database username = user
 Database password = 123
 Database name = financedb
 Database schema = finance
-Tables: users, transactions, goals, reports, budgets
+Table names: users, transactions, goals, reports, budgets
 ```
 
 
@@ -88,12 +87,19 @@ Tables: users, transactions, goals, reports, budgets
 
 ## Running Tests
 
-The application includes unit tests with **JUnit 5, Mockito, and AssertJ** and integration test with testcontainers. 
+The application includes unit tests with **JUnit 5, Mockito, AssertJ** and integration test with testcontainers. 
+
 To run tests using Gradle:
 ```bash
-gradle test
-./gradlew build jacocoTestReport # tests with coverage
+./gradlew test
 ```
+Tests with coverage
+```bash
+./gradlew build jacocoTestReport 
+```
+**Known Issue:** First-time test failures <br>
+- When running tests for the first time, all integration tests fail due to container initialization delay.<br> 
+- When running tests again (2nd time, 3rd time, etc) - all test pass.
 
 ---
 
@@ -111,18 +117,9 @@ The project follows Clean Architecture principles with key packages:
 
 ## Technological Stack
 - **Java Core**
-- **JUnit 5, Mockito, AssertJ, Testcontainers** (for unit testing)
-- **Gradle** (for build management)
+- **Gradle**
 - **PostgreSQL database**
 - **Docker**
+- **JUnit 5, Mockito, AssertJ, Testcontainers**
 
 ---
-
-## Connecting to database (example):
-```bash
-- docker ps
-- psql -h localhost -p 5432 -U user -d financedb # access with password 
-- 123 # this is user password
-- docker exec -it hint1k_postgres psql -U user -d financedb  # access without password
-- SELECT * FROM finance.users; # shows all records from "Users" table
-```
