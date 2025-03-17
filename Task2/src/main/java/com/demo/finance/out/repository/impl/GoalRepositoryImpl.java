@@ -7,7 +7,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,7 +75,7 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      */
     @Override
     public Goal findById(Long goalId) {
-        return findByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, goalId),
+        return findOneByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, goalId),
                 this::mapResultSetToGoal).orElse(null);
     }
 
@@ -88,18 +87,7 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      */
     @Override
     public List<Goal> findByUserId(Long userId) {
-        return executeInTransaction(conn -> {
-            List<Goal> goals = new ArrayList<>();
-            try (PreparedStatement stmt = conn.prepareStatement(FIND_BY_USER_ID_SQL)) {
-                stmt.setLong(1, userId);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    while (rs.next()) {
-                        goals.add(mapResultSetToGoal(rs));
-                    }
-                }
-            }
-            return goals;
-        });
+        return findAllByCriteria(FIND_BY_USER_ID_SQL, List.of(userId), this::mapResultSetToGoal);
     }
 
     /**
@@ -111,7 +99,7 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      */
     @Override
     public Optional<Goal> findByUserIdAndGoalId(Long goalId, Long userId) {
-        return findByCriteria(FIND_BY_USER_AND_GOAL_SQL, stmt -> {
+        return findOneByCriteria(FIND_BY_USER_AND_GOAL_SQL, stmt -> {
             stmt.setLong(1, goalId);
             stmt.setLong(2, userId);
         }, this::mapResultSetToGoal);

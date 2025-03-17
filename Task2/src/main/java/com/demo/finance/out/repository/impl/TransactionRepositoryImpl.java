@@ -83,7 +83,7 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
      */
     @Override
     public Transaction findById(Long transactionId) {
-        return findByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, transactionId),
+        return findOneByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, transactionId),
                 this::mapResultSetToTransaction).orElse(null);
     }
 
@@ -95,18 +95,22 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
      */
     @Override
     public List<Transaction> findByUserId(Long userId) {
-        return executeInTransaction(conn -> {
-            List<Transaction> transactions = new ArrayList<>();
-            try (PreparedStatement stmt = conn.prepareStatement(FIND_BY_USER_ID_SQL)) {
-                stmt.setLong(1, userId);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    while (rs.next()) {
-                        transactions.add(mapResultSetToTransaction(rs));
-                    }
-                }
-            }
-            return transactions;
-        });
+        return findAllByCriteria(FIND_BY_USER_ID_SQL, List.of(userId), this::mapResultSetToTransaction);
+    }
+
+    /**
+     * Retrieves a transaction record from the database by its ID and user ID.
+     *
+     * @param transactionId the ID of the transaction to retrieve
+     * @param userId        the ID of the user who owns the transaction
+     * @return an {@code Optional} containing the transaction if found, or an empty {@code Optional} if not found
+     */
+    @Override
+    public Optional<Transaction> findByUserIdAndTransactionId(Long transactionId, Long userId) {
+        return findOneByCriteria(FIND_BY_USER_AND_TRANSACTION_SQL, stmt -> {
+            stmt.setLong(1, transactionId);
+            stmt.setLong(2, userId);
+        }, this::mapResultSetToTransaction);
     }
 
     /**
@@ -121,63 +125,60 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
      */
     @Override
     public List<Transaction> findFiltered(Long userId, LocalDate from, LocalDate to, String category, Type type) {
-        return executeInTransaction(conn -> {
-            StringBuilder sql = new StringBuilder("SELECT * FROM finance.transactions WHERE user_id = ?");
-            List<Object> params = new ArrayList<>();
-            params.add(userId);
+        String sql = buildFilteredQuery(from, to, category, type);
+        List<Object> params = getFilterParameters(userId, from, to, category, type);
 
-            if (from != null) {
-                sql.append(" AND date >= ?");
-                params.add(Date.valueOf(from));
-            }
-            if (to != null) {
-                sql.append(" AND date <= ?");
-                params.add(Date.valueOf(to));
-            }
-            if (category != null) {
-                sql.append(" AND category = ?");
-                params.add(category);
-            }
-            if (type != null) {
-                sql.append(" AND type = ?");
-                params.add(type.name());
-            }
-
-            List<Transaction> transactions = new ArrayList<>();
-            try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-                for (int i = 0; i < params.size(); i++) {
-                    stmt.setObject(i + 1, params.get(i));
-                }
-                try (ResultSet rs = stmt.executeQuery()) {
-                    while (rs.next()) {
-                        transactions.add(mapResultSetToTransaction(rs));
-                    }
-                }
-            }
-            return transactions;
-        });
+        return findAllByCriteria(sql, params, this::mapResultSetToTransaction);
     }
 
     /**
-     * Retrieves a transaction record from the database by its ID and user ID.
+     * Builds a dynamic SQL query string based on the provided filter criteria for retrieving filtered transactions.
      *
-     * @param transactionId the ID of the transaction to retrieve
-     * @param userId        the ID of the user who owns the transaction
-     * @return an {@code Optional} containing the transaction if found, or an empty {@code Optional} if not found
+     * @param from     the start date of the filter range (inclusive), or {@code null} if no start date filter
+     * @param to       the end date of the filter range (inclusive), or {@code null} if no end date filter
+     * @param category the category of the transactions to filter by, or {@code null} if no category filter
+     * @param type     the type of the transactions to filter by, or {@code null} if no type filter
+     * @return the constructed SQL query string with appended filter conditions
      */
-    @Override
-    public Optional<Transaction> findByUserIdAndTransactionId(Long transactionId, Long userId) {
-        return findByCriteria(FIND_BY_USER_AND_TRANSACTION_SQL, stmt -> {
-            stmt.setLong(1, transactionId);
-            stmt.setLong(2, userId);
-        }, this::mapResultSetToTransaction);
+    private String buildFilteredQuery(LocalDate from, LocalDate to, String category, Type type) {
+        StringBuilder sql = new StringBuilder(FIND_BY_USER_ID_SQL);
+
+        if (from != null) sql.append(" AND date >= ?");
+        if (to != null) sql.append(" AND date <= ?");
+        if (category != null) sql.append(" AND category = ?");
+        if (type != null) sql.append(" AND type = ?");
+
+        return sql.toString();
+    }
+
+    /**
+     * Collects and returns a list of parameters corresponding to the provided filter criteria for use
+     * in a prepared statement.
+     *
+     * @param userId   the ID of the user whose transactions are to be filtered
+     * @param from     the start date of the filter range (inclusive), or {@code null} if no start date filter
+     * @param to       the end date of the filter range (inclusive), or {@code null} if no end date filter
+     * @param category the category of the transactions to filter by, or {@code null} if no category filter
+     * @param type     the type of the transactions to filter by, or {@code null} if no type filter
+     * @return a list of parameters to bind to the prepared statement
+     */
+    private List<Object> getFilterParameters(Long userId, LocalDate from, LocalDate to, String category, Type type) {
+        List<Object> params = new ArrayList<>();
+        params.add(userId);
+
+        if (from != null) params.add(Date.valueOf(from));
+        if (to != null) params.add(Date.valueOf(to));
+        if (category != null) params.add(category);
+        if (type != null) params.add(type.name());
+
+        return params;
     }
 
     /**
      * Sets the parameters of a prepared statement for inserting or updating a transaction record.
      *
-     * @param stmt         the prepared statement to populate
-     * @param transaction  the transaction object providing the parameter values
+     * @param stmt        the prepared statement to populate
+     * @param transaction the transaction object providing the parameter values
      * @throws SQLException if an SQL error occurs while setting the parameters
      */
     private void setTransactionParameters(PreparedStatement stmt, Transaction transaction) throws SQLException {

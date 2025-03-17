@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,7 +73,8 @@ public abstract class BaseRepository {
      * @param <T>    the type of the result
      * @return an {@code Optional} containing the mapped result if found, or an empty {@code Optional} if not found
      */
-    protected <T> Optional<T> findByCriteria(String sql, PreparedStatementSetter setter, ResultSetMapper<T> mapper) {
+    protected <T> Optional<T> findOneByCriteria(String sql, PreparedStatementSetter setter,
+                                                ResultSetMapper<T> mapper) {
         return executeInTransaction(conn -> {
             //noinspection SqlSourceToSinkFlow
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -83,6 +86,49 @@ public abstract class BaseRepository {
                 }
             }
             return Optional.empty();
+        });
+    }
+
+    /**
+     * Executes a query to retrieve multiple entities from the database based on the provided SQL query,
+     * parameters, and result mapper. The method binds the parameters to the prepared statement and maps
+     * each row of the result set to the desired type using the provided mapper.
+     *
+     * @param sql    the SQL query to execute
+     * @param params the list of parameters to bind to the prepared statement
+     * @param mapper the result set mapper to convert each row into the desired type
+     * @param <T>    the type of the results
+     * @return a list of mapped results retrieved from the database
+     */
+    protected <T> List<T> findAllByCriteria(String sql, List<Object> params, ResultSetMapper<T> mapper) {
+        return executeQuery(sql, params, rs -> {
+            List<T> results = new ArrayList<>();
+            while (rs.next()) {
+                results.add(mapper.map(rs));
+            }
+            return results;
+        });
+    }
+
+    /**
+     * Helper method to execute a query, bind parameters, and process the ResultSet.
+     *
+     * @param sql    the SQL query to execute
+     * @param params the list of parameters to bind to the prepared statement
+     * @param mapper the function to process the ResultSet and return the result
+     * @param <T>    the type of the result
+     * @return the result of processing the ResultSet
+     */
+    private <T> T executeQuery(String sql, List<Object> params, ResultSetMapper<T> mapper) {
+        return executeInTransaction(conn -> {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (int i = 0; i < params.size(); i++) {
+                    stmt.setObject(i + 1, params.get(i));
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return mapper.map(rs);
+                }
+            }
         });
     }
 

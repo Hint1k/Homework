@@ -72,7 +72,7 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      */
     @Override
     public Optional<Budget> findById(Long budgetId) {
-        return findByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, budgetId),
+        return findOneByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, budgetId),
                 this::mapResultSetToBudget);
     }
 
@@ -84,7 +84,7 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      */
     @Override
     public Optional<Budget> findByUserId(Long userId) {
-        return findByCriteria(FIND_BY_USER_ID_SQL, stmt -> stmt.setLong(1, userId),
+        return findOneByCriteria(FIND_BY_USER_ID_SQL, stmt -> stmt.setLong(1, userId),
                 this::mapResultSetToBudget);
     }
 

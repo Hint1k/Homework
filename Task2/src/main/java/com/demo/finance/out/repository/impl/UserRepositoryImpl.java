@@ -74,16 +74,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      */
     @Override
     public List<User> findAll() {
-        return executeInTransaction(conn -> {
-            List<User> users = new ArrayList<>();
-            try (PreparedStatement stmt = conn.prepareStatement(FIND_ALL_SQL);
-                 ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    users.add(mapResultSetToUser(rs));
-                }
-            }
-            return users;
-        });
+        return findAllByCriteria(FIND_ALL_SQL, new ArrayList<>(), this::mapResultSetToUser);
     }
 
     /**
@@ -94,7 +85,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      */
     @Override
     public Optional<User> findById(Long userId) {
-        return findByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, userId),
+        return findOneByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, userId),
                 this::mapResultSetToUser);
     }
 
@@ -106,7 +97,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      */
     @Override
     public Optional<User> findByEmail(String email) {
-        return findByCriteria(FIND_BY_EMAIL_SQL, stmt -> stmt.setString(1, email),
+        return findOneByCriteria(FIND_BY_EMAIL_SQL, stmt -> stmt.setString(1, email),
                 this::mapResultSetToUser);
     }
 
