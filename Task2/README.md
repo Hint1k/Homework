@@ -89,13 +89,13 @@ Table names: users, transactions, goals, reports, budgets
 
 The application includes unit tests with **JUnit 5, Mockito, AssertJ** and integration test with testcontainers. 
 
-To run unit tests using Gradle:
+To run unit tests and integration tests together using Gradle:
 ```bash
-./gradlew test integrationTest # runs both unit tests and integration tests
+./gradlew test integrationTest
 ```
-Tests with coverage using Jacoco 
+Unit tests and integration tests together with coverage using Jacoco 
 ```bash
-./gradlew jacocoTestReport # runs both unit tests and integration tests and creates a combined report  
+./gradlew jacocoTestReport  
 ```
 
 ---
