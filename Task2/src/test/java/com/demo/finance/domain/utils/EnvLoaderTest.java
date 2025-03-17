@@ -1,4 +1,4 @@
-package com.demo.finance.app.config;
+package com.demo.finance.domain.utils;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

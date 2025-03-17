@@ -6,9 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,24 +34,20 @@ class DataSourceManagerTest extends AbstractContainerBaseTest {
     void testGetConnection_InvalidCredentials() {
         overrideDatabaseConfig();
 
-        assertThatCode(DataSourceManager::getConnection)
-                .isInstanceOf(DatabaseConnectionException.class)
+        assertThatCode(DataSourceManager::getConnection).isInstanceOf(DatabaseConnectionException.class)
                 .hasMessageContaining("Failed to establish a database connection");
     }
 
     private void overrideDatabaseConfig() {
         try {
-            DatabaseConfig instance = DatabaseConfig.getInstance();
-            Field envVarsField = DatabaseConfig.class.getDeclaredField("envVars");
-            envVarsField.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            Map<String, String> envVars = (Map<String, String>) envVarsField.get(instance);
-            envVars.put("DB_URL", "jdbc:postgresql://invalid-host:5432/testdb");
-            envVars.put("DB_USERNAME", "invalid_user");
-            envVars.put("DB_PASSWORD", "invalid_password");
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            String logMessage = "Failed to load valid .env file: " + e.getMessage() + e;
-            String failMessage = "Exception occurred while loading valid .env file: " + e.getMessage();
+            System.setProperty("DB_URL", "jdbc:postgresql://invalid-host:5432/testdb");
+            System.setProperty("DB_USERNAME", "invalid_user");
+            System.setProperty("DB_PASSWORD", "invalid_password");
+
+            log.info("Overridden database configuration with invalid credentials.");
+        } catch (Exception e) {
+            String logMessage = "Failed to override database configuration: " + e.getMessage();
+            String failMessage = "Exception occurred while overriding database configuration: " + e.getMessage();
             log.log(Level.SEVERE, logMessage);
             fail(failMessage);
         }

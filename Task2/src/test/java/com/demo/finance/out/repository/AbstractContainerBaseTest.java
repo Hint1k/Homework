@@ -41,10 +41,9 @@ public abstract class AbstractContainerBaseTest {
     static void setupDatabase() {
         try {
             System.setProperty("ENV_PATH", "src/test/resources/.env");
-            System.setProperty("DB_URL", POSTGRESQL_CONTAINER.getJdbcUrl());
-            System.setProperty("DB_USERNAME", POSTGRESQL_CONTAINER.getUsername());
-            System.setProperty("DB_PASSWORD", POSTGRESQL_CONTAINER.getPassword());
-
+            System.setProperty("DB_URL", String.format("jdbc:postgresql://localhost:%d/testdb",
+                    POSTGRESQL_CONTAINER.getFirstMappedPort()
+            ));
             try (Connection conn = DriverManager.getConnection(
                     POSTGRESQL_CONTAINER.getJdbcUrl(),
                     POSTGRESQL_CONTAINER.getUsername(),

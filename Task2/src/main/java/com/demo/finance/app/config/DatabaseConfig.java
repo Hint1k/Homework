@@ -1,104 +1,104 @@
 package com.demo.finance.app.config;
 
-import java.util.Map;
+import com.demo.finance.domain.utils.SystemPropLoader;
+
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- * Configuration class for managing database connection details.
- * This class uses environment variables (loaded from a `.env` file) and system properties
- * to retrieve database URL, username, and password. It ensures that required database
- * configurations are present and overrides them with system properties if they exist.
+ * A configuration class responsible for managing database connection details.
+ * This class ensures that required database properties (DB_URL, DB_USERNAME, DB_PASSWORD)
+ * are loaded from a .env file, validated, and set as system properties. It follows the
+ * singleton pattern to provide a single instance of the configuration throughout the application.
  */
 public class DatabaseConfig {
 
     private static final Logger log = Logger.getLogger(DatabaseConfig.class.getName());
-    private final Map<String, String> envVars;
-    private static final String DEFAULT_ENV = ".env";
     private static final String DB_URL = "DB_URL";
     private static final String DB_USERNAME = "DB_USERNAME";
     private static final String DB_PASSWORD = "DB_PASSWORD";
+    private static final String DEFAULT_ENV_FILE = ".env";
     private static final DatabaseConfig INSTANCE = new DatabaseConfig();
 
     /**
      * Private constructor to enforce the singleton pattern.
-     * Loads environment variables from the `.env` file and overrides them with system properties if available.
+     * Loads and validates required database properties during initialization.
      */
     private DatabaseConfig() {
-        String envFilePath = System.getProperty("ENV_PATH", DEFAULT_ENV);
-        envVars = EnvLoader.loadEnv(envFilePath);
-        overrideWithSystemProperties();
+        loadAndValidateProperties();
     }
 
     /**
      * Retrieves the singleton instance of the `DatabaseConfig` class.
      *
-     * @return the singleton instance of `DatabaseConfig`
+     * @return The singleton instance of `DatabaseConfig`.
      */
     public static DatabaseConfig getInstance() {
         return INSTANCE;
     }
 
     /**
-     * Retrieves the database URL from the environment variables.
-     * If the URL is missing or empty, logs an error and throws a `RuntimeException`.
+     * Retrieves the database URL from the system properties.
+     * Validates that the property is present and non-empty before returning it.
      *
-     * @return the database URL
-     * @throws RuntimeException if the database URL is not configured in the `.env` file
+     * @return The database URL as a string.
+     * @throws RuntimeException If the DB_URL property is missing or empty in the system properties.
      */
     public String getDbUrl() {
-        String dbUrl = envVars.get(DB_URL);
-        if (dbUrl == null || dbUrl.isEmpty()) {
-            log.severe(DB_URL + " is missing or empty in the .env file.");
-            throw new RuntimeException(DB_URL + " is not configured in the .env file.");
-        }
-        return dbUrl;
+        validateProperty(DB_URL);
+        return System.getProperty(DB_URL);
     }
 
     /**
-     * Retrieves the database username from the environment variables.
-     * If the username is missing or empty, logs an error and throws a `RuntimeException`.
+     * Retrieves the database username from the system properties.
+     * Validates that the property is present and non-empty before returning it.
      *
-     * @return the database username
-     * @throws RuntimeException if the database username is not configured in the `.env` file
+     * @return The database username as a string.
+     * @throws RuntimeException If the DB_USERNAME property is missing or empty in the system properties.
      */
     public String getDbUsername() {
-        String dbUsername = envVars.get(DB_USERNAME);
-        if (dbUsername == null || dbUsername.isEmpty()) {
-            log.severe(DB_USERNAME + " is missing or empty in the .env file.");
-            throw new RuntimeException(DB_USERNAME + " is not configured in the .env file.");
-        }
-        return dbUsername;
+        validateProperty(DB_USERNAME);
+        return System.getProperty(DB_USERNAME);
     }
 
     /**
-     * Retrieves the database password from the environment variables.
-     * If the password is missing or empty, logs an error and throws a `RuntimeException`.
+     * Retrieves the database password from the system properties.
+     * Validates that the property is present and non-empty before returning it.
      *
-     * @return the database password
-     * @throws RuntimeException if the database password is not configured in the `.env` file
+     * @return The database password as a string.
+     * @throws RuntimeException If the DB_PASSWORD property is missing or empty in the system properties.
      */
     public String getDbPassword() {
-        String dbPassword = envVars.get(DB_PASSWORD);
-        if (dbPassword == null || dbPassword.isEmpty()) {
-            log.severe(DB_PASSWORD + " is missing or empty in the .env file.");
-            throw new RuntimeException(DB_PASSWORD + " is not configured in the .env file.");
-        }
-        return dbPassword;
+        validateProperty(DB_PASSWORD);
+        return System.getProperty(DB_PASSWORD);
     }
 
     /**
-     * Overrides the database connection details (URL, username, password) with system properties
-     * if they are set. Logs a message indicating that overrides have been applied.
+     * Loads environment variables from a .env file, validates them, and sets them as system properties.
+     * Ensures that all required properties (DB_URL, DB_USERNAME, DB_PASSWORD) are present and valid.
      */
-    private void overrideWithSystemProperties() {
-        String dbUrl = System.getProperty(DB_URL, envVars.get(DB_URL));
-        String dbUsername = System.getProperty(DB_USERNAME, envVars.get(DB_USERNAME));
-        String dbPassword = System.getProperty(DB_PASSWORD, envVars.get(DB_PASSWORD));
+    private void loadAndValidateProperties() {
+        String envFilePath = System.getProperty("ENV_PATH", DEFAULT_ENV_FILE);
+        Set<String> requiredProperties = Set.of(DB_URL, DB_USERNAME, DB_PASSWORD);
 
-        envVars.put(DB_URL, dbUrl);
-        envVars.put(DB_USERNAME, dbUsername);
-        envVars.put(DB_PASSWORD, dbPassword);
+        SystemPropLoader.loadAndSetProperties(envFilePath, requiredProperties);
 
-        log.info("Database connection details overridden with system properties if they exist.");
+        validateProperty(DB_URL);
+        validateProperty(DB_USERNAME);
+        validateProperty(DB_PASSWORD);
+    }
+
+    /**
+     * Validates that a given property is present and non-empty in the system properties.
+     *
+     * @param propertyKey The key of the property to validate.
+     * @throws RuntimeException If the property is missing or empty in the system properties.
+     */
+    private void validateProperty(String propertyKey) {
+        String propertyValue = System.getProperty(propertyKey);
+        if (propertyValue == null || propertyValue.isEmpty()) {
+            log.severe(propertyKey + " is missing or empty in the system properties.");
+            throw new RuntimeException(propertyKey + " is not configured.");
+        }
     }
 }

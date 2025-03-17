@@ -1,4 +1,4 @@
-package com.demo.finance.app.config;
+package com.demo.finance.domain.utils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

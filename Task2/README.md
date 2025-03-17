@@ -54,7 +54,7 @@ https://github.com/Hint1k/homework
 ```
 
 ### Building and Running the Application
-Navigate to project root folder and run command:
+Navigate to project root folder and run Docker command:
 ```bash
 docker-compose up --build
 ```

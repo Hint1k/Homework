@@ -5,44 +5,34 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.anyString;
 
 @ExtendWith(MockitoExtension.class)
 class DatabaseConfigTest {
 
     private static final Logger log = Logger.getLogger(DatabaseConfigTest.class.getName());
     private DatabaseConfig databaseConfig;
-    private Map<String, String> envVars;
 
     @BeforeEach
     void setUp() {
         try {
             System.setProperty("ENV_PATH", "src/test/resources/.env");
 
-            envVars = new HashMap<>();
-            envVars.put("DB_URL", "jdbc:postgresql://localhost:5432/testdb");
-            envVars.put("DB_USERNAME", "testuser");
-            envVars.put("DB_PASSWORD", "testpass");
+            System.clearProperty("DB_URL");
+            System.clearProperty("DB_USERNAME");
+            System.clearProperty("DB_PASSWORD");
 
-            try (MockedStatic<EnvLoader> mockedEnvLoader = Mockito.mockStatic(EnvLoader.class)) {
-                mockedEnvLoader.when(() -> EnvLoader.loadEnv(anyString())).thenReturn(envVars);
+            System.setProperty("DB_URL", "jdbc:postgresql://localhost:5432/testdb");
+            System.setProperty("DB_USERNAME", "testuser");
+            System.setProperty("DB_PASSWORD", "testpass");
 
-                databaseConfig = DatabaseConfig.getInstance();
-            }
-            resetSingletonInstance();
+            databaseConfig = DatabaseConfig.getInstance();
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error occurred during test setup: " + e.getMessage(), e);
             fail("Test setup failed due to an unexpected exception.");
@@ -60,12 +50,10 @@ class DatabaseConfigTest {
     @DisplayName("Get DB URL - Missing URL throws exception")
     void testGetDbUrl_MissingUrl_ThrowsException() {
         try {
-            envVars.remove("DB_URL");
-            resetSingletonInstance();
+            System.clearProperty("DB_URL");
 
-            assertThatThrownBy(() -> databaseConfig.getDbUrl())
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessage("DB_URL is not configured in the .env file.");
+            assertThatThrownBy(() -> databaseConfig.getDbUrl()).isInstanceOf(RuntimeException.class)
+                    .hasMessage("DB_URL is not configured.");
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error occurred while testing missing DB_URL: " + e.getMessage(), e);
             fail("Test failed due to an unexpected exception while testing missing DB_URL.");
@@ -83,12 +71,10 @@ class DatabaseConfigTest {
     @DisplayName("Get DB Username - Missing username throws exception")
     void testGetDbUsername_MissingUsername_ThrowsException() {
         try {
-            envVars.remove("DB_USERNAME");
-            resetSingletonInstance();
+            System.clearProperty("DB_USERNAME");
 
-            assertThatThrownBy(() -> databaseConfig.getDbUsername())
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessage("DB_USERNAME is not configured in the .env file.");
+            assertThatThrownBy(() -> databaseConfig.getDbUsername()).isInstanceOf(RuntimeException.class)
+                    .hasMessage("DB_USERNAME is not configured.");
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error occurred while testing missing DB_USERNAME: " + e.getMessage(), e);
             fail("Test failed due to an unexpected exception while testing missing DB_USERNAME.");
@@ -106,12 +92,10 @@ class DatabaseConfigTest {
     @DisplayName("Get DB Password - Missing password throws exception")
     void testGetDbPassword_MissingPassword_ThrowsException() {
         try {
-            envVars.remove("DB_PASSWORD");
-            resetSingletonInstance();
+            System.clearProperty("DB_PASSWORD");
 
-            assertThatThrownBy(() -> databaseConfig.getDbPassword())
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessage("DB_PASSWORD is not configured in the .env file.");
+            assertThatThrownBy(() -> databaseConfig.getDbPassword()).isInstanceOf(RuntimeException.class)
+                    .hasMessage("DB_PASSWORD is not configured.");
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error occurred while testing missing DB_PASSWORD: " + e.getMessage(), e);
             fail("Test failed due to an unexpected exception while testing missing DB_PASSWORD.");
@@ -126,7 +110,7 @@ class DatabaseConfigTest {
             System.setProperty("DB_USERNAME", "overriddenUser");
             System.setProperty("DB_PASSWORD", "overriddenPass");
 
-            callOverrideWithSystemProperties(databaseConfig);
+            databaseConfig = DatabaseConfig.getInstance();
 
             assertThat(databaseConfig.getDbUrl()).isEqualTo("jdbc:postgresql://localhost:5432/overridden");
             assertThat(databaseConfig.getDbUsername()).isEqualTo("overriddenUser");
@@ -144,35 +128,25 @@ class DatabaseConfigTest {
     }
 
     @Test
-    @DisplayName("Override with system properties - Missing system properties uses .env values")
-    void testOverrideWithSystemProperties_MissingSystemProperties_UsesEnvValues() {
+    @DisplayName("Override with system properties - Missing system properties uses default values")
+    void testOverrideWithSystemProperties_MissingSystemProperties_UsesDefaultValues() {
         try {
             System.clearProperty("DB_URL");
             System.clearProperty("DB_USERNAME");
             System.clearProperty("DB_PASSWORD");
 
-            resetSingletonInstance();
             databaseConfig = DatabaseConfig.getInstance();
 
-            assertThat(databaseConfig.getDbUrl()).isEqualTo("jdbc:postgresql://localhost:5432/testdb");
-            assertThat(databaseConfig.getDbUsername()).isEqualTo("testuser");
-            assertThat(databaseConfig.getDbPassword()).isEqualTo("testpass");
+            assertThatThrownBy(() -> databaseConfig.getDbUrl()).isInstanceOf(RuntimeException.class)
+                    .hasMessage("DB_URL is not configured.");
+            assertThatThrownBy(() -> databaseConfig.getDbUsername()).isInstanceOf(RuntimeException.class)
+                    .hasMessage("DB_USERNAME is not configured.");
+            assertThatThrownBy(() -> databaseConfig.getDbPassword()).isInstanceOf(RuntimeException.class)
+                    .hasMessage("DB_PASSWORD is not configured.");
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error occurred while testing missing system properties "
-                    + "fallback to .env values: " + e.getMessage(), e);
-            fail("Test failed due to an unexpected exception while testing fallback to .env values.");
+                    + "fallback to default values: " + e.getMessage(), e);
+            fail("Test failed due to an unexpected exception while testing fallback to default values.");
         }
-    }
-
-    private void resetSingletonInstance() throws Exception {
-        Field envVarsField = DatabaseConfig.class.getDeclaredField("envVars");
-        envVarsField.setAccessible(true);
-        envVarsField.set(databaseConfig, new HashMap<>(envVars));
-    }
-
-    private void callOverrideWithSystemProperties(DatabaseConfig databaseConfig) throws Exception {
-        Method overrideMethod = DatabaseConfig.class.getDeclaredMethod("overrideWithSystemProperties");
-        overrideMethod.setAccessible(true);
-        overrideMethod.invoke(databaseConfig);
     }
 }
