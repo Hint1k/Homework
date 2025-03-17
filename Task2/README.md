@@ -89,17 +89,14 @@ Table names: users, transactions, goals, reports, budgets
 
 The application includes unit tests with **JUnit 5, Mockito, AssertJ** and integration test with testcontainers. 
 
-To run tests using Gradle:
+To run unit tests using Gradle:
 ```bash
-./gradlew test
+./gradlew test integrationTest # runs both unit tests and integration tests
 ```
-Tests with coverage
+Tests with coverage using Jacoco 
 ```bash
-./gradlew build jacocoTestReport 
+./gradlew jacocoTestReport # runs both unit tests and integration tests and creates a combined report  
 ```
-**Known Issue:** First-time test failures <br>
-- When running tests for the first time, all integration tests fail due to container initialization delay.<br> 
-- When running tests again (2nd time, 3rd time, etc) - all test pass.
 
 ---
 

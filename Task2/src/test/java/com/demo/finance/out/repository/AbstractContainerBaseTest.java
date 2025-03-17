@@ -3,6 +3,7 @@ package com.demo.finance.out.repository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
 
@@ -25,8 +26,9 @@ public abstract class AbstractContainerBaseTest {
                 new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"))
                         .withDatabaseName("testdb")
                         .withUsername("testuser")
-                        .withPassword("testpass");
-
+                        .withPassword("testpass")
+                        .withReuse(true)
+                        .waitingFor(Wait.forListeningPort());
         static {
             INSTANCE.start();
         }
