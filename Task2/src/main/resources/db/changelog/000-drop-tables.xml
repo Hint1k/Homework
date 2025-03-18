@@ -11,7 +11,14 @@
             <tableExists tableName="users" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="users" schemaName="finance"/>
-        <dropSequence sequenceName="finance.users_user_id_seq"/>
+    </changeSet>
+
+    <!-- Drop users_user_id_seq sequence if it exists -->
+    <changeSet id="drop-users-sequence" author="hint1k">
+        <preConditions onFail="MARK_RAN">
+            <sequenceExists sequenceName="users_user_id_seq" schemaName="finance"/>
+        </preConditions>
+        <dropSequence sequenceName="users_user_id_seq" schemaName="finance"/>
     </changeSet>
 
     <!-- Drop transactions table if it exists -->
@@ -20,7 +27,14 @@
             <tableExists tableName="transactions" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="transactions" schemaName="finance"/>
-        <dropSequence sequenceName="finance.transactions_user_id_seq"/>
+    </changeSet>
+
+    <!-- Drop transactions_user_id_seq sequence if it exists -->
+    <changeSet id="drop-transactions-sequence" author="hint1k">
+        <preConditions onFail="MARK_RAN">
+            <sequenceExists sequenceName="transactions_user_id_seq" schemaName="finance"/>
+        </preConditions>
+        <dropSequence sequenceName="transactions_user_id_seq" schemaName="finance"/>
     </changeSet>
 
     <!-- Drop reports table if it exists -->
@@ -29,7 +43,14 @@
             <tableExists tableName="reports" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="reports" schemaName="finance"/>
-        <dropSequence sequenceName="finance.reports_user_id_seq"/>
+    </changeSet>
+
+    <!-- Drop reports_user_id_seq sequence if it exists -->
+    <changeSet id="drop-reports-sequence" author="hint1k">
+        <preConditions onFail="MARK_RAN">
+            <sequenceExists sequenceName="reports_user_id_seq" schemaName="finance"/>
+        </preConditions>
+        <dropSequence sequenceName="reports_user_id_seq" schemaName="finance"/>
     </changeSet>
 
     <!-- Drop goals table if it exists -->
@@ -38,7 +59,14 @@
             <tableExists tableName="goals" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="goals" schemaName="finance"/>
-        <dropSequence sequenceName="finance.goals_user_id_seq"/>
+    </changeSet>
+
+    <!-- Drop goals_user_id_seq sequence if it exists -->
+    <changeSet id="drop-goals-sequence" author="hint1k">
+        <preConditions onFail="MARK_RAN">
+            <sequenceExists sequenceName="goals_user_id_seq" schemaName="finance"/>
+        </preConditions>
+        <dropSequence sequenceName="goals_user_id_seq" schemaName="finance"/>
     </changeSet>
 
     <!-- Drop budgets table if it exists -->
@@ -47,6 +75,13 @@
             <tableExists tableName="budgets" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="budgets" schemaName="finance"/>
-        <dropSequence sequenceName="finance.budgets_user_id_seq"/>
+    </changeSet>
+
+    <!-- Drop budgets_user_id_seq sequence if it exists -->
+    <changeSet id="drop-budgets-sequence" author="hint1k">
+        <preConditions onFail="MARK_RAN">
+            <sequenceExists sequenceName="budgets_user_id_seq" schemaName="finance"/>
+        </preConditions>
+        <dropSequence sequenceName="budgets_user_id_seq" schemaName="finance"/>
     </changeSet>
 </databaseChangeLog>
