@@ -26,17 +26,10 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      * Saves a new budget record in the database.
      *
      * @param budget the budget to be saved
-     * @return {@code true} if the budget was successfully saved, otherwise {@code false}
      */
     @Override
-    public boolean save(Budget budget) {
-        return Boolean.TRUE.equals(executeInTransaction(conn -> {
-            try (PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                setBudgetParameters(stmt, budget);
-                int rowsInserted = stmt.executeUpdate();
-                return rowsInserted > 0;
-            }
-        }));
+    public void save(Budget budget) {
+        super.persistEntity(budget, INSERT_SQL, stmt -> setBudgetParameters(stmt, budget));
     }
 
     /**
@@ -47,7 +40,7 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      */
     @Override
     public boolean update(Budget budget) {
-        return executeUpdate(UPDATE_SQL, stmt -> {
+        return updateRecord(UPDATE_SQL, stmt -> {
             setBudgetParameters(stmt, budget);
             stmt.setLong(4, budget.getBudgetId());
         });
@@ -61,7 +54,7 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      */
     @Override
     public boolean delete(Long budgetId) {
-        return executeUpdate(DELETE_SQL, stmt -> stmt.setLong(1, budgetId));
+        return updateRecord(DELETE_SQL, stmt -> stmt.setLong(1, budgetId));
     }
 
     /**
@@ -72,7 +65,7 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      */
     @Override
     public Optional<Budget> findById(Long budgetId) {
-        return findOneByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, budgetId),
+        return findRecordByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, budgetId),
                 this::mapResultSetToBudget);
     }
 
@@ -84,7 +77,7 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      */
     @Override
     public Optional<Budget> findByUserId(Long userId) {
-        return findOneByCriteria(FIND_BY_USER_ID_SQL, stmt -> stmt.setLong(1, userId),
+        return findRecordByCriteria(FIND_BY_USER_ID_SQL, stmt -> stmt.setLong(1, userId),
                 this::mapResultSetToBudget);
     }
 

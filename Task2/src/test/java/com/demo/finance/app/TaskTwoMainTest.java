@@ -2,7 +2,7 @@ package com.demo.finance.app;
 
 import com.demo.finance.app.config.ApplicationConfig;
 import com.demo.finance.in.cli.CliHandler;
-import com.demo.finance.out.repository.AbstractContainerBaseTest;
+import com.demo.finance.out.repository.impl.AbstractContainerBaseSetup;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import static org.assertj.core.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class TaskTwoMainTest extends AbstractContainerBaseTest {
+public class TaskTwoMainTest extends AbstractContainerBaseSetup {
 
     private static final Logger log = Logger.getLogger(TaskTwoMainTest.class.getName());
 

@@ -33,13 +33,7 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      */
     @Override
     public void save(Goal goal) {
-        executeInTransaction(conn -> {
-            try (PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                setGoalParameters(stmt, goal);
-                stmt.executeUpdate();
-                return null;
-            }
-        });
+        super.persistEntity(goal, INSERT_SQL, stmt -> setGoalParameters(stmt, goal));
     }
 
     /**
@@ -50,7 +44,7 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      */
     @Override
     public boolean update(Goal goal) {
-        return executeUpdate(UPDATE_SQL, stmt -> {
+        return updateRecord(UPDATE_SQL, stmt -> {
             setGoalParameters(stmt, goal);
             stmt.setLong(7, goal.getGoalId());
         });
@@ -64,7 +58,7 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      */
     @Override
     public boolean delete(Long goalId) {
-        return executeUpdate(DELETE_SQL, stmt -> stmt.setLong(1, goalId));
+        return updateRecord(DELETE_SQL, stmt -> stmt.setLong(1, goalId));
     }
 
     /**
@@ -75,7 +69,7 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      */
     @Override
     public Goal findById(Long goalId) {
-        return findOneByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, goalId),
+        return findRecordByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, goalId),
                 this::mapResultSetToGoal).orElse(null);
     }
 
@@ -87,7 +81,7 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      */
     @Override
     public List<Goal> findByUserId(Long userId) {
-        return findAllByCriteria(FIND_BY_USER_ID_SQL, List.of(userId), this::mapResultSetToGoal);
+        return findAllRecordsByCriteria(FIND_BY_USER_ID_SQL, List.of(userId), this::mapResultSetToGoal);
     }
 
     /**
@@ -98,8 +92,8 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      * @return an {@code Optional} containing the goal if found, or an empty {@code Optional} if not found
      */
     @Override
-    public Optional<Goal> findByUserIdAndGoalId(Long goalId, Long userId) {
-        return findOneByCriteria(FIND_BY_USER_AND_GOAL_SQL, stmt -> {
+    public Optional<Goal> findByUserIdAndGoalId(Long userId, Long goalId) {
+        return findRecordByCriteria(FIND_BY_USER_AND_GOAL_SQL, stmt -> {
             stmt.setLong(1, goalId);
             stmt.setLong(2, userId);
         }, this::mapResultSetToGoal);

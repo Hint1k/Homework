@@ -27,11 +27,8 @@ class BudgetControllerTest {
         Long userId = 1L;
         BigDecimal amount = new BigDecimal(1000);
 
-        when(budgetService.setMonthlyBudget(userId, amount)).thenReturn(true);
+        budgetController.setBudget(userId, amount);
 
-        boolean result = budgetController.setBudget(userId, amount);
-
-        assertThat(result).isTrue();
         verify(budgetService, times(1)).setMonthlyBudget(userId, amount);
     }
 

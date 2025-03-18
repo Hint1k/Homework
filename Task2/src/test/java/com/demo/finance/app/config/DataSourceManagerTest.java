@@ -1,7 +1,7 @@
 package com.demo.finance.app.config;
 
 import com.demo.finance.exception.DatabaseConnectionException;
-import com.demo.finance.out.repository.AbstractContainerBaseTest;
+import com.demo.finance.out.repository.impl.AbstractContainerBaseSetup;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DataSourceManagerTest extends AbstractContainerBaseTest {
+class DataSourceManagerTest extends AbstractContainerBaseSetup {
 
     private static final Logger log = Logger.getLogger(DataSourceManagerTest.class.getName());
 

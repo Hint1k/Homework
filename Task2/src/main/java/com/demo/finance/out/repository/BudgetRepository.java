@@ -15,9 +15,8 @@ public interface BudgetRepository {
      * Saves the specified {@code Budget} object.
      *
      * @param budget the {@code Budget} object to be saved
-     * @return {@code true} if the budget was successfully saved, {@code false} otherwise
      */
-    boolean save(Budget budget);
+    void save(Budget budget);
 
     /**
      * Deletes the budget associated with the specified budget ID.

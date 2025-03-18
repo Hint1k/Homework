@@ -51,12 +51,16 @@ class GoalServiceImplTest {
     @Test
     @DisplayName("Test that deleteGoal deletes an existing goal successfully")
     void testDeleteGoal_existingGoal_deletesSuccessfully() {
-        when(goalRepository.delete(3L)).thenReturn(true);
+        Long goalId = 3L;
+        Long userId = 2L;
+        when(goalRepository.findByUserIdAndGoalId(userId, goalId))
+                .thenReturn(Optional.of(new Goal(2L, "Car", new BigDecimal(5000), 12)));;
+        when(goalRepository.delete(goalId)).thenReturn(true);
 
-        Boolean result = goalService.deleteGoal(2L, 3L);
+        Boolean result = goalService.deleteGoal(userId, goalId);
 
         assertThat(result).isTrue();
-        verify(goalRepository, times(1)).delete(3L);
+        verify(goalRepository, times(1)).delete(goalId);
     }
 
     @Test

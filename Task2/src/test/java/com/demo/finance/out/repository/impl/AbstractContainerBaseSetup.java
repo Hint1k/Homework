@@ -1,4 +1,4 @@
-package com.demo.finance.out.repository;
+package com.demo.finance.out.repository.impl;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,9 +16,9 @@ import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.fail;
 
-public abstract class AbstractContainerBaseTest {
+public abstract class AbstractContainerBaseSetup {
 
-    private static final Logger log = Logger.getLogger(AbstractContainerBaseTest.class.getName());
+    private static final Logger log = Logger.getLogger(AbstractContainerBaseSetup.class.getName());
 
     private static class SingletonContainer {
         @SuppressWarnings("resource")

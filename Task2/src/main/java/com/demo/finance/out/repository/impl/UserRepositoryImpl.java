@@ -33,13 +33,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      */
     @Override
     public void save(User user) {
-        executeInTransaction(conn -> {
-            try (PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                setUserParameters(stmt, user);
-                stmt.executeUpdate();
-                return null;
-            }
-        });
+        super.persistEntity(user, INSERT_SQL, stmt -> setUserParameters(stmt, user));
     }
 
     /**
@@ -50,7 +44,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      */
     @Override
     public boolean update(User user) {
-        return executeUpdate(UPDATE_SQL, stmt -> {
+        return updateRecord(UPDATE_SQL, stmt -> {
             setUserParameters(stmt, user);
             stmt.setLong(6, user.getUserId());
         });
@@ -64,7 +58,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      */
     @Override
     public boolean delete(Long userId) {
-        return executeUpdate(DELETE_SQL, stmt -> stmt.setLong(1, userId));
+        return updateRecord(DELETE_SQL, stmt -> stmt.setLong(1, userId));
     }
 
     /**
@@ -74,7 +68,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      */
     @Override
     public List<User> findAll() {
-        return findAllByCriteria(FIND_ALL_SQL, new ArrayList<>(), this::mapResultSetToUser);
+        return findAllRecordsByCriteria(FIND_ALL_SQL, new ArrayList<>(), this::mapResultSetToUser);
     }
 
     /**
@@ -85,7 +79,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      */
     @Override
     public Optional<User> findById(Long userId) {
-        return findOneByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, userId),
+        return findRecordByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, userId),
                 this::mapResultSetToUser);
     }
 
@@ -97,7 +91,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      */
     @Override
     public Optional<User> findByEmail(String email) {
-        return findOneByCriteria(FIND_BY_EMAIL_SQL, stmt -> stmt.setString(1, email),
+        return findRecordByCriteria(FIND_BY_EMAIL_SQL, stmt -> stmt.setString(1, email),
                 this::mapResultSetToUser);
     }
 

@@ -99,7 +99,11 @@ public class GoalServiceImpl implements GoalService {
      */
     @Override
     public boolean deleteGoal(Long userId, Long goalId) {
-        return goalRepository.delete(goalId);
+        Optional<Goal> goal = goalRepository.findByUserIdAndGoalId(userId, goalId);
+        if (goal.isPresent()) {
+            return goalRepository.delete(goalId);
+        }
+        return false;
     }
 
     /**

@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,7 +44,7 @@ class BudgetCommandTest {
     @DisplayName("Set budget - Success")
     void testSetBudget_Success() {
         when(validationUtils.promptForPositiveBigDecimal(any(), any())).thenReturn(new BigDecimal(500));
-        when(budgetController.setBudget(2L, new BigDecimal(500))).thenReturn(true);
+        doNothing().when(budgetController).setBudget(2L, new BigDecimal(500));
 
         budgetCommand.setBudget();
 
@@ -54,7 +55,7 @@ class BudgetCommandTest {
     @DisplayName("Set budget - Failure")
     void testSetBudget_Failure() {
         when(validationUtils.promptForPositiveBigDecimal(any(), any())).thenReturn(new BigDecimal(500));
-        when(budgetController.setBudget(2L, new BigDecimal(500))).thenReturn(false);
+        doNothing().when(budgetController).setBudget(2L, new BigDecimal(500));
 
         budgetCommand.setBudget();
 
@@ -87,7 +88,7 @@ class BudgetCommandTest {
     @DisplayName("Set budget - Service fails logs error")
     void testSetBudget_ServiceFails_LogsError() {
         when(validationUtils.promptForPositiveBigDecimal(any(), any())).thenReturn(new BigDecimal(500));
-        when(budgetController.setBudget(2L, new BigDecimal(500))).thenReturn(false);
+        doNothing().when(budgetController).setBudget(2L, new BigDecimal(500));
 
         budgetCommand.setBudget();
 

@@ -1,5 +1,6 @@
 package com.demo.finance.domain.model;
 
+import com.demo.finance.domain.utils.GeneratedKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Report {
-
+    @GeneratedKey
     private Long reportId;
     private Long userId;
     private BigDecimal totalIncome;

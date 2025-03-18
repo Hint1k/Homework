@@ -1,8 +1,7 @@
-package com.demo.finance.out.repository;
+package com.demo.finance.out.repository.impl;
 
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
-import com.demo.finance.out.repository.impl.TransactionRepositoryImpl;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TransactionRepositoryImplTest extends AbstractContainerBaseTest {
+class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
 
     private TransactionRepositoryImpl repository;
 
@@ -32,8 +31,15 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseTest {
                 "Groceries", LocalDate.of(2025, 3, 10), "Supermarket",
                 Type.EXPENSE);
         repository.save(transaction);
+        List<Transaction> savedTransactions = repository.findByUserId(1L);
+        assertThat(savedTransactions).isNotEmpty();
 
-        Transaction found = repository.findById(transaction.getTransactionId());
+        Transaction savedTransaction = savedTransactions.get(0);
+        Long transactionId = savedTransaction.getTransactionId();
+
+        assertThat(transactionId).isNotNull();
+
+        Transaction found = repository.findById(transactionId);
 
         assertThat(found).isNotNull();
         assertThat(found.getAmount()).isEqualTo(new BigDecimal("500.00"));
@@ -48,13 +54,21 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseTest {
                 Type.EXPENSE);
         repository.save(transaction);
 
-        Transaction updatedTransaction = new Transaction(transaction.getTransactionId(), 2L,
+        List<Transaction> savedTransactions = repository.findByUserId(2L);
+        assertThat(savedTransactions).isNotEmpty();
+
+        Transaction savedTransaction = savedTransactions.get(0);
+        Long transactionId = savedTransaction.getTransactionId();
+        assertThat(transactionId).isNotNull();
+
+        Transaction updatedTransaction = new Transaction(transactionId, 2L,
                 new BigDecimal("400.00"), "Transport", LocalDate.of(2025, 3, 15),
                 "Taxi fare", Type.EXPENSE);
         boolean updated = repository.update(updatedTransaction);
 
         assertThat(updated).isTrue();
-        Transaction found = repository.findById(transaction.getTransactionId());
+        Transaction found = repository.findById(transactionId);
+        assertThat(found).isNotNull();
         assertThat(found.getAmount()).isEqualTo(new BigDecimal("400.00"));
         assertThat(found.getDescription()).isEqualTo("Taxi fare");
     }
@@ -66,11 +80,18 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseTest {
                 "Bills", LocalDate.of(2025, 3, 20), "Electricity",
                 Type.EXPENSE);
         repository.save(transaction);
+        List<Transaction> transactions = repository.findByUserId(3L);
+        assertThat(transactions).isNotEmpty();
 
-        boolean deleted = repository.delete(transaction.getTransactionId());
+        Transaction savedTransaction = transactions.get(0);
+        Long transactionId = savedTransaction.getTransactionId();
+
+        assertThat(transactionId).isNotNull();
+
+        boolean deleted = repository.delete(transactionId);
 
         assertThat(deleted).isTrue();
-        assertThat(repository.findById(transaction.getTransactionId())).isNull();
+        assertThat(repository.findById(transactionId)).isNull();
     }
 
     @Test
@@ -96,13 +117,19 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseTest {
     @Test
     @DisplayName("Find by user and transaction ID - Success scenario")
     void testFindByUserIdAndTransactionId() {
-        Transaction transaction = new Transaction(null, 5L, new BigDecimal("300.00"),
+        Transaction transaction = new Transaction(5L, 5L, new BigDecimal("300.00"),
                 "Freelance", LocalDate.of(2025, 3, 10), "Project payment",
                 Type.INCOME);
         repository.save(transaction);
+        List<Transaction> savedTransactions = repository.findByUserId(5L);
+        assertThat(savedTransactions).isNotEmpty();
 
-        Optional<Transaction> found = repository.findByUserIdAndTransactionId(
-                transaction.getTransactionId(), 5L);
+        Transaction savedTransaction = savedTransactions.get(0);
+        Long transactionId = savedTransaction.getTransactionId();
+
+        assertThat(transactionId).isNotNull();
+
+        Optional<Transaction> found = repository.findByUserIdAndTransactionId(5L, transactionId);
 
         assertThat(found).isPresent();
         assertThat(found.get().getCategory()).isEqualTo("Freelance");

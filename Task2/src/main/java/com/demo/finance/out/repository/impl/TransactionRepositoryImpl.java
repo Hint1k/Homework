@@ -36,18 +36,8 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
      */
     @Override
     public void save(Transaction transaction) {
-        executeInTransaction(conn -> {
-            try (PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                setTransactionParameters(stmt, transaction);
-                stmt.executeUpdate();
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        transaction.setTransactionId(rs.getLong(1));
-                    }
-                }
-                return null;
-            }
-        });
+        super.persistEntity(transaction, INSERT_SQL, stmt ->
+                setTransactionParameters(stmt, transaction));
     }
 
     /**
@@ -58,7 +48,7 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
      */
     @Override
     public boolean update(Transaction transaction) {
-        return executeUpdate(UPDATE_SQL, stmt -> {
+        return updateRecord(UPDATE_SQL, stmt -> {
             setTransactionParameters(stmt, transaction);
             stmt.setLong(7, transaction.getTransactionId());
         });
@@ -72,7 +62,7 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
      */
     @Override
     public boolean delete(Long transactionId) {
-        return executeUpdate(DELETE_SQL, stmt -> stmt.setLong(1, transactionId));
+        return updateRecord(DELETE_SQL, stmt -> stmt.setLong(1, transactionId));
     }
 
     /**
@@ -83,7 +73,8 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
      */
     @Override
     public Transaction findById(Long transactionId) {
-        return findOneByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, transactionId),
+        return findRecordByCriteria(FIND_BY_ID_SQL, stmt ->
+                        stmt.setLong(1, transactionId),
                 this::mapResultSetToTransaction).orElse(null);
     }
 
@@ -95,7 +86,7 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
      */
     @Override
     public List<Transaction> findByUserId(Long userId) {
-        return findAllByCriteria(FIND_BY_USER_ID_SQL, List.of(userId), this::mapResultSetToTransaction);
+        return findAllRecordsByCriteria(FIND_BY_USER_ID_SQL, List.of(userId), this::mapResultSetToTransaction);
     }
 
     /**
@@ -106,8 +97,8 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
      * @return an {@code Optional} containing the transaction if found, or an empty {@code Optional} if not found
      */
     @Override
-    public Optional<Transaction> findByUserIdAndTransactionId(Long transactionId, Long userId) {
-        return findOneByCriteria(FIND_BY_USER_AND_TRANSACTION_SQL, stmt -> {
+    public Optional<Transaction> findByUserIdAndTransactionId(Long userId, Long transactionId) {
+        return findRecordByCriteria(FIND_BY_USER_AND_TRANSACTION_SQL, stmt -> {
             stmt.setLong(1, transactionId);
             stmt.setLong(2, userId);
         }, this::mapResultSetToTransaction);
@@ -128,7 +119,7 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
         String sql = buildFilteredQuery(from, to, category, type);
         List<Object> params = getFilterParameters(userId, from, to, category, type);
 
-        return findAllByCriteria(sql, params, this::mapResultSetToTransaction);
+        return findAllRecordsByCriteria(sql, params, this::mapResultSetToTransaction);
     }
 
     /**

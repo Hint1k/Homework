@@ -20,9 +20,9 @@ public class BudgetCommand {
      * Initializes the BudgetCommand with the provided context, validation utilities,
      * and scanner.
      *
-     * @param context The CommandContext that holds controllers.
+     * @param context         The CommandContext that holds controllers.
      * @param validationUtils Utility for validation.
-     * @param scanner Scanner to capture user input.
+     * @param scanner         Scanner to capture user input.
      */
     public BudgetCommand(CommandContext context, ValidationUtils validationUtils, Scanner scanner) {
         this.context = context;
@@ -32,18 +32,13 @@ public class BudgetCommand {
 
     /**
      * Prompts the user to enter a monthly budget amount and attempts to set the budget for the current user.
-     * If successful, a confirmation message is displayed.
-     * If the budget setting fails, an error message is shown.
      */
     public void setBudget() {
         try {
             String message = "Enter Monthly Budget: ";
             BigDecimal amount = validationUtils.promptForPositiveBigDecimal(message, scanner);
-            if (context.getBudgetController().setBudget(context.getCurrentUser().getUserId(), amount)) {
-                System.out.println("Budget set successfully.");
-            } else {
-                System.out.println("Failed to set budget.");
-            }
+            context.getBudgetController().setBudget(context.getCurrentUser().getUserId(), amount);
+            System.out.println("Budget set successfully.");
         } catch (MaxRetriesReachedException e) {
             System.out.println(e.getMessage());
         }

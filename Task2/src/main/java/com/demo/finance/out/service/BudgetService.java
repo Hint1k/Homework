@@ -18,9 +18,8 @@ public interface BudgetService {
      *
      * @param userId the ID of the user to set the budget for
      * @param limit the budget limit for the month
-     * @return {@code true} if the budget was successfully set, {@code false} otherwise
      */
-    boolean setMonthlyBudget(Long userId, BigDecimal limit);
+    void setMonthlyBudget(Long userId, BigDecimal limit);
 
     /**
      * Retrieves the current budget for a user.

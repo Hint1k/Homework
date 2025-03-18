@@ -37,18 +37,17 @@ public class BudgetServiceImpl implements BudgetService {
      *
      * @param userId the ID of the user to set the budget for
      * @param limit the budget limit for the month
-     * @return {@code true} if the budget was successfully set, {@code false} otherwise
      */
     @Override
-    public boolean setMonthlyBudget(Long userId, BigDecimal limit) {
+    public void setMonthlyBudget(Long userId, BigDecimal limit) {
         Optional<Budget> existingBudget = budgetRepository.findByUserId(userId);
         if (existingBudget.isPresent()) {
             Budget updatedBudget = existingBudget.get();
             updatedBudget.setMonthlyLimit(limit);
-            return budgetRepository.update(updatedBudget);
+            budgetRepository.update(updatedBudget);
         } else {
             Budget newBudget = new Budget(userId, limit);
-            return budgetRepository.save(newBudget);
+            budgetRepository.save(newBudget);
         }
     }
 

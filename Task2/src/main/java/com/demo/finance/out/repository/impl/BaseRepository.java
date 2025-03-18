@@ -1,14 +1,20 @@
 package com.demo.finance.out.repository.impl;
 
 import com.demo.finance.app.config.DataSourceManager;
+import com.demo.finance.domain.utils.GeneratedKey;
 import com.demo.finance.exception.DatabaseException;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +26,97 @@ import java.util.logging.Logger;
 public abstract class BaseRepository {
 
     protected static final Logger log = Logger.getLogger(BaseRepository.class.getName());
+    private static final Map<Class<?>, Method> SETTER_METHOD_CACHE = new HashMap<>();
+
+    /**
+     * Persists an entity to the database by executing the provided SQL INSERT statement.
+     * If the operation generates a key (e.g., auto-incremented ID), it assigns the key to the entity.
+     *
+     * @param entity    the entity to persist
+     * @param insertSql the SQL INSERT statement to execute
+     * @param setter    the parameter setter to populate the prepared statement
+     * @param <T>       the type of the entity
+     */
+    protected <T> void persistEntity(T entity, String insertSql, PreparedStatementSetter setter) {
+        Long generatedId = insertRecord(insertSql, setter);
+        if (generatedId != null) {
+            setGeneratedId(entity, generatedId);
+        }
+    }
+
+    /**
+     * Updates a record in the database by executing the provided SQL UPDATE statement.
+     *
+     * @param sql    the SQL UPDATE statement to execute
+     * @param setter the parameter setter to populate the prepared statement
+     * @return {@code true} if the update was successful, otherwise {@code false}
+     */
+    protected boolean updateRecord(String sql, PreparedStatementSetter setter) {
+        try {
+            executeStatement(sql, setter, null);
+            return true;
+        } catch (Exception e) {
+            logError("Update record failed", e);
+            return false;
+        }
+    }
+
+    /**
+     * Inserts a record into the database by executing the provided SQL INSERT statement.
+     * If the operation generates a key (e.g., auto-incremented ID), it returns the generated key.
+     *
+     * @param sql    the SQL INSERT statement to execute
+     * @param setter the parameter setter to populate the prepared statement
+     * @return the generated key if successful, or {@code null} if no key was generated
+     */
+    protected Long insertRecord(String sql, PreparedStatementSetter setter) {
+        return executeStatement(sql, setter, rs -> {
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+            return null;
+        });
+    }
+
+    /**
+     * Finds a single record in the database based on the provided SQL query, parameter setter, and result mapper.
+     *
+     * @param sql    the SQL query to execute
+     * @param setter the parameter setter to populate the prepared statement
+     * @param mapper the result set mapper to convert the result into the desired type
+     * @param <T>    the type of the result
+     * @return an {@code Optional} containing the mapped result if found, or an empty {@code Optional} if not found
+     */
+    protected <T> Optional<T> findRecordByCriteria(String sql, PreparedStatementSetter setter,
+                                                   ResultSetMapper<T> mapper) {
+        return queryDatabase(sql, setter, rs -> {
+            if (rs.next()) {
+                return Optional.of(mapper.map(rs));
+            }
+            return Optional.empty();
+        });
+    }
+
+    /**
+     * Finds multiple records in the database based on the provided SQL query, parameters, and result mapper.
+     * The method binds the parameters to the prepared statement and maps each row of the result
+     * set to the desired type.
+     *
+     * @param sql    the SQL query to execute
+     * @param params the list of parameters to bind to the prepared statement
+     * @param mapper the result set mapper to convert each row into the desired type
+     * @param <T>    the type of the results
+     * @return a list of mapped results retrieved from the database
+     */
+    protected <T> List<T> findAllRecordsByCriteria(String sql, List<Object> params, ResultSetMapper<T> mapper) {
+        return queryDatabase(sql, stmt -> bindParameters(stmt, params), rs -> {
+            List<T> results = new ArrayList<>();
+            while (rs.next()) {
+                results.add(mapper.map(rs));
+            }
+            return results;
+        });
+    }
 
     /**
      * Executes a database operation within a transaction. Handles committing or rolling back the transaction
@@ -29,8 +126,8 @@ public abstract class BaseRepository {
      * @param <T>       the type of result returned by the operation
      * @return the result of the operation if successful, or {@code null} if an error occurs
      */
-    protected <T> T executeInTransaction(TransactionalOperation<T> operation) {
-        try (Connection conn = getConnection()) {
+    protected <T> T executeWithinTransaction(TransactionalOperation<T> operation) {
+        try (Connection conn = DataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
             try {
                 T result = operation.execute(conn);
@@ -43,102 +140,103 @@ public abstract class BaseRepository {
             }
         } catch (SQLException e) {
             logError("Failed to obtain database connection", e);
-            throw new DatabaseException("Error obtaining database connection", e);
+            return null;
         }
     }
 
     /**
-     * Executes an update SQL statement using the provided SQL query and parameter setter.
+     * Executes a query against the database, binds parameters, and processes the ResultSet.
      *
-     * @param sql    the SQL update query to execute
-     * @param setter the parameter setter to populate the prepared statement
-     * @return {@code true} if the update was successful, otherwise {@code false}
+     * @param sql           the SQL query to execute
+     * @param setter        the parameter setter to populate the prepared statement
+     * @param resultHandler the function to process the ResultSet and return the result
+     * @param <T>           the type of the result
+     * @return the result of processing the ResultSet
      */
-    protected boolean executeUpdate(String sql, PreparedStatementSetter setter) {
-        return Boolean.TRUE.equals(executeInTransaction(conn -> {
-            //noinspection SqlSourceToSinkFlow
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                setter.setValues(stmt);
-                return stmt.executeUpdate() > 0;
-            }
-        }));
-    }
-
-    /**
-     * Finds a single entity in the database based on the provided SQL query, parameter setter, and result mapper.
-     *
-     * @param sql    the SQL query to execute
-     * @param setter the parameter setter to populate the prepared statement
-     * @param mapper the result set mapper to convert the result into the desired type
-     * @param <T>    the type of the result
-     * @return an {@code Optional} containing the mapped result if found, or an empty {@code Optional} if not found
-     */
-    protected <T> Optional<T> findOneByCriteria(String sql, PreparedStatementSetter setter,
-                                                ResultSetMapper<T> mapper) {
-        return executeInTransaction(conn -> {
+    protected <T> T queryDatabase(String sql, PreparedStatementSetter setter, ResultSetHandler<T> resultHandler) {
+        return executeWithinTransaction(conn -> {
             //noinspection SqlSourceToSinkFlow
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 setter.setValues(stmt);
                 try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        return Optional.of(mapper.map(rs));
+                    return resultHandler.handle(rs);
+                }
+            }
+        });
+    }
+
+    /**
+     * Executes an SQL statement (e.g., INSERT, UPDATE) and optionally processes the generated keys.
+     *
+     * @param sql           the SQL statement to execute
+     * @param setter        the parameter setter to populate the prepared statement
+     * @param resultHandler the function to process the generated keys, or {@code null} if not needed
+     * @param <T>           the type of the result
+     * @return the result of processing the generated keys, or {@code null} if no result handler is provided
+     */
+    protected <T> T executeStatement(String sql, PreparedStatementSetter setter, ResultSetHandler<T> resultHandler) {
+        return executeWithinTransaction(conn -> {
+            //noinspection SqlSourceToSinkFlow
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                setter.setValues(stmt);
+                stmt.executeUpdate();
+                if (resultHandler != null) {
+                    try (ResultSet rs = stmt.getGeneratedKeys()) {
+                        return resultHandler.handle(rs);
+                    }
+                }
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Assigns a generated ID to an entity by invoking the appropriate setter method.
+     * The setter method is determined using reflection and cached for future use.
+     *
+     * @param entity      the entity to assign the generated ID to
+     * @param generatedId the generated ID to assign
+     * @param <T>         the type of the entity
+     * @throws RuntimeException if the setter method cannot be found or invoked
+     */
+    protected <T> void setGeneratedId(T entity, Long generatedId) {
+        try {
+            Class<?> entityClass = entity.getClass();
+            Method setterMethod = SETTER_METHOD_CACHE.get(entityClass);
+
+            if (setterMethod == null) {
+                for (Field field : entityClass.getDeclaredFields()) {
+                    if (field.isAnnotationPresent(GeneratedKey.class)) {
+                        String fieldName = field.getName();
+                        String setterName = "set" + fieldName.substring(0, 1).toUpperCase()
+                                + fieldName.substring(1);
+                        setterMethod = entityClass.getMethod(setterName, Long.class);
+                        SETTER_METHOD_CACHE.put(entityClass, setterMethod);
+                        break;
                     }
                 }
             }
-            return Optional.empty();
-        });
+            Objects.requireNonNull(setterMethod).invoke(entity, generatedId);
+        } catch (Exception e) {
+            logError("Failed to set generated key on entity: " + entity.getClass().getSimpleName(), e);
+        }
     }
 
     /**
-     * Executes a query to retrieve multiple entities from the database based on the provided SQL query,
-     * parameters, and result mapper. The method binds the parameters to the prepared statement and maps
-     * each row of the result set to the desired type using the provided mapper.
+     * Binds a list of parameters to a PreparedStatement.
      *
-     * @param sql    the SQL query to execute
-     * @param params the list of parameters to bind to the prepared statement
-     * @param mapper the result set mapper to convert each row into the desired type
-     * @param <T>    the type of the results
-     * @return a list of mapped results retrieved from the database
+     * @param stmt   the PreparedStatement to bind parameters to
+     * @param params the list of parameters to bind
+     * @throws RuntimeException if an error occurs while binding the parameters
      */
-    protected <T> List<T> findAllByCriteria(String sql, List<Object> params, ResultSetMapper<T> mapper) {
-        return executeQuery(sql, params, rs -> {
-            List<T> results = new ArrayList<>();
-            while (rs.next()) {
-                results.add(mapper.map(rs));
+    protected void bindParameters(PreparedStatement stmt, List<Object> params) {
+        try {
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
             }
-            return results;
-        });
-    }
-
-    /**
-     * Helper method to execute a query, bind parameters, and process the ResultSet.
-     *
-     * @param sql    the SQL query to execute
-     * @param params the list of parameters to bind to the prepared statement
-     * @param mapper the function to process the ResultSet and return the result
-     * @param <T>    the type of the result
-     * @return the result of processing the ResultSet
-     */
-    private <T> T executeQuery(String sql, List<Object> params, ResultSetMapper<T> mapper) {
-        return executeInTransaction(conn -> {
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                for (int i = 0; i < params.size(); i++) {
-                    stmt.setObject(i + 1, params.get(i));
-                }
-                try (ResultSet rs = stmt.executeQuery()) {
-                    return mapper.map(rs);
-                }
-            }
-        });
-    }
-
-    /**
-     * Retrieves a database connection from the {@code DataSourceManager}.
-     *
-     * @return a {@code Connection} object for database operations
-     */
-    protected Connection getConnection() {
-        return DataSourceManager.getConnection();
+        } catch (SQLException e) {
+            logError("Failed to bind parameters", e);
+        }
     }
 
     /**
@@ -178,5 +276,15 @@ public abstract class BaseRepository {
     @FunctionalInterface
     protected interface ResultSetMapper<T> {
         T map(ResultSet rs) throws SQLException;
+    }
+
+    /**
+     * Functional interface for processing a ResultSet and returning a result.
+     *
+     * @param <T> the type of the result
+     */
+    @FunctionalInterface
+    protected interface ResultSetHandler<T> {
+        T handle(ResultSet rs) throws SQLException;
     }
 }

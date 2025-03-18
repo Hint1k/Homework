@@ -1,5 +1,6 @@
 package com.demo.finance.domain.model;
 
+import com.demo.finance.domain.utils.GeneratedKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class Budget {
 
+    @GeneratedKey
     private Long budgetId;
     private Long userId;
     private BigDecimal monthlyLimit;

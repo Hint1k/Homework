@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import com.demo.finance.domain.utils.GeneratedKey;
 import com.demo.finance.domain.utils.Type;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,6 +21,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Transaction {
 
+    @GeneratedKey
     private Long transactionId;
     private Long userId;
     private BigDecimal amount;

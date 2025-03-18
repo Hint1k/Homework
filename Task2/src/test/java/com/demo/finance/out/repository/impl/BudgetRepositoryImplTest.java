@@ -1,18 +1,18 @@
-package com.demo.finance.out.repository;
+package com.demo.finance.out.repository.impl;
 
 import com.demo.finance.domain.model.Budget;
-import com.demo.finance.out.repository.impl.BudgetRepositoryImpl;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class BudgetRepositoryImplTest extends AbstractContainerBaseTest {
+class BudgetRepositoryImplTest extends AbstractContainerBaseSetup {
 
     private BudgetRepositoryImpl repository;
 

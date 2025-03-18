@@ -1,7 +1,6 @@
-package com.demo.finance.out.repository;
+package com.demo.finance.out.repository.impl;
 
 import com.demo.finance.domain.model.Goal;
-import com.demo.finance.out.repository.impl.GoalRepositoryImpl;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GoalRepositoryImplTest extends AbstractContainerBaseTest {
+class GoalRepositoryImplTest extends AbstractContainerBaseSetup {
 
     private GoalRepositoryImpl repository;
 
@@ -116,11 +115,11 @@ class GoalRepositoryImplTest extends AbstractContainerBaseTest {
     @Test
     @DisplayName("Find by user and goal ID - Success scenario")
     void testFindByUserIdAndGoalId() {
-        Goal goal = new Goal(null, 5L, "New Laptop", new BigDecimal("2000.00"),
+        Goal goal = new Goal(5L, 3L, "New Laptop", new BigDecimal("2000.00"),
                 new BigDecimal("500.00"), 6, LocalDate.of(2025, 7, 1));
         repository.save(goal);
 
-        List<Goal> savedGoals = repository.findByUserId(5L);
+        List<Goal> savedGoals = repository.findByUserId(3L);
         assertThat(savedGoals).isNotEmpty();
 
         Goal savedGoal = savedGoals.get(0);
@@ -128,7 +127,7 @@ class GoalRepositoryImplTest extends AbstractContainerBaseTest {
 
         assertThat(goalId).isNotNull();
 
-        Optional<Goal> found = repository.findByUserIdAndGoalId(goalId, 5L);
+        Optional<Goal> found = repository.findByUserIdAndGoalId(3L, goalId);
 
         assertThat(found).isPresent();
         assertThat(found.get().getGoalName()).isEqualTo("New Laptop");

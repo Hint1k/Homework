@@ -1,8 +1,7 @@
-package com.demo.finance.out.repository;
+package com.demo.finance.out.repository.impl;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.out.repository.impl.UserRepositoryImpl;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UserRepositoryImplTest extends AbstractContainerBaseTest {
+class UserRepositoryImplTest extends AbstractContainerBaseSetup {
 
     private UserRepositoryImpl repository;
 

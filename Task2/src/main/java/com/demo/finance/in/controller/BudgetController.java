@@ -25,10 +25,9 @@ public class BudgetController {
      *
      * @param userId the ID of the user for whom the budget is to be set
      * @param amount the amount of the budget to be set for the user
-     * @return {@code true} if the budget was successfully set, otherwise {@code false}
      */
-    public boolean setBudget(Long userId, BigDecimal amount) {
-        return budgetService.setMonthlyBudget(userId, amount);
+    public void setBudget(Long userId, BigDecimal amount) {
+        budgetService.setMonthlyBudget(userId, amount);
     }
 
     /**

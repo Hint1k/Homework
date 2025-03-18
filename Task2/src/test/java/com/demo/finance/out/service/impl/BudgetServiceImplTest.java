@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,12 +39,11 @@ class BudgetServiceImplTest {
         BigDecimal limit = new BigDecimal(1000);
         Budget budget = new Budget(userId, limit);
 
-        when(budgetRepository.save(budget)).thenReturn(true);
+        when(budgetRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
-        boolean result = budgetService.setMonthlyBudget(userId, limit);
+        budgetService.setMonthlyBudget(userId, limit);
 
-        assertThat(result).isTrue();
-        verify(budgetRepository).save(budget);
+        verify(budgetRepository, times(1)).save(budget);
     }
 
     @Test
@@ -85,12 +87,11 @@ class BudgetServiceImplTest {
         BigDecimal limit = new BigDecimal(1000);
         Budget budget = new Budget(userId, limit);
 
-        when(budgetRepository.save(budget)).thenReturn(false);
+        when(budgetRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        doThrow(new RuntimeException("Save failed")).when(budgetRepository).save(budget);
 
-        boolean result = budgetService.setMonthlyBudget(userId, limit);
-
-        assertThat(result).isFalse();
-        verify(budgetRepository).save(budget);
+        assertThrows(RuntimeException.class, () -> budgetService.setMonthlyBudget(userId, limit));
+        verify(budgetRepository, times(1)).save(budget);
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.demo.finance.app.config;
 
-import com.demo.finance.out.repository.AbstractContainerBaseTest;
+import com.demo.finance.out.repository.impl.AbstractContainerBaseSetup;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class LiquibaseManagerTest extends AbstractContainerBaseTest {
+class LiquibaseManagerTest extends AbstractContainerBaseSetup {
 
     private static final Logger log = Logger.getLogger(LiquibaseManagerTest.class.getName());
     private static LiquibaseManager liquibaseManager;
