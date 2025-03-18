@@ -135,7 +135,7 @@ public abstract class BaseRepository {
                 return result;
             } catch (SQLException e) {
                 conn.rollback();
-                logError("Transaction failed", e);
+                logError("Transaction operation failed", e);
                 return null;
             }
         } catch (SQLException e) {

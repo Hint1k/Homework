@@ -17,8 +17,7 @@
         </insert>
 
         <!-- Reset sequence to avoid ID conflicts -->
-        <sql>
-            SELECT setval('finance.users_user_id_seq', (SELECT MAX(user_id) FROM finance.users));
-        </sql>
+        <alterSequence sequenceName="users_user_id_seq" schemaName="finance" incrementBy="1" minValue="1"
+                       cycle="false"/>
     </changeSet>
 </databaseChangeLog>

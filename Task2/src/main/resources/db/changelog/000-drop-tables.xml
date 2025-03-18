@@ -11,7 +11,7 @@
             <tableExists tableName="users" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="users" schemaName="finance"/>
-        <sql>DROP SEQUENCE IF EXISTS finance.users_user_id_seq;</sql>
+        <dropSequence sequenceName="finance.users_user_id_seq"/>
     </changeSet>
 
     <!-- Drop transactions table if it exists -->
@@ -20,7 +20,7 @@
             <tableExists tableName="transactions" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="transactions" schemaName="finance"/>
-        <sql>DROP SEQUENCE IF EXISTS finance.transactions_user_id_seq;</sql>
+        <dropSequence sequenceName="finance.transactions_user_id_seq"/>
     </changeSet>
 
     <!-- Drop reports table if it exists -->
@@ -29,7 +29,7 @@
             <tableExists tableName="reports" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="reports" schemaName="finance"/>
-        <sql>DROP SEQUENCE IF EXISTS finance.reports_user_id_seq;</sql>
+        <dropSequence sequenceName="finance.reports_user_id_seq"/>
     </changeSet>
 
     <!-- Drop goals table if it exists -->
@@ -38,7 +38,7 @@
             <tableExists tableName="goals" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="goals" schemaName="finance"/>
-        <sql>DROP SEQUENCE IF EXISTS finance.goals_user_id_seq;</sql>
+        <dropSequence sequenceName="finance.goals_user_id_seq"/>
     </changeSet>
 
     <!-- Drop budgets table if it exists -->
@@ -47,6 +47,6 @@
             <tableExists tableName="budgets" schemaName="finance"/>
         </preConditions>
         <dropTable tableName="budgets" schemaName="finance"/>
-        <sql>DROP SEQUENCE IF EXISTS finance.budgets_user_id_seq;</sql>
+        <dropSequence sequenceName="finance.budgets_user_id_seq"/>
     </changeSet>
 </databaseChangeLog>
