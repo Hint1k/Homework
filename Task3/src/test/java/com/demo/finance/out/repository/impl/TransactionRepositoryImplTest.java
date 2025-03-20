@@ -161,4 +161,34 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
 
         assertThat(transactions).isEmpty();
     }
+
+    @Test
+    @DisplayName("Find filtered transactions - Cover all filter combinations")
+    void testFindFilteredTransactions_AllFilterCombinations() {
+        repository.save(new Transaction(null, 8L, new BigDecimal("150.00"), "Food",
+                LocalDate.of(2025, 3, 5), "Lunch", Type.EXPENSE));
+        repository.save(new Transaction(null, 8L, new BigDecimal("250.00"), "Transport",
+                LocalDate.of(2025, 3, 10), "Uber", Type.EXPENSE));
+        repository.save(new Transaction(null, 8L, new BigDecimal("500.00"), "Freelance",
+                LocalDate.of(2025, 3, 15), "Project", Type.INCOME));
+
+        // Case 1: Filter by userId only (should return all transactions for user 8)
+        List<Transaction> result1 = repository.findFiltered(8L, null, null, null, null);
+        assertThat(result1).hasSize(3);
+
+        // Case 2: Filter by category
+        List<Transaction> result2 = repository.findFiltered(8L, null, null, "Food", null);
+        assertThat(result2).hasSize(1);
+        assertThat(result2.get(0).getCategory()).isEqualTo("Food");
+
+        // Case 3: Filter by type
+        List<Transaction> result3 = repository.findFiltered(8L, null, null, null, Type.INCOME);
+        assertThat(result3).hasSize(1);
+        assertThat(result3.get(0).getType()).isEqualTo(Type.INCOME);
+
+        // Case 4: Filter by date range
+        List<Transaction> result4 = repository.findFiltered(8L, LocalDate.of(2025, 3, 1),
+                LocalDate.of(2025, 3, 10), null, null);
+        assertThat(result4).hasSize(2);
+    }
 }
