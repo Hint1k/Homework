@@ -44,7 +44,7 @@ public class Goal {
         this.userId = userId;
         this.goalName = goalName;
         this.targetAmount = targetAmount;
-        this.savedAmount = new BigDecimal(0);
+        this.savedAmount = BigDecimal.ZERO;
         this.duration = duration;
         this.startTime = LocalDate.now();
     }

@@ -17,10 +17,10 @@ import java.util.Optional;
  */
 public class UserRepositoryImpl extends BaseRepository implements UserRepository {
 
-    private static final String INSERT_SQL = "INSERT INTO finance.users (name, email, password, blocked, role) "
-            + "VALUES (?, ?, ?, ?, ?)";
+    private static final String INSERT_SQL = "INSERT INTO finance.users "
+            + "(name, email, password, blocked, role, version) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String UPDATE_SQL = "UPDATE finance.users SET name = ?, email = ?, password = ?, "
-            + "blocked = ?, role = ? WHERE user_id = ?";
+            + "blocked = ?, role = ?, version = ? WHERE user_id = ?";
     private static final String DELETE_SQL = "DELETE FROM finance.users WHERE user_id = ?";
     private static final String FIND_ALL_SQL = "SELECT * FROM finance.users";
     private static final String FIND_BY_ID_SQL = "SELECT * FROM finance.users WHERE user_id = ?";
@@ -46,7 +46,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
     public boolean update(User user) {
         return updateRecord(UPDATE_SQL, stmt -> {
             setUserParameters(stmt, user);
-            stmt.setLong(6, user.getUserId());
+            stmt.setLong(7, user.getUserId());
         });
     }
 
@@ -71,28 +71,16 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
         return findAllRecordsByCriteria(FIND_ALL_SQL, new ArrayList<>(), this::mapResultSetToUser);
     }
 
-    /**
-     * Retrieves a user record from the database by their ID.
-     *
-     * @param userId the ID of the user to retrieve
-     * @return an {@code Optional} containing the user if found, or an empty {@code Optional} if not found
-     */
     @Override
-    public Optional<User> findById(Long userId) {
+    public User findById(Long userId) {
         return findRecordByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, userId),
-                this::mapResultSetToUser);
+                this::mapResultSetToUser).orElse(null);
     }
 
-    /**
-     * Retrieves a user record from the database by their email address.
-     *
-     * @param email the email address of the user to retrieve
-     * @return an {@code Optional} containing the user if found, or an empty {@code Optional} if not found
-     */
     @Override
-    public Optional<User> findByEmail(String email) {
+    public User findByEmail(String email) {
         return findRecordByCriteria(FIND_BY_EMAIL_SQL, stmt -> stmt.setString(1, email),
-                this::mapResultSetToUser);
+                this::mapResultSetToUser).orElse(null);
     }
 
     /**
@@ -108,6 +96,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
         stmt.setString(3, user.getPassword());
         stmt.setBoolean(4, user.isBlocked());
         stmt.setString(5, user.getRole().getName());
+        stmt.setLong(6, user.getVersion());
     }
 
     /**
@@ -124,7 +113,8 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
                 rs.getString("email"),
                 rs.getString("password"),
                 rs.getBoolean("blocked"),
-                new Role(rs.getString("role"))
+                new Role(rs.getString("role")),
+                rs.getLong("version")
         );
     }
 }

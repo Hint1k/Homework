@@ -24,6 +24,9 @@
                 <constraints nullable="false"/>
             </column>
             <column name="role" type="VARCHAR(50)" defaultValue="user"/>
+            <column name="version" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
         <!-- Transactions Table -->

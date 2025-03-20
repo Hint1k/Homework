@@ -117,4 +117,14 @@ public class GoalServiceImpl implements GoalService {
     public BigDecimal calculateTotalBalance(Long userId, Goal goal) {
         return balanceUtils.calculateBalance(userId, goal);
     }
+
+    @Override
+    public List<Goal> getPaginatedGoals(int offset, int size) {
+        return goalRepository.findPaginatedGoals(offset, size);
+    }
+
+    @Override
+    public int getTotalGoalCount() {
+        return goalRepository.countAllGoals();
+    }
 }

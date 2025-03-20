@@ -41,19 +41,8 @@ public interface UserRepository {
      */
     List<User> findAll();
 
-    /**
-     * Retrieves the {@code User} associated with the specified user ID.
-     *
-     * @param userId the ID of the user to be retrieved
-     * @return an {@code Optional<User>} containing the user if found, or an empty {@code Optional} if not found
-     */
-    Optional<User> findById(Long userId);
 
-    /**
-     * Retrieves the {@code User} associated with the specified email.
-     *
-     * @param email the email of the user to be retrieved
-     * @return an {@code Optional<User>} containing the user if found, or an empty {@code Optional} if not found
-     */
-    Optional<User> findByEmail(String email);
+    User findById(Long userId);
+
+    User findByEmail(String email);
 }

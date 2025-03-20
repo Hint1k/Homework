@@ -1,6 +1,7 @@
 package com.demo.finance.out.service;
 
 import com.demo.finance.domain.model.Role;
+import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.model.User;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public interface AdminService {
     /**
      * Updates the role of a user with the specified user ID.
      *
-     * @param userId the ID of the user whose role needs to be updated
+     * @param userId  the ID of the user whose role needs to be updated
      * @param newRole the new role to assign to the user
      * @return {@code true} if the role was updated successfully, {@code false} if the user was not found
      */
@@ -51,4 +52,8 @@ public interface AdminService {
      * @return {@code true} if the user was successfully deleted, {@code false} if the user was not found
      */
     boolean deleteUser(Long userId);
+
+    List<User> getPaginatedUsers(int offset, int size);
+
+    int getTotalUserCount();
 }

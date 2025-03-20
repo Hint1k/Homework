@@ -130,4 +130,17 @@ public class TransactionServiceImpl implements TransactionService {
                                                      Type type) {
         return transactionRepository.findFiltered(userId, from, to, category, type);
     }
+
+    @Override
+    public List<Transaction> getFilteredTransactionsWithPagination(
+            Long userId, LocalDate fromDate, LocalDate toDate, String category, Type type, int page, int size) {
+        int offset = (page - 1) * size;
+        return transactionRepository.findFilteredWithPagination(userId, fromDate, toDate, category, type, offset, size);
+    }
+
+    @Override
+    public int getTotalFilteredTransactionsCount(Long userId, LocalDate fromDate, LocalDate toDate, String category,
+                                                 Type type) {
+        return transactionRepository.countFilteredTransactions(userId, fromDate, toDate, category, type);
+    }
 }

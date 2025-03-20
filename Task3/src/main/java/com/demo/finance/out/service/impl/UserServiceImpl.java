@@ -26,6 +26,10 @@ public class UserServiceImpl implements UserService {
         this.passwordUtils = passwordUtils;
     }
 
+    public User getUser(Long userId) {
+        return userRepository.findById(userId);
+    }
+
     /**
      * Updates the account details of the user performing the action.
      *
@@ -38,12 +42,17 @@ public class UserServiceImpl implements UserService {
      * @return {@code true} if the account was successfully updated, {@code false} otherwise
      */
     @Override
-    public boolean updateOwnAccount(Long userId, String name, String email, String password, Role role,
+    public boolean updateOwnAccount(Long userId, String name, String email, String password, Role role, Long version,
                                     boolean isPasswordUpdated) {
-        User existingUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        String hashedPassword = isPasswordUpdated ? passwordUtils.hashPassword(password) : existingUser.getPassword();
-        User updatedUser = new User(userId, name, email, hashedPassword, false, role);
-        return userRepository.update(updatedUser);
+        User existingUser = userRepository.findById(userId);
+        if (existingUser != null) {
+            String hashedPassword = isPasswordUpdated ?
+                    passwordUtils.hashPassword(password) : existingUser.getPassword();
+            User updatedUser = new User(userId, name, email, hashedPassword, false, role, version);
+            return userRepository.update(updatedUser);
+        } else {
+            return false;
+        }
     }
 
     /**

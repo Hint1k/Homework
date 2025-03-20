@@ -3,7 +3,6 @@ package com.demo.finance.app;
 import com.demo.finance.app.config.ApplicationConfig;
 import com.demo.finance.app.config.DatabaseConfig;
 import com.demo.finance.app.config.LiquibaseManager;
-import com.demo.finance.in.cli.CliHandler;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

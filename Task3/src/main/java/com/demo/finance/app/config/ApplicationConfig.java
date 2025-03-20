@@ -4,7 +4,6 @@ import com.demo.finance.domain.utils.*;
 import com.demo.finance.domain.utils.impl.BalanceUtilsImpl;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.domain.utils.impl.ValidationUtilsImpl;
-import com.demo.finance.in.cli.CliHandler;
 import com.demo.finance.in.controller.*;
 import com.demo.finance.out.repository.*;
 import com.demo.finance.out.repository.impl.*;

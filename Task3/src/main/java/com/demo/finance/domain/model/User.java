@@ -25,6 +25,7 @@ public class User {
     private String password;
     private boolean blocked;
     private Role role;
+    private Long version;
 
     /**
      * Constructs a new {@code User} object without a user ID.
@@ -36,12 +37,13 @@ public class User {
      * @param blocked  whether the user's account is blocked
      * @param role     the role assigned to the user
      */
-    public User(String name, String email, String password, boolean blocked, Role role) {
+    public User(String name, String email, String password, boolean blocked, Role role, Long version) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.blocked = blocked;
         this.role = role;
+        this.version = version;
     }
 
     /**
@@ -66,7 +68,7 @@ public class User {
         User user = (User) o;
         return blocked == user.blocked && Objects.equals(userId, user.userId) && Objects.equals(name, user.name)
                 && Objects.equals(email, user.email) && Objects.equals(password, user.password)
-                && Objects.equals(role, user.role);
+                && Objects.equals(role, user.role) && Objects.equals(version, user.version);
     }
 
     /**
@@ -77,7 +79,7 @@ public class User {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(userId, name, email, password, blocked, role);
+        return Objects.hash(userId, name, email, password, blocked, role, version);
     }
 
     /**
@@ -89,12 +91,13 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "userId='" + userId + '\'' +
+                "userId=" + userId +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", blocked=" + blocked +
                 ", role=" + role +
+                ", version=" + version +
                 '}';
     }
 }

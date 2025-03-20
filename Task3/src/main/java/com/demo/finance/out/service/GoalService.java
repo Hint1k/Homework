@@ -67,4 +67,20 @@ public interface GoalService {
      * @return the total balance accumulated towards the goal
      */
     BigDecimal calculateTotalBalance(Long userId, Goal goal);
+
+    /**
+     * Retrieves a paginated list of goals.
+     *
+     * @param offset the starting index for pagination
+     * @param size   the number of goals to retrieve
+     * @return a list of paginated goals
+     */
+    List<Goal> getPaginatedGoals(int offset, int size);
+
+    /**
+     * Retrieves the total count of goals in the system.
+     *
+     * @return the total number of goals
+     */
+    int getTotalGoalCount();
 }

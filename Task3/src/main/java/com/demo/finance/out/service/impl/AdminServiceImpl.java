@@ -1,10 +1,13 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Role;
+import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.AdminService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -87,5 +90,15 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public boolean deleteUser(Long userId) {
         return userRepository.delete(userId);
+    }
+
+    @Override
+    public List<User> getPaginatedUsers(int offset, int size) {
+        return userRepository.getPaginatedUsers(offset, size);
+    }
+
+    @Override
+    public int getTotalUserCount() {
+        return userRepository.getTotalUserCount();
     }
 }
