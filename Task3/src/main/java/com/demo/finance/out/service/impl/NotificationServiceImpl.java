@@ -1,5 +1,6 @@
 package com.demo.finance.out.service.impl;
 
+import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.BalanceUtils;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.domain.model.Goal;
@@ -35,12 +36,12 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * Constructs a {@code NotificationServiceImpl} instance with the provided dependencies.
      *
-     * @param budgetRepository        the repository for budget data
-     * @param goalRepository          the repository for goal data
-     * @param transactionRepository   the repository for transaction data
-     * @param userRepository          the repository for user data
-     * @param balanceUtils            utility class for calculating balances
-     * @param emailService            utility class for sending email notifications
+     * @param budgetRepository      the repository for budget data
+     * @param goalRepository        the repository for goal data
+     * @param transactionRepository the repository for transaction data
+     * @param userRepository        the repository for user data
+     * @param balanceUtils          utility class for calculating balances
+     * @param emailService          utility class for sending email notifications
      */
     public NotificationServiceImpl(BudgetRepository budgetRepository, GoalRepository goalRepository,
                                    TransactionRepository transactionRepository, UserRepository userRepository,
@@ -137,15 +138,17 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * Sends a notification via email to the user.
      *
-     * @param userId the ID of the user to receive the notification
+     * @param userId  the ID of the user to receive the notification
      * @param subject the subject of the email
-     * @param body the body content of the email
+     * @param body    the body content of the email
      */
     private void sendNotificationViaEmail(Long userId, String subject, String body) {
-        userRepository.findById(userId).ifPresentOrElse(
-                user -> emailService.sendEmail(user.getEmail(), subject, body),
-                () -> System.out.println("User email not found.")
-        );
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new RuntimeException("User not found.");
+        } else {
+            emailService.sendEmail(user.getEmail(), subject, body);
+        }
     }
 
     /**

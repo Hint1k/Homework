@@ -3,6 +3,7 @@ package com.demo.finance.in.controller;
 import com.demo.finance.domain.dto.GoalDto;
 import com.demo.finance.domain.mapper.GoalMapper;
 import com.demo.finance.domain.model.Goal;
+import com.demo.finance.domain.model.User;
 import com.demo.finance.out.service.GoalService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -58,22 +59,20 @@ public class GoalServlet extends HttpServlet {
                             .write("Invalid pagination parameters. Page and size must be positive integers.");
                     return;
                 }
+                User currentUser = (User) request.getSession().getAttribute("currentUser");
+                if (currentUser == null) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("No user is currently logged in.");
+                    return;
+                }
+                Long userId = currentUser.getUserId();
                 int offset = (page - 1) * size;
-                List<Goal> goals = goalService.getPaginatedGoals(offset, size);
-                int totalGoals = goalService.getTotalGoalCount();
+                List<Goal> goals = goalService.getPaginatedGoals(userId, offset, size);
+                int totalGoals = goalService.getTotalGoalCount(userId);
                 int totalPages = (int) Math.ceil((double) totalGoals / size);
-                List<GoalDto> goalDtos = goals.stream()
-                        .map(GoalMapper.INSTANCE::toDto)
-                        .toList();
-                Map<String, Object> responseMap = Map.of(
-                        "data", goalDtos,
-                        "metadata", Map.of(
-                                "totalItems", totalGoals,
-                                "totalPages", totalPages,
-                                "currentPage", page,
-                                "pageSize", size
-                        )
-                );
+                List<GoalDto> goalDtos = goals.stream().map(GoalMapper.INSTANCE::toDto).toList();
+                Map<String, Object> responseMap = Map.of("data", goalDtos, "metadata", Map.of("totalItems",
+                        totalGoals, "totalPages", totalPages, "currentPage", page, "pageSize", size));
                 response.setStatus(HttpServletResponse.SC_OK);
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString(responseMap));
@@ -164,14 +163,8 @@ public class GoalServlet extends HttpServlet {
                 GoalDto goalDto = objectMapper.readValue(jsonBody.toString(), GoalDto.class);
                 goalDto.setGoalId(goalId);
                 Goal goal = GoalMapper.INSTANCE.toEntity(goalDto);
-                boolean success = goalService.updateGoal(
-                        goal.getGoalId(),
-                        goal.getUserId(),
-                        goal.getGoalName(),
-                        goal.getTargetAmount(),
-                        goal.getDuration()
-                );
-
+                boolean success = goalService.updateGoal(goal.getGoalId(), goal.getUserId(), goal.getGoalName(),
+                        goal.getTargetAmount(), goal.getDuration());
                 if (success) {
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.setContentType("application/json");
@@ -207,7 +200,6 @@ public class GoalServlet extends HttpServlet {
             try {
                 Long goalId = Long.parseLong(pathInfo.substring(1));
                 Long userId = Long.parseLong(request.getParameter("userId"));
-
                 boolean success = goalService.deleteGoal(userId, goalId);
                 if (success) {
                     response.setStatus(HttpServletResponse.SC_OK);

@@ -1,13 +1,18 @@
 package com.demo.finance.out.service.impl;
 
+import com.demo.finance.domain.dto.TransactionDto;
+import com.demo.finance.domain.dto.UserDto;
+import com.demo.finance.domain.mapper.TransactionMapper;
+import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.utils.Type;
+import com.demo.finance.domain.utils.PaginatedResponse;
+import com.demo.finance.domain.utils.ValidatedUser;
+import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.AdminService;
 
-import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -18,39 +23,33 @@ import java.util.List;
 public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
+    private final TransactionRepository transactionRepository;
 
     /**
      * Constructs an {@code AdminServiceImpl} instance with the specified {@code UserRepository}.
      *
      * @param userRepository the repository to interact with user data
      */
-    public AdminServiceImpl(UserRepository userRepository) {
+    public AdminServiceImpl(UserRepository userRepository, TransactionRepository transactionRepository) {
         this.userRepository = userRepository;
+        this.transactionRepository = transactionRepository;
     }
 
-    /**
-     * Retrieves a list of all users from the repository.
-     *
-     * @return a {@code List<User>} containing all users
-     */
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public User getUser(Long userId) {
+        return userRepository.findById(userId);
     }
 
-    /**
-     * Updates the role of a user with the specified user ID.
-     *
-     * @param userId  the ID of the user whose role needs to be updated
-     * @param newRole the new role to assign to the user
-     * @return {@code true} if the role was updated successfully, {@code false} if the user was not found
-     */
     @Override
-    public boolean updateUserRole(Long userId, Role newRole) {
-        return userRepository.findById(userId).map(user -> {
-            user.setRole(newRole);
-            return userRepository.update(user);
-        }).orElse(false);
+    public boolean updateUserRole(ValidatedUser validatedUser) {
+        Long userId = validatedUser.userDto().getUserId();
+        Role newRole = validatedUser.userDto().getRole();
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            return false;
+        }
+        user.setRole(newRole);
+        return userRepository.update(user);
     }
 
     /**
@@ -60,25 +59,14 @@ public class AdminServiceImpl implements AdminService {
      * @return {@code true} if the user was successfully blocked, {@code false} if the user was not found
      */
     @Override
-    public boolean blockUser(Long userId) {
-        return userRepository.findById(userId).map(user -> {
-            user.setBlocked(true);
-            return userRepository.update(user);
-        }).orElse(false);
-    }
-
-    /**
-     * Unblocks the user with the specified user ID.
-     *
-     * @param userId the ID of the user to be unblocked
-     * @return {@code true} if the user was successfully unblocked, {@code false} if the user was not found
-     */
-    @Override
-    public boolean unBlockUser(Long userId) {
-        return userRepository.findById(userId).map(user -> {
-            user.setBlocked(false);
-            return userRepository.update(user);
-        }).orElse(false);
+    public boolean blockOrUnblockUser(Long userId) {
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            return false;
+        }
+        boolean blocked = user.isBlocked();
+        user.setBlocked(!blocked);
+        return userRepository.update(user);
     }
 
     /**
@@ -93,12 +81,21 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<User> getPaginatedUsers(int offset, int size) {
-        return userRepository.getPaginatedUsers(offset, size);
+    public PaginatedResponse<UserDto> getPaginatedUsers(int page, int size) {
+        int offset = (page - 1) * size;
+        List<User> users = userRepository.findAll(offset, size);
+        int totalUsers = userRepository.getTotalUserCount();
+        List<UserDto> dtoList = users.stream().map(UserMapper.INSTANCE::toDto).toList();
+        return new PaginatedResponse<>(dtoList, totalUsers, (int) Math.ceil((double) totalUsers / size), page, size);
     }
 
     @Override
-    public int getTotalUserCount() {
-        return userRepository.getTotalUserCount();
+    public PaginatedResponse<TransactionDto> getPaginatedTransactionsForUser(Long userId, int page, int size) {
+        int offset = (page - 1) * size;
+        List<Transaction> transactions = transactionRepository.findByUserId(userId, offset, size);
+        int totalTransactions = transactionRepository.getTotalTransactionCountForUser(userId);
+        List<TransactionDto> dtoList = transactions.stream().map(TransactionMapper.INSTANCE::toDto).toList();
+        return new PaginatedResponse<>(dtoList, totalTransactions, (int) Math.ceil((double) totalTransactions / size),
+                page, size);
     }
 }

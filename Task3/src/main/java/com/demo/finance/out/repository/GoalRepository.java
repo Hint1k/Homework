@@ -59,4 +59,8 @@ public interface GoalRepository {
      * or an empty {@code Optional} if not found
      */
     Optional<Goal> findByUserIdAndGoalId(Long goalId, Long userId);
+
+    List<Goal> findPaginatedGoals(Long userId, int offset, int size);
+
+    int countAllGoals(Long userId);
 }

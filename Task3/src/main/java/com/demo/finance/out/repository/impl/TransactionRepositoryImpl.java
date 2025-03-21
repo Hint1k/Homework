@@ -26,8 +26,11 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
     private static final String DELETE_SQL = "DELETE FROM finance.transactions WHERE transaction_id = ?";
     private static final String FIND_BY_ID_SQL = "SELECT * FROM finance.transactions WHERE transaction_id = ?";
     private static final String FIND_BY_USER_ID_SQL = "SELECT * FROM finance.transactions WHERE user_id = ?";
+    private static final String FIND_BY_USER_ID_SQL_PAGINATED = "SELECT * FROM finance.transactions WHERE user_id = ? "
+            + "LIMIT ? OFFSET ?";
     private static final String FIND_BY_USER_AND_TRANSACTION_SQL = "SELECT * FROM finance.transactions WHERE "
             + "transaction_id = ? AND user_id = ?";
+    private static final String COUNT_SQL = "SELECT COUNT(*) AS total FROM finance.transactions WHERE user_id = ?";
 
     /**
      * Saves a new transaction record in the database.
@@ -89,6 +92,15 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
         return findAllRecordsByCriteria(FIND_BY_USER_ID_SQL, List.of(userId), this::mapResultSetToTransaction);
     }
 
+    @Override
+    public List<Transaction> findByUserId(Long userId, int offset, int size) {
+        List<Object> params = new ArrayList<>();
+        params.add(userId);
+        params.add(size);
+        params.add(offset);
+        return findAllRecordsByCriteria(FIND_BY_USER_ID_SQL_PAGINATED, params, this::mapResultSetToTransaction);
+    }
+
     /**
      * Retrieves a transaction record from the database by its ID and user ID.
      *
@@ -102,6 +114,16 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
             stmt.setLong(1, transactionId);
             stmt.setLong(2, userId);
         }, this::mapResultSetToTransaction);
+    }
+
+    @Override
+    public int getTotalTransactionCountForUser(Long userId) {
+        return queryDatabase(COUNT_SQL, stmt -> stmt.setLong(1, userId), rs -> {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+            return 0;
+        });
     }
 
     /**
@@ -118,8 +140,32 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
     public List<Transaction> findFiltered(Long userId, LocalDate from, LocalDate to, String category, Type type) {
         String sql = buildFilteredQuery(from, to, category, type);
         List<Object> params = getFilterParameters(userId, from, to, category, type);
-
         return findAllRecordsByCriteria(sql, params, this::mapResultSetToTransaction);
+    }
+
+    @Override
+    public List<Transaction> findFilteredWithPagination(Long userId, LocalDate fromDate, LocalDate toDate,
+                                                        String category, Type type, int page, int size) {
+        String baseSql = buildFilteredQuery(fromDate, toDate, category, type);
+        String paginatedSql = baseSql + " LIMIT ? OFFSET ?";
+        List<Object> params = getFilterParameters(userId, fromDate, toDate, category, type);
+        params.add(size);
+        params.add((page - 1) * size);
+        return findAllRecordsByCriteria(paginatedSql, params, this::mapResultSetToTransaction);
+    }
+
+    @Override
+    public int countFilteredTransactions(Long userId, LocalDate fromDate, LocalDate toDate, String category,
+                                         Type type) {
+        String baseSql = buildFilteredQuery(fromDate, toDate, category, type);
+        List<Object> params = getFilterParameters(userId, fromDate, toDate, category, type);
+        String finalSql = COUNT_SQL + baseSql.substring(FIND_BY_USER_ID_SQL.length());
+        return queryDatabase(finalSql, stmt -> bindParameters(stmt, params), rs -> {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+            return 0;
+        });
     }
 
     /**

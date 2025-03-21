@@ -52,24 +52,33 @@ public interface TransactionRepository {
      */
     List<Transaction> findByUserId(Long userId);
 
+    List<Transaction> findByUserId(Long userId, int offset, int size);
+
     /**
      * Finds Transaction entities associated with a specific user ID, filtered by date range, category, and type.
      *
-     * @param userId the ID of the user
-     * @param from the start date of the filter range (inclusive)
-     * @param to the end date of the filter range (inclusive)
+     * @param userId   the ID of the user
+     * @param from     the start date of the filter range (inclusive)
+     * @param to       the end date of the filter range (inclusive)
      * @param category the category to filter by (optional)
-     * @param type the type of transaction to filter by (optional)
+     * @param type     the type of transaction to filter by (optional)
      * @return a list of Transaction entities matching the filters
      */
     List<Transaction> findFiltered(Long userId, LocalDate from, LocalDate to, String category, Type type);
 
+    List<Transaction> findFilteredWithPagination(Long userId, LocalDate fromDate, LocalDate toDate,
+                                                 String category, Type type, int page, int size);
+
+    int countFilteredTransactions(Long userId, LocalDate fromDate, LocalDate toDate, String category, Type type);
+
     /**
      * Finds a Transaction entity by its ID and associated user ID.
      *
-     * @param userId the ID of the user associated with the transaction
+     * @param userId        the ID of the user associated with the transaction
      * @param transactionId the ID of the transaction
      * @return an Optional containing the Transaction entity if found, otherwise an empty Optional
      */
     Optional<Transaction> findByUserIdAndTransactionId(Long userId, Long transactionId);
+
+    int getTotalTransactionCountForUser(Long userId);
 }

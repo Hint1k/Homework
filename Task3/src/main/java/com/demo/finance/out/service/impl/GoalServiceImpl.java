@@ -119,12 +119,12 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public List<Goal> getPaginatedGoals(int offset, int size) {
-        return goalRepository.findPaginatedGoals(offset, size);
+    public List<Goal> getPaginatedGoals(Long userId, int offset, int size) {
+        return goalRepository.findPaginatedGoals(userId, offset, size);
     }
 
     @Override
-    public int getTotalGoalCount() {
-        return goalRepository.countAllGoals();
+    public int getTotalGoalCount(Long userId) {
+        return goalRepository.countAllGoals(userId);
     }
 }

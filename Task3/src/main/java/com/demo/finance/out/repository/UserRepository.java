@@ -3,7 +3,6 @@ package com.demo.finance.out.repository;
 import com.demo.finance.domain.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * The {@code UserRepository} interface defines the contract for operations related to user data persistence.
@@ -41,6 +40,9 @@ public interface UserRepository {
      */
     List<User> findAll();
 
+    List<User> findAll(int offset, int size);
+
+    int getTotalUserCount();
 
     User findById(Long userId);
 

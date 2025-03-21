@@ -1,10 +1,15 @@
 package com.demo.finance.in.controller;
 
+import com.demo.finance.domain.dto.TransactionDto;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.utils.Mode;
+import com.demo.finance.domain.utils.PaginatedResponse;
+import com.demo.finance.domain.utils.PaginationParams;
+import com.demo.finance.domain.utils.ValidatedUser;
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.out.service.AdminService;
-import com.demo.finance.out.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,85 +19,162 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
-/**
- * The {@code AdminServlet} class handles incoming HTTP requests related to admin functionalities.
- * It provides endpoints for managing users, including viewing all users, updating roles, blocking/unblocking,
- * and deleting users.
- */
 @WebServlet("/api/admin/users/*")
 public class AdminServlet extends HttpServlet {
 
     private final AdminService adminService;
-    private final UserService userService;
     private final ObjectMapper objectMapper;
+    private final ValidationUtils validationUtils;
 
-    /**
-     * Constructs an {@code AdminServlet} with the specified {@code AdminService}.
-     */
-    public AdminServlet(AdminService adminService, UserService userService) {
+    public AdminServlet(AdminService adminService, ValidationUtils validationUtils) {
         this.adminService = adminService;
-        this.userService = userService;
         this.objectMapper = new ObjectMapper();
+        this.validationUtils = validationUtils;
     }
 
-    /**
-     * Handles GET requests to retrieve all users.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
         if ("/".equals(pathInfo)) {
             try {
-                int page = Integer.parseInt(request.getParameter("page") != null
-                        ? request.getParameter("page") : "1");
-                int size = Integer.parseInt(request.getParameter("size") != null
-                        ? request.getParameter("size") : "10");
-                if (page <= 0 || size <= 0) {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter()
-                            .write("Invalid pagination parameters. Page and size must be positive integers.");
-                    return;
-                }
-                int offset = (page - 1) * size;
-                List<User> users = adminService.getPaginatedUsers(offset, size);
-                int totalUsers = adminService.getTotalUserCount();
-                int totalPages = (int) Math.ceil((double) totalUsers / size);
-                List<UserDto> userDtos = users.stream()
-                        .map(UserMapper.INSTANCE::toDto)
-                        .collect(Collectors.toList());
+                String page = request.getParameter("page");
+                String size = request.getParameter("size");
+                PaginationParams params = validationUtils.validatePaginationParams(page, size);
+                PaginatedResponse<UserDto> paginatedResponse = adminService
+                        .getPaginatedUsers(params.page(), params.size());
                 Map<String, Object> responseMap = new HashMap<>();
-                responseMap.put("data", userDtos);
-                responseMap.put("metadata", Map.of(
-                        "totalItems", totalUsers,
-                        "totalPages", totalPages,
-                        "currentPage", page,
-                        "pageSize", size
-                ));
+                responseMap.put("data", paginatedResponse.data());
+                responseMap.put("metadata", Map.of("totalItems", paginatedResponse.totalItems(),
+                        "totalPages", paginatedResponse.totalPages(), "currentPage",
+                        paginatedResponse.currentPage(), "pageSize", paginatedResponse.pageSize()));
                 response.setStatus(HttpServletResponse.SC_OK);
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString(responseMap));
-            } catch (NumberFormatException e) {
+            } catch (IllegalArgumentException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid pagination parameters.");
+                response.setContentType("application/json");
+                response.getWriter().write(objectMapper.writeValueAsString(Map.of("error",
+                        "Invalid pagination parameters", "message", e.getMessage())));
             }
         } else if (pathInfo != null && pathInfo.startsWith("/")) {
             try {
-                Long userId = Long.parseLong(pathInfo.substring(1));
-                User user = userService.getUser(userId);
+                String userId = pathInfo.substring(1);
+                ValidatedUser validatedUser = validationUtils.validateUserJson(userId, Mode.GET, userId);
+                User user = adminService.getUser(validatedUser.userDto().getUserId());
                 if (user != null) {
                     UserDto userDto = UserMapper.INSTANCE.toDto(user);
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(userDto));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.getWriter().write("User not found.");
+                }
+            } catch (IllegalArgumentException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write(e.getMessage());
+            }
+        } else if (pathInfo != null && pathInfo.startsWith("/transactions/")) {
+            try {
+                String userId = pathInfo.substring("/transactions/".length());
+                ValidatedUser validatedUser = validationUtils
+                        .validateUserJson(userId, Mode.GET_USER_TRANSACTIONS, userId);
+                String page = request.getParameter("page");
+                String size = request.getParameter("size");
+                PaginationParams params = validationUtils.validatePaginationParams(page, size);
+                PaginatedResponse<TransactionDto> paginatedResponse = adminService.getPaginatedTransactionsForUser(
+                        validatedUser.userDto().getUserId(), params.page(), params.size());
+                Map<String, Object> responseMap = new HashMap<>();
+                responseMap.put("data", paginatedResponse.data());
+                responseMap.put("metadata", Map.of("totalItems", paginatedResponse.totalItems(),
+                        "totalPages", paginatedResponse.totalPages(),
+                        "currentPage", paginatedResponse.currentPage(),
+                        "pageSize", paginatedResponse.pageSize()
+                ));
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.setContentType("application/json");
+                response.getWriter().write(objectMapper.writeValueAsString(responseMap));
+            } catch (IllegalArgumentException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
+                response.getWriter().write(objectMapper.writeValueAsString(Map.of(
+                        "error", "Invalid request parameters",
+                        "message", e.getMessage()
+                )));
+            }
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write("Endpoint not found.");
+        }
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String pathInfo = request.getPathInfo();
+        if (pathInfo != null && pathInfo.startsWith("/")) {
+            try {
+                String userId = pathInfo.substring(1);
+                String json = readRequestBody(request);
+                ValidatedUser validatedUser = validationUtils.validateUserJson(json, Mode.UPDATE_ROLE, userId);
+                boolean success = adminService.updateUserRole(validatedUser);
+                if (success) {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.setContentType("application/json");
+                    response.getWriter().write(objectMapper.writeValueAsString(validatedUser.userDto()));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().write("Failed to update role.");
+                }
+            } catch (IllegalArgumentException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write(e.getMessage());
+            }
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write("Endpoint not found.");
+        }
+    }
+
+    @Override
+    protected void doPatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String pathInfo = request.getPathInfo();
+        if (pathInfo != null && pathInfo.startsWith("/")) {
+            try {
+                String userId = pathInfo.substring(1);
+                String json = readRequestBody(request);
+                ValidatedUser validatedUser = validationUtils.validateUserJson(json, Mode.BLOCK_UNBLOCK, userId);
+                boolean success = adminService.blockOrUnblockUser(validatedUser.userDto().getUserId());
+                if (success) {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.setContentType("application/json");
+                    response.getWriter().write(objectMapper.writeValueAsString(validatedUser.userDto()));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().write("Failed to block/unblock user.");
+                }
+            } catch (IllegalArgumentException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write(e.getMessage());
+            }
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write("Endpoint not found.");
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String pathInfo = request.getPathInfo();
+        if (pathInfo != null && pathInfo.startsWith("/")) {
+            try {
+                String userId = pathInfo.substring(1);
+                String json = readRequestBody(request);
+                ValidatedUser validatedUser = validationUtils.validateUserJson(json, Mode.DELETE, userId);
+                boolean success = adminService.deleteUser(validatedUser.userDto().getUserId());
+                if (success) {
+                    response.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     response.getWriter().write("User not found.");
@@ -107,134 +189,14 @@ public class AdminServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Handles PUT requests to update a user's role.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String pathInfo = request.getPathInfo();
-        if (pathInfo != null && pathInfo.startsWith("/")) {
-            try {
-                Long userId = Long.parseLong(pathInfo.substring(1));
-                StringBuilder jsonBody = new StringBuilder();
-                String line;
-                try (BufferedReader reader = request.getReader()) {
-                    while ((line = reader.readLine()) != null) {
-                        jsonBody.append(line);
-                    }
-                }
-                UserDto userDto = objectMapper.readValue(jsonBody.toString(), UserDto.class);
-                userDto.setUserId(userId);
-                User user = UserMapper.INSTANCE.toEntity(userDto);
-                boolean success = adminService.updateUserRole(userId, user.getRole());
-                if (success) {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.setContentType("application/json");
-                    response.getWriter().write(objectMapper.writeValueAsString(userDto));
-                } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("Failed to update role.");
-                }
-            } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid user ID.");
-            } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid JSON format.");
+    private String readRequestBody(HttpServletRequest request) throws IOException {
+        StringBuilder jsonBody = new StringBuilder();
+        String line;
+        try (BufferedReader reader = request.getReader()) {
+            while ((line = reader.readLine()) != null) {
+                jsonBody.append(line);
             }
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write("Endpoint not found.");
         }
-    }
-
-    /**
-     * Handles PATCH requests to block or unblock a user.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String pathInfo = request.getPathInfo();
-        if (pathInfo != null && pathInfo.startsWith("/")) {
-            try {
-                Long userId = Long.parseLong(pathInfo.substring(1));
-                StringBuilder jsonBody = new StringBuilder();
-                String line;
-                try (BufferedReader reader = request.getReader()) {
-                    while ((line = reader.readLine()) != null) {
-                        jsonBody.append(line);
-                    }
-                }
-                UserDto userDto = objectMapper.readValue(jsonBody.toString(), UserDto.class);
-                userDto.setUserId(userId);
-                boolean success;
-                if (userDto.isBlocked()) {
-                    success = adminService.blockUser(userId);
-                    if (success) {
-                        response.setStatus(HttpServletResponse.SC_OK);
-                        response.getWriter().write("User blocked successfully.");
-                    } else {
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        response.getWriter().write("Failed to block user.");
-                    }
-                } else {
-                    success = adminService.unBlockUser(userId);
-                    if (success) {
-                        response.setStatus(HttpServletResponse.SC_OK);
-                        response.getWriter().write("User unblocked successfully.");
-                    } else {
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        response.getWriter().write("Failed to unblock user.");
-                    }
-                }
-            } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid user ID.");
-            } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid JSON format.");
-            }
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write("Endpoint not found.");
-        }
-    }
-
-    /**
-     * Handles DELETE requests to delete a user.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String pathInfo = request.getPathInfo();
-        if (pathInfo != null && pathInfo.startsWith("/")) {
-            try {
-                Long userId = Long.parseLong(pathInfo.substring(1));
-                boolean success = adminService.deleteUser(userId);
-                if (success) {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().write("User deleted successfully.");
-                } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("Failed to delete user.");
-                }
-            } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid user ID.");
-            }
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write("Endpoint not found.");
-        }
+        return jsonBody.toString();
     }
 }

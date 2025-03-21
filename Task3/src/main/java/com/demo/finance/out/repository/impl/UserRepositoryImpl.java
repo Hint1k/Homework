@@ -9,7 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Implementation of the {@link UserRepository} interface for managing user-related database operations.
@@ -23,8 +22,10 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
             + "blocked = ?, role = ?, version = ? WHERE user_id = ?";
     private static final String DELETE_SQL = "DELETE FROM finance.users WHERE user_id = ?";
     private static final String FIND_ALL_SQL = "SELECT * FROM finance.users";
+    private static final String FIND_ALL_SQL_PAGINATED = "SELECT * FROM finance.users LIMIT ? OFFSET ?";
     private static final String FIND_BY_ID_SQL = "SELECT * FROM finance.users WHERE user_id = ?";
     private static final String FIND_BY_EMAIL_SQL = "SELECT * FROM finance.users WHERE email = ?";
+    private static final String COUNT_SQL = "SELECT COUNT(*) AS total FROM finance.users";
 
     /**
      * Saves a new user record in the database.
@@ -69,6 +70,24 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
     @Override
     public List<User> findAll() {
         return findAllRecordsByCriteria(FIND_ALL_SQL, new ArrayList<>(), this::mapResultSetToUser);
+    }
+
+    @Override
+    public List<User> findAll(int offset, int size) {
+        List<Object> params = new ArrayList<>();
+        params.add(size);
+        params.add(offset);
+        return findAllRecordsByCriteria(FIND_ALL_SQL_PAGINATED, params, this::mapResultSetToUser);
+    }
+
+    @Override
+    public int getTotalUserCount() {
+        return queryDatabase(COUNT_SQL, stmt -> {}, rs -> {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+            return 0;
+        });
     }
 
     @Override
