@@ -30,12 +30,9 @@ public class TransactionServlet extends HttpServlet {
     private final TransactionService transactionService;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Constructs a {@code TransactionServlet} with the specified {@code TransactionService}.
-     */
-    public TransactionServlet(TransactionService transactionService) {
+    public TransactionServlet(TransactionService transactionService, ObjectMapper objectMapper) {
         this.transactionService = transactionService;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     /**

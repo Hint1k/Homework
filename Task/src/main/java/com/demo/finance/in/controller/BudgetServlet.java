@@ -25,14 +25,9 @@ public class BudgetServlet extends HttpServlet {
     private final BudgetService budgetService;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Constructs a {@code BudgetServlet} with the specified {@code BudgetService}.
-     *
-     * @param budgetService the {@code BudgetService} used for managing budgets
-     */
-    public BudgetServlet(BudgetService budgetService) {
+    public BudgetServlet(BudgetService budgetService, ObjectMapper objectMapper) {
         this.budgetService = budgetService;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     /**

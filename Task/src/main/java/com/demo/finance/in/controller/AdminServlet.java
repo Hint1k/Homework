@@ -28,9 +28,9 @@ public class AdminServlet extends HttpServlet {
     private final ObjectMapper objectMapper;
     private final ValidationUtils validationUtils;
 
-    public AdminServlet(AdminService adminService, ValidationUtils validationUtils) {
+    public AdminServlet(AdminService adminService, ObjectMapper objectMapper, ValidationUtils validationUtils) {
         this.adminService = adminService;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
         this.validationUtils = validationUtils;
     }
 

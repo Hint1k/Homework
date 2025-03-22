@@ -27,14 +27,9 @@ public class GoalServlet extends HttpServlet {
     private final GoalService goalService;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Constructs a {@code GoalServlet} with the specified {@code GoalService}.
-     *
-     * @param goalService the {@code GoalService} used for managing goals
-     */
-    public GoalServlet(GoalService goalService) {
+    public GoalServlet(GoalService goalService, ObjectMapper objectMapper) {
         this.goalService = goalService;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     /**

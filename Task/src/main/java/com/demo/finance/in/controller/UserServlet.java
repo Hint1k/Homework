@@ -4,6 +4,7 @@ import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidatedUser;
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.domain.utils.impl.ValidationUtilsImpl;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
@@ -19,16 +20,18 @@ import java.io.IOException;
 
 @WebServlet("/api/users/*")
 public class UserServlet extends HttpServlet {
+
     private final RegistrationService registrationService;
     private final UserService userService;
-    private final ValidationUtilsImpl validationUtils;
+    private final ValidationUtils validationUtils;
     private final ObjectMapper objectMapper;
 
-    public UserServlet(RegistrationService registrationService, UserService userService) {
+    public UserServlet(RegistrationService registrationService, UserService userService,
+                       ValidationUtils validationUtils, ObjectMapper objectMapper) {
         this.registrationService = registrationService;
         this.userService = userService;
-        this.validationUtils = new ValidationUtilsImpl();
-        this.objectMapper = new ObjectMapper();
+        this.validationUtils = validationUtils;
+        this.objectMapper = objectMapper;
     }
 
     @Override

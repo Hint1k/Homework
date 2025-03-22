@@ -21,14 +21,9 @@ public class NotificationServlet extends HttpServlet {
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Constructs a {@code NotificationServlet} with the specified {@code NotificationService}.
-     *
-     * @param notificationService the {@code NotificationService} used for fetching notifications
-     */
-    public NotificationServlet(NotificationService notificationService) {
+    public NotificationServlet(NotificationService notificationService, ObjectMapper objectMapper) {
         this.notificationService = notificationService;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     /**

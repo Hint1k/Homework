@@ -25,14 +25,9 @@ public class ReportServlet extends HttpServlet {
     private final ReportService reportService;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Constructs a {@code ReportServlet} with the specified {@code ReportService}.
-     *
-     * @param reportService the {@code ReportService} used for generating reports and analyzing data
-     */
-    public ReportServlet(ReportService reportService) {
+    public ReportServlet(ReportService reportService, ObjectMapper objectMapper) {
         this.reportService = reportService;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     /**

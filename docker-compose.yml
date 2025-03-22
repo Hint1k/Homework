@@ -20,7 +20,7 @@ services:
   finance:
     build:
       context: .
-      dockerfile: Task3/Dockerfile
+      dockerfile: Task/Dockerfile
     container_name: hint1k_finance
     env_file:
       - .env

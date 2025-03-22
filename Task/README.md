@@ -64,7 +64,7 @@ Once docker is up and PostgreSQL database is ready run Gradle command:
 ```
 Once the process is completed run Java command:
 ```bash
-java -cp Task2/build/libs/* com.demo.finance.app.TaskTwoMain
+java -cp Task/build/libs/* com.demo.finance.app.TaskMain
 ```
 
 ---
