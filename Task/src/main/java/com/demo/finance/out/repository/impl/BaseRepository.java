@@ -52,13 +52,14 @@ public abstract class BaseRepository {
      * @return {@code true} if the update was successful, otherwise {@code false}
      */
     protected boolean updateRecord(String sql, PreparedStatementSetter setter) {
-        try {
-            executeStatement(sql, setter, null);
-            return true;
-        } catch (Exception e) {
-            logError("Update record failed", e);
-            return false;
-        }
+        return executeWithinTransaction(conn -> {
+            //noinspection SqlSourceToSinkFlow
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                setter.setValues(stmt);
+                int rowsAffected = stmt.executeUpdate();
+                return rowsAffected > 0;
+            }
+        });
     }
 
     /**

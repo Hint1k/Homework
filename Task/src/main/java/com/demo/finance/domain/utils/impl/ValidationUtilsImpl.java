@@ -35,10 +35,36 @@ public class ValidationUtilsImpl implements ValidationUtils {
 
     @Override
     public UserDto validateUserJson(String json, Mode mode, String userId) {
-        Long parsedUserId = parseLong(userId, "Invalid userId format.");
+        Long parsedUserId = parseUserId(userId, mode);
         UserDto userDto = validateUserJson(json, mode);
         userDto.setUserId(parsedUserId);
         return userDto;
+    }
+
+    @Override
+    public UserDto validateUserJson(String json, Mode mode, Long userId) {
+        UserDto userDto = validateUserJson(json, mode);
+        Long userIdJson = userDto.getUserId();
+        if (userIdJson.equals(userId)) {
+            return userDto;
+        } else {
+            throw new ValidationException("A user can't update other users");
+        }
+    }
+
+    @Override
+    public Long parseUserId(String userIdString, Mode mode) {
+        Long userId = parseLong(userIdString, "Invalid userId format");
+        if (userId == 1 && mode == Mode.DELETE) {
+            throw new ValidationException("Default Admin cannot be deleted");
+        }
+        if (userId == 1 && mode == Mode.UPDATE_ROLE) {
+            throw new ValidationException("Default Admin role cannot be changed");
+        }
+        if (userId == 1 && mode == Mode.BLOCK_UNBLOCK) {
+            throw new ValidationException("Default Admin cannot be blocked or unblocked");
+        }
+        return userId;
     }
 
     @Override
@@ -53,6 +79,11 @@ public class ValidationUtilsImpl implements ValidationUtils {
 
     private void validateRequiredFields(JsonNode jsonNode, Mode mode) {
         switch (mode) {
+            case UPDATE:
+                checkField(jsonNode, "userId");
+                checkField(jsonNode, "name");
+                checkField(jsonNode, "email");
+                checkField(jsonNode, "password");
             case REGISTER:
                 checkField(jsonNode, "name");
                 checkField(jsonNode, "email");
@@ -63,18 +94,12 @@ public class ValidationUtilsImpl implements ValidationUtils {
                 checkField(jsonNode, "password");
                 break;
             case UPDATE_ROLE:
-                checkField(jsonNode, "userId");
                 checkField(jsonNode, "role");
                 break;
             case BLOCK_UNBLOCK:
-                checkField(jsonNode, "userId");
                 checkField(jsonNode, "blocked");
                 break;
-            case UPDATE:
-                checkField(jsonNode, "email");
-                break;
-            case GET, DELETE, GET_USER_TRANSACTIONS:
-                checkField(jsonNode, "userId");
+            case GET, DELETE:
                 break;
         }
     }

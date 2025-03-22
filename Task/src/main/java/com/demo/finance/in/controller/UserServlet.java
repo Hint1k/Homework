@@ -139,8 +139,10 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
+            UserDto userDtoInSession = (UserDto) request.getSession().getAttribute("currentUser");
+            Long userId = userDtoInSession.getUserId();
             String json = readRequestBody(request);
-            UserDto userDto = validationUtils.validateUserJson(json, Mode.UPDATE);
+            UserDto userDto = validationUtils.validateUserJson(json, Mode.UPDATE, userId);
             boolean success = userService.updateOwnAccount(userDto);
             if (success) {
                 User updatedUser = userService.getUserByEmail(userDto.getEmail());

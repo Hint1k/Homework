@@ -48,6 +48,7 @@ public class AdminServiceImpl implements AdminService {
             return false;
         }
         user.setRole(newRole);
+        user.setVersion(user.getVersion() + 1);
         return userRepository.update(user);
     }
 
@@ -58,13 +59,13 @@ public class AdminServiceImpl implements AdminService {
      * @return {@code true} if the user was successfully blocked, {@code false} if the user was not found
      */
     @Override
-    public boolean blockOrUnblockUser(Long userId) {
+    public boolean blockOrUnblockUser(Long userId, boolean blocked) {
         User user = userRepository.findById(userId);
         if (user == null) {
             return false;
         }
-        boolean blocked = user.isBlocked();
-        user.setBlocked(!blocked);
+        user.setBlocked(blocked);
+        user.setVersion(user.getVersion() + 1);
         return userRepository.update(user);
     }
 

@@ -16,7 +16,7 @@ public interface AdminService {
 
     boolean updateUserRole(UserDto userDto);
 
-    boolean blockOrUnblockUser(Long userId);
+    boolean blockOrUnblockUser(Long userId, boolean blocked);
 
     /**
      * Deletes the user with the specified user ID.

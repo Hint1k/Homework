@@ -8,5 +8,9 @@ public interface ValidationUtils {
 
     UserDto validateUserJson(String json, Mode mode, String userId);
 
+    UserDto validateUserJson(String json, Mode mode, Long userId);
+
+    Long parseUserId(String userId, Mode mode);
+
     PaginationParams validatePaginationParams(String page, String size);
 }

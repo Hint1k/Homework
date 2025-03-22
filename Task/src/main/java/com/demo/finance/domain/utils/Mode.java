@@ -8,5 +8,4 @@ public enum Mode {
     AUTHENTICATE,
     UPDATE_ROLE,
     BLOCK_UNBLOCK,
-    GET_USER_TRANSACTIONS
 }
