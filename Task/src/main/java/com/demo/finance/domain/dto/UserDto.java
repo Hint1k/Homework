@@ -1,9 +1,6 @@
 package com.demo.finance.domain.dto;
 
 import com.demo.finance.domain.model.Role;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,18 +15,17 @@ import java.util.Objects;
 public class UserDto {
 
     private Long userId;
-
-    @NotBlank(message = "Name is mandatory")
-    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
     private String name;
-
-    @NotBlank(message = "Email is mandatory")
-    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,}$", message = "Invalid email format")
     private String email;
-
+    private String password;
     private boolean blocked;
     private Role role;
     private Long version;
+
+    public static UserDto removePassword(UserDto userDto) {
+        userDto.setPassword(null);
+        return userDto;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -37,15 +33,16 @@ public class UserDto {
         UserDto userDto = (UserDto) o;
         return blocked == userDto.blocked && Objects.equals(userId, userDto.userId)
                 && Objects.equals(name, userDto.name) && Objects.equals(email, userDto.email)
-                && Objects.equals(role, userDto.role) && Objects.equals(version, userDto.version);
+                && Objects.equals(password, userDto.password) && Objects.equals(role, userDto.role)
+                && Objects.equals(version, userDto.version);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, name, email, blocked, role, version);
+        return Objects.hash(userId, name, email, password, blocked, role, version);
     }
 
-    @Override
+    @Override // password is excluded
     public String toString() {
         return "UserDto{" +
                 "userId=" + userId +

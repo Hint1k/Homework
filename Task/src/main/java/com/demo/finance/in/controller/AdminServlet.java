@@ -7,7 +7,6 @@ import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
-import com.demo.finance.domain.utils.ValidatedUser;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.out.service.AdminService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +19,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.demo.finance.domain.dto.UserDto.removePassword;
 
 @WebServlet("/api/admin/users/*")
 public class AdminServlet extends HttpServlet {
@@ -61,13 +62,18 @@ public class AdminServlet extends HttpServlet {
         } else if (pathInfo != null && pathInfo.startsWith("/")) {
             try {
                 String userId = pathInfo.substring(1);
-                ValidatedUser validatedUser = validationUtils.validateUserJson(userId, Mode.GET, userId);
-                User user = adminService.getUser(validatedUser.userDto().getUserId());
+                UserDto userDto = validationUtils.validateUserJson(userId, Mode.GET, userId);
+                User user = adminService.getUser(userDto.getUserId());
                 if (user != null) {
-                    UserDto userDto = UserMapper.INSTANCE.toDto(user);
+                    userDto = UserMapper.INSTANCE.toDto(user);
+                    Map<String, Object> responseBody = Map.of(
+                            "message","Authenticated user details",
+                            "data", UserDto.removePassword(userDto),
+                            "timestamp", java.time.Instant.now().toString()
+                    );
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.setContentType("application/json");
-                    response.getWriter().write(objectMapper.writeValueAsString(userDto));
+                    response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     response.getWriter().write("User not found.");
@@ -79,13 +85,13 @@ public class AdminServlet extends HttpServlet {
         } else if (pathInfo != null && pathInfo.startsWith("/transactions/")) {
             try {
                 String userId = pathInfo.substring("/transactions/".length());
-                ValidatedUser validatedUser = validationUtils
+                UserDto userDto = validationUtils
                         .validateUserJson(userId, Mode.GET_USER_TRANSACTIONS, userId);
                 String page = request.getParameter("page");
                 String size = request.getParameter("size");
                 PaginationParams params = validationUtils.validatePaginationParams(page, size);
                 PaginatedResponse<TransactionDto> paginatedResponse = adminService.getPaginatedTransactionsForUser(
-                        validatedUser.userDto().getUserId(), params.page(), params.size());
+                        userDto.getUserId(), params.page(), params.size());
                 Map<String, Object> responseMap = new HashMap<>();
                 responseMap.put("data", paginatedResponse.data());
                 responseMap.put("metadata", Map.of("totalItems", paginatedResponse.totalItems(),
@@ -117,12 +123,17 @@ public class AdminServlet extends HttpServlet {
             try {
                 String userId = pathInfo.substring(1);
                 String json = readRequestBody(request);
-                ValidatedUser validatedUser = validationUtils.validateUserJson(json, Mode.UPDATE_ROLE, userId);
-                boolean success = adminService.updateUserRole(validatedUser);
+                UserDto userDto = validationUtils.validateUserJson(json, Mode.UPDATE_ROLE, userId);
+                boolean success = adminService.updateUserRole(userDto);
                 if (success) {
+                    Map<String, Object> responseBody = Map.of(
+                            "message","User role updated successfully",
+                            "data", UserDto.removePassword(userDto),
+                            "timestamp", java.time.Instant.now().toString()
+                    );
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.setContentType("application/json");
-                    response.getWriter().write(objectMapper.writeValueAsString(validatedUser.userDto()));
+                    response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().write("Failed to update role.");
@@ -144,12 +155,17 @@ public class AdminServlet extends HttpServlet {
             try {
                 String userId = pathInfo.substring(1);
                 String json = readRequestBody(request);
-                ValidatedUser validatedUser = validationUtils.validateUserJson(json, Mode.BLOCK_UNBLOCK, userId);
-                boolean success = adminService.blockOrUnblockUser(validatedUser.userDto().getUserId());
+                UserDto userDto = validationUtils.validateUserJson(json, Mode.BLOCK_UNBLOCK, userId);
+                boolean success = adminService.blockOrUnblockUser(userDto.getUserId());
                 if (success) {
+                    Map<String, Object> responseBody = Map.of(
+                            "message","User blocked/unblocked status changed successfully",
+                            "data", UserDto.removePassword(userDto),
+                            "timestamp", java.time.Instant.now().toString()
+                    );
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.setContentType("application/json");
-                    response.getWriter().write(objectMapper.writeValueAsString(validatedUser.userDto()));
+                    response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().write("Failed to block/unblock user.");
@@ -171,10 +187,17 @@ public class AdminServlet extends HttpServlet {
             try {
                 String userId = pathInfo.substring(1);
                 String json = readRequestBody(request);
-                ValidatedUser validatedUser = validationUtils.validateUserJson(json, Mode.DELETE, userId);
-                boolean success = adminService.deleteUser(validatedUser.userDto().getUserId());
+                UserDto userDto = validationUtils.validateUserJson(json, Mode.DELETE, userId);
+                boolean success = adminService.deleteUser(userDto.getUserId());
                 if (success) {
+                    Map<String, Object> responseBody = Map.of(
+                            "message", "Account deleted successfully",
+                            "data",userDto.getUserId(),
+                            "timestamp", java.time.Instant.now().toString()
+                    );
                     response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                    response.setContentType("application/json");
+                    response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     response.getWriter().write("User not found.");

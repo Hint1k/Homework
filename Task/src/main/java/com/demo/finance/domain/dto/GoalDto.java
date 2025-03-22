@@ -1,12 +1,9 @@
 package com.demo.finance.domain.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,22 +16,11 @@ import java.util.Objects;
 public class GoalDto {
 
     private Long goalId;
-
-    @NotNull(message = "User ID is mandatory")
     private Long userId;
-
-    @NotBlank(message = "Goal name is mandatory")
     private String goalName;
-
-    @NotNull(message = "Target amount is mandatory")
-    @DecimalMin(value = "0.01", message = "Target amount must be greater than zero")
     private BigDecimal targetAmount;
-
     private BigDecimal savedAmount;
-
-    @NotNull(message = "Duration is mandatory")
     private Integer duration;
-
     private LocalDate startTime;
 
     @Override

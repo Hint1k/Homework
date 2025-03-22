@@ -1,8 +1,8 @@
 package com.demo.finance.out.service.impl;
 
+import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.utils.ValidatedUser;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.RegistrationService;
@@ -18,16 +18,12 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public boolean registerUser(ValidatedUser validatedUser) {
-        if (validatedUser.userDto() == null) {
-            return false;
-        }
-
-        User user = UserMapper.INSTANCE.toEntity(validatedUser.userDto());
+    public boolean registerUser(UserDto userDto) {
+        User user = UserMapper.INSTANCE.toEntity(userDto);
         if (userRepository.findByEmail(user.getEmail()) != null) {
             return false;
         }
-        user.setPassword(passwordUtils.hashPassword(validatedUser.password()));
+        user.setPassword(passwordUtils.hashPassword(userDto.getPassword()));
         user.setBlocked(false);
         user.setRole(new Role("user"));
         user.setVersion(1L);
@@ -36,9 +32,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public boolean authenticate(ValidatedUser validatedUser) {
-        String email = validatedUser.userDto().getEmail();
-        String password = validatedUser.password();
+    public boolean authenticate(UserDto userDto) {
+        String email = userDto.getEmail();
+        String password = userDto.getPassword();
         User user = userRepository.findByEmail(email);
         if (user == null) {
             return false;

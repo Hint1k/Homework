@@ -1,7 +1,7 @@
 package com.demo.finance.domain.utils;
 
 public enum Mode {
-    CREATE,
+    REGISTER,
     UPDATE,
     DELETE,
     GET,

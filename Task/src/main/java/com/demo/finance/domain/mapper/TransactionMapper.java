@@ -5,6 +5,7 @@ import com.demo.finance.domain.dto.TransactionDto;
 import com.demo.finance.domain.model.Transaction;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -30,11 +31,13 @@ public interface TransactionMapper {
     @Mapping(target = "type", source = "type", qualifiedByName = "stringToType")
     Transaction toEntity(TransactionDto transactionDto);
 
+    @Named("typeToString")
     default String typeToString(Type type) {
-        return type.name();
+        return type != null ? type.name() : null;
     }
 
+    @Named("stringToType")
     default Type stringToType(String type) {
-        return Type.valueOf(type);
+        return type != null ? Type.valueOf(type) : null;
     }
 }

@@ -1,7 +1,7 @@
 package com.demo.finance.out.service.impl;
 
+import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.utils.ValidatedUser;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.UserService;
@@ -18,17 +18,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean updateOwnAccount(ValidatedUser validatedUser) {
-        User user = UserMapper.INSTANCE.toEntity(validatedUser.userDto());
-        User existingUser = userRepository.findById(user.getUserId());
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public boolean updateOwnAccount(UserDto userDto) {
+        User user = UserMapper.INSTANCE.toEntity(userDto);
+        User existingUser = userRepository.findByEmail(user.getEmail());
         if (existingUser == null) {
             return false;
         }
-        if (validatedUser.password() != null && !validatedUser.password().equals(existingUser.getPassword())) {
-            user.setPassword(passwordUtils.hashPassword(validatedUser.password()));
+        if (!userDto.getPassword().equals(existingUser.getPassword())) {
+            user.setPassword(passwordUtils.hashPassword(userDto.getPassword()));
         } else {
             user.setPassword(existingUser.getPassword());
         }
+        user.setUserId(existingUser.getUserId());
+        user.setRole(existingUser.getRole());
+        user.setVersion(existingUser.getVersion() + 1);
         return userRepository.update(user);
     }
 

@@ -1,6 +1,6 @@
 package com.demo.finance.out.service;
 
-import com.demo.finance.domain.utils.ValidatedUser;
+import com.demo.finance.domain.dto.UserDto;
 
 /**
  * The {@code RegistrationService} interface defines the methods required for user registration
@@ -8,7 +8,7 @@ import com.demo.finance.domain.utils.ValidatedUser;
  */
 public interface RegistrationService {
 
-    boolean registerUser(ValidatedUser validatedUser);
+    boolean registerUser(UserDto userDtor);
 
-    boolean authenticate(ValidatedUser validatedUser);
+    boolean authenticate(UserDto userDto);
 }

@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(uses = {RoleMapper.class})
 public interface UserMapper {
 
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
@@ -14,6 +14,7 @@ public interface UserMapper {
     @Mapping(target = "userId", source = "userId")
     @Mapping(target = "name", source = "name")
     @Mapping(target = "email", source = "email")
+    @Mapping(target = "password", source = "password")
     @Mapping(target = "blocked", source = "blocked")
     @Mapping(target = "role", source = "role")
     @Mapping(target = "version", source = "version")
@@ -22,6 +23,7 @@ public interface UserMapper {
     @Mapping(target = "userId", source = "userId")
     @Mapping(target = "name", source = "name")
     @Mapping(target = "email", source = "email")
+    @Mapping(target = "password", source = "password")
     @Mapping(target = "blocked", source = "blocked")
     @Mapping(target = "role", source = "role")
     @Mapping(target = "version", source = "version")

@@ -1,7 +1,5 @@
 package com.demo.finance.domain.dto;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,18 +15,9 @@ import java.util.Objects;
 public class ReportDto {
 
     private Long reportId;
-
-    @NotNull(message = "User ID is mandatory")
     private Long userId;
-
-    @NotNull(message = "Total income is mandatory")
-    @DecimalMin(value = "0.0", message = "Total income must be non-negative")
     private BigDecimal totalIncome;
-
-    @NotNull(message = "Total expense is mandatory")
-    @DecimalMin(value = "0.0", message = "Total expense must be non-negative")
     private BigDecimal totalExpense;
-
     private BigDecimal balance;
 
     @Override

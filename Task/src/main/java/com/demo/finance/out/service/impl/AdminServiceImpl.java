@@ -8,7 +8,6 @@ import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.PaginatedResponse;
-import com.demo.finance.domain.utils.ValidatedUser;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.AdminService;
@@ -41,9 +40,9 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public boolean updateUserRole(ValidatedUser validatedUser) {
-        Long userId = validatedUser.userDto().getUserId();
-        Role newRole = validatedUser.userDto().getRole();
+    public boolean updateUserRole(UserDto userDto) {
+        Long userId = userDto.getUserId();
+        Role newRole = userDto.getRole();
         User user = userRepository.findById(userId);
         if (user == null) {
             return false;
@@ -85,7 +84,9 @@ public class AdminServiceImpl implements AdminService {
         int offset = (page - 1) * size;
         List<User> users = userRepository.findAll(offset, size);
         int totalUsers = userRepository.getTotalUserCount();
-        List<UserDto> dtoList = users.stream().map(UserMapper.INSTANCE::toDto).toList();
+        List<UserDto> dtoList = users.stream().map(user ->
+                UserDto.removePassword(UserMapper.INSTANCE.toDto(user))).toList();
+
         return new PaginatedResponse<>(dtoList, totalUsers, (int) Math.ceil((double) totalUsers / size), page, size);
     }
 

@@ -1,8 +1,5 @@
 package com.demo.finance.domain.dto;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,23 +16,11 @@ import java.util.Objects;
 public class TransactionDto {
 
     private Long transactionId;
-
-    @NotNull(message = "User ID is mandatory")
     private Long userId;
-
-    @NotNull(message = "Amount is mandatory")
-    @DecimalMin(value = "0.01", message = "Amount must be greater than zero")
     private BigDecimal amount;
-
-    @NotBlank(message = "Category is mandatory")
     private String category;
-
-    @NotNull(message = "Date is mandatory")
     private LocalDate date;
-
     private String description;
-
-    @NotNull(message = "Type is mandatory")
     private String type;
 
     @Override

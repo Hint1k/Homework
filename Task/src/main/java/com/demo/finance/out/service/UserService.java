@@ -1,7 +1,7 @@
 package com.demo.finance.out.service;
 
+import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.utils.ValidatedUser;
 
 /**
  * The {@code UserService} interface defines the contract for managing user accounts.
@@ -9,7 +9,9 @@ import com.demo.finance.domain.utils.ValidatedUser;
  */
 public interface UserService {
 
-     boolean updateOwnAccount(ValidatedUser validatedUser);
+    User getUserByEmail(String email);
+
+    boolean updateOwnAccount(UserDto userDto);
 
     boolean deleteOwnAccount(Long userId);
 }

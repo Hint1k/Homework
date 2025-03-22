@@ -1,7 +1,10 @@
 package com.demo.finance.app;
 
 import com.demo.finance.app.config.AppConfig;
+import com.demo.finance.in.filter.AuthenticationFilter;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
@@ -15,10 +18,12 @@ public class TaskMain {
         AppConfig appConfig = new AppConfig();
 
         Server server = new Server(8080);
-        ServletContextHandler context = new ServletContextHandler();
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         server.setHandler(context);
+        context.setSessionHandler(new SessionHandler());
 
+        context.addFilter(new FilterHolder(new AuthenticationFilter()), "/api/*", null);
         context.addServlet(new ServletHolder(appConfig.getUserServlet()), "/api/users/*");
         context.addServlet(new ServletHolder(appConfig.getTransactionServlet()), "/api/transactions/*");
         context.addServlet(new ServletHolder(appConfig.getAdminServlet()), "/api/admin/users/*");

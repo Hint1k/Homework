@@ -114,9 +114,7 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
 
     @Override
     public int countAllGoals(Long userId) {
-        return queryDatabase(COUNT_SQL, stmt -> {
-            stmt.setLong(1, userId);
-        }, rs -> {
+        return queryDatabase(COUNT_SQL, stmt -> stmt.setLong(1, userId), rs -> {
             if (rs.next()) {
                 return rs.getInt("total");
             }

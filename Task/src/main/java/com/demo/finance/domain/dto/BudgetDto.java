@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -17,14 +15,8 @@ import java.util.Objects;
 public class BudgetDto {
 
     private Long budgetId;
-
-    @NotNull(message = "User ID is mandatory")
     private Long userId;
-
-    @NotNull(message = "Monthly limit is mandatory")
-    @DecimalMin(value = "0.01", message = "Monthly limit must be greater than zero")
     private BigDecimal monthlyLimit;
-
     private BigDecimal currentExpenses;
 
     @Override

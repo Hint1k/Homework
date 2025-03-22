@@ -4,7 +4,6 @@ import com.demo.finance.domain.dto.TransactionDto;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.PaginatedResponse;
-import com.demo.finance.domain.utils.ValidatedUser;
 
 /**
  * The {@code AdminService} interface defines the contract for managing user-related administrative actions.
@@ -15,7 +14,7 @@ public interface AdminService {
 
     User getUser(Long userId);
 
-    boolean updateUserRole(ValidatedUser validatedUser);
+    boolean updateUserRole(UserDto userDto);
 
     boolean blockOrUnblockUser(Long userId);
 
