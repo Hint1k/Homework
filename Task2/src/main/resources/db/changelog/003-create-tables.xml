@@ -1,0 +1,113 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog/003-create-tables.xml">
+
+    <changeSet id="003-create-tables" author="hint1k">
+        <!-- Users Table -->
+        <createTable tableName="users" schemaName="finance">
+            <column name="user_id" type="BIGINT" defaultValueComputed="nextval('finance.users_user_id_seq')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="blocked" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(50)" defaultValue="user"/>
+        </createTable>
+
+        <!-- Transactions Table -->
+        <createTable tableName="transactions" schemaName="finance">
+            <column name="transaction_id" type="BIGINT"
+                    defaultValueComputed="nextval('finance.transactions_transaction_id_seq')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Reports Table -->
+        <createTable tableName="reports" schemaName="finance">
+            <column name="report_id" type="BIGINT" defaultValueComputed="nextval('finance.reports_report_id_seq')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_income" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_expense" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="balance" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Goals Table -->
+        <createTable tableName="goals" schemaName="finance">
+            <column name="goal_id" type="BIGINT" defaultValueComputed="nextval('finance.goals_goal_id_seq')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="goal_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_amount" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="saved_amount" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="duration" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Budgets Table -->
+        <createTable tableName="budgets" schemaName="finance">
+            <column name="budget_id" type="BIGINT" defaultValueComputed="nextval('finance.budgets_budget_id_seq')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="monthly_limit" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_expenses" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

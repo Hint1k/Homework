@@ -1,5 +1,6 @@
 /.gradle
 .idea
 build
-out
+out/
 *.iml
+!/Task2/src/main/java/com/demo/finance/out/

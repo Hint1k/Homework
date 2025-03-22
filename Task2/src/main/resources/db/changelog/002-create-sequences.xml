@@ -1,0 +1,16 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog/002-create-sequences.xml">
+
+    <changeSet id="002-create-sequences" author="hint1k">
+        <createSequence sequenceName="users_user_id_seq" schemaName="finance" startValue="1" incrementBy="1"/>
+        <createSequence sequenceName="transactions_transaction_id_seq" schemaName="finance" startValue="1"
+                        incrementBy="1"/>
+        <createSequence sequenceName="reports_report_id_seq" schemaName="finance" startValue="1" incrementBy="1"/>
+        <createSequence sequenceName="goals_goal_id_seq" schemaName="finance" startValue="1" incrementBy="1"/>
+        <createSequence sequenceName="budgets_budget_id_seq" schemaName="finance" startValue="1" incrementBy="1"/>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,126 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'jacoco-report-aggregation'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'com.demo'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
+    testImplementation 'org.mockito:mockito-core:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.10.0'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+    compileOnly 'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.5'
+    implementation group: 'org.liquibase', name: 'liquibase-core', version: '4.31.1'
+    testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.20.6'
+    testImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.20.6'
+    testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.20.6'
+}
+
+application {
+    mainClass = 'com.demo.finance.app.TaskTwoMain'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+        resources {
+            srcDirs = ['src/test/resources']
+        }
+    }
+    integrationTest {
+        java {
+            srcDirs = ['src/test/java']
+        }
+        resources {
+            srcDirs = ['src/test/resources']
+        }
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    filter {
+        excludeTestsMatching "com.demo.finance.app.TaskTwoMainTest"
+        excludeTestsMatching "com.demo.finance.app.config.LiquibaseManagerTest"
+        excludeTestsMatching "com.demo.finance.app.config.DataSourceManagerTest"
+        excludeTestsMatching "com.demo.finance.out.repository.BudgetRepositoryImplTest"
+        excludeTestsMatching "com.demo.finance.out.repository.TransactionRepositoryImplTest"
+        excludeTestsMatching "com.demo.finance.out.repository.UserRepositoryImplTest"
+        excludeTestsMatching "com.demo.finance.out.repository.GoalRepositoryImplTest"
+    }
+    maxParallelForks = Runtime.runtime.availableProcessors()
+    finalizedBy jacocoTestReport
+}
+
+tasks.register('integrationTest', Test) {
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching "com.demo.finance.app.TaskTwoMainTest"
+        includeTestsMatching "com.demo.finance.app.config.LiquibaseManagerTest"
+        includeTestsMatching "com.demo.finance.app.config.DataSourceManagerTest"
+        includeTestsMatching "com.demo.finance.out.repository.BudgetRepositoryImplTest"
+        includeTestsMatching "com.demo.finance.out.repository.TransactionRepositoryImplTest"
+        includeTestsMatching "com.demo.finance.out.repository.UserRepositoryImplTest"
+        includeTestsMatching "com.demo.finance.out.repository.GoalRepositoryImplTest"
+    }
+    maxParallelForks = 1
+    forkEvery = 1
+    systemProperty "junit.jupiter.execution.parallel.enabled", "false"
+    finalizedBy jacocoTestReport
+    jacoco {
+        enabled = true
+    }
+}
+
+tasks.named('jacocoTestReport', JacocoReport) {
+    dependsOn tasks.named('test'), tasks.named('integrationTest')
+    executionData.setFrom(fileTree(layout.buildDirectory.dir("jacoco")).include(
+            "test.exec",
+            "integrationTest.exec"
+    ))
+    sourceDirectories.setFrom(files(sourceSets.main.allSource.srcDirs))
+    classDirectories.setFrom(files(sourceSets.main.output))
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+shadowJar {
+    mergeServiceFiles()
+    manifest {
+        attributes 'Main-Class': 'com.demo.finance.app.TaskTwoMain'
+    }
+}
