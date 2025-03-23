@@ -68,7 +68,7 @@ public class AppConfig {
 
         this.adminService = new AdminServiceImpl(userRepository);
         this.budgetService = new BudgetServiceImpl(budgetRepository, transactionRepository);
-        this.goalService = new GoalServiceImpl(goalRepository, balanceUtils);
+        this.goalService = new GoalServiceImpl(goalRepository);
         this.notificationService = new NotificationServiceImpl(budgetRepository,
                 goalRepository, transactionRepository, userRepository, balanceUtils, emailService);
         this.registrationService = new RegistrationServiceImpl(userRepository, passwordUtils);

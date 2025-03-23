@@ -47,15 +47,6 @@ public class User {
     }
 
     /**
-     * Checks if the user has the admin role.
-     *
-     * @return {@code true} if the user's role is "admin", otherwise {@code false}.
-     */
-    public boolean isAdmin() {
-        return role.getName().equalsIgnoreCase("admin");
-    }
-
-    /**
      * Compares this user to another object for equality. Two users are considered equal if
      * their user ID, name, email, password, blocked status, and role are the same.
      *

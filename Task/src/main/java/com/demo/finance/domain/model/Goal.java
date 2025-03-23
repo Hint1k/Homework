@@ -50,16 +50,6 @@ public class Goal {
     }
 
     /**
-     * Checks if the goal has expired based on its duration and the current date.
-     *
-     * @return {@code true} if the goal has expired, otherwise {@code false}.
-     */
-    public boolean isExpired() {
-        LocalDate endDate = startTime.plusMonths(duration);
-        return LocalDate.now().isAfter(endDate);
-    }
-
-    /**
      * Calculates the progress of the goal as a percentage of the target amount.
      *
      * @param totalBalance The total balance of the savings account.

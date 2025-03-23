@@ -13,10 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
-/**
- * The {@code NotificationServlet} class handles incoming HTTP requests related to notifications.
- * It provides endpoints for retrieving budget and goal notifications for users.
- */
 @WebServlet("/api/notifications/*")
 public class NotificationServlet extends HttpServlet {
 

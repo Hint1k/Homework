@@ -18,10 +18,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
 
-/**
- * The {@code BudgetServlet} class handles incoming HTTP requests related to budget management.
- * It provides endpoints for setting and retrieving a user's budget.
- */
 @WebServlet("/api/budgets/*")
 public class BudgetServlet extends HttpServlet {
 

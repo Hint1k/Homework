@@ -43,22 +43,10 @@ public class AuthenticationFilter implements Filter {
         chain.doFilter(request, response);
     }
 
-    /**
-     * Checks if the given URI corresponds to a public endpoint.
-     *
-     * @param requestURI the request URI
-     * @return true if the URI is for a public endpoint, false otherwise
-     */
     private boolean isPublicEndpoint(String requestURI) {
         return requestURI.endsWith("/api/users/registration") || requestURI.endsWith("/api/users/authenticate");
     }
 
-    /**
-     * Checks if the given URI corresponds to an admin-only endpoint.
-     *
-     * @param requestURI the request URI
-     * @return true if the URI is for an admin-only endpoint, false otherwise
-     */
     private boolean isAdminEndpoint(String requestURI) {
         return requestURI.startsWith("/api/admin/users/");
     }

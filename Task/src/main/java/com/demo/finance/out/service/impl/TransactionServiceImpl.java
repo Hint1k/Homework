@@ -10,21 +10,11 @@ import com.demo.finance.out.service.TransactionService;
 import java.util.List;
 import java.util.logging.Logger;
 
-/**
- * The {@code TransactionServiceImpl} class implements the {@link TransactionService} interface.
- * It provides functionality for managing transactions, including creating, updating, deleting,
- * and filtering transactions.
- */
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     protected static final Logger log = Logger.getLogger(TransactionServiceImpl.class.getName());
 
-    /**
-     * Constructor to initialize the service with a {@link TransactionRepository}.
-     *
-     * @param transactionRepository the {@link TransactionRepository} used for transaction data persistence
-     */
     public TransactionServiceImpl(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
     }
@@ -35,23 +25,11 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    /**
-     * Retrieves all transactions associated with a specific user.
-     *
-     * @param userId the ID of the user whose transactions are retrieved
-     * @return a list of {@link Transaction} objects belonging to the user
-     */
     @Override
     public Transaction getTransactionByUserIdAndTransactionId(Long userId, Long transactionId) {
         return transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
     }
 
-    /**
-     * Retrieves a specific transaction by its ID.
-     *
-     * @param transactionId the ID of the transaction to be retrieved
-     * @return the {@link Transaction} object with the specified ID
-     */
     @Override
     public Transaction getTransaction(Long transactionId) {
         return transactionRepository.findById(transactionId);
@@ -71,13 +49,6 @@ public class TransactionServiceImpl implements TransactionService {
         return false;
     }
 
-    /**
-     * Deletes a transaction for a user.
-     *
-     * @param userId        the ID of the user associated with the transaction to be deleted
-     * @param transactionId the ID of the transaction to be deleted
-     * @return {@code true} if the transaction was successfully deleted, {@code false} otherwise
-     */
     @Override
     public boolean deleteTransaction(Long userId, Long transactionId) {
         Transaction transaction = transactionRepository.findByUserIdAndTransactionId(userId, transactionId);

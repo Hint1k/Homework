@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The **Personal Finance Tracker** is a Java-based console application that helps users manage their finances effectively.
+The **Personal Finance Tracker** is a Java-based web application that helps users manage their finances effectively.
 It allows users to track transactions, set budgets, define financial goals, generate reports, and receive notifications.
 
 This README provides installation and usage instructions for the application.
@@ -62,10 +62,6 @@ Once docker is up and PostgreSQL database is ready run Gradle command:
 ```bash
 ./gradlew clean shadowJar 
 ```
-Once the process is completed run Java command:
-```bash
-java -cp Task/build/libs/* com.demo.finance.app.TaskMain
-```
 
 ---
 
@@ -103,7 +99,7 @@ To run tests with coverage using Jacoco
 ## Code Structure
 
 The project follows Clean Architecture principles with key packages:
-- `in.cli` – Handles user input (including controllers).
+- `in.controllers` – Handles user input.
 - `domain.model` – Contains entities.
 - `domain.utils` – Utility classes for validation and date handling.
 - `out.repository` – Manages database storage and retrieval.
@@ -120,3 +116,193 @@ The project follows Clean Architecture principles with key packages:
 - **JUnit 5, Mockito, AssertJ, Testcontainers**
 
 ---
+
+## Application endpoints
+
+### User account actions:
+POST http://localhost:8080/api/users/registration 
+```json 
+{
+"name": "jay",
+"email": "jay@demo.com",
+"password": "123"
+}
+```
+POST http://localhost:8080/api/users/authenticate
+```json 
+{
+"email": "jay@demo.com",
+"password": "123"
+}
+```
+PUT http://localhost:8080/api/users
+```json 
+{
+  "userId": 1,
+  "name": "jay2",
+  "email": "jay2@demo.com",
+  "password": "123"
+}
+```
+GET http://localhost:8080/api/users/me
+```json 
+{ }
+```
+DELETE http://localhost:8080/api/users
+```json 
+{ }
+```
+
+### Admin actions:
+GET http://localhost:8080/api/admin/users/
+```json 
+{
+  "page": 1,
+  "size": 10
+}
+```
+GET http://localhost:8080/api/admin/users/2
+```json 
+{ }
+```
+GET http://localhost:8080/api/admin/users/transactions/2
+```json 
+{
+  "page": 1,
+  "size": 10
+}
+```
+PATCH http://localhost:8080/api/admin/users/role/2
+```json 
+{
+"userId": 2,
+"role": "user"
+}
+```
+PATCH http://localhost:8080/api/admin/users/block/2
+```json 
+{
+  "userId": 2,
+  "blocked": true
+}
+```
+DELETE http://localhost:8080/api/admin/users/2
+```json 
+{ }
+```
+
+### Transaction actions:
+GET http://localhost:8080/api/transactions/
+```json 
+{
+  "page": 1,
+  "size": 10
+}
+```
+GET http://localhost:8080/api/transactions/1
+```json 
+{ }
+```
+POST http://localhost:8080/api/transactions/
+```json 
+{
+  "userId": "10",
+  "amount": "500",
+  "category": "1",
+  "date": "2025-03-23",
+  "description": "1",
+  "type": "EXPENSE"
+}
+```
+PUT http://localhost:8080/api/transactions/1
+```json 
+{
+  "userId": "10",
+  "amount": "750",
+  "category": "2",
+  "description": "2"
+}
+```
+DELETE http://localhost:8080/api/transactions/1
+```json 
+{ }
+```
+
+### Goal actions: 
+GET http://localhost:8080/api/goals/
+```json 
+{
+  "page": 1,
+  "size": 10
+}
+```
+GET http://localhost:8080/api/goals/1
+```json 
+{ }
+```
+POST http://localhost:8080/api/goals/
+```json 
+{
+  "userId": "10",
+  "goalName": "1",
+  "targetAmount": "1500",
+  "duration": "3",
+  "startTime": "2025-01-01"
+}
+```
+PUT http://localhost:8080/api/goals/1
+```json 
+{
+  "userId": "11",
+  "goalName": "2",
+  "targetAmount": "1500",
+  "duration": "3",
+  "startTime": "2025-03-30"
+}
+```
+DELETE http://localhost:8080/api/goals/1
+```json 
+{ }
+```
+
+### Budget actions:
+GET http://localhost:8080/api/budgets/budget
+```json 
+{ }
+```
+POST http://localhost:8080/api/budgets/
+```json 
+{
+  "monthlyLimit": "1500"
+}
+```
+
+### Report actions 
+GET http://localhost:8080/api/reports/report
+```json 
+{ }
+```
+GET http://localhost:8080/api/reports/expenses-by-category
+```json 
+{
+  "fromDate": "2025-01-01",
+  "toDate": "2025-06-30"
+}
+```
+POST http://localhost:8080/api/reports/by-date
+```json 
+{
+  "fromDate": "2025-01-01",
+  "toDate": "2025-06-30"
+}
+```
+
+### Notifications actions
+GET http://localhost:8080/api/notifications/budget
+```json 
+{ }
+```
+GET http://localhost:8080/api/notifications/goal
+```json 
+{ }
+```

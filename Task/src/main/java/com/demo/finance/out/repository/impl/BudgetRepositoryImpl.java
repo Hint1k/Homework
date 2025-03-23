@@ -7,10 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Implementation of the {@link BudgetRepository} interface for managing budget-related database operations.
- * This class provides methods to save, update, delete, and retrieve budget records from the database.
- */
 public class BudgetRepositoryImpl extends BaseRepository implements BudgetRepository {
 
     private static final String INSERT_SQL = "INSERT INTO finance.budgets (user_id, monthly_limit, current_expenses) "
@@ -21,11 +17,6 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
     private static final String FIND_BY_ID_SQL = "SELECT * FROM finance.budgets WHERE budget_id = ?";
     private static final String FIND_BY_USER_ID_SQL = "SELECT * FROM finance.budgets WHERE user_id = ?";
 
-    /**
-     * Saves a new budget record in the database.
-     *
-     * @param budget the budget to be saved
-     */
     @Override
     public boolean save(Budget budget) {
         Long generatedId = insertRecord(INSERT_SQL, stmt -> setBudgetParameters(stmt, budget));
@@ -36,12 +27,6 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
         return false;
     }
 
-    /**
-     * Updates an existing budget record in the database.
-     *
-     * @param budget the budget to be updated
-     * @return {@code true} if the budget was successfully updated, otherwise {@code false}
-     */
     @Override
     public boolean update(Budget budget) {
         return updateRecord(UPDATE_SQL, stmt -> {
@@ -50,61 +35,29 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
         });
     }
 
-    /**
-     * Deletes a budget record from the database by its ID.
-     *
-     * @param budgetId the ID of the budget to delete
-     * @return {@code true} if the budget was successfully deleted, otherwise {@code false}
-     */
     @Override
     public boolean delete(Long budgetId) {
         return updateRecord(DELETE_SQL, stmt -> stmt.setLong(1, budgetId));
     }
 
-    /**
-     * Retrieves a budget record from the database by its ID.
-     *
-     * @param budgetId the ID of the budget to retrieve
-     * @return an {@code Optional} containing the budget if found, or an empty {@code Optional} if not found
-     */
     @Override
     public Budget findById(Long budgetId) {
         return findRecordByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, budgetId),
                 this::mapResultSetToBudget).orElse(null);
     }
 
-    /**
-     * Retrieves a budget record from the database by the user ID.
-     *
-     * @param userId the ID of the user whose budget is to be retrieved
-     * @return an {@code Optional} containing the budget if found, or an empty {@code Optional} if not found
-     */
     @Override
     public Budget findByUserId(Long userId) {
         return findRecordByCriteria(FIND_BY_USER_ID_SQL, stmt -> stmt.setLong(1, userId),
                 this::mapResultSetToBudget).orElse(null);
     }
 
-    /**
-     * Sets the parameters of a prepared statement for inserting or updating a budget record.
-     *
-     * @param stmt   the prepared statement to populate
-     * @param budget the budget object providing the parameter values
-     * @throws SQLException if an SQL error occurs while setting the parameters
-     */
     private void setBudgetParameters(PreparedStatement stmt, Budget budget) throws SQLException {
         stmt.setLong(1, budget.getUserId());
         stmt.setBigDecimal(2, budget.getMonthlyLimit());
         stmt.setBigDecimal(3, budget.getCurrentExpenses());
     }
 
-    /**
-     * Maps a result set row to a {@code Budget} object.
-     *
-     * @param rs the result set containing the budget data
-     * @return a {@code Budget} object populated with the data from the result set
-     * @throws SQLException if an SQL error occurs while accessing the result set
-     */
     private Budget mapResultSetToBudget(ResultSet rs) throws SQLException {
         return new Budget(
                 rs.getLong("budget_id"),

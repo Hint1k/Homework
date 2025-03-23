@@ -3,7 +3,6 @@ package com.demo.finance.out.service.impl;
 import com.demo.finance.domain.dto.GoalDto;
 import com.demo.finance.domain.mapper.GoalMapper;
 import com.demo.finance.domain.model.Goal;
-import com.demo.finance.domain.utils.BalanceUtils;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.out.repository.GoalRepository;
 import com.demo.finance.out.service.GoalService;
@@ -11,25 +10,12 @@ import com.demo.finance.out.service.GoalService;
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * {@code GoalServiceImpl} implements the {@code GoalService} interface.
- * This service provides methods for creating, retrieving, updating, and deleting financial goals.
- * It also calculates the total balance accumulated towards a goal.
- */
 public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
-    private final BalanceUtils balanceUtils;
 
-    /**
-     * Constructs a new {@code GoalServiceImpl} instance with the provided repository and utility classes.
-     *
-     * @param goalRepository the repository for accessing and modifying goals
-     * @param balanceUtils   the utility class for calculating balance towards goals
-     */
-    public GoalServiceImpl(GoalRepository goalRepository, BalanceUtils balanceUtils) {
+    public GoalServiceImpl(GoalRepository goalRepository) {
         this.goalRepository = goalRepository;
-        this.balanceUtils = balanceUtils;
     }
 
     @Override
@@ -39,12 +25,6 @@ public class GoalServiceImpl implements GoalService {
         return goalRepository.save(goal);
     }
 
-    /**
-     * Retrieves a goal by its ID.
-     *
-     * @param goalId the ID of the goal to retrieve
-     * @return the goal if found, or {@code null} if not found
-     */
     @Override
     public Goal getGoal(Long goalId) {
         return goalRepository.findById(goalId);
@@ -53,17 +33,6 @@ public class GoalServiceImpl implements GoalService {
     @Override
     public Goal getGoalByUserIdAndGoalId(Long userId, Long goalId) {
         return goalRepository.findByUserIdAndGoalId(userId, goalId);
-    }
-
-    /**
-     * Retrieves all goals associated with a user.
-     *
-     * @param userId the ID of the user whose goals are being retrieved
-     * @return a list of goals associated with the user
-     */
-    @Override
-    public List<Goal> getGoalsByUserId(Long userId) {
-        return goalRepository.findByUserId(userId);
     }
 
     @Override
@@ -80,13 +49,6 @@ public class GoalServiceImpl implements GoalService {
         return false;
     }
 
-    /**
-     * Deletes a goal by its ID.
-     *
-     * @param userId the ID of the user who owns the goal
-     * @param goalId the ID of the goal to delete
-     * @return {@code true} if the goal was successfully deleted, {@code false} otherwise
-     */
     @Override
     public boolean deleteGoal(Long userId, Long goalId) {
         Goal goal = goalRepository.findByUserIdAndGoalId(userId, goalId);
@@ -94,28 +56,6 @@ public class GoalServiceImpl implements GoalService {
             return goalRepository.delete(goalId);
         }
         return false;
-    }
-
-    /**
-     * Calculates the total balance accumulated towards a user's goal.
-     *
-     * @param userId the ID of the user whose goal balance is being calculated
-     * @param goal   the goal for which the balance is being calculated
-     * @return the total balance accumulated towards the goal
-     */
-    @Override
-    public BigDecimal calculateTotalBalance(Long userId, Goal goal) {
-        return balanceUtils.calculateBalance(userId, goal);
-    }
-
-    @Override
-    public List<Goal> getPaginatedGoals(Long userId, int offset, int size) {
-        return goalRepository.findPaginatedGoals(userId, offset, size);
-    }
-
-    @Override
-    public int getTotalGoalCount(Long userId) {
-        return goalRepository.getTotalGoalCountForUser(userId);
     }
 
     @Override

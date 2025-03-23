@@ -22,10 +22,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
 
-/**
- * The {@code ReportServlet} class handles incoming HTTP requests related to report generation and analysis.
- * It provides endpoints for generating user reports and analyzing expenses by category.
- */
 @WebServlet("/api/reports/*")
 public class ReportServlet extends HttpServlet {
 

@@ -12,32 +12,15 @@ import java.util.Map;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
-/**
- * {@code BudgetServiceImpl} implements the {@code BudgetService} interface and provides the actual business logic
- * for managing a user's budget, including setting a monthly budget, calculating expenses, and generating a formatted
- * string representation of the budget.
- */
 public class BudgetServiceImpl implements BudgetService {
     private final BudgetRepository budgetRepository;
     private final TransactionRepository transactionRepository;
 
-    /**
-     * Constructs a new instance of {@code BudgetServiceImpl}.
-     *
-     * @param budgetRepository      the repository responsible for persisting and retrieving budget data
-     * @param transactionRepository the repository responsible for handling transaction data
-     */
     public BudgetServiceImpl(BudgetRepository budgetRepository, TransactionRepository transactionRepository) {
         this.budgetRepository = budgetRepository;
         this.transactionRepository = transactionRepository;
     }
 
-    /**
-     * Sets the monthly budget for a user.
-     *
-     * @param userId the ID of the user to set the budget for
-     * @param limit  the budget limit for the month
-     */
     @Override
     public Budget setMonthlyBudget(Long userId, BigDecimal limit) {
         Budget existingBudget = budgetRepository.findByUserId(userId);
@@ -55,24 +38,11 @@ public class BudgetServiceImpl implements BudgetService {
         return null;
     }
 
-    /**
-     * Retrieves the current budget for a user.
-     *
-     * @param userId the ID of the user whose budget is to be retrieved
-     * @return an {@code Optional<Budget>} containing the user's budget, or an empty optional if no budget is set
-     */
     @Override
     public Budget getBudget(Long userId) {
         return budgetRepository.findByUserId(userId);
     }
 
-    /**
-     * Calculates the total expenses for a user for a given month.
-     *
-     * @param userId       the ID of the user whose expenses are to be calculated
-     * @param currentMonth the month for which the expenses are to be calculated
-     * @return the total expenses for the specified month
-     */
     @Override
     public BigDecimal calculateExpensesForMonth(Long userId, YearMonth currentMonth) {
         LocalDate startOfMonth = currentMonth.atDay(1);
@@ -103,5 +73,4 @@ public class BudgetServiceImpl implements BudgetService {
                 "budgetData", budgetData
         );
     }
-
 }
