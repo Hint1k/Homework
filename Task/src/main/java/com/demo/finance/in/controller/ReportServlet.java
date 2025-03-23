@@ -22,6 +22,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
 
+/**
+ * The {@code ReportServlet} class is a servlet that handles HTTP requests related to report operations,
+ * such as generating reports by date, analyzing expenses by category, and retrieving general user reports.
+ * It validates incoming JSON data, interacts with services for business logic, and returns appropriate responses.
+ */
 @WebServlet("/api/reports/*")
 public class ReportServlet extends HttpServlet {
 
@@ -29,6 +34,13 @@ public class ReportServlet extends HttpServlet {
     private final ObjectMapper objectMapper;
     private final ValidationUtils validationUtils;
 
+    /**
+     * Constructs a new instance of {@code ReportServlet} with the required dependencies.
+     *
+     * @param reportService     the service responsible for report-related operations
+     * @param objectMapper      the object mapper for JSON serialization and deserialization
+     * @param validationUtils   the utility for validating incoming JSON data
+     */
     public ReportServlet(ReportService reportService, ObjectMapper objectMapper, ValidationUtils validationUtils) {
         this.reportService = reportService;
         this.objectMapper = objectMapper;
@@ -36,6 +48,13 @@ public class ReportServlet extends HttpServlet {
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
+    /**
+     * Handles POST requests for generating reports by a specified date range.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -73,6 +92,13 @@ public class ReportServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles GET requests for retrieving expenses by category or generating a general user report.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -134,6 +160,13 @@ public class ReportServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Reads and returns the body of the HTTP request as a JSON string.
+     *
+     * @param request the HTTP servlet request
+     * @return the JSON string from the request body
+     * @throws IOException if an I/O error occurs while reading the request body
+     */
     private String readRequestBody(HttpServletRequest request) throws IOException {
         StringBuilder json = new StringBuilder();
         try (BufferedReader reader = request.getReader()) {
@@ -145,6 +178,14 @@ public class ReportServlet extends HttpServlet {
         return json.toString();
     }
 
+    /**
+     * Sends an error response with the specified status code and error message.
+     *
+     * @param response     the HTTP servlet response
+     * @param statusCode   the HTTP status code to set in the response
+     * @param errorMessage the error message to include in the response body
+     * @throws IOException if an I/O error occurs while writing the response
+     */
     private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
             throws IOException {
         response.setStatus(statusCode);

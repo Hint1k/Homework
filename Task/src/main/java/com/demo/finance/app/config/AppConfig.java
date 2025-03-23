@@ -14,6 +14,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * The {@code AppConfig} class serves as the central configuration class for the application.
+ * It initializes and wires all dependencies, including repositories, services, utilities, and servlets,
+ * ensuring that the application components are properly instantiated and ready for use.
+ */
 @Setter
 @Getter
 public class AppConfig {
@@ -49,6 +54,11 @@ public class AppConfig {
     private final NotificationServlet notificationServlet;
     private final ReportServlet reportServlet;
 
+    /**
+     * Constructs a new instance of {@code AppConfig}, initializing all required components and dependencies.
+     * This includes setting up database configurations, running migrations, and wiring repositories, services,
+     * utilities, and servlets to ensure the application is fully configured and operational.
+     */
     public AppConfig() {
         this.databaseConfig = DatabaseConfig.getInstance();
         this.liquibaseManager = new LiquibaseManager(databaseConfig);

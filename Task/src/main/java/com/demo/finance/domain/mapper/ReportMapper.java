@@ -6,11 +6,26 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+/**
+ * The {@code ReportMapper} interface defines methods for mapping between {@link Report} entities
+ * and {@link ReportDto} data transfer objects using MapStruct. It provides bidirectional conversion
+ * capabilities to facilitate the transformation of report-related data between the application's
+ * persistence layer and its API layer.
+ */
 @Mapper
 public interface ReportMapper {
 
+    /**
+     * The singleton instance of the {@code ReportMapper}, initialized by MapStruct.
+     */
     ReportMapper INSTANCE = Mappers.getMapper(ReportMapper.class);
 
+    /**
+     * Converts a {@link Report} entity into a {@link ReportDto} data transfer object.
+     *
+     * @param report the {@link Report} entity to map
+     * @return the corresponding {@link ReportDto} object
+     */
     @Mapping(target = "reportId", source = "reportId")
     @Mapping(target = "userId", source = "userId")
     @Mapping(target = "totalIncome", source = "totalIncome")
@@ -18,6 +33,12 @@ public interface ReportMapper {
     @Mapping(target = "balance", source = "balance")
     ReportDto toDto(Report report);
 
+    /**
+     * Converts a {@link ReportDto} data transfer object into a {@link Report} entity.
+     *
+     * @param reportDto the {@link ReportDto} object to map
+     * @return the corresponding {@link Report} entity
+     */
     @Mapping(target = "reportId", source = "reportId")
     @Mapping(target = "userId", source = "userId")
     @Mapping(target = "totalIncome", source = "totalIncome")

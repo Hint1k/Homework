@@ -23,6 +23,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The {@code GoalServlet} class is a servlet that handles HTTP requests related to goal operations,
+ * such as creating, retrieving, updating, and deleting goals. It validates incoming JSON data,
+ * interacts with services for business logic, and returns appropriate responses.
+ */
 @WebServlet("/api/goals/*")
 public class GoalServlet extends HttpServlet {
 
@@ -30,6 +35,13 @@ public class GoalServlet extends HttpServlet {
     private final ObjectMapper objectMapper;
     private final ValidationUtils validationUtils;
 
+    /**
+     * Constructs a new instance of {@code GoalServlet} with the required dependencies.
+     *
+     * @param goalService       the service responsible for goal-related operations
+     * @param objectMapper      the object mapper for JSON serialization and deserialization
+     * @param validationUtils   the utility for validating incoming JSON data
+     */
     public GoalServlet(GoalService goalService, ObjectMapper objectMapper,
                        ValidationUtils validationUtils) {
         this.goalService = goalService;
@@ -38,6 +50,13 @@ public class GoalServlet extends HttpServlet {
         this.validationUtils = validationUtils;
     }
 
+    /**
+     * Handles POST requests for creating a new goal.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -77,6 +96,13 @@ public class GoalServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles GET requests for retrieving paginated goals or a specific goal by ID.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -138,6 +164,13 @@ public class GoalServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles PUT requests for updating an existing goal.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -182,6 +215,13 @@ public class GoalServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles DELETE requests for deleting a goal by its ID.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -213,6 +253,13 @@ public class GoalServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Reads and returns the body of the HTTP request as a JSON string.
+     *
+     * @param request the HTTP servlet request
+     * @return the JSON string from the request body
+     * @throws IOException if an I/O error occurs while reading the request body
+     */
     private String readRequestBody(HttpServletRequest request) throws IOException {
         StringBuilder json = new StringBuilder();
         try (BufferedReader reader = request.getReader()) {
@@ -224,6 +271,14 @@ public class GoalServlet extends HttpServlet {
         return json.toString();
     }
 
+    /**
+     * Sends an error response with the specified status code and error message.
+     *
+     * @param response     the HTTP servlet response
+     * @param statusCode   the HTTP status code to set in the response
+     * @param errorMessage the error message to include in the response body
+     * @throws IOException if an I/O error occurs while writing the response
+     */
     private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
             throws IOException {
         response.setStatus(statusCode);

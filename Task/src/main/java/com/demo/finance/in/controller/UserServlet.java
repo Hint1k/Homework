@@ -20,6 +20,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * The {@code UserServlet} class is a servlet that handles HTTP requests related to user operations,
+ * such as registration, authentication, account updates, and deletion. It validates incoming JSON data,
+ * interacts with services for business logic, and returns appropriate responses.
+ */
 @WebServlet("/api/users/*")
 public class UserServlet extends HttpServlet {
 
@@ -28,6 +33,14 @@ public class UserServlet extends HttpServlet {
     private final ValidationUtils validationUtils;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Constructs a new instance of {@code UserServlet} with the required dependencies.
+     *
+     * @param registrationService the service responsible for user registration and authentication
+     * @param userService          the service responsible for user-related operations
+     * @param validationUtils      the utility for validating incoming JSON data
+     * @param objectMapper         the object mapper for JSON serialization and deserialization
+     */
     public UserServlet(RegistrationService registrationService, UserService userService,
                        ValidationUtils validationUtils, ObjectMapper objectMapper) {
         this.registrationService = registrationService;
@@ -37,6 +50,13 @@ public class UserServlet extends HttpServlet {
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
+    /**
+     * Handles POST requests for user registration and authentication.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -104,6 +124,13 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles GET requests to retrieve the currently authenticated user's details.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -127,6 +154,13 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles PUT requests for updating the authenticated user's account details.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
@@ -164,6 +198,13 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles DELETE requests for deleting the authenticated user's account.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
@@ -191,6 +232,13 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Reads and returns the body of the HTTP request as a JSON string.
+     *
+     * @param request the HTTP servlet request
+     * @return the JSON string from the request body
+     * @throws IOException if an I/O error occurs while reading the request body
+     */
     private String readRequestBody(HttpServletRequest request) throws IOException {
         StringBuilder json = new StringBuilder();
         try (BufferedReader reader = request.getReader()) {
@@ -202,6 +250,14 @@ public class UserServlet extends HttpServlet {
         return json.toString();
     }
 
+    /**
+     * Sends an error response with the specified status code and error message.
+     *
+     * @param response     the HTTP servlet response
+     * @param statusCode   the HTTP status code to set in the response
+     * @param errorMessage the error message to include in the response body
+     * @throws IOException if an I/O error occurs while writing the response
+     */
     private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
             throws IOException {
         response.setStatus(statusCode);

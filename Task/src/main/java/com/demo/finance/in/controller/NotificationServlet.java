@@ -13,18 +13,36 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * The {@code NotificationServlet} class is a servlet that handles HTTP requests related to fetching
+ * budget and goal notifications for users. It interacts with the notification service to retrieve
+ * relevant notifications and returns appropriate responses.
+ */
 @WebServlet("/api/notifications/*")
 public class NotificationServlet extends HttpServlet {
 
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Constructs a new instance of {@code NotificationServlet} with the required dependencies.
+     *
+     * @param notificationService the service responsible for fetching notifications
+     * @param objectMapper        the object mapper for JSON serialization and deserialization
+     */
     public NotificationServlet(NotificationService notificationService, ObjectMapper objectMapper) {
         this.notificationService = notificationService;
         this.objectMapper = objectMapper;
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
+    /**
+     * Handles GET requests for retrieving budget or goal notifications for the authenticated user.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -71,6 +89,14 @@ public class NotificationServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Sends an error response with the specified status code and error message.
+     *
+     * @param response     the HTTP servlet response
+     * @param statusCode   the HTTP status code to set in the response
+     * @param errorMessage the error message to include in the response body
+     * @throws IOException if an I/O error occurs while writing the response
+     */
     private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
             throws IOException {
         response.setStatus(statusCode);

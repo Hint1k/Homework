@@ -25,6 +25,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The {@code AdminServlet} class is a servlet that handles HTTP requests related to admin operations,
+ * such as retrieving paginated user lists, fetching user details, blocking/unblocking users, updating user roles,
+ * and deleting users. It validates incoming JSON data, interacts with services for business logic,
+ * and returns appropriate responses.
+ */
 @WebServlet("/api/admin/users/*")
 public class AdminServlet extends HttpServlet {
 
@@ -34,6 +40,15 @@ public class AdminServlet extends HttpServlet {
     private final ObjectMapper objectMapper;
     private final ValidationUtils validationUtils;
 
+    /**
+     * Constructs a new instance of {@code AdminServlet} with the required dependencies.
+     *
+     * @param adminService       the service responsible for admin-specific operations
+     * @param userService         the service responsible for user-related operations
+     * @param transactionService  the service responsible for transaction-related operations
+     * @param objectMapper        the object mapper for JSON serialization and deserialization
+     * @param validationUtils     the utility for validating incoming JSON data
+     */
     public AdminServlet(AdminService adminService, UserService userService, TransactionService transactionService,
                         ObjectMapper objectMapper, ValidationUtils validationUtils) {
         this.adminService = adminService;
@@ -44,6 +59,13 @@ public class AdminServlet extends HttpServlet {
         this.validationUtils = validationUtils;
     }
 
+    /**
+     * Handles GET requests for retrieving paginated user lists, user details, or paginated transactions for a specific user.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -128,6 +150,13 @@ public class AdminServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles PATCH requests for blocking/unblocking users or updating user roles.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doPatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -180,6 +209,13 @@ public class AdminServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles DELETE requests for deleting a user by their ID.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -210,6 +246,14 @@ public class AdminServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Overrides the default service method to handle PATCH requests due to Jetty's lack of native PATCH support.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException      if an I/O error occurs during request processing
+     * @throws ServletException if a servlet-specific error occurs
+     */
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -220,6 +264,13 @@ public class AdminServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Reads and returns the body of the HTTP request as a JSON string.
+     *
+     * @param request the HTTP servlet request
+     * @return the JSON string from the request body
+     * @throws IOException if an I/O error occurs while reading the request body
+     */
     private String readRequestBody(HttpServletRequest request) throws IOException {
         StringBuilder jsonBody = new StringBuilder();
         String line;
@@ -231,6 +282,14 @@ public class AdminServlet extends HttpServlet {
         return jsonBody.toString();
     }
 
+    /**
+     * Sends an error response with the specified status code and error message.
+     *
+     * @param response     the HTTP servlet response
+     * @param statusCode   the HTTP status code to set in the response
+     * @param errorMessage the error message to include in the response body
+     * @throws IOException if an I/O error occurs while writing the response
+     */
     private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
             throws IOException {
         response.setStatus(statusCode);

@@ -23,6 +23,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The {@code TransactionServlet} class is a servlet that handles HTTP requests related to transaction operations,
+ * such as creating, retrieving, updating, and deleting transactions. It validates incoming JSON data,
+ * interacts with services for business logic, and returns appropriate responses.
+ */
 @WebServlet("/api/transactions/*")
 public class TransactionServlet extends HttpServlet {
 
@@ -30,6 +35,13 @@ public class TransactionServlet extends HttpServlet {
     private final ObjectMapper objectMapper;
     private final ValidationUtils validationUtils;
 
+    /**
+     * Constructs a new instance of {@code TransactionServlet} with the required dependencies.
+     *
+     * @param transactionService the service responsible for transaction-related operations
+     * @param objectMapper       the object mapper for JSON serialization and deserialization
+     * @param validationUtils    the utility for validating incoming JSON data
+     */
     public TransactionServlet(TransactionService transactionService, ObjectMapper objectMapper,
                               ValidationUtils validationUtils) {
         this.transactionService = transactionService;
@@ -38,6 +50,13 @@ public class TransactionServlet extends HttpServlet {
         this.validationUtils = validationUtils;
     }
 
+    /**
+     * Handles POST requests for creating a new transaction.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -77,6 +96,13 @@ public class TransactionServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles GET requests for retrieving paginated transactions or a specific transaction by ID.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -139,6 +165,13 @@ public class TransactionServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles PUT requests for updating an existing transaction.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -184,6 +217,13 @@ public class TransactionServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles DELETE requests for deleting a transaction by its ID.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -215,6 +255,13 @@ public class TransactionServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Reads and returns the body of the HTTP request as a JSON string.
+     *
+     * @param request the HTTP servlet request
+     * @return the JSON string from the request body
+     * @throws IOException if an I/O error occurs while reading the request body
+     */
     private String readRequestBody(HttpServletRequest request) throws IOException {
         StringBuilder json = new StringBuilder();
         try (BufferedReader reader = request.getReader()) {
@@ -226,6 +273,14 @@ public class TransactionServlet extends HttpServlet {
         return json.toString();
     }
 
+    /**
+     * Sends an error response with the specified status code and error message.
+     *
+     * @param response     the HTTP servlet response
+     * @param statusCode   the HTTP status code to set in the response
+     * @param errorMessage the error message to include in the response body
+     * @throws IOException if an I/O error occurs while writing the response
+     */
     private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
             throws IOException {
         response.setStatus(statusCode);

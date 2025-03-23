@@ -28,14 +28,15 @@ public class User {
     private Long version;
 
     /**
-     * Constructs a new {@code User} object without a user ID.
-     * This constructor is typically used when creating a new user that has not yet been persisted.
+     * Constructs a new {@code User} object with the specified details. This constructor is used to create
+     * a user without an initially assigned user ID, typically before persisting the user to the database.
      *
      * @param name     the name of the user
      * @param email    the email address of the user
      * @param password the password of the user
-     * @param blocked  whether the user's account is blocked
-     * @param role     the role assigned to the user
+     * @param blocked  the blocked status of the user (true if blocked, false otherwise)
+     * @param role     the role of the user within the system
+     * @param version  the version of the user record for optimistic locking
      */
     public User(String name, String email, String password, boolean blocked, Role role, Long version) {
         this.name = name;
@@ -48,7 +49,7 @@ public class User {
 
     /**
      * Compares this user to another object for equality. Two users are considered equal if
-     * their user ID, name, email, password, blocked status, and role are the same.
+     * their user ID, name, email, password, blocked status, role and version are the same.
      *
      * @param o The object to compare to.
      * @return {@code true} if this user is equal to the provided object, otherwise {@code false}.
@@ -64,7 +65,7 @@ public class User {
 
     /**
      * Generates a hash code for this user. The hash code is based on the user ID, name, email,
-     * password, blocked status, and role.
+     * password, blocked status, role and version.
      *
      * @return A hash code for this user.
      */
@@ -75,7 +76,7 @@ public class User {
 
     /**
      * Returns a string representation of the user, including the user ID, name, email, password,
-     * blocked status, and role.
+     * blocked status, role and version.
      *
      * @return A string representation of the user.
      */

@@ -18,6 +18,11 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * The {@code NotificationServiceImpl} class implements the {@link NotificationService} interface
+ * and provides concrete implementations for fetching budget and goal notifications.
+ * It interacts with various repositories and utilities to generate and send notifications to users.
+ */
 public class NotificationServiceImpl implements NotificationService {
 
     private final BudgetRepository budgetRepository;
@@ -27,6 +32,16 @@ public class NotificationServiceImpl implements NotificationService {
     private final BalanceUtils balanceUtils;
     private final EmailService emailService;
 
+    /**
+     * Constructs a new instance of {@code NotificationServiceImpl} with the provided repositories, utilities, and services.
+     *
+     * @param budgetRepository      the repository used to interact with budget data in the database
+     * @param goalRepository        the repository used to interact with goal data in the database
+     * @param transactionRepository the repository used to interact with transaction data in the database
+     * @param userRepository        the repository used to interact with user data in the database
+     * @param balanceUtils          the utility class used for balance calculations
+     * @param emailService          the service used to send emails to users
+     */
     public NotificationServiceImpl(BudgetRepository budgetRepository, GoalRepository goalRepository,
                                    TransactionRepository transactionRepository, UserRepository userRepository,
                                    BalanceUtils balanceUtils, EmailService emailService) {
@@ -38,6 +53,12 @@ public class NotificationServiceImpl implements NotificationService {
         this.emailService = emailService;
     }
 
+    /**
+     * Fetches a budget-related notification for a specific user and sends it via email.
+     *
+     * @param userId the unique identifier of the user for whom the budget notification is fetched
+     * @return a {@link String} containing the budget notification message for the user
+     */
     @Override
     public String fetchBudgetNotification(Long userId) {
         String notification = getBudgetLimitNotification(userId);
@@ -45,6 +66,12 @@ public class NotificationServiceImpl implements NotificationService {
         return notification;
     }
 
+    /**
+     * Fetches a goal-related notification for a specific user and sends it via email.
+     *
+     * @param userId the unique identifier of the user for whom the goal notification is fetched
+     * @return a {@link String} containing the goal notification message for the user
+     */
     @Override
     public String fetchGoalNotification(Long userId) {
         String notification = getGoalCompletionNotification(userId);
@@ -52,6 +79,12 @@ public class NotificationServiceImpl implements NotificationService {
         return notification;
     }
 
+    /**
+     * Generates a budget limit notification for a specific user based on their expenses and budget limit.
+     *
+     * @param userId the unique identifier of the user
+     * @return a {@link String} containing the budget limit notification message
+     */
     private String getBudgetLimitNotification(Long userId) {
         Budget budget = budgetRepository.findByUserId(userId);
         if (budget == null) {
@@ -66,6 +99,12 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * Generates a goal completion notification for a specific user, including progress updates for all goals.
+     *
+     * @param userId the unique identifier of the user
+     * @return a {@link String} containing the goal completion notification message
+     */
     private String getGoalCompletionNotification(Long userId) {
         List<Goal> userGoals = goalRepository.findByUserId(userId);
         if (userGoals.isEmpty()) {
@@ -89,6 +128,14 @@ public class NotificationServiceImpl implements NotificationService {
         return notification.toString().trim();
     }
 
+    /**
+     * Sends a notification to a user via email.
+     *
+     * @param userId  the unique identifier of the user
+     * @param subject the subject of the email notification
+     * @param body    the content or body of the email notification
+     * @throws RuntimeException if the user is not found in the database
+     */
     private void sendNotificationViaEmail(Long userId, String subject, String body) {
         User user = userRepository.findById(userId);
         if (user == null) {
@@ -98,6 +145,12 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * Calculates the total expenses incurred by a user within the current month.
+     *
+     * @param userId the unique identifier of the user
+     * @return the total expenses as a {@link BigDecimal} value for the current month
+     */
     private BigDecimal calculateTotalExpenses(Long userId) {
         LocalDate startOfMonth = LocalDate.now().withDayOfMonth(1);
         LocalDate endOfMonth = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());

@@ -10,10 +10,27 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 import java.util.logging.Logger;
 
+/**
+ * The {@code TaskMain} class serves as the entry point for the Finance App.
+ * It initializes and configures the Jetty server, setting up servlets and filters
+ * to handle API requests. This class ensures that the application runs inside a Docker container
+ * and provides logging for server startup and runtime errors.
+ */
 public class TaskMain {
 
+    /**
+     * Logger instance for logging events and errors in the {@code TaskMain} class.
+     */
     private static final Logger log = Logger.getLogger(TaskMain.class.getName());
 
+    /**
+     * The main method initializes the Jetty server, configures servlets and filters,
+     * and starts the server to handle incoming HTTP requests.
+     * The server listens on port 8080 and supports session management.
+     * If the server fails to start, an exception is thrown, and the error is logged.
+     *
+     * @param args command-line arguments (not used in this implementation)
+     */
     public static void main(String[] args) {
         AppConfig appConfig = new AppConfig();
 
@@ -23,7 +40,10 @@ public class TaskMain {
         server.setHandler(context);
         context.setSessionHandler(new SessionHandler());
 
+        // Add the AuthenticationFilter to secure API endpoints
         context.addFilter(new FilterHolder(new AuthenticationFilter()), "/api/*", null);
+
+        // Register servlets for various API endpoints
         context.addServlet(new ServletHolder(appConfig.getUserServlet()), "/api/users/*");
         context.addServlet(new ServletHolder(appConfig.getTransactionServlet()), "/api/transactions/*");
         context.addServlet(new ServletHolder(appConfig.getAdminServlet()), "/api/admin/users/*");

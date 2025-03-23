@@ -25,7 +25,14 @@ public class Budget {
     private BigDecimal monthlyLimit;
     private BigDecimal currentExpenses;
 
-    // no budget id constructor
+    /**
+     * Constructs a new {@code Budget} object with the specified user ID and monthly limit.
+     * This constructor initializes the current expenses to zero and is typically used when
+     * creating a new budget without an initially assigned budget ID.
+     *
+     * @param userId        the ID of the user associated with the budget
+     * @param monthlyLimit  the monthly spending limit for the budget
+     */
     public Budget(Long userId, BigDecimal monthlyLimit) {
         this.userId = userId;
         this.monthlyLimit = monthlyLimit;
