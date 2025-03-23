@@ -1,5 +1,6 @@
 package com.demo.finance.out.service;
 
+import com.demo.finance.domain.dto.ReportDto;
 import com.demo.finance.domain.model.Report;
 
 import java.math.BigDecimal;
@@ -20,18 +21,9 @@ public interface ReportService {
      * @return an {@link Optional} containing the generated {@link Report}, or {@code Optional.empty()}
      * if no report is found
      */
-    Optional<Report> generateUserReport(Long userId);
+    Report generateUserReport(Long userId);
 
-    /**
-     * Generates a report for a specific user within a given date range.
-     *
-     * @param userId the ID of the user for whom the report is generated
-     * @param from the start date of the range
-     * @param to the end date of the range
-     * @return an {@link Optional} containing the generated {@link Report}, or {@code Optional.empty()}
-     * if no report is found
-     */
-    Optional<Report> generateReportByDate(Long userId, LocalDate from, LocalDate to);
+    Report generateReportByDate(Long userId, LocalDate from, LocalDate to);
 
     /**
      * Generates a report for a specific user within a given date range, using string representations of dates.
@@ -42,7 +34,7 @@ public interface ReportService {
      * @return an {@link Optional} containing the generated {@link Report}, or {@code Optional.empty()}
      * if no report is found
      */
-    Optional<Report> generateReportByDate(Long userId, String fromDate, String toDate);
+    Report generateReportByDate(Long userId, String fromDate, String toDate);
 
     /**
      * Analyzes the user's expenses by category within a specified date range.

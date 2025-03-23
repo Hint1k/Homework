@@ -6,6 +6,7 @@ import com.demo.finance.domain.model.Budget;
 import com.demo.finance.out.service.BudgetService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +29,7 @@ public class BudgetServlet extends HttpServlet {
     public BudgetServlet(BudgetService budgetService, ObjectMapper objectMapper) {
         this.budgetService = budgetService;
         this.objectMapper = objectMapper;
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     /**

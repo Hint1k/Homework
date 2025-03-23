@@ -1,10 +1,16 @@
 package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.dto.ReportDto;
+import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.mapper.ReportMapper;
+import com.demo.finance.domain.model.Report;
+import com.demo.finance.domain.utils.Mode;
+import com.demo.finance.domain.utils.ValidationUtils;
+import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.ReportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Map;
 
 /**
@@ -24,10 +31,13 @@ public class ReportServlet extends HttpServlet {
 
     private final ReportService reportService;
     private final ObjectMapper objectMapper;
+    private final ValidationUtils validationUtils;
 
-    public ReportServlet(ReportService reportService, ObjectMapper objectMapper) {
+    public ReportServlet(ReportService reportService, ObjectMapper objectMapper, ValidationUtils validationUtils) {
         this.reportService = reportService;
         this.objectMapper = objectMapper;
+        this.validationUtils = validationUtils;
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     /**
@@ -40,60 +50,25 @@ public class ReportServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
-        if ("/report".equals(pathInfo)) {
+        if ("/by-date".equals(pathInfo)) {
             try {
-                StringBuilder jsonBody = new StringBuilder();
-                String line;
-                try (BufferedReader reader = request.getReader()) {
-                    while ((line = reader.readLine()) != null) {
-                        jsonBody.append(line);
-                    }
-                }
-                ReportDto reportDto = objectMapper.readValue(jsonBody.toString(), ReportDto.class);
-                Long userId = reportDto.getUserId();
-                if (userId == null) {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("Invalid input. User ID is mandatory.");
-                    return;
-                }
-                var reportOptional = reportService.generateUserReport(userId);
-                if (reportOptional.isPresent()) {
-                    ReportDto generatedReport = ReportMapper.INSTANCE.toDto(reportOptional.get());
+                UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
+                Long userId = userDto.getUserId();
+                String json = readRequestBody(request);
+                Map<String, LocalDate> reportDates = validationUtils.validateReport(json, Mode.REPORT, userId);
+
+                Report report = reportService
+                        .generateReportByDate(userId, reportDates.get("fromDate"), reportDates.get("toDate"));
+                if (report != null) {
+                    ReportDto reportDto = ReportMapper.INSTANCE.toDto(report);
+                    Map<String, Object> responseBody = Map.of(
+                            "message", "Report by dates generated successfully",
+                            "data", reportDto,
+                            "timestamp", java.time.Instant.now().toString()
+                    );
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.setContentType("application/json");
-                    response.getWriter().write(objectMapper.writeValueAsString(generatedReport));
-                } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().write("No transactions found for the user.");
-                }
-            } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid JSON format or input.");
-            }
-        } else if ("/by-date".equals(pathInfo)) {
-            try {
-                StringBuilder jsonBody = new StringBuilder();
-                String line;
-                try (BufferedReader reader = request.getReader()) {
-                    while ((line = reader.readLine()) != null) {
-                        jsonBody.append(line);
-                    }
-                }
-                ReportDto reportDto = objectMapper.readValue(jsonBody.toString(), ReportDto.class);
-                Long userId = reportDto.getUserId();
-                String fromDate = request.getParameter("fromDate");
-                String toDate = request.getParameter("toDate");
-                if (userId == null || fromDate == null || toDate == null) {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("Invalid input. User ID, fromDate, and toDate are mandatory.");
-                    return;
-                }
-                var reportOptional = reportService.generateReportByDate(userId, fromDate, toDate);
-                if (reportOptional.isPresent()) {
-                    ReportDto generatedReport = ReportMapper.INSTANCE.toDto(reportOptional.get());
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.setContentType("application/json");
-                    response.getWriter().write(objectMapper.writeValueAsString(generatedReport));
+                    response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     response.getWriter().write("No transactions found for the user in the specified date range.");
@@ -120,31 +95,69 @@ public class ReportServlet extends HttpServlet {
         String pathInfo = request.getPathInfo();
         if ("/expenses-by-category".equals(pathInfo)) {
             try {
-                Long userId = Long.parseLong(request.getParameter("userId"));
-                String fromDate = request.getParameter("fromDate");
-                String toDate = request.getParameter("toDate");
-                if (fromDate == null || toDate == null) {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("Invalid input. fromDate and toDate are mandatory.");
-                    return;
-                }
+                UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
+                Long userId = userDto.getUserId();
+                String json = readRequestBody(request);
+                Map<String, LocalDate> reportDates = validationUtils.validateReport(json, Mode.REPORT, userId);
                 Map<String, BigDecimal> expensesByCategory = reportService
-                        .analyzeExpensesByCategory(userId, fromDate, toDate);
+                        .analyzeExpensesByCategory(userId, reportDates.get("fromDate"), reportDates.get("toDate"));
                 if (!expensesByCategory.isEmpty()) {
-                    response.setStatus(HttpServletResponse.SC_OK);
+                    Map<String, Object> responseBody = Map.of(
+                            "message", "Expenses generated successfully",
+                            "data", expensesByCategory,
+                            "timestamp", java.time.Instant.now().toString()
+                    );
+                    response.setStatus(HttpServletResponse.SC_CREATED);
                     response.setContentType("application/json");
-                    response.getWriter().write(objectMapper.writeValueAsString(expensesByCategory));
+                    response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     response.getWriter().write("No expenses found for the user in the specified date range.");
                 }
+            } catch (ValidationException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write(e.getMessage());
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("Invalid user ID or date format.");
+            }
+        } else if ("/report".equals(pathInfo)) {
+            try {
+                UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
+                Long userId = userDto.getUserId();
+                Report report = reportService.generateUserReport(userId);
+                if (report != null) {
+                    ReportDto reportDto = ReportMapper.INSTANCE.toDto(report);
+                    Map<String, Object> responseBody = Map.of(
+                            "message", "General report generated successfully",
+                            "data", reportDto,
+                            "timestamp", java.time.Instant.now().toString()
+                    );
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.setContentType("application/json");
+                    response.getWriter().write(objectMapper.writeValueAsString(responseBody));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.getWriter().write("No reports found for the user.");
+                }
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("Invalid JSON format or input.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write("Endpoint not found.");
         }
+    }
+
+    private String readRequestBody(HttpServletRequest request) throws IOException {
+        StringBuilder json = new StringBuilder();
+        try (BufferedReader reader = request.getReader()) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                json.append(line);
+            }
+        }
+        return json.toString();
     }
 }

@@ -13,6 +13,7 @@ import com.demo.finance.out.service.AdminService;
 import com.demo.finance.out.service.TransactionService;
 import com.demo.finance.out.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -39,6 +40,7 @@ public class AdminServlet extends HttpServlet {
         this.userService = userService;
         this.transactionService = transactionService;
         this.objectMapper = objectMapper;
+        this.objectMapper.registerModule(new JavaTimeModule());
         this.validationUtils = validationUtils;
     }
 

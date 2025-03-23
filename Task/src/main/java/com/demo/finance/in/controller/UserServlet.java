@@ -9,6 +9,7 @@ import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +34,7 @@ public class UserServlet extends HttpServlet {
         this.userService = userService;
         this.validationUtils = validationUtils;
         this.objectMapper = objectMapper;
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Override

@@ -91,6 +91,6 @@ public class AppConfig {
         this.budgetServlet = new BudgetServlet(budgetService, objectMapper);
         this.goalServlet = new GoalServlet(goalService, objectMapper, goalValidationUtils);
         this.notificationServlet = new NotificationServlet(notificationService, objectMapper);
-        this.reportServlet = new ReportServlet(reportService, objectMapper);
+        this.reportServlet = new ReportServlet(reportService, objectMapper, validationUtils);
     }
 }

@@ -1,5 +1,7 @@
 package com.demo.finance.domain.utils.impl;
 
+import com.demo.finance.domain.dto.ReportDto;
+import com.demo.finance.domain.dto.TransactionDto;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.utils.PaginationParams;
@@ -7,7 +9,11 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class ValidationUtilsImpl implements ValidationUtils {
@@ -19,6 +25,7 @@ public class ValidationUtilsImpl implements ValidationUtils {
 
     public ValidationUtilsImpl() {
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Override
@@ -78,6 +85,24 @@ public class ValidationUtilsImpl implements ValidationUtils {
         return new PaginationParams(parsedPage, parsedSize);
     }
 
+    @Override
+    public Map<String, LocalDate> validateReport(String json, Mode mode, Long userId) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            validateRequiredFields(jsonNode, mode);
+            validateFieldValues(jsonNode, mode);
+            LocalDate fromDate = LocalDate.parse(jsonNode.get("fromDate").asText());
+            LocalDate toDate = LocalDate.parse(jsonNode.get("toDate").asText());
+            if (toDate.isAfter(fromDate)) {
+                return Map.of("fromDate", fromDate, "toDate", toDate);
+            } else {
+                throw new ValidationException("FromDate cannot be after ToDate date");
+            }
+        } catch (Exception e) {
+            throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
+        }
+    }
+
     private void validateRequiredFields(JsonNode jsonNode, Mode mode) {
         switch (mode) {
             case UPDATE:
@@ -100,6 +125,9 @@ public class ValidationUtilsImpl implements ValidationUtils {
             case BLOCK_UNBLOCK:
                 checkField(jsonNode, "blocked");
                 break;
+            case REPORT:
+                checkField(jsonNode, "fromDate");
+                checkField(jsonNode, "toDate");
             default:
                 break;
         }
@@ -118,6 +146,22 @@ public class ValidationUtilsImpl implements ValidationUtils {
             String password = jsonNode.get("password").asText();
             if (password.isBlank()) {
                 throw new ValidationException("Password cannot be empty.");
+            }
+        }
+
+        if (jsonNode.has("fromDate")) {
+            try {
+                LocalDate.parse(jsonNode.get("fromDate").asText());
+            } catch (DateTimeParseException e) {
+                throw new ValidationException("Invalid date format.");
+            }
+        }
+
+        if (jsonNode.has("toDate")) {
+            try{
+                LocalDate.parse(jsonNode.get("toDate").asText());
+            } catch (DateTimeParseException e) {
+                throw new ValidationException("Invalid date format.");
             }
         }
 

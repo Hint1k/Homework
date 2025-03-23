@@ -1,5 +1,7 @@
 package com.demo.finance.out.service.impl;
 
+import com.demo.finance.domain.dto.ReportDto;
+import com.demo.finance.domain.mapper.ReportMapper;
 import com.demo.finance.domain.model.Report;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
@@ -38,7 +40,7 @@ public class ReportServiceImpl implements ReportService {
      * if no transactions are found
      */
     @Override
-    public Optional<Report> generateUserReport(Long userId) {
+    public Report generateUserReport(Long userId) {
         List<Transaction> transactions = transactionRepository.findByUserId(userId);
         return generateReportFromTransactions(userId, transactions);
     }
@@ -53,27 +55,16 @@ public class ReportServiceImpl implements ReportService {
      * if no transactions are found
      */
     @Override
-    public Optional<Report> generateReportByDate(Long userId, LocalDate from, LocalDate to) {
+    public Report generateReportByDate(Long userId, LocalDate from, LocalDate to) {
         List<Transaction> transactions = transactionRepository.findByUserId(userId).stream()
                 .filter(t -> t.isWithinDateRange(from, to))
                 .collect(Collectors.toList());
         return generateReportFromTransactions(userId, transactions);
     }
 
-    /**
-     * Generates a report for a specific user within a given date range, using string representations of dates.
-     *
-     * @param userId   the ID of the user for whom the report is generated
-     * @param fromDate the start date of the range, represented as a string
-     * @param toDate   the end date of the range, represented as a string
-     * @return an {@link Optional} containing the generated {@link Report}, or {@code Optional.empty()}
-     * if no transactions are found
-     */
     @Override
-    public Optional<Report> generateReportByDate(Long userId, String fromDate, String toDate) {
-        LocalDate from = LocalDate.parse(fromDate);
-        LocalDate to = LocalDate.parse(toDate);
-        return generateReportByDate(userId, from, to);
+    public Report generateReportByDate(Long userId, String fromDate, String toDate) {
+        return generateReportByDate(userId, LocalDate.parse(fromDate), LocalDate.parse(toDate));
     }
 
     /**
@@ -119,8 +110,8 @@ public class ReportServiceImpl implements ReportService {
      * @return an {@link Optional} containing the generated {@link Report}, or {@code Optional.empty()}
      * if no transactions are found
      */
-    private Optional<Report> generateReportFromTransactions(Long userId, List<Transaction> transactions) {
-        if (transactions.isEmpty()) return Optional.empty();
+    private Report generateReportFromTransactions(Long userId, List<Transaction> transactions) {
+        if (transactions.isEmpty()) return null;
 
         BigDecimal totalIncome = transactions.stream()
                 .filter(t -> t.getType() == Type.INCOME)
@@ -132,6 +123,6 @@ public class ReportServiceImpl implements ReportService {
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return Optional.of(new Report(userId, totalIncome, totalExpense));
+        return new Report(userId, totalIncome, totalExpense);
     }
 }
