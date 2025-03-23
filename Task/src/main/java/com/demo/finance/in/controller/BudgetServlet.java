@@ -36,13 +36,6 @@ public class BudgetServlet extends HttpServlet {
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
-    /**
-     * Handles POST requests to set a monthly budget for a user.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -64,34 +57,22 @@ public class BudgetServlet extends HttpServlet {
                         response.setContentType("application/json");
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
-                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        response.setContentType("application/json");
-                        response.getWriter().write("Failed to retrieve budget details.");
+                        sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                "Failed to retrieve budget details.");
                     }
                 } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Monthly limit must be provided.");
+                    sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                            "Monthly limit must be provided.");
                 }
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid JSON format or input.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Invalid JSON format or input.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
-    /**
-     * Handles GET requests to retrieve a user's budget.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -102,7 +83,7 @@ public class BudgetServlet extends HttpServlet {
                 Map<String, Object> budgetData = budgetService.getBudgetData(userId);
                 if (budgetData != null) {
                     Map<String, Object> responseBody = Map.of(
-                            "message", "Budget generated successfully",
+                            "message", "Budget retrieved successfully",
                             "data", budgetData,
                             "timestamp", java.time.Instant.now().toString()
                     );
@@ -110,19 +91,14 @@ public class BudgetServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Budget not found for the user.");
+                    sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
+                            "Budget not found for the user.");
                 }
             } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid user ID.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid user ID.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -135,5 +111,13 @@ public class BudgetServlet extends HttpServlet {
             }
         }
         return json.toString();
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
+            throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json");
+        Map<String, String> errorResponse = Map.of("error", errorMessage);
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

@@ -1,8 +1,7 @@
 package com.demo.finance.domain.utils.impl;
 
-import com.demo.finance.domain.dto.BudgetDto;
+import com.demo.finance.domain.dto.*;
 import com.demo.finance.domain.utils.Mode;
-import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class ValidationUtilsImpl implements ValidationUtils {
-
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,}$");
 
@@ -115,8 +113,103 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    @Override
+    public TransactionDto validateTransactionJson(String json, Mode mode) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            validateRequiredFields(jsonNode, mode);
+            TransactionDto transactionDto = objectMapper.readValue(json, TransactionDto.class);
+            validateFieldValues(jsonNode, mode);
+            return transactionDto;
+        } catch (Exception e) {
+            throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public TransactionDto validateTransactionJson(String json, Mode mode, String transactionId) {
+        Long parsedTransactionId = parseTransactionId(transactionId, mode);
+        TransactionDto transactionDto = validateTransactionJson(json, mode);
+        transactionDto.setTransactionId(parsedTransactionId);
+        return transactionDto;
+    }
+
+    @Override
+    public GoalDto validateGoalJson(String json, Mode mode) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            validateRequiredFields(jsonNode, mode);
+            GoalDto goalDto = objectMapper.readValue(json, GoalDto.class);
+            validateFieldValues(jsonNode, mode);
+            return goalDto;
+        } catch (Exception e) {
+            throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public GoalDto validateGoalJson(String json, Mode mode, String goalId) {
+        Long parsedGoalId = parseGoalId(goalId, mode);
+        GoalDto goalDto = validateGoalJson(json, mode);
+        goalDto.setGoalId(parsedGoalId);
+        return goalDto;
+    }
+
+    @Override
+    public Long parseTransactionId(String transactionIdString, Mode mode) {
+        try {
+            return Long.parseLong(transactionIdString);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid format of transaction ID: " + transactionIdString);
+        }
+    }
+
+    @Override
+    public Long parseGoalId(String goalIdString, Mode mode) {
+        try {
+            return Long.parseLong(goalIdString);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid format of goal ID: " + goalIdString);
+        }
+    }
+
     private void validateRequiredFields(JsonNode jsonNode, Mode mode) {
         switch (mode) {
+            case TRANSACTION_CREATE:
+                checkField(jsonNode, "userId");
+                checkField(jsonNode, "amount");
+                checkField(jsonNode, "category");
+                checkField(jsonNode, "date");
+                checkField(jsonNode, "description");
+                checkField(jsonNode, "type");
+                break;
+            case TRANSACTION_UPDATE:
+                checkField(jsonNode, "userId");
+                checkField(jsonNode, "amount");
+                checkField(jsonNode, "category");
+                checkField(jsonNode, "description");
+                break;
+            case TRANSACTION_DELETE:
+                checkField(jsonNode, "transactionId");
+                checkField(jsonNode, "userId");
+                break;
+            case GOAL_CREATE:
+                checkField(jsonNode, "userId");
+                checkField(jsonNode, "goalName");
+                checkField(jsonNode, "targetAmount");
+                checkField(jsonNode, "duration");
+                checkField(jsonNode, "startTime");
+                break;
+            case GOAL_UPDATE:
+                checkField(jsonNode, "userId");
+                checkField(jsonNode, "goalName");
+                checkField(jsonNode, "targetAmount");
+                checkField(jsonNode, "duration");
+                break;
+            case GOAL_DELETE:
+                checkField(jsonNode, "goalId");
+                checkField(jsonNode, "userId");
+                break;
             case UPDATE:
                 checkField(jsonNode, "userId");
                 checkField(jsonNode, "name");
@@ -152,7 +245,6 @@ public class ValidationUtilsImpl implements ValidationUtils {
         if (jsonNode.has("userId") && !jsonNode.get("userId").isIntegralNumber()) {
             throw new ValidationException("Invalid userId: must be a non-null Long.");
         }
-
         if (jsonNode.has("email") && !isValidEmail(jsonNode.get("email").asText())) {
             throw new ValidationException("Invalid email format.");
         }
@@ -179,11 +271,54 @@ public class ValidationUtilsImpl implements ValidationUtils {
         if (jsonNode.has("blocked") && !jsonNode.get("blocked").isBoolean()) {
             throw new ValidationException("Blocked field must be a boolean.");
         }
-
         if (jsonNode.has("monthlyLimit")) {
             BigDecimal amount = new BigDecimal(jsonNode.get("monthlyLimit").asText());
             if (amount.compareTo(BigDecimal.ZERO) < 0) {
                 throw new ValidationException("Amount must be positive.");
+            }
+        }
+        if (jsonNode.has("amount")) {
+            BigDecimal amount = new BigDecimal(jsonNode.get("amount").asText());
+            if (amount.compareTo(BigDecimal.ZERO) < 0) {
+                throw new ValidationException("Amount must be positive.");
+            }
+        }
+        if (jsonNode.has("date")) {
+            try {
+                LocalDate.parse(jsonNode.get("date").asText());
+            } catch (DateTimeParseException e) {
+                throw new ValidationException("Invalid date format.");
+            }
+        }
+        if (jsonNode.has("type")) {
+            String type = jsonNode.get("type").asText();
+            if (!type.equalsIgnoreCase("INCOME") && !type.equalsIgnoreCase("EXPENSE")) {
+                throw new ValidationException("Type must be either INCOME or EXPENSE.");
+            }
+        }
+        if (jsonNode.has("targetAmount")) {
+            BigDecimal targetAmount = new BigDecimal(jsonNode.get("targetAmount").asText());
+            if (targetAmount.compareTo(BigDecimal.ZERO) < 0) {
+                throw new ValidationException("Target amount must be positive.");
+            }
+        }
+        if (jsonNode.has("savedAmount")) {
+            BigDecimal savedAmount = new BigDecimal(jsonNode.get("savedAmount").asText());
+            if (savedAmount.compareTo(BigDecimal.ZERO) < 0) {
+                throw new ValidationException("Saved amount must be positive.");
+            }
+        }
+        if (jsonNode.has("duration")) {
+            int duration = jsonNode.get("duration").asInt();
+            if (duration <= 0) {
+                throw new ValidationException("Duration must be a positive integer.");
+            }
+        }
+        if (jsonNode.has("startTime")) {
+            try {
+                LocalDate.parse(jsonNode.get("startTime").asText());
+            } catch (DateTimeParseException e) {
+                throw new ValidationException("Invalid start time format.");
             }
         }
     }

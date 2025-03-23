@@ -1,13 +1,9 @@
 package com.demo.finance.app.config;
 
 import com.demo.finance.domain.utils.BalanceUtils;
-import com.demo.finance.domain.utils.GoalValidationUtils;
-import com.demo.finance.domain.utils.TranValidationUtils;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.domain.utils.impl.BalanceUtilsImpl;
-import com.demo.finance.domain.utils.impl.GoalValidationUtilsImpl;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
-import com.demo.finance.domain.utils.impl.TranValidationUtilsImpl;
 import com.demo.finance.domain.utils.impl.ValidationUtilsImpl;
 import com.demo.finance.in.controller.*;
 import com.demo.finance.out.repository.*;
@@ -35,8 +31,6 @@ public class AppConfig {
     private final EmailService emailService;
     private final PasswordUtilsImpl passwordUtils;
     private final ValidationUtils validationUtils;
-    private final TranValidationUtils tranValidationUtils;
-    private final GoalValidationUtils goalValidationUtils;
 
     private final AdminService adminService;
     private final BudgetService budgetService;
@@ -71,8 +65,6 @@ public class AppConfig {
         this.emailService = new EmailServiceImpl();
         this.passwordUtils = new PasswordUtilsImpl();
         this.validationUtils = new ValidationUtilsImpl();
-        this.tranValidationUtils = new TranValidationUtilsImpl();
-        this.goalValidationUtils = new GoalValidationUtilsImpl();
 
         this.adminService = new AdminServiceImpl(userRepository);
         this.budgetService = new BudgetServiceImpl(budgetRepository, transactionRepository);
@@ -85,11 +77,11 @@ public class AppConfig {
         this.userService = new UserServiceImpl(userRepository, passwordUtils);
 
         this.userServlet = new UserServlet(registrationService, userService, validationUtils, objectMapper);
-        this.transactionServlet = new TransactionServlet(transactionService, objectMapper, tranValidationUtils);
+        this.transactionServlet = new TransactionServlet(transactionService, objectMapper, validationUtils);
         this.adminServlet = new AdminServlet(adminService, userService, transactionService, objectMapper,
                 validationUtils);
         this.budgetServlet = new BudgetServlet(budgetService, objectMapper, validationUtils);
-        this.goalServlet = new GoalServlet(goalService, objectMapper, goalValidationUtils);
+        this.goalServlet = new GoalServlet(goalService, objectMapper, validationUtils);
         this.notificationServlet = new NotificationServlet(notificationService, objectMapper);
         this.reportServlet = new ReportServlet(reportService, objectMapper, validationUtils);
     }

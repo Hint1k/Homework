@@ -7,7 +7,7 @@ import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
-import com.demo.finance.domain.utils.GoalValidationUtils;
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.GoalService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,10 +28,10 @@ public class GoalServlet extends HttpServlet {
 
     private final GoalService goalService;
     private final ObjectMapper objectMapper;
-    private final GoalValidationUtils validationUtils;
+    private final ValidationUtils validationUtils;
 
     public GoalServlet(GoalService goalService, ObjectMapper objectMapper,
-                       GoalValidationUtils validationUtils) {
+                       ValidationUtils validationUtils) {
         this.goalService = goalService;
         this.objectMapper = objectMapper;
         this.objectMapper.registerModule(new JavaTimeModule());
@@ -44,7 +44,7 @@ public class GoalServlet extends HttpServlet {
         if ("/".equals(pathInfo)) {
             try {
                 String json = readRequestBody(request);
-                GoalDto goalDto = validationUtils.validateGoalJson(json, Mode.CREATE);
+                GoalDto goalDto = validationUtils.validateGoalJson(json, Mode.GOAL_CREATE);
                 Long goalId = goalService.createGoal(goalDto);
                 if (goalId != null) {
                     Goal goal = goalService.getGoal(goalId);
@@ -59,27 +59,21 @@ public class GoalServlet extends HttpServlet {
                         response.setContentType("application/json");
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
-                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        response.getWriter().write("Failed to retrieve goal details.");
+                        sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                "Failed to retrieve goal details.");
                     }
                 } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Failed to create goal.");
+                    sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                            "Failed to create goal.");
                 }
             } catch (ValidationException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(e.getMessage());
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.setContentType("application/json");
-                response.getWriter().write("An error occurred while creating the goal.");
+                sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "An error occurred while creating the goal.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -111,9 +105,7 @@ public class GoalServlet extends HttpServlet {
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString(responseMap));
             } catch (IllegalArgumentException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(objectMapper.writeValueAsString(Map.of(
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, objectMapper.writeValueAsString(Map.of(
                         "error", "Invalid request parameters",
                         "message", e.getMessage()
                 )));
@@ -135,19 +127,14 @@ public class GoalServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Goal not found or you are not the owner of the goal.");
+                    sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
+                            "Goal not found or you are not the owner of the goal.");
                 }
             } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid goal ID.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid goal ID.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -160,7 +147,7 @@ public class GoalServlet extends HttpServlet {
                 Long userId = userDto.getUserId();
                 String goalIdString = pathInfo.substring(1);
                 String json = readRequestBody(request);
-                GoalDto goalDto = validationUtils.validateGoalJson(json, Mode.UPDATE, goalIdString);
+                GoalDto goalDto = validationUtils.validateGoalJson(json, Mode.GOAL_UPDATE, goalIdString);
                 boolean success = goalService.updateGoal(goalDto, userId);
                 if (success) {
                     Goal goal = goalService.getGoal(goalDto.getGoalId());
@@ -175,32 +162,23 @@ public class GoalServlet extends HttpServlet {
                         response.setContentType("application/json");
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
-                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        response.setContentType("application/json");
-                        response.getWriter().write("Failed to retrieve goal details.");
+                        sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                "Failed to retrieve goal details.");
                     }
                 } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Failed to update goal or you are not the owner of the goal.");
+                    sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                            "Failed to update goal or you are not the owner of the goal.");
                 }
             } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid goal ID.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid goal ID.");
             } catch (ValidationException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(e.getMessage());
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.setContentType("application/json");
-                response.getWriter().write("An error occurred while updating the goal.");
+                sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "An error occurred while updating the goal.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -212,7 +190,7 @@ public class GoalServlet extends HttpServlet {
                 UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
                 Long userId = userDto.getUserId();
                 String goalIdString = pathInfo.substring(1);
-                Long goalId = validationUtils.parseGoalId(goalIdString, Mode.DELETE);
+                Long goalId = validationUtils.parseGoalId(goalIdString, Mode.GOAL_DELETE);
                 boolean success = goalService.deleteGoal(userId, goalId);
                 if (success) {
                     Map<String, Object> responseBody = Map.of(
@@ -224,19 +202,14 @@ public class GoalServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Failed to delete goal or you are not the owner of the goal.");
+                    sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                            "Failed to delete goal or you are not the owner of the goal.");
                 }
             } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid goal ID");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid goal ID");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -249,5 +222,13 @@ public class GoalServlet extends HttpServlet {
             }
         }
         return json.toString();
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
+            throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json");
+        Map<String, String> errorResponse = Map.of("error", errorMessage);
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

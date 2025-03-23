@@ -1,7 +1,7 @@
 package com.demo.finance.domain.utils;
 
-import com.demo.finance.domain.dto.BudgetDto;
-import com.demo.finance.domain.dto.ReportDto;
+import com.demo.finance.domain.dto.GoalDto;
+import com.demo.finance.domain.dto.TransactionDto;
 import com.demo.finance.domain.dto.UserDto;
 
 import java.math.BigDecimal;
@@ -23,4 +23,16 @@ public interface ValidationUtils {
     Map<String, LocalDate> validateReport(String json, Mode mode, Long userId);
 
     BigDecimal validateBudgetJson(String json, Mode mode, Long userId);
+
+    TransactionDto validateTransactionJson(String json, Mode mode);
+
+    TransactionDto validateTransactionJson(String json, Mode mode, String transactionId);
+
+    GoalDto validateGoalJson(String json, Mode mode);
+
+    GoalDto validateGoalJson(String json, Mode mode, String goalId);
+
+    Long parseTransactionId(String transactionIdString, Mode mode);
+
+    Long parseGoalId(String goalIdString, Mode mode);
 }

@@ -58,19 +58,15 @@ public class UserServlet extends HttpServlet {
                         response.setContentType("application/json");
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
-                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        response.setContentType("application/json");
-                        response.getWriter().write("Failed to retrieve user details.");
+                        sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                "Failed to retrieve user details.");
                     }
                 } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Failed to register user.");
+                    sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                            "Failed to register user.");
                 }
             } catch (ValidationException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(e.getMessage());
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             }
         } else if ("/authenticate".equals(pathInfo)) {
             try {
@@ -92,27 +88,19 @@ public class UserServlet extends HttpServlet {
                         response.setContentType("application/json");
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
-                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        response.setContentType("application/json");
-                        response.getWriter().write("Failed to retrieve user details.");
+                        sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                "Failed to retrieve user details.");
                     }
                 } else {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Invalid credentials.");
+                    sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                            "Invalid credentials.");
                 }
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(objectMapper.writeValueAsString(Map.of(
-                        "message", "Invalid request parameters.",
-                        "timestamp", java.time.Instant.now().toString()
-                )));
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Invalid request parameters.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -131,17 +119,11 @@ public class UserServlet extends HttpServlet {
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString(responseBody));
             } else {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write(objectMapper.writeValueAsString(Map.of(
-                        "message", "No user is currently logged in.",
-                        "timestamp", java.time.Instant.now().toString()
-                )));
+                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                        "No user is currently logged in.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -170,19 +152,15 @@ public class UserServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Failed to retrieve updated user details.");
+                    sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                            "Failed to retrieve updated user details.");
                 }
             } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Failed to update account.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Failed to update account.");
             }
         } catch (ValidationException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.setContentType("application/json");
-            response.getWriter().write(e.getMessage());
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -204,14 +182,12 @@ public class UserServlet extends HttpServlet {
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString(responseBody));
             } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Failed to delete account.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Failed to delete account.");
             }
         } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.setContentType("application/json");
-            response.getWriter().write("An error occurred while deleting the account.");
+            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "An error occurred while deleting the account.");
         }
     }
 

@@ -40,13 +40,6 @@ public class ReportServlet extends HttpServlet {
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
-    /**
-     * Handles POST requests to generate a report for a user.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -70,29 +63,20 @@ public class ReportServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.setContentType("application/json");
-                    response.getWriter().write("No transactions found for the user in the specified date range.");
+                    sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
+                            "No transactions found for the user in the specified date range.");
                 }
+            } catch (ValidationException e) {
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid JSON format or input.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Invalid JSON format or input.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
-    /**
-     * Handles GET requests to analyze expenses by category for a user within a date range.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -110,22 +94,21 @@ public class ReportServlet extends HttpServlet {
                             "data", expensesByCategory,
                             "timestamp", java.time.Instant.now().toString()
                     );
-                    response.setStatus(HttpServletResponse.SC_CREATED);
+                    response.setStatus(HttpServletResponse.SC_OK);
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.setContentType("application/json");
-                    response.getWriter().write("No expenses found for the user in the specified date range.");
+                    sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
+                            "No expenses found for the user in the specified date range.");
                 }
             } catch (ValidationException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(e.getMessage());
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid user ID or date format.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Invalid user ID or date format.");
+            } catch (Exception e) {
+                sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "An error occurred while analyzing expenses by category.");
             }
         } else if ("/report".equals(pathInfo)) {
             try {
@@ -143,19 +126,15 @@ public class ReportServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.setContentType("application/json");
-                    response.getWriter().write("No reports found for the user.");
+                    sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
+                            "No reports found for the user.");
                 }
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid JSON format or input.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Invalid JSON format or input.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -168,5 +147,13 @@ public class ReportServlet extends HttpServlet {
             }
         }
         return json.toString();
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
+            throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json");
+        Map<String, String> errorResponse = Map.of("error", errorMessage);
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

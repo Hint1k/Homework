@@ -29,13 +29,6 @@ public class NotificationServlet extends HttpServlet {
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
-    /**
-     * Handles GET requests to retrieve a user's budget notification.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -49,17 +42,16 @@ public class NotificationServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(Map.of("message", notification)));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.setContentType("application/json");
-                    response.getWriter().write("No budget notification found for the user.");
+                    sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
+                            "No budget notification found for the user.");
                 }
             } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid user ID.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid user ID.");
+            } catch (Exception e) {
+                sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "An error occurred while fetching the budget notification.");
             }
-        }
-        else if ("/goal".equals(pathInfo)) {
+        } else if ("/goal".equals(pathInfo)) {
             try {
                 UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
                 Long userId = userDto.getUserId();
@@ -69,19 +61,25 @@ public class NotificationServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(Map.of("message", notification)));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.setContentType("application/json");
-                    response.getWriter().write("No goal notification found for the user.");
+                    sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
+                            "No goal notification found for the user.");
                 }
             } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid user ID.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid user ID.");
+            } catch (Exception e) {
+                sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "An error occurred while fetching the goal notification.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
+            throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json");
+        Map<String, String> errorResponse = Map.of("error", errorMessage);
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

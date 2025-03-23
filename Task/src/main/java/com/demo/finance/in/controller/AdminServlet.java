@@ -71,12 +71,8 @@ public class AdminServlet extends HttpServlet {
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString(responseMap));
             } catch (IllegalArgumentException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(objectMapper.writeValueAsString(Map.of(
-                        "error", "Invalid pagination parameters",
-                        "message", e.getMessage()
-                )));
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Invalid pagination parameters: " + e.getMessage());
             }
         } else if (pathInfo != null && pathInfo.startsWith("/transactions/")) {
             try {
@@ -103,12 +99,8 @@ public class AdminServlet extends HttpServlet {
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString(responseMap));
             } catch (IllegalArgumentException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(objectMapper.writeValueAsString(Map.of(
-                        "error", "Invalid request parameters",
-                        "message", e.getMessage()
-                )));
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Invalid request parameters: " + e.getMessage());
             }
         } else if (pathInfo != null && pathInfo.startsWith("/")) {
             try {
@@ -126,19 +118,13 @@ public class AdminServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.setContentType("application/json");
-                    response.getWriter().write("User not found.");
+                    sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "User not found.");
                 }
             } catch (IllegalArgumentException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(e.getMessage());
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -161,14 +147,11 @@ public class AdminServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Failed to block/unblock user.");
+                    sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                            "Failed to block/unblock user.");
                 }
             } catch (ValidationException | IllegalArgumentException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(e.getMessage());
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             }
         } else if (pathInfo != null && pathInfo.startsWith("/role/")) {
             try {
@@ -186,21 +169,17 @@ public class AdminServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Failed to update role.");
+                    sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                            "Failed to update role.");
                 }
             } catch (ValidationException | IllegalArgumentException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(e.getMessage());
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
+
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
@@ -219,23 +198,15 @@ public class AdminServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.setContentType("application/json");
-                    response.getWriter().write("User not found.");
+                    sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "User not found.");
                 }
             } catch (ValidationException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(e.getMessage());
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid user ID.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid user ID.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -258,5 +229,13 @@ public class AdminServlet extends HttpServlet {
             }
         }
         return jsonBody.toString();
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
+            throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json");
+        Map<String, String> errorResponse = Map.of("error", errorMessage);
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

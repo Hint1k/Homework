@@ -7,7 +7,7 @@ import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
-import com.demo.finance.domain.utils.TranValidationUtils;
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.TransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,10 +28,10 @@ public class TransactionServlet extends HttpServlet {
 
     private final TransactionService transactionService;
     private final ObjectMapper objectMapper;
-    private final TranValidationUtils validationUtils;
+    private final ValidationUtils validationUtils;
 
     public TransactionServlet(TransactionService transactionService, ObjectMapper objectMapper,
-                              TranValidationUtils validationUtils) {
+                              ValidationUtils validationUtils) {
         this.transactionService = transactionService;
         this.objectMapper = objectMapper;
         this.objectMapper.registerModule(new JavaTimeModule());
@@ -44,7 +44,7 @@ public class TransactionServlet extends HttpServlet {
         if ("/".equals(pathInfo)) {
             try {
                 String json = readRequestBody(request);
-                TransactionDto transactionDto = validationUtils.validateTransactionJson(json, Mode.CREATE);
+                TransactionDto transactionDto = validationUtils.validateTransactionJson(json, Mode.TRANSACTION_CREATE);
                 Long transactionId = transactionService.createTransaction(transactionDto);
                 if (transactionId != null) {
                     Transaction transaction = transactionService.getTransaction(transactionId);
@@ -59,28 +59,21 @@ public class TransactionServlet extends HttpServlet {
                         response.setContentType("application/json");
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
-                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        response.setContentType("application/json");
-                        response.getWriter().write("Failed to retrieve transaction details.");
+                        sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                "Failed to retrieve transaction details.");
                     }
                 } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Failed to create transaction.");
+                    sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                            "Failed to create transaction.");
                 }
             } catch (ValidationException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(e.getMessage());
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.setContentType("application/json");
-                response.getWriter().write("An error occurred while creating the transaction.");
+                sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "An error occurred while creating the transaction.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -112,9 +105,7 @@ public class TransactionServlet extends HttpServlet {
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString(responseMap));
             } catch (IllegalArgumentException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(objectMapper.writeValueAsString(Map.of(
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, objectMapper.writeValueAsString(Map.of(
                         "error", "Invalid request parameters",
                         "message", e.getMessage()
                 )));
@@ -137,19 +128,14 @@ public class TransactionServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.setContentType("application/json");
-                    response.getWriter().write("Transaction not found or you are not the owner of the transaction.");
+                    sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
+                            "Transaction not found or you are not the owner of the transaction.");
                 }
             } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid transaction ID.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid transaction ID.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -163,7 +149,7 @@ public class TransactionServlet extends HttpServlet {
                 String transactionIdString = pathInfo.substring(1);
                 String json = readRequestBody(request);
                 TransactionDto transactionDto = validationUtils
-                        .validateTransactionJson(json, Mode.UPDATE, transactionIdString);
+                        .validateTransactionJson(json, Mode.TRANSACTION_UPDATE, transactionIdString);
                 boolean success = transactionService.updateTransaction(transactionDto, userId);
                 if (success) {
                     Transaction transaction = transactionService.getTransaction(transactionDto.getTransactionId());
@@ -178,33 +164,23 @@ public class TransactionServlet extends HttpServlet {
                         response.setContentType("application/json");
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
-                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        response.setContentType("application/json");
-                        response.getWriter().write("Failed to retrieve transaction details.");
+                        sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                "Failed to retrieve transaction details.");
                     }
                 } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setContentType("application/json");
-                    response.getWriter()
-                            .write("Failed to update transaction or you are not the owner of the transaction.");
+                    sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                            "Failed to update transaction or you are not the owner of the transaction.");
                 }
             } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid transaction ID.");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid transaction ID.");
             } catch (ValidationException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(e.getMessage());
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.setContentType("application/json");
-                response.getWriter().write("An error occurred while updating the transaction.");
+                sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "An error occurred while updating the transaction.");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -216,7 +192,7 @@ public class TransactionServlet extends HttpServlet {
                 UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
                 Long userId = userDto.getUserId();
                 String transactionIdString = pathInfo.substring(1);
-                Long transactionId = validationUtils.parseTransactionId(transactionIdString, Mode.DELETE);
+                Long transactionId = validationUtils.parseTransactionId(transactionIdString, Mode.TRANSACTION_DELETE);
                 boolean success = transactionService.deleteTransaction(userId, transactionId);
                 if (success) {
                     Map<String, Object> responseBody = Map.of(
@@ -228,20 +204,14 @@ public class TransactionServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setContentType("application/json");
-                    response.getWriter()
-                            .write("Failed to delete transaction or you are not the owner of the transaction.");
+                    sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                            "Failed to delete transaction or you are not the owner of the transaction.");
                 }
             } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("Invalid transaction ID");
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid transaction ID");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("application/json");
-            response.getWriter().write("Endpoint not found.");
+            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "Endpoint not found.");
         }
     }
 
@@ -254,5 +224,13 @@ public class TransactionServlet extends HttpServlet {
             }
         }
         return json.toString();
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
+            throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json");
+        Map<String, String> errorResponse = Map.of("error", errorMessage);
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }
