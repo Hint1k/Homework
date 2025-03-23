@@ -1,6 +1,7 @@
 package com.demo.finance.out.repository.impl;
 
 import com.demo.finance.domain.model.Goal;
+import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.out.repository.GoalRepository;
 
 import java.sql.Date;
@@ -36,8 +37,8 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      * @param goal the goal to be saved
      */
     @Override
-    public void save(Goal goal) {
-        super.persistEntity(goal, INSERT_SQL, stmt -> setGoalParameters(stmt, goal));
+    public Long save(Goal goal) {
+        return insertRecord(INSERT_SQL, stmt -> setGoalParameters(stmt, goal));
     }
 
     /**
@@ -88,6 +89,15 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
         return findAllRecordsByCriteria(FIND_BY_USER_ID_SQL, List.of(userId), this::mapResultSetToGoal);
     }
 
+    @Override
+    public List<Goal> findByUserId(Long userId, int offset, int size) {
+        List<Object> params = new ArrayList<>();
+        params.add(userId);
+        params.add(size);
+        params.add(offset);
+        return findAllRecordsByCriteria(FIND_BY_USER_ID_SQL_PAGINATED, params, this::mapResultSetToGoal);
+    }
+
     /**
      * Retrieves a goal record from the database by its ID and user ID.
      *
@@ -96,11 +106,11 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      * @return an {@code Optional} containing the goal if found, or an empty {@code Optional} if not found
      */
     @Override
-    public Optional<Goal> findByUserIdAndGoalId(Long userId, Long goalId) {
+    public Goal findByUserIdAndGoalId(Long userId, Long goalId) {
         return findRecordByCriteria(FIND_BY_USER_AND_GOAL_SQL, stmt -> {
             stmt.setLong(1, goalId);
             stmt.setLong(2, userId);
-        }, this::mapResultSetToGoal);
+        }, this::mapResultSetToGoal).orElse(null);
     }
 
     @Override
@@ -113,7 +123,7 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
     }
 
     @Override
-    public int countAllGoals(Long userId) {
+    public int getTotalGoalCountForUser(Long userId) {
         return queryDatabase(COUNT_SQL, stmt -> stmt.setLong(1, userId), rs -> {
             if (rs.next()) {
                 return rs.getInt("total");

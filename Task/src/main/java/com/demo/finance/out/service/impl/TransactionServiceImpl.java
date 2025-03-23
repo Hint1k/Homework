@@ -1,14 +1,13 @@
 package com.demo.finance.out.service.impl;
 
+import com.demo.finance.domain.dto.TransactionDto;
+import com.demo.finance.domain.mapper.TransactionMapper;
 import com.demo.finance.domain.model.Transaction;
-import com.demo.finance.domain.utils.Type;
+import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.TransactionService;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -30,26 +29,10 @@ public class TransactionServiceImpl implements TransactionService {
         this.transactionRepository = transactionRepository;
     }
 
-    /**
-     * Creates a new transaction for a user.
-     *
-     * @param userId      the ID of the user for whom the transaction is created
-     * @param amount      the amount of the transaction
-     * @param category    the category of the transaction (e.g., food, rent, etc.)
-     * @param date        the date of the transaction
-     * @param description a description of the transaction
-     * @param type        the type of transaction (either {@link Type#INCOME} or {@link Type#EXPENSE})
-     * @throws IllegalArgumentException if the amount is negative
-     */
     @Override
-    public void createTransaction(Long userId, BigDecimal amount, String category, String date, String description,
-                                  Type type) {
-        if (amount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Amount must be positive.");
-        }
-        LocalDate transactionDate = LocalDate.parse(date);
-        Transaction transaction = new Transaction(userId, amount, category, transactionDate, description, type);
-        transactionRepository.save(transaction);
+    public Long createTransaction(TransactionDto dto) {
+        Transaction transaction = TransactionMapper.INSTANCE.toEntity(dto);
+        return transactionRepository.save(transaction);
     }
 
     /**
@@ -59,8 +42,8 @@ public class TransactionServiceImpl implements TransactionService {
      * @return a list of {@link Transaction} objects belonging to the user
      */
     @Override
-    public List<Transaction> getTransactionsByUserId(Long userId) {
-        return transactionRepository.findByUserId(userId);
+    public Transaction getTransactionByUserIdAndTransactionId(Long userId, Long transactionId) {
+        return transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
     }
 
     /**
@@ -74,26 +57,15 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.findById(transactionId);
     }
 
-    /**
-     * Updates an existing transaction for a user.
-     *
-     * @param transactionId the ID of the transaction to be updated
-     * @param userId        the ID of the user associated with the transaction
-     * @param amount        the new amount for the transaction
-     * @param category      the new category for the transaction
-     * @param description   the new description for the transaction
-     * @return {@code true} if the transaction was successfully updated, {@code false} otherwise
-     */
     @Override
-    public boolean updateTransaction(Long transactionId, Long userId, BigDecimal amount, String category,
-                                     String description) {
-        Optional<Transaction> transaction = transactionRepository.findByUserIdAndTransactionId(transactionId, userId);
-        if (transaction.isPresent()) {
-            Transaction updatedTransaction = transaction.get();
-            updatedTransaction.setAmount(amount);
-            updatedTransaction.setCategory(category);
-            updatedTransaction.setDescription(description);
-            transactionRepository.update(updatedTransaction);
+    public boolean updateTransaction(TransactionDto dto, Long userId) {
+        Long transactionId = dto.getTransactionId();
+        Transaction transaction = transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
+        if (transaction != null) {
+            transaction.setAmount(dto.getAmount());
+            transaction.setCategory(dto.getCategory());
+            transaction.setDescription(dto.getDescription());
+            transactionRepository.update(transaction);
             return true;
         }
         return false;
@@ -108,39 +80,20 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean deleteTransaction(Long userId, Long transactionId) {
-        Optional<Transaction> transaction = transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
-        if (transaction.isPresent()) {
+        Transaction transaction = transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
+        if (transaction != null) {
             return transactionRepository.delete(transactionId);
         }
         return false;
     }
 
-    /**
-     * Retrieves a list of transactions for a user that match the specified filtering criteria.
-     *
-     * @param userId   the ID of the user whose transactions are retrieved
-     * @param from     the start date for filtering the transactions
-     * @param to       the end date for filtering the transactions
-     * @param category the category to filter the transactions by (can be {@code null} to ignore)
-     * @param type     the type of transactions to filter (either {@link Type#INCOME} or {@link Type#EXPENSE})
-     * @return a list of {@link Transaction} objects that match the filtering criteria
-     */
     @Override
-    public List<Transaction> getFilteredTransactions(Long userId, LocalDate from, LocalDate to, String category,
-                                                     Type type) {
-        return transactionRepository.findFiltered(userId, from, to, category, type);
-    }
-
-    @Override
-    public List<Transaction> getFilteredTransactionsWithPagination(
-            Long userId, LocalDate fromDate, LocalDate toDate, String category, Type type, int page, int size) {
+    public PaginatedResponse<TransactionDto> getPaginatedTransactionsForUser(Long userId, int page, int size) {
         int offset = (page - 1) * size;
-        return transactionRepository.findFilteredWithPagination(userId, fromDate, toDate, category, type, offset, size);
-    }
-
-    @Override
-    public int getTotalFilteredTransactionsCount(Long userId, LocalDate fromDate, LocalDate toDate, String category,
-                                                 Type type) {
-        return transactionRepository.countFilteredTransactions(userId, fromDate, toDate, category, type);
+        List<Transaction> transactions = transactionRepository.findByUserId(userId, offset, size);
+        int totalTransactions = transactionRepository.getTotalTransactionCountForUser(userId);
+        List<TransactionDto> dtoList = transactions.stream().map(TransactionMapper.INSTANCE::toDto).toList();
+        return new PaginatedResponse<>(dtoList, totalTransactions, (int) Math.ceil((double) totalTransactions / size),
+                page, size);
     }
 }

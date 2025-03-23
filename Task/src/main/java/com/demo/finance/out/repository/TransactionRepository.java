@@ -18,7 +18,7 @@ public interface TransactionRepository {
      *
      * @param transaction the Transaction entity to be saved
      */
-    void save(Transaction transaction);
+    Long save(Transaction transaction);
 
     /**
      * Updates an existing Transaction entity in the repository.
@@ -66,19 +66,7 @@ public interface TransactionRepository {
      */
     List<Transaction> findFiltered(Long userId, LocalDate from, LocalDate to, String category, Type type);
 
-    List<Transaction> findFilteredWithPagination(Long userId, LocalDate fromDate, LocalDate toDate,
-                                                 String category, Type type, int page, int size);
-
-    int countFilteredTransactions(Long userId, LocalDate fromDate, LocalDate toDate, String category, Type type);
-
-    /**
-     * Finds a Transaction entity by its ID and associated user ID.
-     *
-     * @param userId        the ID of the user associated with the transaction
-     * @param transactionId the ID of the transaction
-     * @return an Optional containing the Transaction entity if found, otherwise an empty Optional
-     */
-    Optional<Transaction> findByUserIdAndTransactionId(Long userId, Long transactionId);
+    Transaction findByUserIdAndTransactionId(Long userId, Long transactionId);
 
     int getTotalTransactionCountForUser(Long userId);
 }

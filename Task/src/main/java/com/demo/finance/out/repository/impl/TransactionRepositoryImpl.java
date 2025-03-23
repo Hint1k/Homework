@@ -38,9 +38,8 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
      * @param transaction the transaction to be saved
      */
     @Override
-    public void save(Transaction transaction) {
-        super.persistEntity(transaction, INSERT_SQL, stmt ->
-                setTransactionParameters(stmt, transaction));
+    public Long save(Transaction transaction) {
+        return insertRecord(INSERT_SQL, stmt -> setTransactionParameters(stmt, transaction));
     }
 
     /**
@@ -109,11 +108,11 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
      * @return an {@code Optional} containing the transaction if found, or an empty {@code Optional} if not found
      */
     @Override
-    public Optional<Transaction> findByUserIdAndTransactionId(Long userId, Long transactionId) {
+    public Transaction findByUserIdAndTransactionId(Long userId, Long transactionId) {
         return findRecordByCriteria(FIND_BY_USER_AND_TRANSACTION_SQL, stmt -> {
             stmt.setLong(1, transactionId);
             stmt.setLong(2, userId);
-        }, this::mapResultSetToTransaction);
+        }, this::mapResultSetToTransaction).orElse(null);
     }
 
     @Override
@@ -143,30 +142,6 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
         return findAllRecordsByCriteria(sql, params, this::mapResultSetToTransaction);
     }
 
-    @Override
-    public List<Transaction> findFilteredWithPagination(Long userId, LocalDate fromDate, LocalDate toDate,
-                                                        String category, Type type, int page, int size) {
-        String baseSql = buildFilteredQuery(fromDate, toDate, category, type);
-        String paginatedSql = baseSql + " LIMIT ? OFFSET ?";
-        List<Object> params = getFilterParameters(userId, fromDate, toDate, category, type);
-        params.add(size);
-        params.add((page - 1) * size);
-        return findAllRecordsByCriteria(paginatedSql, params, this::mapResultSetToTransaction);
-    }
-
-    @Override
-    public int countFilteredTransactions(Long userId, LocalDate fromDate, LocalDate toDate, String category,
-                                         Type type) {
-        String baseSql = buildFilteredQuery(fromDate, toDate, category, type);
-        List<Object> params = getFilterParameters(userId, fromDate, toDate, category, type);
-        String finalSql = COUNT_SQL + baseSql.substring(FIND_BY_USER_ID_SQL.length());
-        return queryDatabase(finalSql, stmt -> bindParameters(stmt, params), rs -> {
-            if (rs.next()) {
-                return rs.getInt("total");
-            }
-            return 0;
-        });
-    }
 
     /**
      * Builds a dynamic SQL query string based on the provided filter criteria for retrieving filtered transactions.

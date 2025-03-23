@@ -71,9 +71,16 @@ public abstract class BaseRepository {
      * @return the generated key if successful, or {@code null} if no key was generated
      */
     protected Long insertRecord(String sql, PreparedStatementSetter setter) {
-        return executeStatement(sql, setter, rs -> {
-            if (rs.next()) {
-                return rs.getLong(1);
+        return executeWithinTransaction(conn -> {
+            //noinspection SqlSourceToSinkFlow
+            try (PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                setter.setValues(stmt);
+                stmt.executeUpdate();
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getLong(1);
+                    }
+                }
             }
             return null;
         });

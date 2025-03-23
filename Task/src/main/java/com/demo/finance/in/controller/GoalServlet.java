@@ -1,12 +1,18 @@
 package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.dto.GoalDto;
+import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.mapper.GoalMapper;
 import com.demo.finance.domain.model.Goal;
-import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.utils.Mode;
+import com.demo.finance.domain.utils.PaginatedResponse;
+import com.demo.finance.domain.utils.PaginationParams;
+import com.demo.finance.domain.utils.GoalValidationUtils;
+import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.GoalService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,120 +20,58 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
-/**
- * The {@code GoalServlet} class handles incoming HTTP requests related to goal management.
- * It provides endpoints for creating, retrieving, updating, deleting, and filtering goals.
- */
 @WebServlet("/api/goals/*")
 public class GoalServlet extends HttpServlet {
 
     private final GoalService goalService;
     private final ObjectMapper objectMapper;
+    private final GoalValidationUtils validationUtils;
 
-    public GoalServlet(GoalService goalService, ObjectMapper objectMapper) {
+    public GoalServlet(GoalService goalService, ObjectMapper objectMapper,
+                       GoalValidationUtils validationUtils) {
         this.goalService = goalService;
         this.objectMapper = objectMapper;
+        this.objectMapper.registerModule(new JavaTimeModule());
+        this.validationUtils = validationUtils;
     }
 
-    /**
-     * Handles GET requests to retrieve a single goal or a paginated list of goals.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String pathInfo = request.getPathInfo();
-        if ("/".equals(pathInfo)) {
-            try {
-                int page = Integer.parseInt(request.getParameter("page") != null
-                        ? request.getParameter("page") : "1");
-                int size = Integer.parseInt(request.getParameter("size") != null
-                        ? request.getParameter("size") : "10");
-                if (page <= 0 || size <= 0) {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter()
-                            .write("Invalid pagination parameters. Page and size must be positive integers.");
-                    return;
-                }
-                User currentUser = (User) request.getSession().getAttribute("currentUser");
-                if (currentUser == null) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("No user is currently logged in.");
-                    return;
-                }
-                Long userId = currentUser.getUserId();
-                int offset = (page - 1) * size;
-                List<Goal> goals = goalService.getPaginatedGoals(userId, offset, size);
-                int totalGoals = goalService.getTotalGoalCount(userId);
-                int totalPages = (int) Math.ceil((double) totalGoals / size);
-                List<GoalDto> goalDtos = goals.stream().map(GoalMapper.INSTANCE::toDto).toList();
-                Map<String, Object> responseMap = Map.of("data", goalDtos, "metadata", Map.of("totalItems",
-                        totalGoals, "totalPages", totalPages, "currentPage", page, "pageSize", size));
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.setContentType("application/json");
-                response.getWriter().write(objectMapper.writeValueAsString(responseMap));
-            } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid pagination parameters.");
-            }
-        }
-        else if (pathInfo != null && pathInfo.startsWith("/")) {
-            try {
-                Long goalId = Long.parseLong(pathInfo.substring(1));
-                Goal goal = goalService.getGoal(goalId);
-                if (goal != null) {
-                    GoalDto goalDto = GoalMapper.INSTANCE.toDto(goal);
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.setContentType("application/json");
-                    response.getWriter().write(objectMapper.writeValueAsString(goalDto));
-                } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().write("Goal not found.");
-                }
-            } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid goal ID.");
-            }
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write("Endpoint not found.");
-        }
-    }
-
-    /**
-     * Handles POST requests to create a new goal.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
         if ("/".equals(pathInfo)) {
             try {
-                StringBuilder jsonBody = new StringBuilder();
-                String line;
-                try (BufferedReader reader = request.getReader()) {
-                    while ((line = reader.readLine()) != null) {
-                        jsonBody.append(line);
+                String json = readRequestBody(request);
+                GoalDto goalDto = validationUtils.validateGoalJson(json, Mode.CREATE);
+                Long goalId = goalService.createGoal(goalDto);
+                if (goalId != null) {
+                    Goal goal = goalService.getGoal(goalId);
+                    if (goal != null) {
+                        GoalDto goalDtoCreated = GoalMapper.INSTANCE.toDto(goal);
+                        Map<String, Object> responseBody = Map.of(
+                                "message", "Goal created successfully",
+                                "data", goalDtoCreated,
+                                "timestamp", java.time.Instant.now().toString()
+                        );
+                        response.setStatus(HttpServletResponse.SC_CREATED);
+                        response.setContentType("application/json");
+                        response.getWriter().write(objectMapper.writeValueAsString(responseBody));
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        response.getWriter().write("Failed to retrieve goal details.");
                     }
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().write("Failed to create goal.");
                 }
-                GoalDto goalDto = objectMapper.readValue(jsonBody.toString(), GoalDto.class);
-                Goal goal = GoalMapper.INSTANCE.toEntity(goalDto);
-                goalService.createGoal(goal.getUserId(), goal.getGoalName(), goal.getTargetAmount(),
-                        goal.getDuration());
-                response.setStatus(HttpServletResponse.SC_CREATED);
-                response.setContentType("application/json");
-                response.getWriter().write(objectMapper.writeValueAsString(goalDto));
-            } catch (Exception e) {
+            } catch (ValidationException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid JSON format.");
+                response.getWriter().write(e.getMessage());
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("An error occurred while creating the goal.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -135,45 +79,111 @@ public class GoalServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Handles PUT requests to update an existing goal.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String pathInfo = request.getPathInfo();
+        if (pathInfo == null || "/".equals(pathInfo)) {
+            try {
+                UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
+                Long userId = userDto.getUserId();
+                String json = readRequestBody(request);
+                PaginationParams paginationRequest = objectMapper.readValue(json, PaginationParams.class);
+                PaginationParams params = validationUtils.validatePaginationParams(
+                        String.valueOf(paginationRequest.page()),
+                        String.valueOf(paginationRequest.size())
+                );
+                PaginatedResponse<GoalDto> paginatedResponse = goalService
+                        .getPaginatedGoalsForUser(userId, params.page(), params.size());
+                Map<String, Object> responseMap = new HashMap<>();
+                responseMap.put("data", paginatedResponse.data());
+                responseMap.put("metadata", Map.of(
+                        "user_id", userId,
+                        "totalItems", paginatedResponse.totalItems(),
+                        "totalPages", paginatedResponse.totalPages(),
+                        "currentPage", paginatedResponse.currentPage(),
+                        "pageSize", paginatedResponse.pageSize()
+                ));
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.setContentType("application/json");
+                response.getWriter().write(objectMapper.writeValueAsString(responseMap));
+            } catch (IllegalArgumentException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
+                response.getWriter().write(objectMapper.writeValueAsString(Map.of(
+                        "error", "Invalid request parameters",
+                        "message", e.getMessage()
+                )));
+            }
+        } else if (pathInfo.startsWith("/")) {
+            try {
+                UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
+                Long userId = userDto.getUserId();
+                Long goalId = validationUtils.parseGoalId(pathInfo.substring(1), Mode.GET);
+                Goal goal = goalService.getGoalByUserIdAndGoalId(userId, goalId);
+                if (goal != null) {
+                    GoalDto goalDto = GoalMapper.INSTANCE.toDto(goal);
+                    Map<String, Object> responseBody = Map.of(
+                            "message", "Goal found successfully",
+                            "data", goalDto,
+                            "timestamp", java.time.Instant.now().toString()
+                    );
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.setContentType("application/json");
+                    response.getWriter().write(objectMapper.writeValueAsString(responseBody));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.getWriter().write("Goal not found or you are not the owner of the goal.");
+                }
+            } catch (NumberFormatException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("Invalid goal ID.");
+            }
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write("Endpoint not found.");
+        }
+    }
+
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
         if (pathInfo != null && pathInfo.startsWith("/")) {
             try {
-                Long goalId = Long.parseLong(pathInfo.substring(1));
-                StringBuilder jsonBody = new StringBuilder();
-                String line;
-                try (BufferedReader reader = request.getReader()) {
-                    while ((line = reader.readLine()) != null) {
-                        jsonBody.append(line);
-                    }
-                }
-                GoalDto goalDto = objectMapper.readValue(jsonBody.toString(), GoalDto.class);
-                goalDto.setGoalId(goalId);
-                Goal goal = GoalMapper.INSTANCE.toEntity(goalDto);
-                boolean success = goalService.updateGoal(goal.getGoalId(), goal.getUserId(), goal.getGoalName(),
-                        goal.getTargetAmount(), goal.getDuration());
+                UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
+                Long userId = userDto.getUserId();
+                String goalIdString = pathInfo.substring(1);
+                String json = readRequestBody(request);
+                GoalDto goalDto = validationUtils.validateGoalJson(json, Mode.UPDATE, goalIdString);
+                boolean success = goalService.updateGoal(goalDto, userId);
                 if (success) {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.setContentType("application/json");
-                    response.getWriter().write(objectMapper.writeValueAsString(goalDto));
+                    Goal goal = goalService.getGoal(goalDto.getGoalId());
+                    if (goal != null) {
+                        GoalDto goalDtoUpdated = GoalMapper.INSTANCE.toDto(goal);
+                        Map<String, Object> responseBody = Map.of(
+                                "message", "Goal updated successfully",
+                                "data", goalDtoUpdated,
+                                "timestamp", java.time.Instant.now().toString()
+                        );
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.setContentType("application/json");
+                        response.getWriter().write(objectMapper.writeValueAsString(responseBody));
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        response.getWriter().write("Failed to retrieve goal details.");
+                    }
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("Failed to update goal.");
+                    response.getWriter().write("Failed to update goal or you are not the owner of the goal.");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("Invalid goal ID.");
-            } catch (Exception e) {
+            } catch (ValidationException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid JSON format.");
+                response.getWriter().write(e.getMessage());
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("An error occurred while updating the goal.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -181,35 +191,47 @@ public class GoalServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Handles DELETE requests to delete a goal.
-     *
-     * @param request  the HTTP request object
-     * @param response the HTTP response object
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
         if (pathInfo != null && pathInfo.startsWith("/")) {
             try {
-                Long goalId = Long.parseLong(pathInfo.substring(1));
-                Long userId = Long.parseLong(request.getParameter("userId"));
+                UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
+                Long userId = userDto.getUserId();
+                String goalIdString = pathInfo.substring(1);
+                Long goalId = validationUtils.parseGoalId(goalIdString, Mode.DELETE);
                 boolean success = goalService.deleteGoal(userId, goalId);
                 if (success) {
+                    Map<String, Object> responseBody = Map.of(
+                            "message", "Goal deleted successfully",
+                            "goal id", goalId,
+                            "timestamp", java.time.Instant.now().toString()
+                    );
                     response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().write("Goal deleted successfully.");
+                    response.setContentType("application/json");
+                    response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("Failed to delete goal.");
+                    response.getWriter().write("Failed to delete goal or you are not the owner of the goal.");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Invalid goal ID or user ID.");
+                response.getWriter().write("Invalid goal ID");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write("Endpoint not found.");
         }
+    }
+
+    private String readRequestBody(HttpServletRequest request) throws IOException {
+        StringBuilder json = new StringBuilder();
+        try (BufferedReader reader = request.getReader()) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                json.append(line);
+            }
+        }
+        return json.toString();
     }
 }

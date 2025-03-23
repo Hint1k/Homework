@@ -25,8 +25,4 @@ public interface AdminService {
      * @return {@code true} if the user was successfully deleted, {@code false} if the user was not found
      */
     boolean deleteUser(Long userId);
-
-    PaginatedResponse<UserDto> getPaginatedUsers(int page, int size);
-
-    PaginatedResponse<TransactionDto> getPaginatedTransactionsForUser(Long userId, int page, int size);
 }

@@ -10,6 +10,8 @@ import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.AdminService;
+import com.demo.finance.out.service.TransactionService;
+import com.demo.finance.out.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,11 +28,16 @@ import java.util.Map;
 public class AdminServlet extends HttpServlet {
 
     private final AdminService adminService;
+    private final UserService userService;
+    private final TransactionService transactionService;
     private final ObjectMapper objectMapper;
     private final ValidationUtils validationUtils;
 
-    public AdminServlet(AdminService adminService, ObjectMapper objectMapper, ValidationUtils validationUtils) {
+    public AdminServlet(AdminService adminService, UserService userService, TransactionService transactionService,
+                        ObjectMapper objectMapper, ValidationUtils validationUtils) {
         this.adminService = adminService;
+        this.userService = userService;
+        this.transactionService = transactionService;
         this.objectMapper = objectMapper;
         this.validationUtils = validationUtils;
     }
@@ -46,7 +53,7 @@ public class AdminServlet extends HttpServlet {
                         String.valueOf(paginationParams.page()),
                         String.valueOf(paginationParams.size())
                 );
-                PaginatedResponse<UserDto> paginatedResponse = adminService.getPaginatedUsers(
+                PaginatedResponse<UserDto> paginatedResponse = userService.getPaginatedUsers(
                         params.page(),
                         params.size()
                 );
@@ -79,11 +86,8 @@ public class AdminServlet extends HttpServlet {
                         String.valueOf(paginationRequest.page()),
                         String.valueOf(paginationRequest.size())
                 );
-                PaginatedResponse<TransactionDto> paginatedResponse = adminService.getPaginatedTransactionsForUser(
-                        userId,
-                        params.page(),
-                        params.size()
-                );
+                PaginatedResponse<TransactionDto> paginatedResponse = transactionService
+                        .getPaginatedTransactionsForUser(userId, params.page(), params.size());
                 Map<String, Object> responseMap = new HashMap<>();
                 responseMap.put("data", paginatedResponse.data());
                 responseMap.put("metadata", Map.of(

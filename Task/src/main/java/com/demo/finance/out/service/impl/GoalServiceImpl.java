@@ -1,13 +1,15 @@
 package com.demo.finance.out.service.impl;
 
+import com.demo.finance.domain.dto.GoalDto;
+import com.demo.finance.domain.mapper.GoalMapper;
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.utils.BalanceUtils;
+import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.out.repository.GoalRepository;
 import com.demo.finance.out.service.GoalService;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * {@code GoalServiceImpl} implements the {@code GoalService} interface.
@@ -30,17 +32,11 @@ public class GoalServiceImpl implements GoalService {
         this.balanceUtils = balanceUtils;
     }
 
-    /**
-     * Creates a new goal for a user.
-     *
-     * @param userId       the ID of the user for whom the goal is being created
-     * @param goalName     the name of the goal
-     * @param targetAmount the target amount to be saved for the goal
-     * @param duration     the duration (in months) to achieve the goal
-     */
     @Override
-    public void createGoal(Long userId, String goalName, BigDecimal targetAmount, int duration) {
-        goalRepository.save(new Goal(userId, goalName, targetAmount, duration));
+    public Long createGoal(GoalDto goalDto) {
+        Goal goal = GoalMapper.INSTANCE.toEntity(goalDto);
+        goal.setSavedAmount(BigDecimal.ZERO);
+        return goalRepository.save(goal);
     }
 
     /**
@@ -54,6 +50,11 @@ public class GoalServiceImpl implements GoalService {
         return goalRepository.findById(goalId);
     }
 
+    @Override
+    public Goal getGoalByUserIdAndGoalId(Long userId, Long goalId) {
+        return goalRepository.findByUserIdAndGoalId(userId, goalId);
+    }
+
     /**
      * Retrieves all goals associated with a user.
      *
@@ -65,26 +66,15 @@ public class GoalServiceImpl implements GoalService {
         return goalRepository.findByUserId(userId);
     }
 
-    /**
-     * Updates an existing goal with new details.
-     *
-     * @param goalId          the ID of the goal to update
-     * @param userId          the ID of the user who owns the goal
-     * @param newGoalName     the new name for the goal
-     * @param newTargetAmount the new target amount for the goal
-     * @param newDuration     the new duration (in months) to achieve the goal
-     * @return {@code true} if the goal was successfully updated, {@code false} otherwise
-     */
     @Override
-    public boolean updateGoal(Long goalId, Long userId, String newGoalName, BigDecimal newTargetAmount,
-                              int newDuration) {
-        Optional<Goal> goal = goalRepository.findByUserIdAndGoalId(goalId, userId);
-        if (goal.isPresent()) {
-            Goal updatedGoal = goal.get();
-            updatedGoal.setGoalName(newGoalName);
-            updatedGoal.setTargetAmount(newTargetAmount);
-            updatedGoal.setDuration(newDuration);
-            goalRepository.update(updatedGoal);
+    public boolean updateGoal(GoalDto goalDto, Long userId) {
+        Long goalId = goalDto.getGoalId();
+        Goal goal = goalRepository.findByUserIdAndGoalId(userId, goalId);
+        if (goal != null) {
+            goal.setGoalName(goalDto.getGoalName());
+            goal.setTargetAmount(goalDto.getTargetAmount());
+            goal.setDuration(goalDto.getDuration());
+            goalRepository.update(goal);
             return true;
         }
         return false;
@@ -99,8 +89,8 @@ public class GoalServiceImpl implements GoalService {
      */
     @Override
     public boolean deleteGoal(Long userId, Long goalId) {
-        Optional<Goal> goal = goalRepository.findByUserIdAndGoalId(userId, goalId);
-        if (goal.isPresent()) {
+        Goal goal = goalRepository.findByUserIdAndGoalId(userId, goalId);
+        if (goal != null) {
             return goalRepository.delete(goalId);
         }
         return false;
@@ -125,6 +115,16 @@ public class GoalServiceImpl implements GoalService {
 
     @Override
     public int getTotalGoalCount(Long userId) {
-        return goalRepository.countAllGoals(userId);
+        return goalRepository.getTotalGoalCountForUser(userId);
+    }
+
+    @Override
+    public PaginatedResponse<GoalDto> getPaginatedGoalsForUser(Long userId, int page, int size) {
+        int offset = (page - 1) * size;
+        List<Goal> goals = goalRepository.findByUserId(userId, offset, size);
+        int totalGoals = goalRepository.getTotalGoalCountForUser(userId);
+        List<GoalDto> dtoList = goals.stream().map(GoalMapper.INSTANCE::toDto).toList();
+        return new PaginatedResponse<>(dtoList, totalGoals, (int) Math.ceil((double) totalGoals / size),
+                page, size);
     }
 }

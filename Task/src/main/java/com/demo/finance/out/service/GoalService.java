@@ -1,6 +1,8 @@
 package com.demo.finance.out.service;
 
+import com.demo.finance.domain.dto.GoalDto;
 import com.demo.finance.domain.model.Goal;
+import com.demo.finance.domain.utils.PaginatedResponse;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -12,15 +14,7 @@ import java.util.List;
  */
 public interface GoalService {
 
-    /**
-     * Creates a new goal for a user.
-     *
-     * @param userId       the ID of the user for whom the goal is being created
-     * @param goalName     the name of the goal
-     * @param targetAmount the target amount to be saved for the goal
-     * @param duration     the duration (in months) to achieve the goal
-     */
-    void createGoal(Long userId, String goalName, BigDecimal targetAmount, int duration);
+    Long createGoal(GoalDto goalDto);
 
     /**
      * Retrieves a goal by its ID.
@@ -30,6 +24,8 @@ public interface GoalService {
      */
     Goal getGoal(Long goalId);
 
+    Goal getGoalByUserIdAndGoalId(Long userId, Long goalId);
+
     /**
      * Retrieves all goals associated with a user.
      *
@@ -38,17 +34,7 @@ public interface GoalService {
      */
     List<Goal> getGoalsByUserId(Long userId);
 
-    /**
-     * Updates an existing goal with new details.
-     *
-     * @param goalId          the ID of the goal to update
-     * @param userId          the ID of the user who owns the goal
-     * @param newGoalName     the new name for the goal
-     * @param newTargetAmount the new target amount for the goal
-     * @param newDuration     the new duration (in months) to achieve the goal
-     * @return {@code true} if the goal was successfully updated, {@code false} otherwise
-     */
-    boolean updateGoal(Long goalId, Long userId, String newGoalName, BigDecimal newTargetAmount, int newDuration);
+    boolean updateGoal(GoalDto goalDto, Long userId);
 
     /**
      * Deletes a goal by its ID.
@@ -83,4 +69,6 @@ public interface GoalService {
      * @return the total number of goals
      */
     int getTotalGoalCount(Long userId);
+
+    PaginatedResponse<GoalDto> getPaginatedGoalsForUser(Long userId, int page, int size);
 }

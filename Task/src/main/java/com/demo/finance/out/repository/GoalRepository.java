@@ -16,7 +16,7 @@ public interface GoalRepository {
      *
      * @param goal the Goal entity to be saved
      */
-    void save(Goal goal);
+    Long save(Goal goal);
 
     /**
      * Updates the specified Goal entity in the repository.
@@ -50,6 +50,8 @@ public interface GoalRepository {
      */
     List<Goal> findByUserId(Long userId);
 
+    List<Goal> findByUserId(Long userId, int offset, int size);
+
     /**
      * Finds a Goal entity by its ID and the associated user ID.
      *
@@ -58,9 +60,9 @@ public interface GoalRepository {
      * @return an {@code Optional<Goal>} containing the goal if found,
      * or an empty {@code Optional} if not found
      */
-    Optional<Goal> findByUserIdAndGoalId(Long goalId, Long userId);
+    Goal findByUserIdAndGoalId(Long userId, Long goalId);
 
     List<Goal> findPaginatedGoals(Long userId, int offset, int size);
 
-    int countAllGoals(Long userId);
+    int getTotalGoalCountForUser(Long userId);
 }

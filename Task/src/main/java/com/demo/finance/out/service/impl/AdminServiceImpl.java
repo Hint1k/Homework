@@ -1,18 +1,10 @@
 package com.demo.finance.out.service.impl;
 
-import com.demo.finance.domain.dto.TransactionDto;
 import com.demo.finance.domain.dto.UserDto;
-import com.demo.finance.domain.mapper.TransactionMapper;
-import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.Role;
-import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.utils.PaginatedResponse;
-import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.AdminService;
-
-import java.util.List;
 
 /**
  * {@code AdminServiceImpl} is an implementation of the {@code AdminService} interface.
@@ -22,16 +14,14 @@ import java.util.List;
 public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
-    private final TransactionRepository transactionRepository;
 
     /**
      * Constructs an {@code AdminServiceImpl} instance with the specified {@code UserRepository}.
      *
      * @param userRepository the repository to interact with user data
      */
-    public AdminServiceImpl(UserRepository userRepository, TransactionRepository transactionRepository) {
+    public AdminServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.transactionRepository = transactionRepository;
     }
 
     @Override
@@ -78,26 +68,5 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public boolean deleteUser(Long userId) {
         return userRepository.delete(userId);
-    }
-
-    @Override
-    public PaginatedResponse<UserDto> getPaginatedUsers(int page, int size) {
-        int offset = (page - 1) * size;
-        List<User> users = userRepository.findAll(offset, size);
-        int totalUsers = userRepository.getTotalUserCount();
-        List<UserDto> dtoList = users.stream().map(user ->
-                UserDto.removePassword(UserMapper.INSTANCE.toDto(user))).toList();
-
-        return new PaginatedResponse<>(dtoList, totalUsers, (int) Math.ceil((double) totalUsers / size), page, size);
-    }
-
-    @Override
-    public PaginatedResponse<TransactionDto> getPaginatedTransactionsForUser(Long userId, int page, int size) {
-        int offset = (page - 1) * size;
-        List<Transaction> transactions = transactionRepository.findByUserId(userId, offset, size);
-        int totalTransactions = transactionRepository.getTotalTransactionCountForUser(userId);
-        List<TransactionDto> dtoList = transactions.stream().map(TransactionMapper.INSTANCE::toDto).toList();
-        return new PaginatedResponse<>(dtoList, totalTransactions, (int) Math.ceil((double) totalTransactions / size),
-                page, size);
     }
 }
