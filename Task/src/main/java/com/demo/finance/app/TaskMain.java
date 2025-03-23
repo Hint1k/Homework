@@ -27,7 +27,7 @@ public class TaskMain {
         context.addServlet(new ServletHolder(appConfig.getUserServlet()), "/api/users/*");
         context.addServlet(new ServletHolder(appConfig.getTransactionServlet()), "/api/transactions/*");
         context.addServlet(new ServletHolder(appConfig.getAdminServlet()), "/api/admin/users/*");
-        context.addServlet(new ServletHolder(appConfig.getBudgetServlet()), "/api/budget/*");
+        context.addServlet(new ServletHolder(appConfig.getBudgetServlet()), "/api/budgets/*");
         context.addServlet(new ServletHolder(appConfig.getGoalServlet()), "/api/goals/*");
         context.addServlet(new ServletHolder(appConfig.getNotificationServlet()), "/api/notifications/*");
         context.addServlet(new ServletHolder(appConfig.getReportServlet()), "/api/reports/*");

@@ -4,6 +4,7 @@ import com.demo.finance.domain.model.Budget;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -13,21 +14,9 @@ import java.util.Optional;
  */
 public interface BudgetService {
 
-    /**
-     * Sets the monthly budget for a user.
-     *
-     * @param userId the ID of the user to set the budget for
-     * @param limit the budget limit for the month
-     */
-    void setMonthlyBudget(Long userId, BigDecimal limit);
+    Budget setMonthlyBudget(Long userId, BigDecimal limit);
 
-    /**
-     * Retrieves the current budget for a user.
-     *
-     * @param userId the ID of the user whose budget is to be retrieved
-     * @return an {@code Optional<Budget>} containing the user's budget, or an empty optional if no budget is set
-     */
-    Optional<Budget> getBudget(Long userId);
+    Budget getBudget(Long userId);
 
     /**
      * Calculates the total expenses for a user for a given month.
@@ -38,11 +27,5 @@ public interface BudgetService {
      */
     BigDecimal calculateExpensesForMonth(Long userId, YearMonth currentMonth);
 
-    /**
-     * Retrieves the formatted string representation of a user's budget.
-     *
-     * @param userId the ID of the user whose budget is to be formatted
-     * @return a string representing the user's budget in a readable format
-     */
-    String getFormattedBudget(Long userId);
+    Map<String, Object> getBudgetData(Long userId);
 }

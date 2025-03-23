@@ -2,7 +2,6 @@ package com.demo.finance.out.repository;
 
 import com.demo.finance.domain.model.Budget;
 
-import java.util.Optional;
 
 /**
  * The {@code BudgetRepository} interface defines the contract for interacting with the storage
@@ -16,7 +15,7 @@ public interface BudgetRepository {
      *
      * @param budget the {@code Budget} object to be saved
      */
-    void save(Budget budget);
+    boolean save(Budget budget);
 
     /**
      * Deletes the budget associated with the specified budget ID.
@@ -41,7 +40,7 @@ public interface BudgetRepository {
      * @return an {@code Optional<Budget>} containing the budget if found,
      * or an empty {@code Optional} if no budget is found
      */
-    Optional<Budget> findById(Long budgetId);
+    Budget findById(Long budgetId);
 
     /**
      * Retrieves the {@code Budget} associated with the specified user ID.
@@ -50,5 +49,5 @@ public interface BudgetRepository {
      * @return an {@code Optional<Budget>} containing the user's budget if it exists,
      * or an empty {@code Optional} if no budget is found
      */
-    Optional<Budget> findByUserId(Long userId);
+    Budget findByUserId(Long userId);
 }

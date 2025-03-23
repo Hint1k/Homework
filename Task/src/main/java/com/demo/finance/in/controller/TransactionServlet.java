@@ -60,21 +60,26 @@ public class TransactionServlet extends HttpServlet {
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
                         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        response.setContentType("application/json");
                         response.getWriter().write("Failed to retrieve transaction details.");
                     }
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json");
                     response.getWriter().write("Failed to create transaction.");
                 }
             } catch (ValidationException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write(e.getMessage());
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.setContentType("application/json");
                 response.getWriter().write("An error occurred while creating the transaction.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -133,14 +138,17 @@ public class TransactionServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("application/json");
                     response.getWriter().write("Transaction not found or you are not the owner of the transaction.");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid transaction ID.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -171,25 +179,31 @@ public class TransactionServlet extends HttpServlet {
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
                         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        response.setContentType("application/json");
                         response.getWriter().write("Failed to retrieve transaction details.");
                     }
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json");
                     response.getWriter()
                             .write("Failed to update transaction or you are not the owner of the transaction.");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid transaction ID.");
             } catch (ValidationException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write(e.getMessage());
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.setContentType("application/json");
                 response.getWriter().write("An error occurred while updating the transaction.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -215,15 +229,18 @@ public class TransactionServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json");
                     response.getWriter()
                             .write("Failed to delete transaction or you are not the owner of the transaction.");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid transaction ID");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }

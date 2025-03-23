@@ -1,8 +1,9 @@
 package com.demo.finance.in.controller;
 
-import com.demo.finance.domain.dto.BudgetDto;
-import com.demo.finance.domain.mapper.BudgetMapper;
+import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.Budget;
+import com.demo.finance.domain.utils.Mode;
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.out.service.BudgetService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -15,20 +16,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * The {@code BudgetServlet} class handles incoming HTTP requests related to budget management.
  * It provides endpoints for setting and retrieving a user's budget.
  */
-@WebServlet("/api/budget/*")
+@WebServlet("/api/budgets/*")
 public class BudgetServlet extends HttpServlet {
 
     private final BudgetService budgetService;
     private final ObjectMapper objectMapper;
+    private final ValidationUtils validationUtils;
 
-    public BudgetServlet(BudgetService budgetService, ObjectMapper objectMapper) {
+    public BudgetServlet(BudgetService budgetService, ObjectMapper objectMapper, ValidationUtils validationUtils) {
         this.budgetService = budgetService;
         this.objectMapper = objectMapper;
+        this.validationUtils = validationUtils;
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
@@ -42,33 +46,41 @@ public class BudgetServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
-        if ("/".equals(pathInfo)) {
+        if (pathInfo == null || "/".equals(pathInfo)) {
             try {
-                StringBuilder jsonBody = new StringBuilder();
-                String line;
-                try (BufferedReader reader = request.getReader()) {
-                    while ((line = reader.readLine()) != null) {
-                        jsonBody.append(line);
+                UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
+                Long userId = userDto.getUserId();
+                String json = readRequestBody(request);
+                BigDecimal limit = validationUtils.validateBudgetJson(json, Mode.BUDGET, userId);
+                if (limit != null) {
+                    Budget budget = budgetService.setMonthlyBudget(userId, limit);
+                    if (budget != null) {
+                        Map<String, Object> responseBody = Map.of(
+                                "message", "Budget generated successfully",
+                                "data", budget,
+                                "timestamp", java.time.Instant.now().toString()
+                        );
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.setContentType("application/json");
+                        response.getWriter().write(objectMapper.writeValueAsString(responseBody));
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        response.setContentType("application/json");
+                        response.getWriter().write("Failed to retrieve budget details.");
                     }
-                }
-                BudgetDto budgetDto = objectMapper.readValue(jsonBody.toString(), BudgetDto.class);
-                BigDecimal monthlyLimit = budgetDto.getMonthlyLimit();
-                Long userId = budgetDto.getUserId();
-                if (userId == null || monthlyLimit == null || monthlyLimit.compareTo(BigDecimal.ZERO) <= 0) {
+                } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("Invalid input. User ID and monthly limit must be provided.");
-                    return;
+                    response.setContentType("application/json");
+                    response.getWriter().write("Monthly limit must be provided.");
                 }
-                budgetService.setMonthlyBudget(userId, monthlyLimit);
-                response.setStatus(HttpServletResponse.SC_CREATED);
-                response.setContentType("application/json");
-                response.getWriter().write(objectMapper.writeValueAsString(budgetDto));
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid JSON format or input.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -83,30 +95,45 @@ public class BudgetServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
-        if (pathInfo != null && pathInfo.startsWith("/")) {
+        if ("/budget".equals(pathInfo)) {
             try {
-                Long userId = Long.parseLong(pathInfo.substring(1));
-                String formattedBudget = budgetService.getFormattedBudget(userId);
-                if (formattedBudget != null) {
+                UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
+                Long userId = userDto.getUserId();
+                Map<String, Object> budgetData = budgetService.getBudgetData(userId);
+                if (budgetData != null) {
+                    Map<String, Object> responseBody = Map.of(
+                            "message", "Budget generated successfully",
+                            "data", budgetData,
+                            "timestamp", java.time.Instant.now().toString()
+                    );
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.setContentType("application/json");
-                    BudgetDto budgetDto = BudgetMapper.INSTANCE.toDto(
-                            new Budget(null, userId, null, null)
-                    );
-                    budgetDto.setMonthlyLimit(new BigDecimal(formattedBudget.split("/")[1].trim()));
-                    budgetDto.setCurrentExpenses(new BigDecimal(formattedBudget.split("/")[0].trim()));
-                    response.getWriter().write(objectMapper.writeValueAsString(budgetDto));
+                    response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("application/json");
                     response.getWriter().write("Budget not found for the user.");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid user ID.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
+    }
+
+    private String readRequestBody(HttpServletRequest request) throws IOException {
+        StringBuilder json = new StringBuilder();
+        try (BufferedReader reader = request.getReader()) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                json.append(line);
+            }
+        }
+        return json.toString();
     }
 }

@@ -1,8 +1,10 @@
 package com.demo.finance.domain.utils;
 
+import com.demo.finance.domain.dto.BudgetDto;
 import com.demo.finance.domain.dto.ReportDto;
 import com.demo.finance.domain.dto.UserDto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -19,4 +21,6 @@ public interface ValidationUtils {
     PaginationParams validatePaginationParams(String page, String size);
 
     Map<String, LocalDate> validateReport(String json, Mode mode, Long userId);
+
+    BigDecimal validateBudgetJson(String json, Mode mode, Long userId);
 }

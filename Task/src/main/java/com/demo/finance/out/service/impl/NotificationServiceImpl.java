@@ -87,14 +87,11 @@ public class NotificationServiceImpl implements NotificationService {
      * @return the budget limit notification message
      */
     private String getBudgetLimitNotification(Long userId) {
-        Optional<Budget> budgetOpt = budgetRepository.findByUserId(userId);
-        if (budgetOpt.isEmpty()) {
+        Budget budget = budgetRepository.findByUserId(userId);
+        if (budget == null) {
             return "No budget set for user.";
         }
-
-        Budget budget = budgetOpt.get();
         BigDecimal totalExpenses = calculateTotalExpenses(userId);
-
         BigDecimal remainingBudget = budget.getMonthlyLimit().subtract(totalExpenses);
         if (remainingBudget.compareTo(BigDecimal.ZERO) < 0) {
             return "🚨 Budget exceeded! Limit: " + budget.getMonthlyLimit() + ", Expenses: " + totalExpenses;

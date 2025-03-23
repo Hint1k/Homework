@@ -9,5 +9,6 @@ public enum Mode {
     UPDATE_ROLE,
     BLOCK_UNBLOCK,
     CREATE,
-    REPORT
+    REPORT,
+    BUDGET,
 }

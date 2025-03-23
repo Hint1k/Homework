@@ -71,14 +71,17 @@ public class ReportServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("application/json");
                     response.getWriter().write("No transactions found for the user in the specified date range.");
                 }
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid JSON format or input.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -112,13 +115,16 @@ public class ReportServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("application/json");
                     response.getWriter().write("No expenses found for the user in the specified date range.");
                 }
             } catch (ValidationException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write(e.getMessage());
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid user ID or date format.");
             }
         } else if ("/report".equals(pathInfo)) {
@@ -138,14 +144,17 @@ public class ReportServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("application/json");
                     response.getWriter().write("No reports found for the user.");
                 }
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid JSON format or input.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }

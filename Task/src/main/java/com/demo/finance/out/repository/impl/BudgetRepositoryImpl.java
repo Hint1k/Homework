@@ -6,7 +6,6 @@ import com.demo.finance.out.repository.BudgetRepository;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Optional;
 
 /**
  * Implementation of the {@link BudgetRepository} interface for managing budget-related database operations.
@@ -28,8 +27,13 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      * @param budget the budget to be saved
      */
     @Override
-    public void save(Budget budget) {
-        super.persistEntity(budget, INSERT_SQL, stmt -> setBudgetParameters(stmt, budget));
+    public boolean save(Budget budget) {
+        Long generatedId = insertRecord(INSERT_SQL, stmt -> setBudgetParameters(stmt, budget));
+        if (generatedId != null) {
+            setGeneratedId(budget, generatedId);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -64,9 +68,9 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      * @return an {@code Optional} containing the budget if found, or an empty {@code Optional} if not found
      */
     @Override
-    public Optional<Budget> findById(Long budgetId) {
+    public Budget findById(Long budgetId) {
         return findRecordByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, budgetId),
-                this::mapResultSetToBudget);
+                this::mapResultSetToBudget).orElse(null);
     }
 
     /**
@@ -76,9 +80,9 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      * @return an {@code Optional} containing the budget if found, or an empty {@code Optional} if not found
      */
     @Override
-    public Optional<Budget> findByUserId(Long userId) {
+    public Budget findByUserId(Long userId) {
         return findRecordByCriteria(FIND_BY_USER_ID_SQL, stmt -> stmt.setLong(1, userId),
-                this::mapResultSetToBudget);
+                this::mapResultSetToBudget).orElse(null);
     }
 
     /**

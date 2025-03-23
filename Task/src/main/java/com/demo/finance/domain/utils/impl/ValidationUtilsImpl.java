@@ -1,7 +1,6 @@
 package com.demo.finance.domain.utils.impl;
 
-import com.demo.finance.domain.dto.ReportDto;
-import com.demo.finance.domain.dto.TransactionDto;
+import com.demo.finance.domain.dto.BudgetDto;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.utils.PaginationParams;
@@ -11,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
@@ -103,6 +103,18 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    @Override
+    public BigDecimal validateBudgetJson(String json, Mode mode, Long userId) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            validateRequiredFields(jsonNode, mode);
+            validateFieldValues(jsonNode, mode);
+            return BigDecimal.valueOf(jsonNode.get("monthlyLimit").asDouble());
+        } catch (Exception e) {
+            throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
+        }
+    }
+
     private void validateRequiredFields(JsonNode jsonNode, Mode mode) {
         switch (mode) {
             case UPDATE:
@@ -128,6 +140,9 @@ public class ValidationUtilsImpl implements ValidationUtils {
             case REPORT:
                 checkField(jsonNode, "fromDate");
                 checkField(jsonNode, "toDate");
+            case BUDGET:
+                checkField(jsonNode, "monthlyLimit");
+                break;
             default:
                 break;
         }
@@ -141,14 +156,12 @@ public class ValidationUtilsImpl implements ValidationUtils {
         if (jsonNode.has("email") && !isValidEmail(jsonNode.get("email").asText())) {
             throw new ValidationException("Invalid email format.");
         }
-
         if (jsonNode.has("password")) {
             String password = jsonNode.get("password").asText();
             if (password.isBlank()) {
                 throw new ValidationException("Password cannot be empty.");
             }
         }
-
         if (jsonNode.has("fromDate")) {
             try {
                 LocalDate.parse(jsonNode.get("fromDate").asText());
@@ -156,17 +169,22 @@ public class ValidationUtilsImpl implements ValidationUtils {
                 throw new ValidationException("Invalid date format.");
             }
         }
-
         if (jsonNode.has("toDate")) {
-            try{
+            try {
                 LocalDate.parse(jsonNode.get("toDate").asText());
             } catch (DateTimeParseException e) {
                 throw new ValidationException("Invalid date format.");
             }
         }
-
         if (jsonNode.has("blocked") && !jsonNode.get("blocked").isBoolean()) {
             throw new ValidationException("Blocked field must be a boolean.");
+        }
+
+        if (jsonNode.has("monthlyLimit")) {
+            BigDecimal amount = new BigDecimal(jsonNode.get("monthlyLimit").asText());
+            if (amount.compareTo(BigDecimal.ZERO) < 0) {
+                throw new ValidationException("Amount must be positive.");
+            }
         }
     }
 

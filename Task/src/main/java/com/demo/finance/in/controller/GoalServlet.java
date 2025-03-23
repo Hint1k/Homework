@@ -64,17 +64,21 @@ public class GoalServlet extends HttpServlet {
                     }
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json");
                     response.getWriter().write("Failed to create goal.");
                 }
             } catch (ValidationException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write(e.getMessage());
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.setContentType("application/json");
                 response.getWriter().write("An error occurred while creating the goal.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -132,14 +136,17 @@ public class GoalServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("application/json");
                     response.getWriter().write("Goal not found or you are not the owner of the goal.");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid goal ID.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -169,24 +176,30 @@ public class GoalServlet extends HttpServlet {
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
                         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        response.setContentType("application/json");
                         response.getWriter().write("Failed to retrieve goal details.");
                     }
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json");
                     response.getWriter().write("Failed to update goal or you are not the owner of the goal.");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid goal ID.");
             } catch (ValidationException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write(e.getMessage());
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.setContentType("application/json");
                 response.getWriter().write("An error occurred while updating the goal.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -212,14 +225,17 @@ public class GoalServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json");
                     response.getWriter().write("Failed to delete goal or you are not the owner of the goal.");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid goal ID");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }

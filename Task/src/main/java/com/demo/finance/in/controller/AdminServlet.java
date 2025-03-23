@@ -127,14 +127,17 @@ public class AdminServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("application/json");
                     response.getWriter().write("User not found.");
                 }
             } catch (IllegalArgumentException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write(e.getMessage());
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -159,10 +162,12 @@ public class AdminServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json");
                     response.getWriter().write("Failed to block/unblock user.");
                 }
             } catch (ValidationException | IllegalArgumentException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write(e.getMessage());
             }
         } else if (pathInfo != null && pathInfo.startsWith("/role/")) {
@@ -182,14 +187,17 @@ public class AdminServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json");
                     response.getWriter().write("Failed to update role.");
                 }
             } catch (ValidationException | IllegalArgumentException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write(e.getMessage());
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -212,17 +220,21 @@ public class AdminServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("application/json");
                     response.getWriter().write("User not found.");
                 }
             } catch (ValidationException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write(e.getMessage());
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid user ID.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }

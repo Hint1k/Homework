@@ -59,14 +59,17 @@ public class UserServlet extends HttpServlet {
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
                         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        response.setContentType("application/json");
                         response.getWriter().write("Failed to retrieve user details.");
                     }
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json");
                     response.getWriter().write("Failed to register user.");
                 }
             } catch (ValidationException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write(e.getMessage());
             }
         } else if ("/authenticate".equals(pathInfo)) {
@@ -90,10 +93,12 @@ public class UserServlet extends HttpServlet {
                         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                     } else {
                         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        response.setContentType("application/json");
                         response.getWriter().write("Failed to retrieve user details.");
                     }
                 } else {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
                     response.getWriter().write("Invalid credentials.");
                 }
             } catch (Exception e) {
@@ -106,6 +111,7 @@ public class UserServlet extends HttpServlet {
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -134,6 +140,7 @@ public class UserServlet extends HttpServlet {
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
@@ -164,14 +171,17 @@ public class UserServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(responseBody));
                 } else {
                     response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    response.setContentType("application/json");
                     response.getWriter().write("Failed to retrieve updated user details.");
                 }
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Failed to update account.");
             }
         } catch (ValidationException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
             response.getWriter().write(e.getMessage());
         }
     }
@@ -195,10 +205,12 @@ public class UserServlet extends HttpServlet {
                 response.getWriter().write(objectMapper.writeValueAsString(responseBody));
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Failed to delete account.");
             }
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.setContentType("application/json");
             response.getWriter().write("An error occurred while deleting the account.");
         }
     }
@@ -212,5 +224,13 @@ public class UserServlet extends HttpServlet {
             }
         }
         return json.toString();
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, int statusCode, String errorMessage)
+            throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json");
+        Map<String, String> errorResponse = Map.of("error", errorMessage);
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

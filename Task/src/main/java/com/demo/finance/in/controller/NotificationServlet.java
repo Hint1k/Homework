@@ -1,5 +1,6 @@
 package com.demo.finance.in.controller;
 
+import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.out.service.NotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -40,7 +41,8 @@ public class NotificationServlet extends HttpServlet {
         String pathInfo = request.getPathInfo();
         if ("/budget".equals(pathInfo)) {
             try {
-                Long userId = Long.parseLong(request.getParameter("userId"));
+                UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
+                Long userId = userDto.getUserId();
                 String notification = notificationService.fetchBudgetNotification(userId);
                 if (notification != null && !notification.isEmpty()) {
                     response.setStatus(HttpServletResponse.SC_OK);
@@ -48,16 +50,19 @@ public class NotificationServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(Map.of("message", notification)));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("application/json");
                     response.getWriter().write("No budget notification found for the user.");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid user ID.");
             }
         }
         else if ("/goal".equals(pathInfo)) {
             try {
-                Long userId = Long.parseLong(request.getParameter("userId"));
+                UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
+                Long userId = userDto.getUserId();
                 String notification = notificationService.fetchGoalNotification(userId);
                 if (notification != null && !notification.isEmpty()) {
                     response.setStatus(HttpServletResponse.SC_OK);
@@ -65,14 +70,17 @@ public class NotificationServlet extends HttpServlet {
                     response.getWriter().write(objectMapper.writeValueAsString(Map.of("message", notification)));
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("application/json");
                     response.getWriter().write("No goal notification found for the user.");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json");
                 response.getWriter().write("Invalid user ID.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("application/json");
             response.getWriter().write("Endpoint not found.");
         }
     }
