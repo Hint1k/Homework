@@ -102,7 +102,9 @@ public class BudgetServiceImpl implements BudgetService {
         BigDecimal totalExpenses = calculateExpensesForMonth(userId, currentMonth);
         Budget budget = getBudget(userId);
         if (budget == null) {
-            throw new RuntimeException("No budget set for the user.");
+            return Map.of("message", "Budget is not set", "data", Map.of(
+                    "monthlyLimit", BigDecimal.ZERO,
+                    "currentExpenses", totalExpenses));
         }
         BigDecimal monthlyLimit = budget.getMonthlyLimit();
         String formattedBudget = String.format("Budget: %.2f/%.2f", totalExpenses, monthlyLimit);

@@ -54,13 +54,13 @@ https://github.com/Hint1k/homework
 ```
 
 ### Building and Running the Application
-Navigate to project root folder and run Docker command:
-```bash
-docker-compose up --build
-```
-Once docker is up and PostgreSQL database is ready run Gradle command:
+Navigate to project root folder and run Gradle command:
 ```bash
 ./gradlew clean shadowJar 
+```
+Then run Docker command:
+```bash
+docker-compose up --build
 ```
 
 ---
