@@ -88,11 +88,11 @@ public class AppConfig {
 
         this.userServlet = new UserServlet(registrationService, userService, validationUtils, objectMapper);
         this.transactionServlet = new TransactionServlet(transactionService, objectMapper, validationUtils);
-        this.adminServlet = new AdminServlet(adminService, userService, transactionService, objectMapper,
-                validationUtils);
+        this.adminServlet = new AdminServlet(adminService, userService, transactionService, validationUtils,
+                objectMapper);
         this.budgetServlet = new BudgetServlet(budgetService, objectMapper, validationUtils);
         this.goalServlet = new GoalServlet(goalService, objectMapper, validationUtils);
-        this.notificationServlet = new NotificationServlet(notificationService, objectMapper);
+        this.notificationServlet = new NotificationServlet(notificationService, objectMapper, validationUtils);
         this.reportServlet = new ReportServlet(reportService, objectMapper, validationUtils);
     }
 }

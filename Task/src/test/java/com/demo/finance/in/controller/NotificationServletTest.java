@@ -1,6 +1,7 @@
 package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.dto.UserDto;
+import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.out.service.NotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -28,13 +29,14 @@ class NotificationServletTest {
     @Mock private HttpServletResponse response;
     @Mock private HttpSession session;
     @Mock private PrintWriter printWriter;
+    @Mock private ValidationUtils validationUtils;
     private NotificationServlet notificationServlet;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() throws Exception {
         objectMapper.registerModule(new JavaTimeModule());
-        notificationServlet = new NotificationServlet(notificationService, objectMapper);
+        notificationServlet = new NotificationServlet(notificationService, objectMapper, validationUtils);
         when(response.getWriter()).thenReturn(printWriter);
     }
 

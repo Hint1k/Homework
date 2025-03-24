@@ -54,7 +54,7 @@ class AdminServletTest {
     @BeforeEach
     void setUp() throws Exception {
         objectMapper.registerModule(new JavaTimeModule());
-        adminServlet = new AdminServlet(adminService, userService, transactionService, objectMapper, validationUtils);
+        adminServlet = new AdminServlet(adminService, userService, transactionService, validationUtils, objectMapper);
         when(response.getWriter()).thenReturn(printWriter);
     }
 
