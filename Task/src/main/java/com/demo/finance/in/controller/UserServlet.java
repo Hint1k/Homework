@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * The {@code UserServlet} class is a servlet that handles HTTP requests related to user operations,
@@ -119,12 +118,8 @@ public class UserServlet extends BaseServlet {
                 User user = userService.getUserByEmail(userDto.getEmail());
                 if (user != null) {
                     UserDto registeredUserDto = UserDto.removePassword(UserMapper.INSTANCE.toDto(user));
-                    Map<String, Object> responseBody = Map.of(
-                            "message", "User registered successfully",
-                            "data", registeredUserDto,
-                            "timestamp", java.time.Instant.now().toString()
-                    );
-                    sendSuccessResponse(response, HttpServletResponse.SC_CREATED, responseBody);
+                    sendSuccessResponse(response, HttpServletResponse.SC_CREATED,
+                            "User registered successfully", registeredUserDto);
                 } else {
                     sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                             "Failed to retrieve user details.");
@@ -156,12 +151,8 @@ public class UserServlet extends BaseServlet {
                     UserDto authUserDto = UserDto.removePassword(UserMapper.INSTANCE.toDto(user));
                     HttpSession session = request.getSession();
                     session.setAttribute("currentUser", authUserDto);
-                    Map<String, Object> responseBody = Map.of(
-                            "message", "Authentication successful",
-                            "data", authUserDto,
-                            "timestamp", java.time.Instant.now().toString()
-                    );
-                    sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                    sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                            "Authentication successful", authUserDto);
                 } else {
                     sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                             "Failed to retrieve user details.");
@@ -186,12 +177,7 @@ public class UserServlet extends BaseServlet {
     private void handleGetCurrentUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
         if (userDto != null) {
-            Map<String, Object> responseBody = Map.of(
-                    "message", "Authenticated user details",
-                    "data", userDto,
-                    "timestamp", java.time.Instant.now().toString()
-            );
-            sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+            sendSuccessResponse(response, HttpServletResponse.SC_OK, "Authenticated user details", userDto);
         } else {
             sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
                     "No user is currently logged in.");
@@ -220,12 +206,8 @@ public class UserServlet extends BaseServlet {
                     if (session != null) {
                         session.setAttribute("currentUser", updatedUserDto);
                     }
-                    Map<String, Object> responseBody = Map.of(
-                            "message", "User updated successfully",
-                            "data", updatedUserDto,
-                            "timestamp", java.time.Instant.now().toString()
-                    );
-                    sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                    sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                            "User updated successfully", updatedUserDto);
                 } else {
                     sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                             "Failed to retrieve updated user details.");
@@ -254,12 +236,8 @@ public class UserServlet extends BaseServlet {
             boolean success = userService.deleteOwnAccount(currentUser.getUserId());
             if (success) {
                 session.invalidate();
-                Map<String, Object> responseBody = Map.of(
-                        "message", "Account deleted successfully",
-                        "email", currentUser.getEmail(),
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                        "Account deleted successfully", currentUser.getEmail());
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
                         "Failed to delete account.");

@@ -85,12 +85,8 @@ public class BudgetServlet extends BaseServlet {
             if (limit != null) {
                 Budget budget = budgetService.setMonthlyBudget(userId, limit);
                 if (budget != null) {
-                    Map<String, Object> responseBody = Map.of(
-                            "message", "Budget generated successfully",
-                            "data", budget,
-                            "timestamp", java.time.Instant.now().toString()
-                    );
-                    sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                    sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                            "Budget generated successfully", budget);
                 } else {
                     sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                             "Failed to retrieve budget details.");
@@ -118,12 +114,8 @@ public class BudgetServlet extends BaseServlet {
             Long userId = userDto.getUserId();
             Map<String, Object> budgetData = budgetService.getBudgetData(userId);
             if (budgetData != null) {
-                Map<String, Object> responseBody = Map.of(
-                        "message", "Budget retrieved successfully",
-                        "data", budgetData,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                        "Budget retrieved successfully", budgetData);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
                         "Budget not found for the user.");

@@ -19,7 +19,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * The {@code AdminServlet} class is a servlet that handles HTTP requests related to admin operations,
@@ -132,21 +131,10 @@ public class AdminServlet extends BaseServlet {
         try {
             String json = readRequestBody(request);
             PaginationParams paginationParams = objectMapper.readValue(json, PaginationParams.class);
-            PaginationParams params = validationUtils.validatePaginationParams(
-                    String.valueOf(paginationParams.page()),
-                    String.valueOf(paginationParams.size())
-            );
-            PaginatedResponse<UserDto> paginatedResponse = userService.getPaginatedUsers(
-                    params.page(),
-                    params.size()
-            );
-            Map<String, Object> metadata = Map.of(
-                    "totalItems", paginatedResponse.totalItems(),
-                    "totalPages", paginatedResponse.totalPages(),
-                    "currentPage", paginatedResponse.currentPage(),
-                    "pageSize", paginatedResponse.pageSize()
-            );
-            sendPaginatedResponse(response, paginatedResponse.data(), metadata);
+            PaginationParams params = validationUtils.validatePaginationParams(String.valueOf(paginationParams.page()),
+                    String.valueOf(paginationParams.size()));
+            PaginatedResponse<UserDto> paginatedResponse = userService.getPaginatedUsers(params.page(), params.size());
+            sendPaginatedResponseWithMetadata(response, null, paginatedResponse);
         } catch (IllegalArgumentException e) {
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
                     "Invalid pagination parameters: " + e.getMessage());
@@ -169,19 +157,10 @@ public class AdminServlet extends BaseServlet {
             PaginationParams paginationRequest = objectMapper.readValue(json, PaginationParams.class);
             Long userId = validationUtils.parseUserId(userIdString, Mode.GET);
             PaginationParams params = validationUtils.validatePaginationParams(
-                    String.valueOf(paginationRequest.page()),
-                    String.valueOf(paginationRequest.size())
-            );
+                    String.valueOf(paginationRequest.page()), String.valueOf(paginationRequest.size()));
             PaginatedResponse<TransactionDto> paginatedResponse = transactionService
                     .getPaginatedTransactionsForUser(userId, params.page(), params.size());
-            Map<String, Object> metadata = Map.of(
-                    "user_id", userId,
-                    "totalItems", paginatedResponse.totalItems(),
-                    "totalPages", paginatedResponse.totalPages(),
-                    "currentPage", paginatedResponse.currentPage(),
-                    "pageSize", paginatedResponse.pageSize()
-            );
-            sendPaginatedResponse(response, paginatedResponse.data(), metadata);
+            sendPaginatedResponseWithMetadata(response, userId, paginatedResponse);
         } catch (IllegalArgumentException e) {
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
                     "Invalid request parameters: " + e.getMessage());
@@ -203,12 +182,8 @@ public class AdminServlet extends BaseServlet {
             User user = adminService.getUser(userId);
             if (user != null) {
                 UserDto userDto = UserDto.removePassword(UserMapper.INSTANCE.toDto(user));
-                Map<String, Object> responseBody = Map.of(
-                        "message", "Authenticated user details",
-                        "data", userDto,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                        "Authenticated user details", userDto);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "User not found.");
             }
@@ -232,12 +207,8 @@ public class AdminServlet extends BaseServlet {
             UserDto userDto = validationUtils.validateUserJson(json, Mode.BLOCK_UNBLOCK, userId);
             boolean success = adminService.blockOrUnblockUser(userDto.getUserId(), userDto.isBlocked());
             if (success) {
-                Map<String, Object> responseBody = Map.of(
-                        "message", "User blocked/unblocked status changed successfully",
-                        "data", UserDto.removePassword(userDto),
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                        "User blocked/unblocked status changed successfully", UserDto.removePassword(userDto));
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
                         "Failed to block/unblock user.");
@@ -262,12 +233,8 @@ public class AdminServlet extends BaseServlet {
             UserDto userDto = validationUtils.validateUserJson(json, Mode.UPDATE_ROLE, userId);
             boolean success = adminService.updateUserRole(userDto);
             if (success) {
-                Map<String, Object> responseBody = Map.of(
-                        "message", "User role updated successfully",
-                        "data", UserDto.removePassword(userDto),
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                        "User role updated successfully", UserDto.removePassword(userDto));
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
                         "Failed to update role.");
@@ -292,12 +259,8 @@ public class AdminServlet extends BaseServlet {
             Long userId = validationUtils.parseUserId(userIdString, Mode.DELETE);
             boolean success = adminService.deleteUser(userId);
             if (success) {
-                Map<String, Object> responseBody = Map.of(
-                        "message", "Account deleted successfully",
-                        "deleted user id", userId,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                        "Account deleted successfully", userId);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "User not found.");
             }

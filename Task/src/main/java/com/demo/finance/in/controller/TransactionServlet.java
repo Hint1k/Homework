@@ -126,12 +126,8 @@ public class TransactionServlet extends BaseServlet {
                 Transaction transaction = transactionService.getTransaction(transactionId);
                 if (transaction != null) {
                     TransactionDto transactionDtoCreated = TransactionMapper.INSTANCE.toDto(transaction);
-                    Map<String, Object> responseBody = Map.of(
-                            "message", "Transaction created successfully",
-                            "data", transactionDtoCreated,
-                            "timestamp", java.time.Instant.now().toString()
-                    );
-                    sendSuccessResponse(response, HttpServletResponse.SC_CREATED, responseBody);
+                    sendSuccessResponse(response, HttpServletResponse.SC_CREATED,
+                            "Transaction created successfully", transactionDtoCreated);
                 } else {
                     sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                             "Failed to retrieve transaction details.");
@@ -158,29 +154,14 @@ public class TransactionServlet extends BaseServlet {
     private void handleGetPaginatedTransactions(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         try {
-            UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
-            Long userId = userDto.getUserId();
-            String json = readRequestBody(request);
-            PaginationParams paginationRequest = objectMapper.readValue(json, PaginationParams.class);
-            PaginationParams params = validationUtils.validatePaginationParams(
-                    String.valueOf(paginationRequest.page()),
-                    String.valueOf(paginationRequest.size())
-            );
+            Long userId = ((UserDto) request.getSession().getAttribute("currentUser")).getUserId();
+            PaginationParams params = getValidatedPaginationParams(request);
             PaginatedResponse<TransactionDto> paginatedResponse = transactionService
                     .getPaginatedTransactionsForUser(userId, params.page(), params.size());
-            Map<String, Object> metadata = Map.of(
-                    "user_id", userId,
-                    "totalItems", paginatedResponse.totalItems(),
-                    "totalPages", paginatedResponse.totalPages(),
-                    "currentPage", paginatedResponse.currentPage(),
-                    "pageSize", paginatedResponse.pageSize()
-            );
-            sendPaginatedResponse(response, paginatedResponse.data(), metadata);
+            sendPaginatedResponseWithMetadata(response, userId, paginatedResponse);
         } catch (IllegalArgumentException e) {
-            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, objectMapper.writeValueAsString(Map.of(
-                    "error", "Invalid request parameters",
-                    "message", e.getMessage()
-            )));
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid request parameters",
+                    Map.of("message", e.getMessage()));
         }
     }
 
@@ -202,12 +183,8 @@ public class TransactionServlet extends BaseServlet {
                     .getTransactionByUserIdAndTransactionId(userId, transactionId);
             if (transaction != null) {
                 TransactionDto transactionDto = TransactionMapper.INSTANCE.toDto(transaction);
-                Map<String, Object> responseBody = Map.of(
-                        "message", "Transaction found successfully",
-                        "data", transactionDto,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                        "Transaction found successfully", transactionDto);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
                         "Transaction not found or you are not the owner of the transaction.");
@@ -239,12 +216,8 @@ public class TransactionServlet extends BaseServlet {
                 Transaction transaction = transactionService.getTransaction(transactionDto.getTransactionId());
                 if (transaction != null) {
                     TransactionDto transactionDtoUpdated = TransactionMapper.INSTANCE.toDto(transaction);
-                    Map<String, Object> responseBody = Map.of(
-                            "message", "Transaction updated successfully",
-                            "data", transactionDtoUpdated,
-                            "timestamp", java.time.Instant.now().toString()
-                    );
-                    sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                    sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                            "Transaction updated successfully", transactionDtoUpdated);
                 } else {
                     sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                             "Failed to retrieve transaction details.");
@@ -280,12 +253,8 @@ public class TransactionServlet extends BaseServlet {
             Long transactionId = validationUtils.parseTransactionId(transactionIdString, Mode.TRANSACTION_DELETE);
             boolean success = transactionService.deleteTransaction(userId, transactionId);
             if (success) {
-                Map<String, Object> responseBody = Map.of(
-                        "message", "Transaction deleted successfully",
-                        "transaction id", transactionId,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                        "Transaction deleted successfully", transactionId);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
                         "Failed to delete transaction or you are not the owner of the transaction.");

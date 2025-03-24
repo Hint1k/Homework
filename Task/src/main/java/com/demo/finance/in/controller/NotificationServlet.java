@@ -9,7 +9,6 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * The {@code NotificationServlet} class is a servlet that handles HTTP requests related to fetching
@@ -66,11 +65,7 @@ public class NotificationServlet extends BaseServlet {
             Long userId = userDto.getUserId();
             String notification = notificationService.fetchBudgetNotification(userId);
             if (notification != null && !notification.isEmpty()) {
-                Map<String, Object> responseBody = Map.of(
-                        "message", notification,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK, notification, null);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
                         "No budget notification found for the user.");
@@ -96,11 +91,7 @@ public class NotificationServlet extends BaseServlet {
             Long userId = userDto.getUserId();
             String notification = notificationService.fetchGoalNotification(userId);
             if (notification != null && !notification.isEmpty()) {
-                Map<String, Object> responseBody = Map.of(
-                        "message", notification,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK, notification, null);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
                         "No goal notification found for the user.");

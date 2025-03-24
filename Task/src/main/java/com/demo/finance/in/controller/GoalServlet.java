@@ -126,12 +126,8 @@ public class GoalServlet extends BaseServlet {
                 Goal goal = goalService.getGoal(goalId);
                 if (goal != null) {
                     GoalDto goalDtoCreated = GoalMapper.INSTANCE.toDto(goal);
-                    Map<String, Object> responseBody = Map.of(
-                            "message", "Goal created successfully",
-                            "data", goalDtoCreated,
-                            "timestamp", java.time.Instant.now().toString()
-                    );
-                    sendSuccessResponse(response, HttpServletResponse.SC_CREATED, responseBody);
+                    sendSuccessResponse(response, HttpServletResponse.SC_CREATED,
+                            "Goal created successfully", goalDtoCreated);
                 } else {
                     sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                             "Failed to retrieve goal details.");
@@ -157,29 +153,14 @@ public class GoalServlet extends BaseServlet {
      */
     private void handleGetPaginatedGoals(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
-            Long userId = userDto.getUserId();
-            String json = readRequestBody(request);
-            PaginationParams paginationRequest = objectMapper.readValue(json, PaginationParams.class);
-            PaginationParams params = validationUtils.validatePaginationParams(
-                    String.valueOf(paginationRequest.page()),
-                    String.valueOf(paginationRequest.size())
-            );
+            Long userId = ((UserDto) request.getSession().getAttribute("currentUser")).getUserId();
+            PaginationParams params = getValidatedPaginationParams(request);
             PaginatedResponse<GoalDto> paginatedResponse = goalService
                     .getPaginatedGoalsForUser(userId, params.page(), params.size());
-            Map<String, Object> metadata = Map.of(
-                    "user_id", userId,
-                    "totalItems", paginatedResponse.totalItems(),
-                    "totalPages", paginatedResponse.totalPages(),
-                    "currentPage", paginatedResponse.currentPage(),
-                    "pageSize", paginatedResponse.pageSize()
-            );
-            sendPaginatedResponse(response, paginatedResponse.data(), metadata);
+            sendPaginatedResponseWithMetadata(response, userId, paginatedResponse);
         } catch (IllegalArgumentException e) {
-            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, objectMapper.writeValueAsString(Map.of(
-                    "error", "Invalid request parameters",
-                    "message", e.getMessage()
-            )));
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid request parameters",
+                    Map.of("message", e.getMessage()));
         }
     }
 
@@ -200,12 +181,7 @@ public class GoalServlet extends BaseServlet {
             Goal goal = goalService.getGoalByUserIdAndGoalId(userId, goalId);
             if (goal != null) {
                 GoalDto goalDto = GoalMapper.INSTANCE.toDto(goal);
-                Map<String, Object> responseBody = Map.of(
-                        "message", "Goal found successfully",
-                        "data", goalDto,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK, "Goal found successfully", goalDto);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
                         "Goal not found or you are not the owner of the goal.");
@@ -236,12 +212,8 @@ public class GoalServlet extends BaseServlet {
                 Goal goal = goalService.getGoal(goalDto.getGoalId());
                 if (goal != null) {
                     GoalDto goalDtoUpdated = GoalMapper.INSTANCE.toDto(goal);
-                    Map<String, Object> responseBody = Map.of(
-                            "message", "Goal updated successfully",
-                            "data", goalDtoUpdated,
-                            "timestamp", java.time.Instant.now().toString()
-                    );
-                    sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                    sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                            "Goal updated successfully", goalDtoUpdated);
                 } else {
                     sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                             "Failed to retrieve goal details.");
@@ -277,12 +249,7 @@ public class GoalServlet extends BaseServlet {
             Long goalId = validationUtils.parseGoalId(goalIdString, Mode.GOAL_DELETE);
             boolean success = goalService.deleteGoal(userId, goalId);
             if (success) {
-                Map<String, Object> responseBody = Map.of(
-                        "message", "Goal deleted successfully",
-                        "goal id", goalId,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK, "Goal deleted successfully", goalId);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
                         "Failed to delete goal or you are not the owner of the goal.");

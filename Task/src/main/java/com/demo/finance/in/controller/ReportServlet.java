@@ -91,17 +91,12 @@ public class ReportServlet extends BaseServlet {
             Long userId = userDto.getUserId();
             String json = readRequestBody(request);
             Map<String, LocalDate> reportDates = validationUtils.validateReport(json, Mode.REPORT, userId);
-
             Report report = reportService
                     .generateReportByDate(userId, reportDates.get("fromDate"), reportDates.get("toDate"));
             if (report != null) {
                 ReportDto reportDto = ReportMapper.INSTANCE.toDto(report);
-                Map<String, Object> responseBody = Map.of(
-                        "message", "Report by dates generated successfully",
-                        "data", reportDto,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                        "Report by dates generated successfully", reportDto);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
                         "No transactions found for the user in the specified date range.");
@@ -128,18 +123,12 @@ public class ReportServlet extends BaseServlet {
             Long userId = userDto.getUserId();
             String json = readRequestBody(request);
             Map<String, LocalDate> reportDates = validationUtils.validateReport(json, Mode.REPORT, userId);
-
             Map<String, BigDecimal> expensesByCategory = reportService.analyzeExpensesByCategory(
                     userId, reportDates.get("fromDate"), reportDates.get("toDate")
             );
-
             if (!expensesByCategory.isEmpty()) {
-                Map<String, Object> responseBody = Map.of(
-                        "message", "Expenses generated successfully",
-                        "data", expensesByCategory,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                        "Expenses generated successfully", expensesByCategory);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
                         "No expenses found for the user in the specified date range.");
@@ -167,16 +156,11 @@ public class ReportServlet extends BaseServlet {
         try {
             UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
             Long userId = userDto.getUserId();
-
             Report report = reportService.generateUserReport(userId);
             if (report != null) {
                 ReportDto reportDto = ReportMapper.INSTANCE.toDto(report);
-                Map<String, Object> responseBody = Map.of(
-                        "message", "General report generated successfully",
-                        "data", reportDto,
-                        "timestamp", java.time.Instant.now().toString()
-                );
-                sendSuccessResponse(response, HttpServletResponse.SC_OK, responseBody);
+                sendSuccessResponse(response, HttpServletResponse.SC_OK,
+                        "General report generated successfully", reportDto);
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND,
                         "No reports found for the user.");
