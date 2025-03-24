@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 
@@ -98,17 +100,21 @@ class UserRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Find all users - Users exist returns all users")
     void testFindAll_UsersExist_ReturnsAllUsers() {
+        repository.findAll(0, 10).forEach(u -> repository.delete(u.getUserId()));
         repository.save(new User(null, "Emma", "emma@mail.com", "pass1",
                 false, new Role("user"), 1L));
         repository.save(new User(null, "Frank", "frank@mail.com", "pass2",
                 false, new Role("admin"), 1L));
 
-        assertThat(repository.findAll(anyInt(), anyInt())).hasSize(2);
+        List<User> users = repository.findAll(0, 10);
+        assertThat(users).hasSize(2);
     }
 
     @Test
     @DisplayName("Find all users - No users returns empty list")
     void testFindAll_NoUsers_ReturnsEmptyList() {
-        assertThat(repository.findAll(anyInt(), anyInt())).isNull();
+        repository.findAll(0, 10).forEach(u -> repository.delete(u.getUserId()));
+        List<User> users = repository.findAll(0, 10);
+        assertThat(users).isEmpty();
     }
 }
