@@ -69,7 +69,7 @@ class ReportServletTest {
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(userDto);
-        when(validationUtils.validateReport(any(), eq(Mode.REPORT), eq(1L))).thenReturn(reportDates);
+        when(validationUtils.validateReportJson(any(), eq(Mode.REPORT), eq(1L))).thenReturn(reportDates);
         when(reportService.generateReportByDate(eq(1L), any(), any())).thenReturn(new Report());
 
         reportServlet.doPost(request, response);
@@ -98,7 +98,7 @@ class ReportServletTest {
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(userDto);
-        when(validationUtils.validateReport(any(), eq(Mode.REPORT), eq(1L))).thenReturn(reportDates);
+        when(validationUtils.validateReportJson(any(), eq(Mode.REPORT), eq(1L))).thenReturn(reportDates);
         when(reportService.analyzeExpensesByCategory(eq(1L), any(), any()))
                 .thenReturn(expensesByCategory);
 
@@ -152,7 +152,7 @@ class ReportServletTest {
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(userDto);
-        when(validationUtils.validateReport(any(), eq(Mode.REPORT), eq(1L))).thenReturn(reportDates);
+        when(validationUtils.validateReportJson(any(), eq(Mode.REPORT), eq(1L))).thenReturn(reportDates);
         when(reportService.analyzeExpensesByCategory(eq(1L), any(), any()))
                 .thenReturn(new HashMap<>());
 

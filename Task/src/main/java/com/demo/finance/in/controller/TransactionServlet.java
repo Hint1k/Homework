@@ -120,7 +120,8 @@ public class TransactionServlet extends BaseServlet {
     private void handleCreateTransaction(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String json = readRequestBody(request);
-            TransactionDto transactionDto = validationUtils.validateTransactionJson(json, Mode.TRANSACTION_CREATE);
+            TransactionDto transactionDto = validationUtils
+                    .validateJson(json, Mode.TRANSACTION_CREATE, TransactionDto.class);
             Long transactionId = transactionService.createTransaction(transactionDto);
             if (transactionId != null) {
                 Transaction transaction = transactionService.getTransaction(transactionId);
@@ -178,7 +179,7 @@ public class TransactionServlet extends BaseServlet {
         try {
             UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
             Long userId = userDto.getUserId();
-            Long transactionId = validationUtils.parseTransactionId(pathInfo.substring(1), Mode.GET);
+            Long transactionId = validationUtils.parseLong(pathInfo.substring(1));
             Transaction transaction = transactionService
                     .getTransactionByUserIdAndTransactionId(userId, transactionId);
             if (transaction != null) {
@@ -250,7 +251,7 @@ public class TransactionServlet extends BaseServlet {
             UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
             Long userId = userDto.getUserId();
             String transactionIdString = pathInfo.substring(1);
-            Long transactionId = validationUtils.parseTransactionId(transactionIdString, Mode.TRANSACTION_DELETE);
+            Long transactionId = validationUtils.parseLong(transactionIdString);
             boolean success = transactionService.deleteTransaction(userId, transactionId);
             if (success) {
                 sendSuccessResponse(response, HttpServletResponse.SC_OK,

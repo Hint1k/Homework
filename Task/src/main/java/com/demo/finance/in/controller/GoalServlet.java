@@ -120,7 +120,7 @@ public class GoalServlet extends BaseServlet {
     private void handleCreateGoal(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String json = readRequestBody(request);
-            GoalDto goalDto = validationUtils.validateGoalJson(json, Mode.GOAL_CREATE);
+            GoalDto goalDto = validationUtils.validateJson(json, Mode.GOAL_CREATE, GoalDto.class);
             Long goalId = goalService.createGoal(goalDto);
             if (goalId != null) {
                 Goal goal = goalService.getGoal(goalId);
@@ -177,7 +177,7 @@ public class GoalServlet extends BaseServlet {
         try {
             UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
             Long userId = userDto.getUserId();
-            Long goalId = validationUtils.parseGoalId(pathInfo.substring(1), Mode.GET);
+            Long goalId = validationUtils.parseLong(pathInfo.substring(1));
             Goal goal = goalService.getGoalByUserIdAndGoalId(userId, goalId);
             if (goal != null) {
                 GoalDto goalDto = GoalMapper.INSTANCE.toDto(goal);
@@ -246,7 +246,7 @@ public class GoalServlet extends BaseServlet {
             UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
             Long userId = userDto.getUserId();
             String goalIdString = pathInfo.substring(1);
-            Long goalId = validationUtils.parseGoalId(goalIdString, Mode.GOAL_DELETE);
+            Long goalId = validationUtils.parseLong(goalIdString);
             boolean success = goalService.deleteGoal(userId, goalId);
             if (success) {
                 sendSuccessResponse(response, HttpServletResponse.SC_OK, "Goal deleted successfully", goalId);

@@ -67,7 +67,6 @@ class TransactionServletTest {
 
         when(request.getPathInfo()).thenReturn("/");
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateTransactionJson(any(), eq(Mode.TRANSACTION_CREATE))).thenReturn(transactionDto);
         when(transactionService.createTransaction(any())).thenReturn(1L);
         when(transactionService.getTransaction(1L)).thenReturn(new Transaction());
 
@@ -109,7 +108,7 @@ class TransactionServletTest {
         when(request.getPathInfo()).thenReturn("/1");
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(userDto);
-        when(validationUtils.parseTransactionId("1", Mode.GET)).thenReturn(1L);
+        when(validationUtils.parseLong("1")).thenReturn(1L);
         when(transactionService.getTransactionByUserIdAndTransactionId(1L, 1L))
                 .thenReturn(new Transaction());
 
@@ -150,7 +149,7 @@ class TransactionServletTest {
         when(request.getPathInfo()).thenReturn("/1");
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(userDto);
-        when(validationUtils.parseTransactionId("1", Mode.TRANSACTION_DELETE)).thenReturn(1L);
+        when(validationUtils.parseLong("1")).thenReturn(1L);
         when(transactionService.deleteTransaction(1L, 1L)).thenReturn(true);
 
         transactionServlet.doDelete(request, response);
@@ -166,7 +165,7 @@ class TransactionServletTest {
 
         when(request.getPathInfo()).thenReturn("/");
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateTransactionJson(any(), eq(Mode.TRANSACTION_CREATE)))
+        when(validationUtils.validateJson(any(), eq(Mode.TRANSACTION_CREATE), any()))
                 .thenThrow(new ValidationException("Amount must be positive"));
 
         transactionServlet.doPost(request, response);
@@ -184,7 +183,7 @@ class TransactionServletTest {
         when(request.getPathInfo()).thenReturn("/1");
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(userDto);
-        when(validationUtils.parseTransactionId("1", Mode.GET)).thenReturn(1L);
+        when(validationUtils.parseLong("1")).thenReturn(1L);
         when(transactionService.getTransactionByUserIdAndTransactionId(1L, 1L))
                 .thenReturn(null);
 
@@ -218,7 +217,7 @@ class TransactionServletTest {
         when(request.getPathInfo()).thenReturn("/invalid");
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(new UserDto());
-        when(validationUtils.parseTransactionId("invalid", Mode.TRANSACTION_DELETE))
+        when(validationUtils.parseLong("invalid"))
                 .thenThrow(new NumberFormatException("Invalid transaction ID"));
 
         transactionServlet.doDelete(request, response);

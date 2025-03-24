@@ -51,16 +51,6 @@ public interface ValidationUtils {
     UserDto validateUserJson(String json, Mode mode, Long userId);
 
     /**
-     * Parses and validates a user ID string.
-     *
-     * @param userIdString the string representation of the user ID
-     * @param mode         the mode specifying additional constraints for the user ID
-     * @return the parsed user ID as a {@code Long}
-     * @throws IllegalArgumentException if the user ID is invalid or violates mode-specific constraints
-     */
-    Long parseUserId(String userIdString, Mode mode);
-
-    /**
      * Validates pagination parameters for paginated requests.
      *
      * @param page the string representation of the page number
@@ -79,7 +69,7 @@ public interface ValidationUtils {
      * @return a {@link Map} containing the validated "fromDate" and "toDate" as {@link LocalDate} objects
      * @throws IllegalArgumentException if the JSON format is invalid or validation fails
      */
-    Map<String, LocalDate> validateReport(String json, Mode mode, Long userId);
+    Map<String, LocalDate> validateReportJson(String json, Mode mode, Long userId);
 
     /**
      * Validates a JSON string representing a budget request and extracts the monthly limit.
@@ -91,16 +81,6 @@ public interface ValidationUtils {
      * @throws IllegalArgumentException if the JSON format is invalid or validation fails
      */
     BigDecimal validateBudgetJson(String json, Mode mode, Long userId);
-
-    /**
-     * Validates a JSON string representing a transaction and maps it to a {@link TransactionDto} object.
-     *
-     * @param json the JSON string to validate
-     * @param mode the mode specifying the type of validation to perform
-     * @return the validated {@link TransactionDto} object
-     * @throws IllegalArgumentException if the JSON format is invalid or validation fails
-     */
-    TransactionDto validateTransactionJson(String json, Mode mode);
 
     /**
      * Validates a JSON string representing a transaction, maps it to a {@link TransactionDto} object,
@@ -115,16 +95,6 @@ public interface ValidationUtils {
     TransactionDto validateTransactionJson(String json, Mode mode, String transactionId);
 
     /**
-     * Validates a JSON string representing a goal and maps it to a {@link GoalDto} object.
-     *
-     * @param json the JSON string to validate
-     * @param mode the mode specifying the type of validation to perform
-     * @return the validated {@link GoalDto} object
-     * @throws IllegalArgumentException if the JSON format is invalid or validation fails
-     */
-    GoalDto validateGoalJson(String json, Mode mode);
-
-    /**
      * Validates a JSON string representing a goal, maps it to a {@link GoalDto} object,
      * and associates it with the provided goal ID.
      *
@@ -137,22 +107,46 @@ public interface ValidationUtils {
     GoalDto validateGoalJson(String json, Mode mode, String goalId);
 
     /**
-     * Parses and validates a transaction ID string.
+     * Parses and validates a user ID string based on the specified mode.
+     * <p>
+     * This method attempts to parse the provided user ID string into a {@code Long} value and validates it
+     * according to the constraints defined by the given mode. If the input is invalid or violates the mode-specific
+     * constraints, an exception is thrown.
      *
-     * @param transactionIdString the string representation of the transaction ID
-     * @param mode                the mode specifying additional constraints for the transaction ID
-     * @return the parsed transaction ID as a {@code Long}
-     * @throws IllegalArgumentException if the transaction ID format is invalid
+     * @param userIdString the string representation of the user ID to parse
+     * @param mode         the mode specifying additional constraints for the user ID (e.g., GET, DELETE)
+     * @return the parsed user ID as a {@code Long}
+     * @throws IllegalArgumentException if the user ID is null, empty, or cannot be parsed into a valid {@code Long}
      */
-    Long parseTransactionId(String transactionIdString, Mode mode);
+    Long parseUserId(String userIdString, Mode mode);
 
     /**
-     * Parses and validates a goal ID string.
+     * Parses a string value into a {@code Long}, ensuring it is non-null, non-empty, and in valid numeric format.
+     * <p>
+     * This method trims the input string, checks for null or empty values,
+     * and attempts to parse it into a {@code Long}.
+     * If parsing fails due to an invalid numeric format, an exception is thrown with a descriptive error message.
      *
-     * @param goalIdString the string representation of the goal ID
-     * @param mode         the mode specifying additional constraints for the goal ID
-     * @return the parsed goal ID as a {@code Long}
-     * @throws IllegalArgumentException if the goal ID format is invalid
+     * @param value the string value to parse
+     * @return the parsed {@code Long} value
+     * @throws IllegalArgumentException if the input value is null, empty,
+     * or cannot be parsed into a valid {@code Long}
      */
-    Long parseGoalId(String goalIdString, Mode mode);
+    Long parseLong(String value);
+
+    /**
+     * Validates a JSON string and maps it to a specified DTO object.
+     * <p>
+     * This method parses the input JSON string, ensures all required fields are present,
+     * performs additional field value validations based on the specified mode, and maps
+     * the JSON to an instance of the provided DTO class. If the JSON format is invalid or
+     * validation fails, an exception is thrown.
+     *
+     * @param json      the JSON string to validate
+     * @param mode      the mode specifying the type of validation to perform
+     * @param dtoClass  the class of the DTO object to map the JSON to ({@link TransactionDto}, {@link GoalDto})
+     * @param <T>       the type of the DTO object
+     * @return the validated DTO object of the specified type
+     */
+    <T> T validateJson(String json, Mode mode, Class<T> dtoClass);
 }

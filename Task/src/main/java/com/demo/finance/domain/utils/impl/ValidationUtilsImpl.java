@@ -51,7 +51,7 @@ public class ValidationUtilsImpl implements ValidationUtils {
             JsonNode jsonNode = objectMapper.readTree(json);
             validateRequiredFields(jsonNode, mode);
             UserDto userDto = objectMapper.readValue(json, UserDto.class);
-            validateFieldValues(jsonNode, mode);
+            validateFieldValues(jsonNode);
             return userDto;
         } catch (Exception e) {
             throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
@@ -107,7 +107,7 @@ public class ValidationUtilsImpl implements ValidationUtils {
      */
     @Override
     public Long parseUserId(String userIdString, Mode mode) {
-        Long userId = parseLong(userIdString, "Invalid userId format");
+        Long userId = parseLong(userIdString);
         if (userId == 1 && mode == Mode.DELETE) {
             throw new ValidationException("Default Admin cannot be deleted");
         }
@@ -118,6 +118,29 @@ public class ValidationUtilsImpl implements ValidationUtils {
             throw new ValidationException("Default Admin cannot be blocked or unblocked");
         }
         return userId;
+    }
+
+    /**
+     * Parses a string value into a {@code Long}, ensuring it is non-null, non-empty, and in valid numeric format.
+     * <p>
+     * This method trims the input string, checks for null or empty values,
+     * and attempts to parse it into a {@code Long}.
+     * If parsing fails due to an invalid numeric format, an exception is thrown with a descriptive error message.
+     *
+     * @param value the string value to parse
+     * @return the parsed {@code Long} value
+     * @throws IllegalArgumentException if the input value is null, empty,
+     * or cannot be parsed into a valid {@code Long}
+     */
+    public Long parseLong(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("Id cannot be null or empty.");
+        }
+        try {
+            return Long.parseLong(value.trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid numeric format for id: " + value);
+        }
     }
 
     /**
@@ -148,11 +171,11 @@ public class ValidationUtilsImpl implements ValidationUtils {
      * @throws ValidationException if the JSON format is invalid or validation fails
      */
     @Override
-    public Map<String, LocalDate> validateReport(String json, Mode mode, Long userId) {
+    public Map<String, LocalDate> validateReportJson(String json, Mode mode, Long userId) {
         try {
             JsonNode jsonNode = objectMapper.readTree(json);
             validateRequiredFields(jsonNode, mode);
-            validateFieldValues(jsonNode, mode);
+            validateFieldValues(jsonNode);
             LocalDate fromDate = LocalDate.parse(jsonNode.get("fromDate").asText());
             LocalDate toDate = LocalDate.parse(jsonNode.get("toDate").asText());
             if (toDate.isAfter(fromDate)) {
@@ -179,7 +202,7 @@ public class ValidationUtilsImpl implements ValidationUtils {
         try {
             JsonNode jsonNode = objectMapper.readTree(json);
             validateRequiredFields(jsonNode, mode);
-            validateFieldValues(jsonNode, mode);
+            validateFieldValues(jsonNode);
             return BigDecimal.valueOf(jsonNode.get("monthlyLimit").asDouble());
         } catch (Exception e) {
             throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
@@ -187,21 +210,26 @@ public class ValidationUtilsImpl implements ValidationUtils {
     }
 
     /**
-     * Validates a JSON string representing a transaction and maps it to a {@link TransactionDto} object.
+     * Validates a JSON string and maps it to a specified DTO object.
+     * <p>
+     * This method validates the input JSON string, ensures all required fields are present,
+     * performs additional field value validations, and maps the JSON to the specified DTO class.
      *
-     * @param json the JSON string to validate
-     * @param mode the mode specifying the type of validation to perform
-     * @return the validated {@link TransactionDto} object
+     * @param json   the JSON string to validate
+     * @param mode   the mode specifying the type of validation to perform
+     * @param dtoClass the class of the DTO object to map the JSON to (e.g., {@link TransactionDto}, {@link GoalDto})
+     * @param <T>    the type of the DTO object
+     * @return the validated DTO object
      * @throws ValidationException if the JSON format is invalid or validation fails
      */
     @Override
-    public TransactionDto validateTransactionJson(String json, Mode mode) {
+    public <T> T validateJson(String json, Mode mode, Class<T> dtoClass) {
         try {
             JsonNode jsonNode = objectMapper.readTree(json);
             validateRequiredFields(jsonNode, mode);
-            TransactionDto transactionDto = objectMapper.readValue(json, TransactionDto.class);
-            validateFieldValues(jsonNode, mode);
-            return transactionDto;
+            T dto = objectMapper.readValue(json, dtoClass);
+            validateFieldValues(jsonNode);
+            return dto;
         } catch (Exception e) {
             throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
         }
@@ -219,31 +247,10 @@ public class ValidationUtilsImpl implements ValidationUtils {
      */
     @Override
     public TransactionDto validateTransactionJson(String json, Mode mode, String transactionId) {
-        Long parsedTransactionId = parseTransactionId(transactionId, mode);
-        TransactionDto transactionDto = validateTransactionJson(json, mode);
+        Long parsedTransactionId = parseLong(transactionId);
+        TransactionDto transactionDto = validateJson(json, mode, TransactionDto.class);
         transactionDto.setTransactionId(parsedTransactionId);
         return transactionDto;
-    }
-
-    /**
-     * Validates a JSON string representing a goal and maps it to a {@link GoalDto} object.
-     *
-     * @param json the JSON string to validate
-     * @param mode the mode specifying the type of validation to perform
-     * @return the validated {@link GoalDto} object
-     * @throws ValidationException if the JSON format is invalid or validation fails
-     */
-    @Override
-    public GoalDto validateGoalJson(String json, Mode mode) {
-        try {
-            JsonNode jsonNode = objectMapper.readTree(json);
-            validateRequiredFields(jsonNode, mode);
-            GoalDto goalDto = objectMapper.readValue(json, GoalDto.class);
-            validateFieldValues(jsonNode, mode);
-            return goalDto;
-        } catch (Exception e) {
-            throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
-        }
     }
 
     /**
@@ -258,43 +265,51 @@ public class ValidationUtilsImpl implements ValidationUtils {
      */
     @Override
     public GoalDto validateGoalJson(String json, Mode mode, String goalId) {
-        Long parsedGoalId = parseGoalId(goalId, mode);
-        GoalDto goalDto = validateGoalJson(json, mode);
+        Long parsedGoalId = parseLong(goalId);
+        GoalDto goalDto = validateJson(json, mode, GoalDto.class);
         goalDto.setGoalId(parsedGoalId);
         return goalDto;
     }
 
     /**
-     * Parses and validates a transaction ID string.
+     * Checks if the specified field exists and is non-null in the provided JSON node.
+     * Throws a {@link ValidationException} if the field is missing or null.
      *
-     * @param transactionIdString the string representation of the transaction ID
-     * @param mode                the mode specifying additional constraints for the transaction ID
-     * @return the parsed transaction ID as a {@code Long}
-     * @throws IllegalArgumentException if the transaction ID format is invalid
+     * @param jsonNode  the JSON node to check for the field
+     * @param fieldName the name of the field to validate
+     * @throws ValidationException if the field is missing or null in the JSON node
      */
-    @Override
-    public Long parseTransactionId(String transactionIdString, Mode mode) {
-        try {
-            return Long.parseLong(transactionIdString);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid format of transaction ID: " + transactionIdString);
+    private void checkField(JsonNode jsonNode, String fieldName) {
+        if (!jsonNode.hasNonNull(fieldName)) {
+            throw new ValidationException("Missing required field: " + fieldName);
         }
     }
 
     /**
-     * Parses and validates a goal ID string.
+     * Validates whether the provided email string conforms to a valid email format.
+     * Uses a predefined regular expression pattern to perform the validation.
      *
-     * @param goalIdString the string representation of the goal ID
-     * @param mode         the mode specifying additional constraints for the goal ID
-     * @return the parsed goal ID as a {@code Long}
-     * @throws IllegalArgumentException if the goal ID format is invalid
+     * @param email the email string to validate
+     * @return {@code true} if the email matches the valid format, {@code false} otherwise
      */
-    @Override
-    public Long parseGoalId(String goalIdString, Mode mode) {
+    private boolean isValidEmail(String email) {
+        return EMAIL_PATTERN.matcher(email).matches();
+    }
+
+    /**
+     * Parses a string value into an {@code int}, throwing an exception with a custom error message
+     * if the parsing fails due to an invalid format.
+     *
+     * @param value        the string value to parse
+     * @param errorMessage the error message to include in the exception if parsing fails
+     * @return the parsed {@code int} value
+     * @throws IllegalArgumentException if the string value cannot be parsed into an {@code int}
+     */
+    private int parseInt(String value, String errorMessage) {
         try {
-            return Long.parseLong(goalIdString);
+            return Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid format of goal ID: " + goalIdString);
+            throw new IllegalArgumentException(errorMessage);
         }
     }
 
@@ -347,6 +362,7 @@ public class ValidationUtilsImpl implements ValidationUtils {
                 checkField(jsonNode, "name");
                 checkField(jsonNode, "email");
                 checkField(jsonNode, "password");
+                break;
             case REGISTER:
                 checkField(jsonNode, "name");
                 checkField(jsonNode, "email");
@@ -365,6 +381,7 @@ public class ValidationUtilsImpl implements ValidationUtils {
             case REPORT:
                 checkField(jsonNode, "fromDate");
                 checkField(jsonNode, "toDate");
+                break;
             case BUDGET:
                 checkField(jsonNode, "monthlyLimit");
                 break;
@@ -390,10 +407,9 @@ public class ValidationUtilsImpl implements ValidationUtils {
      * </ul>
      *
      * @param jsonNode the JSON node containing the fields to validate
-     * @param mode     the mode specifying additional constraints for validation
      * @throws ValidationException if any field value fails validation
      */
-    private void validateFieldValues(JsonNode jsonNode, Mode mode) {
+    private void validateFieldValues(JsonNode jsonNode) {
         if (jsonNode.has("userId") && !jsonNode.get("userId").isIntegralNumber()) {
             throw new ValidationException("Invalid userId: must be a non-null Long.");
         }
@@ -472,65 +488,6 @@ public class ValidationUtilsImpl implements ValidationUtils {
             } catch (DateTimeParseException e) {
                 throw new ValidationException("Invalid start time format.");
             }
-        }
-    }
-
-    /**
-     * Checks if the specified field exists and is non-null in the provided JSON node.
-     * Throws a {@link ValidationException} if the field is missing or null.
-     *
-     * @param jsonNode   the JSON node to check for the field
-     * @param fieldName  the name of the field to validate
-     * @throws ValidationException if the field is missing or null in the JSON node
-     */
-    private void checkField(JsonNode jsonNode, String fieldName) {
-        if (!jsonNode.hasNonNull(fieldName)) {
-            throw new ValidationException("Missing required field: " + fieldName);
-        }
-    }
-
-    /**
-     * Validates whether the provided email string conforms to a valid email format.
-     * Uses a predefined regular expression pattern to perform the validation.
-     *
-     * @param email the email string to validate
-     * @return {@code true} if the email matches the valid format, {@code false} otherwise
-     */
-    private boolean isValidEmail(String email) {
-        return EMAIL_PATTERN.matcher(email).matches();
-    }
-
-    /**
-     * Parses a string value into a {@code Long}, throwing an exception with a custom error message
-     * if the parsing fails due to an invalid format.
-     *
-     * @param value        the string value to parse
-     * @param errorMessage the error message to include in the exception if parsing fails
-     * @return the parsed {@code Long} value
-     * @throws IllegalArgumentException if the string value cannot be parsed into a {@code Long}
-     */
-    private Long parseLong(String value, String errorMessage) {
-        try {
-            return Long.parseLong(value);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(errorMessage);
-        }
-    }
-
-    /**
-     * Parses a string value into an {@code int}, throwing an exception with a custom error message
-     * if the parsing fails due to an invalid format.
-     *
-     * @param value        the string value to parse
-     * @param errorMessage the error message to include in the exception if parsing fails
-     * @return the parsed {@code int} value
-     * @throws IllegalArgumentException if the string value cannot be parsed into an {@code int}
-     */
-    private int parseInt(String value, String errorMessage) {
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(errorMessage);
         }
     }
 }

@@ -69,7 +69,7 @@ class GoalServletTest {
 
         when(request.getPathInfo()).thenReturn("/");
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateGoalJson(any(), eq(Mode.GOAL_CREATE))).thenReturn(goalDto);
+        when(validationUtils.validateJson(any(), eq(Mode.GOAL_CREATE), any())).thenReturn(goalDto);
         when(goalService.createGoal(any())).thenReturn(1L);
         when(goalService.getGoal(1L)).thenReturn(new Goal());
 
@@ -111,7 +111,7 @@ class GoalServletTest {
         when(request.getPathInfo()).thenReturn("/1");
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(userDto);
-        when(validationUtils.parseGoalId("1", Mode.GET)).thenReturn(1L);
+        when(validationUtils.parseLong("1")).thenReturn(1L);
         when(goalService.getGoalByUserIdAndGoalId(1L, 1L)).thenReturn(new Goal());
 
         goalServlet.doGet(request, response);
@@ -132,8 +132,7 @@ class GoalServletTest {
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(userDto);
-        when(validationUtils.validateGoalJson(any(), eq(Mode.GOAL_UPDATE), eq("1")))
-                .thenReturn(new GoalDto());
+        when(validationUtils.validateGoalJson(any(), eq(Mode.GOAL_UPDATE), eq("1"))).thenReturn(new GoalDto());
         when(goalService.updateGoal(any(), eq(1L))).thenReturn(true);
         when(goalService.getGoal(any())).thenReturn(new Goal());
 
@@ -152,7 +151,7 @@ class GoalServletTest {
         when(request.getPathInfo()).thenReturn("/1");
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(userDto);
-        when(validationUtils.parseGoalId("1", Mode.GOAL_DELETE)).thenReturn(1L);
+        when(validationUtils.parseLong("1")).thenReturn(1L);
         when(goalService.deleteGoal(1L, 1L)).thenReturn(true);
 
         goalServlet.doDelete(request, response);
@@ -168,7 +167,7 @@ class GoalServletTest {
 
         when(request.getPathInfo()).thenReturn("/");
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateGoalJson(any(), eq(Mode.GOAL_CREATE)))
+        when(validationUtils.validateJson(any(), eq(Mode.GOAL_CREATE), any()))
                 .thenThrow(new ValidationException("Target amount must be positive"));
 
         goalServlet.doPost(request, response);
@@ -186,7 +185,7 @@ class GoalServletTest {
         when(request.getPathInfo()).thenReturn("/1");
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(userDto);
-        when(validationUtils.parseGoalId("1", Mode.GET)).thenReturn(1L);
+        when(validationUtils.parseLong("1")).thenReturn(1L);
         when(goalService.getGoalByUserIdAndGoalId(1L, 1L)).thenReturn(null);
 
         goalServlet.doGet(request, response);
@@ -219,8 +218,7 @@ class GoalServletTest {
         when(request.getPathInfo()).thenReturn("/invalid");
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(new UserDto());
-        when(validationUtils.parseGoalId("invalid", Mode.GOAL_DELETE))
-                .thenThrow(new NumberFormatException("Invalid goal ID"));
+        when(validationUtils.parseLong("invalid")).thenThrow(new NumberFormatException("Invalid goal ID"));
 
         goalServlet.doDelete(request, response);
 

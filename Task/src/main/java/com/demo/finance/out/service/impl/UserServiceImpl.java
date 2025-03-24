@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
         if (existingUser == null) {
             return false;
         }
-        if (!userDto.getPassword().equals(existingUser.getPassword())) {
+        if (userDto.getPassword() != null && !userDto.getPassword().equals(existingUser.getPassword())) {
             user.setPassword(passwordUtils.hashPassword(userDto.getPassword()));
         } else {
             user.setPassword(existingUser.getPassword());

@@ -90,7 +90,7 @@ public class ReportServlet extends BaseServlet {
             UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
             Long userId = userDto.getUserId();
             String json = readRequestBody(request);
-            Map<String, LocalDate> reportDates = validationUtils.validateReport(json, Mode.REPORT, userId);
+            Map<String, LocalDate> reportDates = validationUtils.validateReportJson(json, Mode.REPORT, userId);
             Report report = reportService
                     .generateReportByDate(userId, reportDates.get("fromDate"), reportDates.get("toDate"));
             if (report != null) {
@@ -122,7 +122,7 @@ public class ReportServlet extends BaseServlet {
             UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
             Long userId = userDto.getUserId();
             String json = readRequestBody(request);
-            Map<String, LocalDate> reportDates = validationUtils.validateReport(json, Mode.REPORT, userId);
+            Map<String, LocalDate> reportDates = validationUtils.validateReportJson(json, Mode.REPORT, userId);
             Map<String, BigDecimal> expensesByCategory = reportService.analyzeExpensesByCategory(
                     userId, reportDates.get("fromDate"), reportDates.get("toDate")
             );
