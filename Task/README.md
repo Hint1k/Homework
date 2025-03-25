@@ -85,7 +85,7 @@ Table names: users, transactions, goals, reports, budgets
 
 The application includes unit tests with **JUnit 5, Mockito, AssertJ** and integration test with testcontainers. 
 
-To run unit tests using Gradle:
+To run tests using Gradle:
 ```bash
 ./gradlew test
 ```

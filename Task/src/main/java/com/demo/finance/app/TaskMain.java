@@ -1,6 +1,7 @@
 package com.demo.finance.app;
 
 import com.demo.finance.app.config.AppConfig;
+import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.in.filter.AuthenticationFilter;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -53,9 +54,15 @@ public class TaskMain {
         context.addServlet(new ServletHolder(appConfig.getReportServlet()), "/api/reports/*");
 
         try {
+            DataSourceManager.getConnection().close();
+
             server.start();
             log.info("Finance App is running inside Docker!");
-            server.join(); // Keep the server running
+
+            // Prevent blocking in tests
+            if (System.getProperty("TEST_ENV") == null) {
+                server.join(); // Keep running only in production
+            }
         } catch (Exception e) {
             log.severe("Failed to start the server: " + e.getMessage());
             throw new RuntimeException(e);

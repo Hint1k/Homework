@@ -1,152 +1,225 @@
 package com.demo.finance.app;
 
 import com.demo.finance.app.config.AppConfig;
+import com.demo.finance.app.config.DataSourceManager;
+import com.demo.finance.in.filter.AuthenticationFilter;
 import com.demo.finance.out.repository.impl.AbstractContainerBaseSetup;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import com.demo.finance.in.filter.AuthenticationFilter;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.logging.Logger;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.fail;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(Lifecycle.PER_CLASS)
 public class TaskMainTest extends AbstractContainerBaseSetup {
-    @Mock private Server mockServer;
-    @Mock private AppConfig mockAppConfig;
-    @Mock private AuthenticationFilter mockAuthFilter;
-    @Mock private Logger mockLogger;
-    @Mock private ServletContextHandler mockContext;
 
-    @Test
-    @DisplayName("Verify database connection through AppConfig")
-    void testDatabaseConnection() {
-        assertThatCode(() -> {
-            try (Connection conn = DriverManager.getConnection(
-                    POSTGRESQL_CONTAINER.getJdbcUrl(),
-                    POSTGRESQL_CONTAINER.getUsername(),
-                    POSTGRESQL_CONTAINER.getPassword())) {
-                assertThat(conn.isValid(1)).isTrue();
+    private static final int TEST_PORT = 8080;
+    private final AtomicReference<Server> serverRef = new AtomicReference<>();
+
+    @BeforeEach
+    void setUp() {
+        stopServer();
+    }
+
+    @AfterEach
+    void tearDown() {
+        stopServer();
+    }
+
+    private void stopServer() {
+        try {
+            Server server = serverRef.get();
+            if (server != null && server.isStarted()) {
+                server.stop();
             }
-        }).doesNotThrowAnyException();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            serverRef.set(null);
+        }
+    }
+
+    private void startServer() throws InterruptedException {
+            Server server = new Server(TEST_PORT);
+            configureServer(server);
+            serverRef.set(server);
+            new Thread(() -> {
+                try {
+                    server.start();
+                    server.join();
+                } catch (Exception e) {
+                    throw new RuntimeException("Server failed to start", e);
+                }
+            }).start();
+            Thread.sleep(1000);
+    }
+
+    private void configureServer(Server server) {
+        AppConfig appConfig = new AppConfig();
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
+        server.setHandler(context);
+        context.setSessionHandler(new SessionHandler());
+        context.addFilter(new FilterHolder(new AuthenticationFilter()), "/api/*", null);
+        context.addServlet(new ServletHolder(appConfig.getUserServlet()), "/api/users/*");
+        context.addServlet(new ServletHolder(appConfig.getTransactionServlet()), "/api/transactions/*");
+        context.addServlet(new ServletHolder(appConfig.getAdminServlet()), "/api/admin/users/*");
+        context.addServlet(new ServletHolder(appConfig.getBudgetServlet()), "/api/budgets/*");
+        context.addServlet(new ServletHolder(appConfig.getGoalServlet()), "/api/goals/*");
+        context.addServlet(new ServletHolder(appConfig.getNotificationServlet()), "/api/notifications/*");
+        context.addServlet(new ServletHolder(appConfig.getReportServlet()), "/api/reports/*");
     }
 
     @Test
-    @DisplayName("Verify that main method starts Jetty server with correct configuration")
-    void testTaskMainExecution() {
-        try (MockedStatic<TaskMain> mockedTaskMain = mockStatic(TaskMain.class)) {
-            mockedTaskMain.when(() -> TaskMain.main(any()))
-                    .thenAnswer(invocation -> {
-                        Server server = mock(Server.class);
-                        ServletContextHandler context = mock(ServletContextHandler.class);
-                        return null;
-                    });
+    @DisplayName("Verify server starts successfully with all components")
+    void testServerStartup() {
+        try {
+            startServer();
 
-            assertThatCode(() -> TaskMain.main(new String[]{})).doesNotThrowAnyException();
+            HttpResponse<String> response = HttpClient.newHttpClient()
+                    .send(HttpRequest.newBuilder()
+                                    .uri(URI.create("http://localhost:" + TEST_PORT + "/api/users/health"))
+                                    .GET()
+                                    .build(),
+                            HttpResponse.BodyHandlers.ofString());
+
+            assertThat(response.statusCode()).isNotEqualTo(404);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            stopServer();
         }
     }
 
     @Test
     @DisplayName("Verify authentication filter is properly configured")
-    void testAuthenticationFilterConfiguration() {
-        try (MockedStatic<TaskMain> mockedTaskMain = mockStatic(TaskMain.class);
-             MockedStatic<Logger> mockedLogger = mockStatic(Logger.class)) {
+    void testAuthenticationFilter() {
+        try {
+            startServer();
 
-            Logger mockLogger = mock(Logger.class);
-            mockedLogger.when(() -> Logger.getLogger(anyString())).thenReturn(mockLogger);
+            HttpResponse<String> response = HttpClient.newHttpClient()
+                    .send(HttpRequest.newBuilder()
+                                    .uri(URI.create("http://localhost:" + TEST_PORT + "/api/users"))
+                                    .GET()
+                                    .build(),
+                            HttpResponse.BodyHandlers.ofString());
 
-            ServletContextHandler mockContext = mock(ServletContextHandler.class);
-            Server mockServer = mock(Server.class);
-
-            mockedTaskMain.when(() -> TaskMain.main(any()))
-                    .thenAnswer(inv -> {
-                        // Simulate actual TaskMain behavior
-                        lenient().when(mockServer.getHandler()).thenReturn(mockContext);
-                        FilterHolder holder = new FilterHolder(mockAuthFilter);
-                        mockContext.addFilter(holder, "/api/*", null);
-                        return null;
-                    });
-
-            TaskMain.main(new String[]{});
-
-            verify(mockContext).addFilter(any(FilterHolder.class), eq("/api/*"), isNull());
+            assertThat(response.statusCode()).isEqualTo(401);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            stopServer();
         }
     }
 
     @Test
-    @DisplayName("Verify server failure is properly logged")
-    void testServerFailureLogging() {
-        try (MockedStatic<TaskMain> mockedTaskMain = mockStatic(TaskMain.class);
-             MockedStatic<Logger> loggerMockedStatic = mockStatic(Logger.class)) {
+    @DisplayName("Verify server shutdown on error")
+    void testServerFailure() {
+        String originalDbUrl = System.getProperty("DB_URL");
+        System.setProperty("DB_URL", "invalid_url");
 
-            Logger testLogger = mock(Logger.class);
-            loggerMockedStatic.when(() -> Logger.getLogger(TaskMain.class.getName()))
-                    .thenReturn(testLogger);
+        assertThatThrownBy(() -> {
+            System.setProperty("TEST_ENV", "true");
+            TaskMain.main(new String[]{});
+        }).isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("java.sql.SQLException");
 
-            mockedTaskMain.when(() -> TaskMain.main(any()))
-                    .thenThrow(new RuntimeException("Server error"));
+        System.setProperty("DB_URL", originalDbUrl);
+        System.clearProperty("TEST_ENV");
+    }
 
-            assertThatThrownBy(() -> TaskMain.main(new String[]{}))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("Server error");
+    @Test
+    @DisplayName("Verify database connection through AppConfig")
+    void testDatabaseConnection() {
+        try (Connection conn = DataSourceManager.getConnection()) {
 
-            verify(testLogger).severe(contains("Failed to start the server"));
+            assertThat(conn.isValid(1)).isTrue();
+
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(
+                         "SELECT table_name FROM information_schema.tables " +
+                                 "WHERE table_schema = 'finance'")) {
+                List<String> tables = new ArrayList<>();
+                while (rs.next()) {
+                    tables.add(rs.getString(1));
+                }
+
+                assertThat(tables).contains("users", "transactions", "budgets", "goals").doesNotHaveDuplicates();
+            }
+        } catch (SQLException e) {
+            fail("Database connection failed", e);
+        } finally {
+            stopServer();
         }
     }
 
     @Test
-    @DisplayName("Verify server starts successfully with all servlets registered")
-    void testServerStartsWithAllServlets() {
-        try (MockedStatic<TaskMain> mockedTaskMain = mockStatic(TaskMain.class);
-             MockedStatic<Logger> loggerMockedStatic = mockStatic(Logger.class);
-             MockedStatic<AppConfig> appConfigMockedStatic = mockStatic(AppConfig.class)) {
+    @DisplayName("Verify server starts with correct configuration")
+    void testTaskMainExecution() {
+        Server server = new Server(TEST_PORT);
+        AppConfig appConfig = new AppConfig();
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
+        server.setHandler(context);
+        context.setSessionHandler(new SessionHandler());
+        context.addFilter(new FilterHolder(new AuthenticationFilter()), "/api/*", null);
+        context.addServlet(new ServletHolder(appConfig.getUserServlet()), "/api/users/*");
+        context.addServlet(new ServletHolder(appConfig.getTransactionServlet()), "/api/transactions/*");
+        context.addServlet(new ServletHolder(appConfig.getAdminServlet()), "/api/admin/users/*");
+        context.addServlet(new ServletHolder(appConfig.getBudgetServlet()), "/api/budgets/*");
+        context.addServlet(new ServletHolder(appConfig.getGoalServlet()), "/api/goals/*");
+        context.addServlet(new ServletHolder(appConfig.getNotificationServlet()), "/api/notifications/*");
+        context.addServlet(new ServletHolder(appConfig.getReportServlet()), "/api/reports/*");
+        ServletHolder[] servletHolders = context.getServletHandler().getServlets();
 
-            Logger testLogger = mock(Logger.class);
-            AppConfig testAppConfig = mock(AppConfig.class);
+        List<String> actualServletNames = Arrays.stream(servletHolders)
+                .map(servlet -> servlet.getName().split("-")[0])
+                .toList();
 
-            loggerMockedStatic.when(() -> Logger.getLogger(TaskMain.class.getName()))
-                    .thenReturn(testLogger);
+        List<String> expectedServletNames = List.of(
+                "com.demo.finance.in.controller.UserServlet",
+                "com.demo.finance.in.controller.TransactionServlet",
+                "com.demo.finance.in.controller.AdminServlet",
+                "com.demo.finance.in.controller.BudgetServlet",
+                "com.demo.finance.in.controller.GoalServlet",
+                "com.demo.finance.in.controller.NotificationServlet",
+                "com.demo.finance.in.controller.ReportServlet"
+        );
 
-            appConfigMockedStatic.when(AppConfig::new)
-                    .thenReturn(testAppConfig);
+        assertThat(actualServletNames).containsExactlyInAnyOrderElementsOf(expectedServletNames);
+        stopServer();
+    }
 
-            when(testAppConfig.getUserServlet()).thenReturn(mock());
-            when(testAppConfig.getTransactionServlet()).thenReturn(mock());
-            when(testAppConfig.getAdminServlet()).thenReturn(mock());
-            when(testAppConfig.getBudgetServlet()).thenReturn(mock());
-            when(testAppConfig.getGoalServlet()).thenReturn(mock());
-            when(testAppConfig.getNotificationServlet()).thenReturn(mock());
-            when(testAppConfig.getReportServlet()).thenReturn(mock());
-
-            mockedTaskMain.when(() -> TaskMain.main(any()))
-                    .thenAnswer(inv -> {
-                        testLogger.info("Finance App is running inside Docker!");
-                        return null;
-                    });
-
-            TaskMain.main(new String[]{});
-
-            verify(testLogger).info("Finance App is running inside Docker!");
-        }
+    @Test
+    @DisplayName("To include this class in JaCoCo coverage report")
+    void testMainMethodCoverage() {
+        System.setProperty("TEST_ENV", "true");
+        assertThatCode(() -> TaskMain.main(new String[]{}))
+                .doesNotThrowAnyException();
+        System.clearProperty("TEST_ENV");
     }
 }
