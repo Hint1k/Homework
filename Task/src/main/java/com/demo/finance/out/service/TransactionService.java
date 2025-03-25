@@ -12,11 +12,19 @@ public interface TransactionService {
 
     /**
      * Creates a new transaction in the system based on the provided transaction data.
+     * <p>
+     * This method maps the provided {@link TransactionDto} to a {@link Transaction} entity,
+     * associates the transaction with the specified user ID, and saves it to the database.
+     * The transaction details typically include the amount, category, date, description, and type.
+     * <p>
+     * Example request payload for creating a transaction:
      *
      * @param transactionDto the {@link TransactionDto} object containing the details of the transaction to create
+     * @param userId         the unique identifier of the user associated with the transaction
      * @return the unique identifier ({@code Long}) of the newly created transaction
+     * @throws IllegalArgumentException if the provided transaction data is invalid or incomplete
      */
-    Long createTransaction(TransactionDto transactionDto);
+    Long createTransaction(TransactionDto transactionDto, Long userId);
 
     /**
      * Retrieves a specific transaction associated with a user by their user ID and transaction ID.

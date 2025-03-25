@@ -138,7 +138,6 @@ POST http://localhost:8080/api/users/authenticate
 PUT http://localhost:8080/api/users
 ```json 
 {
-  "userId": 1,
   "name": "jay2",
   "email": "jay2@demo.com",
   "password": "123"
@@ -175,14 +174,12 @@ GET http://localhost:8080/api/admin/users/transactions/2
 PATCH http://localhost:8080/api/admin/users/role/2
 ```json 
 {
-"userId": 2,
 "role": "user"
 }
 ```
 PATCH http://localhost:8080/api/admin/users/block/2
 ```json 
 {
-  "userId": 2,
   "blocked": true
 }
 ```
@@ -206,7 +203,6 @@ GET http://localhost:8080/api/transactions/1
 POST http://localhost:8080/api/transactions/
 ```json 
 {
-  "userId": "10",
   "amount": "500",
   "category": "1",
   "date": "2025-03-23",
@@ -217,7 +213,6 @@ POST http://localhost:8080/api/transactions/
 PUT http://localhost:8080/api/transactions/1
 ```json 
 {
-  "userId": "10",
   "amount": "750",
   "category": "2",
   "description": "2"
@@ -243,7 +238,6 @@ GET http://localhost:8080/api/goals/1
 POST http://localhost:8080/api/goals/
 ```json 
 {
-  "userId": "10",
   "goalName": "1",
   "targetAmount": "1500",
   "duration": "3",
@@ -253,7 +247,6 @@ POST http://localhost:8080/api/goals/
 PUT http://localhost:8080/api/goals/1
 ```json 
 {
-  "userId": "11",
   "goalName": "2",
   "targetAmount": "1500",
   "duration": "3",

@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -54,29 +55,6 @@ class GoalServletTest {
         objectMapper.registerModule(new JavaTimeModule());
         goalServlet = new GoalServlet(goalService, objectMapper, validationUtils);
         when(response.getWriter()).thenReturn(printWriter);
-    }
-
-    @Test
-    @DisplayName("Create goal - Success scenario")
-    void testCreateGoal_Success() throws Exception {
-        String requestBody = "{\"userId\": 1, \"goalName\": \"Save Money\", \"targetAmount\": 1000.0, "
-                + "\"duration\": 6, \"startTime\": \"2023-10-01\"}";
-        GoalDto goalDto = new GoalDto();
-        goalDto.setUserId(1L);
-        goalDto.setGoalName("Save Money");
-        goalDto.setTargetAmount(BigDecimal.valueOf(1000.0));
-        goalDto.setDuration(6);
-
-        when(request.getPathInfo()).thenReturn("/");
-        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateJson(any(), eq(Mode.GOAL_CREATE), any())).thenReturn(goalDto);
-        when(goalService.createGoal(any())).thenReturn(1L);
-        when(goalService.getGoal(1L)).thenReturn(new Goal());
-
-        goalServlet.doPost(request, response);
-
-        verify(response).setStatus(HttpServletResponse.SC_CREATED);
-        verify(printWriter).write(contains("Goal created successfully"));
     }
 
     @Test
@@ -161,22 +139,6 @@ class GoalServletTest {
     }
 
     @Test
-    @DisplayName("Create goal - ValidationException")
-    void testCreateGoal_ValidationException() throws Exception {
-        String requestBody = "{\"userId\": 1, \"goalName\": \"Save Money\", \"targetAmount\": -1000.0}";
-
-        when(request.getPathInfo()).thenReturn("/");
-        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateJson(any(), eq(Mode.GOAL_CREATE), any()))
-                .thenThrow(new ValidationException("Target amount must be positive"));
-
-        goalServlet.doPost(request, response);
-
-        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        verify(printWriter).write(contains("Target amount must be positive"));
-    }
-
-    @Test
     @DisplayName("Get goal by ID - Not found")
     void testGetGoalById_NotFound() throws Exception {
         UserDto userDto = new UserDto();
@@ -235,5 +197,54 @@ class GoalServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
         verify(printWriter).write(contains("Endpoint not found"));
+    }
+
+    @Test
+    @DisplayName("Create goal - ValidationException")
+    void testCreateGoal_ValidationException() throws Exception {
+        String requestBody = "{\"userId\": 1, \"goalName\": \"Save Money\", \"targetAmount\": -1000.0}";
+
+        UserDto currentUser = new UserDto();
+        currentUser.setUserId(1L);
+        when(request.getSession()).thenReturn(session);
+        when(session.getAttribute("currentUser")).thenReturn(currentUser);
+
+        when(request.getPathInfo()).thenReturn("/");
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
+        when(validationUtils.validateJson(any(), eq(Mode.GOAL_CREATE), any()))
+                .thenThrow(new ValidationException("Target amount must be positive"));
+
+        goalServlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        verify(printWriter).write(contains("Target amount must be positive"));
+    }
+
+    @Test
+    @DisplayName("Create goal - Success scenario")
+    void testCreateGoal_Success() throws Exception {
+        String requestBody = "{\"userId\": 1, \"goalName\": \"Save Money\", \"targetAmount\": 1000.0, "
+                + "\"duration\": 6, \"startTime\": \"2023-10-01\"}";
+        GoalDto goalDto = new GoalDto();
+        goalDto.setUserId(1L);
+        goalDto.setGoalName("Save Money");
+        goalDto.setTargetAmount(BigDecimal.valueOf(1000.0));
+        goalDto.setDuration(6);
+
+        UserDto currentUser = new UserDto();
+        currentUser.setUserId(1L);
+        when(request.getSession()).thenReturn(session);
+        when(session.getAttribute("currentUser")).thenReturn(currentUser);
+
+        when(request.getPathInfo()).thenReturn("/");
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
+        when(validationUtils.validateJson(any(), eq(Mode.GOAL_CREATE), any())).thenReturn(goalDto);
+        when(goalService.createGoal(any(), anyLong())).thenReturn(1L);
+        when(goalService.getGoal(1L)).thenReturn(new Goal());
+
+        goalServlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_CREATED);
+        verify(printWriter).write(contains("Goal created successfully"));
     }
 }

@@ -36,13 +36,21 @@ public class TransactionServiceImpl implements TransactionService {
 
     /**
      * Creates a new transaction in the system based on the provided transaction data.
+     * <p>
+     * This method maps the provided {@link TransactionDto} to a {@link Transaction} entity,
+     * associates the transaction with the specified user ID, and saves it to the database.
+     * The transaction details include the amount, category, date, description, and type.
+     * <p>
      *
-     * @param dto the {@link TransactionDto} object containing the details of the transaction to create
+     * @param dto    the {@link TransactionDto} object containing the details of the transaction to create
+     * @param userId the unique identifier of the user associated with the transaction
      * @return the unique identifier ({@code Long}) of the newly created transaction
+     * @throws IllegalArgumentException if the provided transaction data is invalid or incomplete
      */
     @Override
-    public Long createTransaction(TransactionDto dto) {
+    public Long createTransaction(TransactionDto dto, Long userId) {
         Transaction transaction = TransactionMapper.INSTANCE.toEntity(dto);
+        transaction.setUserId(userId);
         return transactionRepository.save(transaction);
     }
 

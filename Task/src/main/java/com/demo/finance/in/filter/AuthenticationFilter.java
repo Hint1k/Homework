@@ -15,8 +15,10 @@ import java.io.IOException;
 /**
  * The {@code AuthenticationFilter} class implements the {@link Filter} interface
  * and provides a mechanism to enforce authentication and authorization checks on incoming HTTP requests.
- * It ensures that only authenticated users can access protected endpoints and that admin-specific endpoints
- * are accessible only to users with the "admin" role.
+ * It ensures that:
+ * - Public endpoints are accessible without authentication.
+ * - Admin-specific endpoints are accessible only to users with the "admin" role.
+ * - All other protected endpoints are accessible only to users with the "user" role.
  */
 public class AuthenticationFilter implements Filter {
 
@@ -25,6 +27,7 @@ public class AuthenticationFilter implements Filter {
      * - Allows access to public endpoints without authentication.
      * - Requires authentication for all other endpoints.
      * - Restricts access to admin-specific endpoints to users with the "admin" role.
+     * - Restricts access to all other protected endpoints to users with the "user" role.
      *
      * @param request  the incoming servlet request
      * @param response the outgoing servlet response
@@ -53,7 +56,16 @@ public class AuthenticationFilter implements Filter {
             if (currentUser instanceof UserDto user) {
                 if (!"admin".equalsIgnoreCase(user.getRole().getName())) {
                     httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    httpResponse.getWriter().write("Access denied. Admin role required.");
+                    httpResponse.getWriter().write("Access denied. Role \"admin\" required.");
+                    return;
+                }
+            }
+        } else {
+            Object currentUser = session.getAttribute("currentUser");
+            if (currentUser instanceof UserDto user) {
+                if (!"user".equalsIgnoreCase(user.getRole().getName())) {
+                    httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    httpResponse.getWriter().write("Access denied. Role \"user\" required.");
                     return;
                 }
             }

@@ -120,9 +120,10 @@ public class TransactionServlet extends BaseServlet {
     private void handleCreateTransaction(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String json = readRequestBody(request);
+            Long userId = ((UserDto) request.getSession().getAttribute("currentUser")).getUserId();
             TransactionDto transactionDto = validationUtils
                     .validateJson(json, Mode.TRANSACTION_CREATE, TransactionDto.class);
-            Long transactionId = transactionService.createTransaction(transactionDto);
+            Long transactionId = transactionService.createTransaction(transactionDto, userId);
             if (transactionId != null) {
                 Transaction transaction = transactionService.getTransaction(transactionId);
                 if (transaction != null) {

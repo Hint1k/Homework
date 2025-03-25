@@ -44,14 +44,17 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Updates the details of the currently authenticated user's account.
-     * Handles password updates securely by hashing the new password if it has changed.
+     * Updates the account details of the user with the specified user ID.
+     * This method maps the provided {@link UserDto} to a {@link User} entity,
+     * preserves the existing role and increments the version, and updates the password
+     * only if a new one is provided. Returns true if the update is successful.
      *
-     * @param userDto the {@link UserDto} object containing updated user information
-     * @return {@code true} if the update was successful, {@code false} otherwise
+     * @param userDto the {@link UserDto} containing updated user details
+     * @param userId  the unique identifier of the user whose account is being updated
+     * @return true if the account is successfully updated, false otherwise
      */
     @Override
-    public boolean updateOwnAccount(UserDto userDto) {
+    public boolean updateOwnAccount(UserDto userDto, Long userId) {
         User user = UserMapper.INSTANCE.toEntity(userDto);
         User existingUser = userRepository.findById(user.getUserId());
         if (existingUser == null) {

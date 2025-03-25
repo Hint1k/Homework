@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -63,7 +64,7 @@ class UserServletTest {
 
         when(request.getPathInfo()).thenReturn("/registration");
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateUserJson(any(), eq(Mode.REGISTER))).thenReturn(userDto);
+        when(validationUtils.validateUserJson(any(), eq(Mode.REGISTER_USER))).thenReturn(userDto);
         when(registrationService.registerUser(any())).thenReturn(true);
         when(userService.getUserByEmail("test@example.com")).thenReturn(new User());
 
@@ -122,8 +123,8 @@ class UserServletTest {
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(sessionUser);
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateUserJson(any(), eq(Mode.UPDATE), eq(1L))).thenReturn(updatedUserDto);
-        when(userService.updateOwnAccount(any())).thenReturn(true);
+        when(validationUtils.validateUserJson(any(), eq(Mode.UPDATE_USER))).thenReturn(updatedUserDto);
+        when(userService.updateOwnAccount(any(), anyLong())).thenReturn(true);
         when(userService.getUserByEmail("updated@example.com")).thenReturn(new User());
 
         userServlet.doPut(request, response);
@@ -162,7 +163,7 @@ class UserServletTest {
 
         when(request.getPathInfo()).thenReturn("/registration");
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateUserJson(any(), eq(Mode.REGISTER)))
+        when(validationUtils.validateUserJson(any(), eq(Mode.REGISTER_USER)))
                 .thenThrow(new ValidationException("Invalid email format"));
 
         userServlet.doPost(request, response);

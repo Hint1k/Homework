@@ -113,7 +113,7 @@ public class UserServlet extends BaseServlet {
     private void handleRegistration(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String json = readRequestBody(request);
-            UserDto userDto = validationUtils.validateUserJson(json, Mode.REGISTER);
+            UserDto userDto = validationUtils.validateUserJson(json, Mode.REGISTER_USER);
             boolean success = registrationService.registerUser(userDto);
             if (success) {
                 User user = userService.getUserByEmail(userDto.getEmail());
@@ -196,8 +196,8 @@ public class UserServlet extends BaseServlet {
             UserDto userDtoInSession = (UserDto) request.getSession().getAttribute("currentUser");
             Long userId = userDtoInSession.getUserId();
             String json = readRequestBody(request);
-            UserDto userDto = validationUtils.validateUserJson(json, Mode.UPDATE, userId);
-            boolean success = userService.updateOwnAccount(userDto);
+            UserDto userDto = validationUtils.validateUserJson(json, Mode.UPDATE_USER);
+            boolean success = userService.updateOwnAccount(userDto, userId);
             if (success) {
                 User updatedUser = userService.getUserByEmail(userDto.getEmail());
                 if (updatedUser != null) {

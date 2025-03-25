@@ -73,6 +73,6 @@ public interface TransactionMapper {
      */
     @Named("stringToType")
     default Type stringToType(String type) {
-        return type != null ? Type.valueOf(type) : null;
+        return type != null ? Type.valueOf(type.toUpperCase()) : null;
     }
 }

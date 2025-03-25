@@ -195,10 +195,11 @@ public class AdminServlet extends BaseServlet {
     private void handleBlockUnblockUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String pathInfo = request.getPathInfo();
-            String userId = pathInfo.substring("/block/".length());
+            String userIdString = pathInfo.substring("/block/".length());
             String json = readRequestBody(request);
-            UserDto userDto = validationUtils.validateUserJson(json, Mode.BLOCK_UNBLOCK, userId);
-            boolean success = adminService.blockOrUnblockUser(userDto.getUserId(), userDto.isBlocked());
+            Long userId = validationUtils.parseUserId(userIdString, Mode.BLOCK_UNBLOCK);
+            UserDto userDto = validationUtils.validateUserJson(json, Mode.BLOCK_UNBLOCK);
+            boolean success = adminService.blockOrUnblockUser(userId, userDto);
             if (success) {
                 sendSuccessResponse(response, HttpServletResponse.SC_OK,
                         "User blocked/unblocked status changed successfully", UserDto.removePassword(userDto));
@@ -221,10 +222,11 @@ public class AdminServlet extends BaseServlet {
     private void handleUpdateUserRole(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String pathInfo = request.getPathInfo();
-            String userId = pathInfo.substring("/role/".length());
+            String userIdString = pathInfo.substring("/role/".length());
             String json = readRequestBody(request);
-            UserDto userDto = validationUtils.validateUserJson(json, Mode.UPDATE_ROLE, userId);
-            boolean success = adminService.updateUserRole(userDto);
+            Long userId = validationUtils.parseUserId(userIdString, Mode.UPDATE_ROLE);
+            UserDto userDto = validationUtils.validateUserJson(json, Mode.UPDATE_ROLE);
+            boolean success = adminService.updateUserRole(userId, userDto);
             if (success) {
                 sendSuccessResponse(response, HttpServletResponse.SC_OK,
                         "User role updated successfully", UserDto.removePassword(userDto));

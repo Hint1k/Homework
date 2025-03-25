@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -59,21 +60,50 @@ class TransactionServletTest {
     @Test
     @DisplayName("Create transaction - Success scenario")
     void testCreateTransaction_Success() throws Exception {
-        String requestBody = "{\"userId\": 1, \"amount\": 100.0, \"category\": \"Food\", \"date\": \"2023-10-01\", "
+        String requestBody = "{\"amount\": 100.0, \"category\": \"Food\", \"date\": \"2023-10-01\", "
                 + "\"description\": \"Lunch\", \"type\": \"EXPENSE\"}";
         TransactionDto transactionDto = new TransactionDto();
-        transactionDto.setUserId(1L);
+        transactionDto.setUserId(3L);
         transactionDto.setAmount(BigDecimal.valueOf(100.0));
+
+        UserDto currentUser = new UserDto();
+        currentUser.setUserId(3L);
 
         when(request.getPathInfo()).thenReturn("/");
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(transactionService.createTransaction(any())).thenReturn(1L);
-        when(transactionService.getTransaction(1L)).thenReturn(new Transaction());
+        when(request.getSession()).thenReturn(session);
+        when(session.getAttribute("currentUser")).thenReturn(currentUser);
+        when(validationUtils.validateJson(requestBody, Mode.TRANSACTION_CREATE, TransactionDto.class))
+                .thenReturn(transactionDto);
+        when(transactionService.createTransaction(any(), anyLong())).thenReturn(2L);
+        when(transactionService.getTransaction(2L)).thenReturn(new Transaction());
 
         transactionServlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_CREATED);
         verify(printWriter).write(contains("Transaction created successfully"));
+    }
+
+    @Test
+    @DisplayName("Create transaction - ValidationException")
+    void testCreateTransaction_ValidationException() throws Exception {
+        String requestBody = "{\"amount\": -150, \"category\": \"Food\", \"date\": \"2023-10-01\", "
+                + "\"description\": \"Lunch\", \"type\": \"EXPENSE\"}";
+
+        UserDto currentUser = new UserDto();
+        currentUser.setUserId(3L);
+
+        when(request.getPathInfo()).thenReturn("/");
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
+        when(request.getSession()).thenReturn(session);
+        when(session.getAttribute("currentUser")).thenReturn(currentUser);
+        when(validationUtils.validateJson(any(), eq(Mode.TRANSACTION_CREATE), any()))
+                .thenThrow(new ValidationException("Amount must be positive"));
+
+        transactionServlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        verify(printWriter).write(contains("Amount must be positive"));
     }
 
     @Test
@@ -156,22 +186,6 @@ class TransactionServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         verify(printWriter).write(contains("Transaction deleted successfully"));
-    }
-
-    @Test
-    @DisplayName("Create transaction - ValidationException")
-    void testCreateTransaction_ValidationException() throws Exception {
-        String requestBody = "{\"userId\": 1, \"amount\": -100.0}";
-
-        when(request.getPathInfo()).thenReturn("/");
-        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateJson(any(), eq(Mode.TRANSACTION_CREATE), any()))
-                .thenThrow(new ValidationException("Amount must be positive"));
-
-        transactionServlet.doPost(request, response);
-
-        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        verify(printWriter).write(contains("Amount must be positive"));
     }
 
     @Test

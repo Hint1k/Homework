@@ -29,7 +29,7 @@ class ValidationUtilsImplTest {
     @DisplayName("Validate user JSON with valid input - returns UserDto")
     void testValidateUserJson_ValidInput_ReturnsUserDto() {
         String json = "{\"name\":\"John\",\"email\":\"john@test.com\",\"password\":\"pass123\"}";
-        UserDto result = validationUtils.validateUserJson(json, Mode.REGISTER);
+        UserDto result = validationUtils.validateUserJson(json, Mode.REGISTER_USER);
         assertThat(result.getName()).isEqualTo("John");
         assertThat(result.getEmail()).isEqualTo("john@test.com");
     }
@@ -38,7 +38,7 @@ class ValidationUtilsImplTest {
     @DisplayName("Validate user JSON with invalid email - throws ValidationException")
     void testValidateUserJson_InvalidEmail_ThrowsException() {
         String json = "{\"name\":\"John\",\"email\":\"invalid\",\"password\":\"pass123\"}";
-        assertThatThrownBy(() -> validationUtils.validateUserJson(json, Mode.REGISTER))
+        assertThatThrownBy(() -> validationUtils.validateUserJson(json, Mode.REGISTER_USER))
                 .isInstanceOf(ValidationException.class)
                 .hasMessageContaining("Invalid email format");
     }
@@ -134,7 +134,7 @@ class ValidationUtilsImplTest {
     @DisplayName("Validate JSON with missing required field - throws Exception")
     void testValidateJson_MissingField_ThrowsException() {
         String json = "{\"name\":\"John\"}";
-        assertThatThrownBy(() -> validationUtils.validateUserJson(json, Mode.REGISTER))
+        assertThatThrownBy(() -> validationUtils.validateUserJson(json, Mode.REGISTER_USER))
                 .isInstanceOf(ValidationException.class)
                 .hasMessageContaining("Missing required field");
     }
@@ -178,17 +178,8 @@ class ValidationUtilsImplTest {
     @DisplayName("Validate user JSON with ID for update - returns UserDto with ID")
     void testValidateUserJson_WithIdForUpdate_ReturnsDtoWithId() {
         String json = "{\"userId\":1,\"name\":\"John\",\"email\":\"john@test.com\",\"password\":\"pass123\"}";
-        UserDto result = validationUtils.validateUserJson(json, Mode.UPDATE, 1L);
+        UserDto result = validationUtils.validateUserJson(json, Mode.UPDATE_USER);
         assertThat(result.getUserId()).isEqualTo(1L);
-    }
-
-    @Test
-    @DisplayName("Validate user JSON with mismatched ID - throws Exception")
-    void testValidateUserJson_MismatchedId_ThrowsException() {
-        String json = "{\"userId\":2,\"name\":\"John\",\"email\":\"jay4@demo.com\",\"password\":\"123\"}";
-        assertThatThrownBy(() -> validationUtils.validateUserJson(json, Mode.UPDATE, 1L))
-                .isInstanceOf(ValidationException.class)
-                .hasMessageContaining("A user can't update other users");
     }
 
     @Test

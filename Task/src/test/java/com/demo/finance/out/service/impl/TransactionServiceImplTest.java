@@ -40,7 +40,7 @@ class TransactionServiceImplTest {
 
         when(transactionRepository.save(any(Transaction.class))).thenReturn(123L);
 
-        Long result = transactionService.createTransaction(dto);
+        Long result = transactionService.createTransaction(dto, 1L);
 
         assertThat(result).isEqualTo(123L);
         verify(transactionRepository).save(any(Transaction.class));

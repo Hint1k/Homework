@@ -27,30 +27,6 @@ public interface ValidationUtils {
     UserDto validateUserJson(String json, Mode mode);
 
     /**
-     * Validates a JSON string representing a user, maps it to a {@link UserDto} object,
-     * and associates it with the provided user ID.
-     *
-     * @param json   the JSON string to validate
-     * @param mode   the mode specifying the type of validation to perform
-     * @param userId the string representation of the user ID
-     * @return the validated {@link UserDto} object with the associated user ID
-     * @throws IllegalArgumentException if the JSON format is invalid or validation fails
-     */
-    UserDto validateUserJson(String json, Mode mode, String userId);
-
-    /**
-     * Validates a JSON string representing a user, maps it to a {@link UserDto} object,
-     * and ensures the user ID in the JSON matches the provided user ID.
-     *
-     * @param json   the JSON string to validate
-     * @param mode   the mode specifying the type of validation to perform
-     * @param userId the user ID to match
-     * @return the validated {@link UserDto} object
-     * @throws IllegalArgumentException if the user IDs do not match or validation fails
-     */
-    UserDto validateUserJson(String json, Mode mode, Long userId);
-
-    /**
      * Validates pagination parameters based on the provided JSON string and mode.
      * This method ensures that the required fields are present in the JSON and validates their values.
      *

@@ -18,21 +18,26 @@ public interface AdminService {
     User getUser(Long userId);
 
     /**
-     * Updates the role of a specific user based on the provided user data.
+     * Updates the role of the user with the specified user ID.
+     * This method retrieves the user, sets the new role from the provided {@link UserDto},
+     * increments the version, and saves the updated user. Returns true if successful.
      *
-     * @param userDto the {@link UserDto} object containing updated role information for the user
-     * @return {@code true} if the update was successful, {@code false} otherwise
+     * @param userId  the unique identifier of the user whose role is being updated
+     * @param userDto the {@link UserDto} containing the new role information
+     * @return true if the role is successfully updated, false otherwise
      */
-    boolean updateUserRole(UserDto userDto);
+    boolean updateUserRole(Long userId, UserDto userDto);
 
     /**
-     * Blocks or unblocks a specific user in the system.
+     * Blocks or unblocks the user with the specified user ID.
+     * This method retrieves the user, updates the blocked status from the provided {@link UserDto},
+     * increments the version, and saves the updated user. Returns true if successful.
      *
-     * @param userId  the unique identifier of the user
-     * @param blocked a boolean flag indicating whether to block ({@code true}) or unblock ({@code false}) the user
-     * @return {@code true} if the operation was successful, {@code false} otherwise
+     * @param userId  the unique identifier of the user to block or unblock
+     * @param userDto the {@link UserDto} containing the blocked status
+     * @return true if the user's blocked status is successfully updated, false otherwise
      */
-    boolean blockOrUnblockUser(Long userId, boolean blocked);
+    boolean blockOrUnblockUser(Long userId, UserDto userDto);
 
     /**
      * Deletes a specific user from the system based on their unique user ID.

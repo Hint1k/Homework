@@ -120,8 +120,9 @@ public class GoalServlet extends BaseServlet {
     private void handleCreateGoal(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String json = readRequestBody(request);
+            Long userId = ((UserDto) request.getSession().getAttribute("currentUser")).getUserId();
             GoalDto goalDto = validationUtils.validateJson(json, Mode.GOAL_CREATE, GoalDto.class);
-            Long goalId = goalService.createGoal(goalDto);
+            Long goalId = goalService.createGoal(goalDto, userId);
             if (goalId != null) {
                 Goal goal = goalService.getGoal(goalId);
                 if (goal != null) {

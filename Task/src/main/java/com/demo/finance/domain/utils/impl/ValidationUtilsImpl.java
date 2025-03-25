@@ -59,45 +59,6 @@ public class ValidationUtilsImpl implements ValidationUtils {
     }
 
     /**
-     * Validates a JSON string representing a user, maps it to a {@link UserDto} object,
-     * and associates it with the provided user ID.
-     *
-     * @param json   the JSON string to validate
-     * @param mode   the mode specifying the type of validation to perform
-     * @param userId the string representation of the user ID
-     * @return the validated {@link UserDto} object with the associated user ID
-     * @throws ValidationException if the JSON format is invalid or validation fails
-     */
-    @Override
-    public UserDto validateUserJson(String json, Mode mode, String userId) {
-        Long parsedUserId = parseUserId(userId, mode);
-        UserDto userDto = validateUserJson(json, mode);
-        userDto.setUserId(parsedUserId);
-        return userDto;
-    }
-
-    /**
-     * Validates a JSON string representing a user, maps it to a {@link UserDto} object,
-     * and ensures the user ID in the JSON matches the provided user ID.
-     *
-     * @param json   the JSON string to validate
-     * @param mode   the mode specifying the type of validation to perform
-     * @param userId the user ID to match
-     * @return the validated {@link UserDto} object
-     * @throws ValidationException if the user IDs do not match or validation fails
-     */
-    @Override
-    public UserDto validateUserJson(String json, Mode mode, Long userId) {
-        UserDto userDto = validateUserJson(json, mode);
-        Long userIdJson = userDto.getUserId();
-        if (userIdJson.equals(userId)) {
-            return userDto;
-        } else {
-            throw new ValidationException("A user can't update other users");
-        }
-    }
-
-    /**
      * Parses and validates a user ID string.
      *
      * @param userIdString the string representation of the user ID
@@ -316,7 +277,6 @@ public class ValidationUtilsImpl implements ValidationUtils {
     private void validateRequiredFields(JsonNode jsonNode, Mode mode) {
         switch (mode) {
             case TRANSACTION_CREATE:
-                checkField(jsonNode, "userId");
                 checkField(jsonNode, "amount");
                 checkField(jsonNode, "category");
                 checkField(jsonNode, "date");
@@ -324,39 +284,23 @@ public class ValidationUtilsImpl implements ValidationUtils {
                 checkField(jsonNode, "type");
                 break;
             case TRANSACTION_UPDATE:
-                checkField(jsonNode, "userId");
                 checkField(jsonNode, "amount");
                 checkField(jsonNode, "category");
                 checkField(jsonNode, "description");
                 break;
-            case TRANSACTION_DELETE:
-                checkField(jsonNode, "transactionId");
-                checkField(jsonNode, "userId");
-                break;
             case GOAL_CREATE:
-                checkField(jsonNode, "userId");
                 checkField(jsonNode, "goalName");
                 checkField(jsonNode, "targetAmount");
                 checkField(jsonNode, "duration");
                 checkField(jsonNode, "startTime");
                 break;
             case GOAL_UPDATE:
-                checkField(jsonNode, "userId");
                 checkField(jsonNode, "goalName");
                 checkField(jsonNode, "targetAmount");
                 checkField(jsonNode, "duration");
                 break;
-            case GOAL_DELETE:
-                checkField(jsonNode, "goalId");
-                checkField(jsonNode, "userId");
-                break;
-            case UPDATE:
-                checkField(jsonNode, "userId");
-                checkField(jsonNode, "name");
-                checkField(jsonNode, "email");
-                checkField(jsonNode, "password");
-                break;
-            case REGISTER:
+            case REGISTER_USER:
+            case UPDATE_USER:
                 checkField(jsonNode, "name");
                 checkField(jsonNode, "email");
                 checkField(jsonNode, "password");
@@ -395,7 +339,7 @@ public class ValidationUtilsImpl implements ValidationUtils {
      *
      * @param jsonNode the JsonNode containing the pagination parameters to validate.
      * @return a {@link PaginationParams} object containing the validated page and size values.
-     *         If a parameter is missing, its value will default to -1.
+     * If a parameter is missing, its value will default to -1.
      * @throws ValidationException if the "page" or "size" values are invalid (e.g., non-numeric or out of range).
      */
     private PaginationParams validateParamsValues(JsonNode jsonNode) {
@@ -446,9 +390,6 @@ public class ValidationUtilsImpl implements ValidationUtils {
      * @throws ValidationException if any field value fails validation
      */
     private void validateFieldValues(JsonNode jsonNode) {
-        if (jsonNode.has("userId") && !jsonNode.get("userId").isIntegralNumber()) {
-            throw new ValidationException("Invalid userId: must be a non-null Long.");
-        }
         if (jsonNode.has("email") && !isValidEmail(jsonNode.get("email").asText())) {
             throw new ValidationException("Invalid email format.");
         }

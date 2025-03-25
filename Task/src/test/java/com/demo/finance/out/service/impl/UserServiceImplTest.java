@@ -51,7 +51,7 @@ class UserServiceImplTest {
         when(passwordUtils.hashPassword(newPassword)).thenReturn(hashedPassword);
         when(userRepository.update(updatedUser)).thenReturn(true);
 
-        boolean result = userService.updateOwnAccount(userDto);
+        boolean result = userService.updateOwnAccount(userDto, userId);
 
         assertThat(result).isTrue();
         verify(userRepository, times(1)).findById(userId);
@@ -93,7 +93,7 @@ class UserServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(existingUser);
         when(userRepository.update(updatedUser)).thenReturn(true);
 
-        boolean result = userService.updateOwnAccount(userDto);
+        boolean result = userService.updateOwnAccount(userDto, userId);
 
         assertThat(result).isTrue();
         verify(userRepository, times(1)).findById(userId);
@@ -125,7 +125,7 @@ class UserServiceImplTest {
         when(passwordUtils.hashPassword(newPassword)).thenReturn(hashedPassword);
         when(userRepository.update(updatedUser)).thenReturn(false);
 
-        boolean result = userService.updateOwnAccount(userDto);
+        boolean result = userService.updateOwnAccount(userDto, userId);
 
         assertThat(result).isFalse();
         verify(userRepository, times(1)).findById(userId);

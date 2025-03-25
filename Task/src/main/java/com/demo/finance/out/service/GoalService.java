@@ -11,12 +11,20 @@ import com.demo.finance.domain.utils.PaginatedResponse;
 public interface GoalService {
 
     /**
-     * Creates a new goal in the system based on the provided goal data.
+     * Creates a new financial goal in the system based on the provided goal data.
+     * <p>
+     * This method maps the provided {@link GoalDto} to a {@link Goal} entity, associates the goal
+     * with the specified user ID, initializes the saved amount to zero, and saves it to the database.
+     * The goal details typically include the target amount, duration, start time, and goal name.
+     * <p>
+     * Example request payload for creating a goal:
      *
      * @param goalDto the {@link GoalDto} object containing the details of the goal to create
+     * @param userId  the unique identifier of the user associated with the goal
      * @return the unique identifier ({@code Long}) of the newly created goal
+     * @throws IllegalArgumentException if the provided goal data is invalid or incomplete
      */
-    Long createGoal(GoalDto goalDto);
+    Long createGoal(GoalDto goalDto, Long userId);
 
     /**
      * Retrieves a specific goal by its unique goal ID.

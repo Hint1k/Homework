@@ -31,14 +31,14 @@ class GoalServiceImplTest {
     @DisplayName("Create goal - valid goal - returns goal ID")
     void testCreateGoal_validGoal_returnsGoalId() {
         GoalDto dto = new GoalDto();
-        dto.setUserId(1L);
+        dto.setUserId(12L);
         dto.setGoalName("Car");
         dto.setTargetAmount(new BigDecimal(5000));
         dto.setDuration(12);
 
         when(goalRepository.save(any(Goal.class))).thenReturn(123L);
 
-        Long result = goalService.createGoal(dto);
+        Long result = goalService.createGoal(dto, 12L);
 
         assertThat(result).isEqualTo(123L);
         verify(goalRepository).save(argThat(goal ->

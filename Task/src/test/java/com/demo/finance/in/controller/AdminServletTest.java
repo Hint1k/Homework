@@ -102,7 +102,7 @@ class AdminServletTest {
     @Test
     @DisplayName("Block/unblock user - Success scenario")
     void testBlockOrUnblockUser_Success() throws Exception {
-        String requestBody = "{\"userId\": 2, \"blocked\": true}";
+        String requestBody = "{\"blocked\": true}";
         String pathInfo = "/block/2";
         UserDto userDto = new UserDto();
         userDto.setUserId(2L);
@@ -110,8 +110,9 @@ class AdminServletTest {
 
         when(request.getPathInfo()).thenReturn(pathInfo);
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateUserJson(any(), eq(Mode.BLOCK_UNBLOCK), eq("2"))).thenReturn(userDto);
-        when(adminService.blockOrUnblockUser(2L, true)).thenReturn(true);
+        when(validationUtils.parseUserId("2", Mode.BLOCK_UNBLOCK)).thenReturn(2L);
+        when(validationUtils.validateUserJson(any(), eq(Mode.BLOCK_UNBLOCK))).thenReturn(userDto);
+        when(adminService.blockOrUnblockUser(2L, userDto)).thenReturn(true);
 
         adminServlet.doPatch(request, response);
 
@@ -122,15 +123,16 @@ class AdminServletTest {
     @Test
     @DisplayName("Update user role - Success scenario")
     void testUpdateUserRole_Success() throws Exception {
-        String requestBody = "{\"userId\": 2, \"role\": \"ADMIN\"}";
+        String requestBody = "{\"role\": \"ADMIN\"}";
         String pathInfo = "/role/2";
         UserDto userDto = new UserDto();
         userDto.setUserId(2L);
 
         when(request.getPathInfo()).thenReturn(pathInfo);
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(validationUtils.validateUserJson(any(), eq(Mode.UPDATE_ROLE), eq("2"))).thenReturn(userDto);
-        when(adminService.updateUserRole(userDto)).thenReturn(true);
+        when(validationUtils.parseUserId("2", Mode.UPDATE_ROLE)).thenReturn(2L);
+        when(validationUtils.validateUserJson(any(), eq(Mode.UPDATE_ROLE))).thenReturn(userDto);
+        when(adminService.updateUserRole(2L, userDto)).thenReturn(true);
 
         adminServlet.doPatch(request, response);
 
@@ -177,7 +179,7 @@ class AdminServletTest {
         when(request.getPathInfo()).thenReturn(pathInfo);
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
         doThrow(new ValidationException("Invalid user data")).when(validationUtils)
-                .validateUserJson(any(), eq(Mode.BLOCK_UNBLOCK), eq("2"));
+                .validateUserJson(any(), eq(Mode.BLOCK_UNBLOCK));
 
         adminServlet.doPatch(request, response);
 

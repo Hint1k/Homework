@@ -30,15 +30,22 @@ public class GoalServiceImpl implements GoalService {
     }
 
     /**
-     * Creates a new goal in the system based on the provided goal data.
-     * Initializes the saved amount to zero before saving the goal to the database.
+     * Creates a new financial goal in the system based on the provided goal data.
+     * <p>
+     * This method maps the provided {@link GoalDto} to a {@link Goal} entity, associates the goal
+     * with the specified user ID, initializes the saved amount to zero, and saves it to the database.
+     * The goal details include the target amount, duration, start time, and goal name.
+     * <p>
      *
      * @param goalDto the {@link GoalDto} object containing the details of the goal to create
+     * @param userId  the unique identifier of the user associated with the goal
      * @return the unique identifier ({@code Long}) of the newly created goal
+     * @throws IllegalArgumentException if the provided goal data is invalid or incomplete
      */
     @Override
-    public Long createGoal(GoalDto goalDto) {
+    public Long createGoal(GoalDto goalDto, Long userId) {
         Goal goal = GoalMapper.INSTANCE.toEntity(goalDto);
+        goal.setUserId(userId);
         goal.setSavedAmount(BigDecimal.ZERO);
         return goalRepository.save(goal);
     }

@@ -9,7 +9,7 @@ public enum Mode {
     /**
      * Represents the mode for user registration.
      */
-    REGISTER,
+    REGISTER_USER,
 
     /**
      * Represents the mode for creating a generic entity.
@@ -29,7 +29,7 @@ public enum Mode {
     /**
      * Represents the mode for updating a generic entity.
      */
-    UPDATE,
+    UPDATE_USER,
 
     /**
      * Represents the mode for updating a goal.
