@@ -1,6 +1,6 @@
 package com.demo.finance.in.controller;
 
-import com.demo.finance.domain.dto.UserDto;
+import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
@@ -163,14 +163,8 @@ public abstract class BaseServlet extends HttpServlet {
      * @throws IllegalArgumentException if the pagination parameters are invalid or missing
      */
     protected PaginationParams getValidatedPaginationParams(HttpServletRequest request) throws IOException {
-        UserDto userDto = (UserDto) request.getSession().getAttribute("currentUser");
-        if (userDto == null) {
-            throw new IllegalStateException("No user is currently logged in.");
-        }
         String json = readRequestBody(request);
-        PaginationParams paginationRequest = objectMapper.readValue(json, PaginationParams.class);
-        return validationUtils.validatePaginationParams(String.valueOf(paginationRequest.page()),
-                String.valueOf(paginationRequest.size()));
+        return validationUtils.validatePaginationParams(json, Mode.PAGE);
     }
 
     /**

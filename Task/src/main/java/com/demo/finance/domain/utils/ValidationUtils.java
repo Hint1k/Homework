@@ -51,14 +51,14 @@ public interface ValidationUtils {
     UserDto validateUserJson(String json, Mode mode, Long userId);
 
     /**
-     * Validates pagination parameters for paginated requests.
+     * Validates pagination parameters based on the provided JSON string and mode.
+     * This method ensures that the required fields are present in the JSON and validates their values.
      *
-     * @param page the string representation of the page number
-     * @param size the string representation of the page size
-     * @return a {@link PaginationParams} object containing the validated page and size values
-     * @throws IllegalArgumentException if the page or size format is invalid or exceeds constraints
+     * @param json the JSON string containing pagination parameters (e.g., "page" and "size").
+     * @param mode the mode of validation, which determines the required fields and rules.
+     * @return a {@link PaginationParams} object containing validated page and size values.
      */
-    PaginationParams validatePaginationParams(String page, String size);
+    PaginationParams validatePaginationParams(String json, Mode mode);
 
     /**
      * Validates a JSON string representing a report request and extracts date ranges.
@@ -130,7 +130,7 @@ public interface ValidationUtils {
      * @param value the string value to parse
      * @return the parsed {@code Long} value
      * @throws IllegalArgumentException if the input value is null, empty,
-     * or cannot be parsed into a valid {@code Long}
+     *                                  or cannot be parsed into a valid {@code Long}
      */
     Long parseLong(String value);
 
@@ -142,10 +142,10 @@ public interface ValidationUtils {
      * the JSON to an instance of the provided DTO class. If the JSON format is invalid or
      * validation fails, an exception is thrown.
      *
-     * @param json      the JSON string to validate
-     * @param mode      the mode specifying the type of validation to perform
-     * @param dtoClass  the class of the DTO object to map the JSON to ({@link TransactionDto}, {@link GoalDto})
-     * @param <T>       the type of the DTO object
+     * @param json     the JSON string to validate
+     * @param mode     the mode specifying the type of validation to perform
+     * @param dtoClass the class of the DTO object to map the JSON to ({@link TransactionDto}, {@link GoalDto})
+     * @param <T>      the type of the DTO object
      * @return the validated DTO object of the specified type
      */
     <T> T validateJson(String json, Mode mode, Class<T> dtoClass);

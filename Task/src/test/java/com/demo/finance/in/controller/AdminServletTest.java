@@ -68,8 +68,7 @@ class AdminServletTest {
 
         when(request.getPathInfo()).thenReturn("/");
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(objectMapper.readValue(requestBody, PaginationParams.class)).thenReturn(paginationParams);
-        when(validationUtils.validatePaginationParams("1", "10")).thenReturn(paginationParams);
+        when(validationUtils.validatePaginationParams(requestBody, Mode.PAGE)).thenReturn(paginationParams);
         when(userService.getPaginatedUsers(1, 10)).thenReturn(paginatedResponse);
 
         adminServlet.doGet(request, response);
@@ -89,9 +88,8 @@ class AdminServletTest {
 
         when(request.getPathInfo()).thenReturn(pathInfo);
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
-        when(objectMapper.readValue(requestBody, PaginationParams.class)).thenReturn(paginationParams);
         when(validationUtils.parseUserId("2", Mode.GET)).thenReturn(2L);
-        when(validationUtils.validatePaginationParams("1", "10")).thenReturn(paginationParams);
+        when(validationUtils.validatePaginationParams(requestBody, Mode.PAGE)).thenReturn(paginationParams);
         when(transactionService.getPaginatedTransactionsForUser(2L, 1, 10))
                 .thenReturn(paginatedResponse);
 
@@ -161,8 +159,8 @@ class AdminServletTest {
         when(request.getPathInfo()).thenReturn("/");
         when(request.getReader()).thenReturn(new BufferedReader(
                 new StringReader("{\"page\": \"invalid\", \"size\": 10}")));
-        doThrow(new IllegalArgumentException("Invalid page format"))
-                .when(objectMapper).readValue(anyString(), eq(PaginationParams.class));
+        doThrow(new ValidationException("Invalid page number."))
+                .when(validationUtils).validatePaginationParams(anyString(), eq(Mode.PAGE));
 
         adminServlet.doGet(request, response);
 

@@ -5,6 +5,7 @@ import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
+import com.demo.finance.exception.DuplicateEmailException;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
@@ -128,7 +129,7 @@ public class UserServlet extends BaseServlet {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
                         "Failed to register user.");
             }
-        } catch (ValidationException e) {
+        } catch (DuplicateEmailException | ValidationException e) {
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
     }
@@ -161,9 +162,8 @@ public class UserServlet extends BaseServlet {
                 sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
                         "Invalid credentials.");
             }
-        } catch (Exception e) {
-            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid request parameters.");
+        } catch (ValidationException e) {
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
     }
 

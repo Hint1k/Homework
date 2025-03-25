@@ -107,6 +107,9 @@ public class ValidationUtilsImpl implements ValidationUtils {
      */
     @Override
     public Long parseUserId(String userIdString, Mode mode) {
+        if (userIdString == null || !userIdString.matches("\\d+")) {
+            throw new IllegalArgumentException("Invalid user ID format. User ID must be a positive integer.");
+        }
         Long userId = parseLong(userIdString);
         if (userId == 1 && mode == Mode.DELETE) {
             throw new ValidationException("Default Admin cannot be deleted");
@@ -130,7 +133,7 @@ public class ValidationUtilsImpl implements ValidationUtils {
      * @param value the string value to parse
      * @return the parsed {@code Long} value
      * @throws IllegalArgumentException if the input value is null, empty,
-     * or cannot be parsed into a valid {@code Long}
+     *                                  or cannot be parsed into a valid {@code Long}
      */
     public Long parseLong(String value) {
         if (value == null || value.trim().isEmpty()) {
@@ -144,21 +147,28 @@ public class ValidationUtilsImpl implements ValidationUtils {
     }
 
     /**
-     * Validates pagination parameters for paginated requests.
+     * Validates pagination parameters by parsing the JSON string, ensuring all required fields are present,
+     * and validating the values of the fields such as "page" and "size".
+     * <p>
+     * This implementation uses an ObjectMapper to parse the JSON string into a JsonNode.
+     * It delegates the validation of required fields to {@link #validateRequiredFields(JsonNode, Mode)}
+     * and the validation of parameter values to {@link #validateParamsValues(JsonNode)}.
      *
-     * @param page the string representation of the page number
-     * @param size the string representation of the page size
-     * @return a {@link PaginationParams} object containing the validated page and size values
-     * @throws IllegalArgumentException if the page or size format is invalid or exceeds constraints
+     * @param json the JSON string containing pagination parameters (e.g., "page" and "size").
+     * @param mode the mode of validation, which determines the required fields and rules.
+     * @return a {@link PaginationParams} object containing validated page and size values.
+     * @throws ValidationException if the JSON format is invalid, required fields are missing,
+     *                             or any validation rule is violated.
      */
     @Override
-    public PaginationParams validatePaginationParams(String page, String size) {
-        int parsedPage = parseInt(page, "Invalid page format: must be an integer.");
-        int parsedSize = parseInt(size, "Invalid size format: must be an integer.");
-        if (parsedSize > 100) {
-            throw new IllegalArgumentException("Size cannot exceed 100.");
+    public PaginationParams validatePaginationParams(String json, Mode mode) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            validateRequiredFields(jsonNode, mode);
+            return validateParamsValues(jsonNode);
+        } catch (Exception e) {
+            throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
         }
-        return new PaginationParams(parsedPage, parsedSize);
     }
 
     /**
@@ -215,10 +225,10 @@ public class ValidationUtilsImpl implements ValidationUtils {
      * This method validates the input JSON string, ensures all required fields are present,
      * performs additional field value validations, and maps the JSON to the specified DTO class.
      *
-     * @param json   the JSON string to validate
-     * @param mode   the mode specifying the type of validation to perform
+     * @param json     the JSON string to validate
+     * @param mode     the mode specifying the type of validation to perform
      * @param dtoClass the class of the DTO object to map the JSON to (e.g., {@link TransactionDto}, {@link GoalDto})
-     * @param <T>    the type of the DTO object
+     * @param <T>      the type of the DTO object
      * @return the validated DTO object
      * @throws ValidationException if the JSON format is invalid or validation fails
      */
@@ -297,23 +307,6 @@ public class ValidationUtilsImpl implements ValidationUtils {
     }
 
     /**
-     * Parses a string value into an {@code int}, throwing an exception with a custom error message
-     * if the parsing fails due to an invalid format.
-     *
-     * @param value        the string value to parse
-     * @param errorMessage the error message to include in the exception if parsing fails
-     * @return the parsed {@code int} value
-     * @throws IllegalArgumentException if the string value cannot be parsed into an {@code int}
-     */
-    private int parseInt(String value, String errorMessage) {
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(errorMessage);
-        }
-    }
-
-    /**
      * Validates the presence of required fields in the JSON node based on the specified mode.
      *
      * @param jsonNode the JSON node to validate
@@ -385,9 +378,52 @@ public class ValidationUtilsImpl implements ValidationUtils {
             case BUDGET:
                 checkField(jsonNode, "monthlyLimit");
                 break;
+            case PAGE:
+                checkField(jsonNode, "page");
+                checkField(jsonNode, "size");
+                break;
             default:
                 break;
         }
+    }
+
+    /**
+     * Validates the values of pagination parameters ("page" and "size") extracted from the provided JsonNode.
+     * <p>
+     * The "page" value must be a positive integer greater than or equal to 1.
+     * The "size" value must be a positive integer between 1 and 100 (inclusive).
+     *
+     * @param jsonNode the JsonNode containing the pagination parameters to validate.
+     * @return a {@link PaginationParams} object containing the validated page and size values.
+     *         If a parameter is missing, its value will default to -1.
+     * @throws ValidationException if the "page" or "size" values are invalid (e.g., non-numeric or out of range).
+     */
+    private PaginationParams validateParamsValues(JsonNode jsonNode) {
+        int page = -1, size = -1;
+        if (jsonNode.has("page")) {
+            try {
+                page = Integer.parseInt(jsonNode.get("page").asText());
+                if (page < 1) {
+                    throw new ValidationException("Page must be positive integer: " + page);
+                }
+            } catch (NumberFormatException e) {
+                throw new ValidationException("Invalid page number.");
+            }
+        }
+        if (jsonNode.has("size")) {
+            try {
+                size = Integer.parseInt(jsonNode.get("size").asText());
+                if (size < 1) {
+                    throw new ValidationException("Size must be positive integer: " + size);
+                }
+                if (size > 100) {
+                    throw new IllegalArgumentException("Size cannot exceed 100.");
+                }
+            } catch (NumberFormatException e) {
+                throw new ValidationException("Invalid size number.");
+            }
+        }
+        return new PaginationParams(page, size);
     }
 
     /**

@@ -4,6 +4,7 @@ import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
+import com.demo.finance.exception.DuplicateEmailException;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.domain.mapper.UserMapper;
@@ -31,17 +32,22 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     /**
-     * Registers a new user in the system based on the provided user data.
-     * Ensures that the email is unique and securely hashes the user's password before saving it to the database.
+     * Registers a new user in the system after performing necessary validations and transformations.
+     * <p>
+     * This method maps the provided {@link UserDto} to a {@link User} entity, checks for duplicate email addresses,
+     * hashes the user's password, sets default values for blocked status, role, and version, and saves the user
+     * to the repository.
      *
-     * @param userDto the {@link UserDto} object containing the details of the user to register
-     * @return {@code true} if the registration was successful, {@code false} if the email is already registered
+     * @param userDto the data transfer object containing user registration details.
+     * @return true if the user is successfully registered and saved in the repository.
+     * @throws DuplicateEmailException if the email address provided in the {@link UserDto} is already registered.
+     * @throws RuntimeException        if an unexpected error occurs during the registration process.
      */
     @Override
     public boolean registerUser(UserDto userDto) {
         User user = UserMapper.INSTANCE.toEntity(userDto);
         if (userRepository.findByEmail(user.getEmail()) != null) {
-            return false;
+            throw new DuplicateEmailException("Email is already registered: " + user.getEmail());
         }
         user.setPassword(passwordUtils.hashPassword(userDto.getPassword()));
         user.setBlocked(false);

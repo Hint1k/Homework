@@ -55,7 +55,7 @@ class ValidationUtilsImplTest {
     void testParseUserId_InvalidInput_ThrowsException() {
         assertThatThrownBy(() -> validationUtils.parseUserId("abc", Mode.DELETE))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Invalid numeric format");
+                .hasMessageContaining("Invalid user ID format. User ID must be a positive integer.");
     }
 
     @Test
@@ -69,7 +69,8 @@ class ValidationUtilsImplTest {
     @Test
     @DisplayName("Validate pagination params with valid input - returns PaginationParams")
     void testValidatePaginationParams_ValidInput_ReturnsParams() {
-        PaginationParams result = validationUtils.validatePaginationParams("1", "10");
+        String json = "{\"page\":1,\"size\":10}";
+        PaginationParams result = validationUtils.validatePaginationParams(json, Mode.PAGE);
         assertThat(result.page()).isEqualTo(1);
         assertThat(result.size()).isEqualTo(10);
     }
@@ -77,8 +78,9 @@ class ValidationUtilsImplTest {
     @Test
     @DisplayName("Validate pagination params with large size - throws Exception")
     void testValidatePaginationParams_SizeTooLarge_ThrowsException() {
-        assertThatThrownBy(() -> validationUtils.validatePaginationParams("1", "101"))
-                .isInstanceOf(IllegalArgumentException.class)
+        String json = "{\"page\":1,\"size\":101}";
+        assertThatThrownBy(() -> validationUtils.validatePaginationParams(json, Mode.PAGE))
+                .isInstanceOf(ValidationException.class)
                 .hasMessageContaining("Size cannot exceed 100");
     }
 

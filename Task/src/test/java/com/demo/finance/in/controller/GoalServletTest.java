@@ -90,7 +90,7 @@ class GoalServletTest {
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(requestBody)));
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("currentUser")).thenReturn(userDto);
-        when(validationUtils.validatePaginationParams("1", "10"))
+        when(validationUtils.validatePaginationParams(requestBody, Mode.PAGE))
                 .thenReturn(new PaginationParams(1, 10));
         when(goalService.getPaginatedGoalsForUser(1L, 1, 10))
                 .thenReturn(new PaginatedResponse<>(Collections.emptyList(),

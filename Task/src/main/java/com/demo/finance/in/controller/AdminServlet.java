@@ -129,13 +129,10 @@ public class AdminServlet extends BaseServlet {
      */
     private void handleGetPaginatedUsers(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            String json = readRequestBody(request);
-            PaginationParams paginationParams = objectMapper.readValue(json, PaginationParams.class);
-            PaginationParams params = validationUtils.validatePaginationParams(String.valueOf(paginationParams.page()),
-                    String.valueOf(paginationParams.size()));
+            PaginationParams params = getValidatedPaginationParams(request);
             PaginatedResponse<UserDto> paginatedResponse = userService.getPaginatedUsers(params.page(), params.size());
             sendPaginatedResponseWithMetadata(response, null, paginatedResponse);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ValidationException e) {
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
                     "Invalid pagination parameters: " + e.getMessage());
         }
@@ -153,17 +150,13 @@ public class AdminServlet extends BaseServlet {
         try {
             String pathInfo = request.getPathInfo();
             String userIdString = pathInfo.substring("/transactions/".length());
-            String json = readRequestBody(request);
-            PaginationParams paginationRequest = objectMapper.readValue(json, PaginationParams.class);
             Long userId = validationUtils.parseUserId(userIdString, Mode.GET);
-            PaginationParams params = validationUtils.validatePaginationParams(
-                    String.valueOf(paginationRequest.page()), String.valueOf(paginationRequest.size()));
+            PaginationParams params = getValidatedPaginationParams(request);
             PaginatedResponse<TransactionDto> paginatedResponse = transactionService
                     .getPaginatedTransactionsForUser(userId, params.page(), params.size());
             sendPaginatedResponseWithMetadata(response, userId, paginatedResponse);
-        } catch (IllegalArgumentException e) {
-            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid request parameters: " + e.getMessage());
+        } catch (IllegalArgumentException | ValidationException e) {
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -187,7 +180,7 @@ public class AdminServlet extends BaseServlet {
             } else {
                 sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, "User not found.");
             }
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ValidationException e) {
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
     }
@@ -213,7 +206,7 @@ public class AdminServlet extends BaseServlet {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
                         "Failed to block/unblock user.");
             }
-        } catch (ValidationException | IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ValidationException e) {
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
     }

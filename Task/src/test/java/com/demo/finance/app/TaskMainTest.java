@@ -3,7 +3,9 @@ package com.demo.finance.app;
 import com.demo.finance.app.config.AppConfig;
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.in.filter.AuthenticationFilter;
+import com.demo.finance.in.filter.ExceptionHandlerFilter;
 import com.demo.finance.out.repository.impl.AbstractContainerBaseSetup;
+import jakarta.servlet.DispatcherType;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -26,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -84,6 +87,8 @@ public class TaskMainTest extends AbstractContainerBaseSetup {
         context.setContextPath("/");
         server.setHandler(context);
         context.setSessionHandler(new SessionHandler());
+        context.addFilter(new FilterHolder(new ExceptionHandlerFilter()),
+                "/*", EnumSet.of(DispatcherType.REQUEST));
         context.addFilter(new FilterHolder(new AuthenticationFilter()), "/api/*", null);
         context.addServlet(new ServletHolder(appConfig.getUserServlet()), "/api/users/*");
         context.addServlet(new ServletHolder(appConfig.getTransactionServlet()), "/api/transactions/*");
@@ -186,6 +191,8 @@ public class TaskMainTest extends AbstractContainerBaseSetup {
         context.setContextPath("/");
         server.setHandler(context);
         context.setSessionHandler(new SessionHandler());
+        context.addFilter(new FilterHolder(new ExceptionHandlerFilter()),
+                "/*", EnumSet.of(DispatcherType.REQUEST));
         context.addFilter(new FilterHolder(new AuthenticationFilter()), "/api/*", null);
         context.addServlet(new ServletHolder(appConfig.getUserServlet()), "/api/users/*");
         context.addServlet(new ServletHolder(appConfig.getTransactionServlet()), "/api/transactions/*");

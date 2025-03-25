@@ -3,6 +3,7 @@ package com.demo.finance.out.service.impl;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
+import com.demo.finance.exception.DuplicateEmailException;
 import com.demo.finance.out.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
@@ -50,16 +52,17 @@ class RegistrationServiceImplTest {
     }
 
     @Test
-    @DisplayName("Register user - existing email - returns false")
-    void testRegisterUser_existingEmail_returnsFalse() {
+    @DisplayName("Register user - existing email - throws DuplicateEmailException")
+    void testRegisterUser_existingEmail_throwsException() {
         UserDto dto = new UserDto();
         dto.setEmail("existing@mail.com");
 
         when(userRepository.findByEmail("existing@mail.com")).thenReturn(new User());
 
-        boolean result = registrationService.registerUser(dto);
+        assertThatThrownBy(() -> registrationService.registerUser(dto))
+                .isInstanceOf(DuplicateEmailException.class)
+                .hasMessage("Email is already registered: existing@mail.com");
 
-        assertThat(result).isFalse();
         verify(userRepository, never()).save(any());
     }
 

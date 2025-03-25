@@ -85,4 +85,9 @@ public enum Mode {
      * Represents the mode for managing budgets.
      */
     BUDGET,
+
+    /**
+     * Represents the mode for paginated parameters.
+     */
+    PAGE,
 }
