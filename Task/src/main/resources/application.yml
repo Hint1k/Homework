@@ -1,11 +1,6 @@
 app:
   db:
     url: "jdbc:postgresql://postgres:5432/financedb"
-    username: "user"
-    password: "123"
   server:
     port: 8080
-  security:
-    public_endpoints:
-      - "/api/users/registration"
-      - "/api/users/authenticate"
+    context-path: /

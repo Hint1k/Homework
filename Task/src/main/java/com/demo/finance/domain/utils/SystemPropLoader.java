@@ -3,13 +3,15 @@ package com.demo.finance.domain.utils;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.Set;
 
 /**
  * A utility class for loading, validating, and setting application-wide properties
- * from a .env file into JVM system properties. This class ensures that all required
- * properties are present and valid before setting them as system properties.
+ * from both a .env file and a YAML configuration file into JVM system properties.
+ * This class ensures that all required properties are present and valid before
+ * setting them as system properties.
  */
 @Component
 public class SystemPropLoader {
@@ -17,21 +19,40 @@ public class SystemPropLoader {
     private static final Logger log = Logger.getLogger(SystemPropLoader.class.getName());
 
     /**
-     * Loads environment variables from a .env file, validates them against a set of
+     * Loads environment variables from a .env file and YAML file, validates them against a set of
      * required properties, and sets them as JVM system properties if they are not already set.
      *
-     * @param envFilePath       The path to the .env file containing key-value pairs of properties.
-     * @param requiredProperties A set of property keys that must be present and non-empty in the .env file.
-     * @throws RuntimeException If any required property is missing or empty in the .env file.
+     * @param envFilePath   The path to the .env file containing sensitive key-value pairs (e.g., credentials).
+     * @param ymlFilePath   The path to the YAML file containing non-sensitive configuration settings.
+     * @param envProperties A set of required property keys that must be present and non-empty in the .env file.
      */
-    public static void loadAndSetProperties(String envFilePath, Set<String> requiredProperties) {
-        log.info("Loading and validating properties from .env file: " + envFilePath);
-        Map<String, String> envVars = EnvLoader.loadEnv(envFilePath);
+    public static void loadAndSetProperties(String envFilePath, String ymlFilePath, Set<String> envProperties,
+                                            Set<String> ymlProperties) {
+        processProperties("env", envFilePath, envProperties, EnvLoader::loadEnv);
+        processProperties("yml", ymlFilePath, ymlProperties, YmlLoader::loadYml);
 
-        validateProperties(envVars, requiredProperties);
-        setSystemProperties(envVars);
+        log.info("All properties from .env and YAML have been successfully loaded, validated, and set.");
+    }
 
-        log.info("All properties have been successfully loaded, validated, and set.");
+    /**
+     * Helper method to load, validate, and set properties from a given source.
+     *
+     * @param sourceName         Name of the source (e.g., "environment", "YAML") for logging.
+     * @param filePath           Path to the file to be loaded.
+     * @param requiredProperties Set of required properties for validation (can be empty if validation is not needed).
+     * @param loaderFunction     Function that loads the properties from the file.
+     */
+    private static void processProperties(String sourceName, String filePath, Set<String> requiredProperties,
+                                          Function<String, Map<String, String>> loaderFunction) {
+        log.info("Loading properties from " + sourceName + " file: " + filePath);
+        Map<String, String> properties = loaderFunction.apply(filePath);
+        if (properties.containsKey("app.db.url")) {
+            properties.put("DB_URL", properties.remove("app.db.url"));
+        }
+        if (!requiredProperties.isEmpty()) {
+            validateProperties(properties, requiredProperties);
+        }
+        setSystemProperties(properties);
     }
 
     /**
@@ -39,7 +60,7 @@ public class SystemPropLoader {
      * environment variables map. If any required property is missing or empty, an exception
      * is thrown with a descriptive error message.
      *
-     * @param envVars           A map of environment variables loaded from the .env file.
+     * @param envVars            A map of environment variables loaded from the .env file.
      * @param requiredProperties A set of property keys that must be validated.
      * @throws RuntimeException If any required property is missing or empty in the envVars map.
      */
@@ -57,13 +78,13 @@ public class SystemPropLoader {
     }
 
     /**
-     * Sets the provided environment variables as JVM system properties, but only if they
+     * Sets the provided properties as JVM system properties, but only if they
      * are not already set. Logs a message for each property that is set or skipped.
      *
-     * @param envVars A map of environment variables to be set as JVM system properties.
+     * @param properties A map of properties to be set as JVM system properties.
      */
-    private static void setSystemProperties(Map<String, String> envVars) {
-        for (Map.Entry<String, String> entry : envVars.entrySet()) {
+    private static void setSystemProperties(Map<String, String> properties) {
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             if (System.getProperty(key) == null) {

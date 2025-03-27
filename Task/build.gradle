@@ -29,32 +29,52 @@ dependencyManagement {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
-    testImplementation 'org.mockito:mockito-core:5.10.0'
-    testImplementation 'org.mockito:mockito-junit-jupiter:5.10.0'
-    testImplementation 'org.assertj:assertj-core:3.24.2'
+    // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.36'
     annotationProcessor 'org.projectlombok:lombok:1.18.36'
-    implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.5'
-    implementation group: 'org.liquibase', name: 'liquibase-core', version: '4.31.1'
-    testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.20.6'
-    testImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.20.6'
-    testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.20.6'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.3'
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.18.3'
-    implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.6.3'
-    annotationProcessor group: 'org.mapstruct', name: 'mapstruct-processor', version: '1.6.3'
-    implementation 'org.aspectj:aspectjrt:1.9.23'
-    runtimeOnly group: 'org.aspectj', name: 'aspectjweaver', version: '1.9.23'
-    compileOnly group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.1.0'
-    implementation group: 'org.eclipse.jetty', name: 'jetty-server', version: '11.0.25'
-    implementation group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '11.0.25'
+
+    // Spring Framework Core and Web Components
     implementation 'org.springframework:spring-context'
     implementation 'org.springframework:spring-web'
     implementation 'org.springframework:spring-webmvc'
-    testImplementation 'org.springframework:spring-test'
+
+    // Jakarta Servlet API
+    compileOnly group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.1.0'
+
+    // Jetty - Embedded Web Server
+    implementation group: 'org.eclipse.jetty', name: 'jetty-server', version: '11.0.25'
+    implementation group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '11.0.25'
+
+    // Database - PostgreSQL Driver & Liquibase for Migrations
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.5'
+    implementation group: 'org.liquibase', name: 'liquibase-core', version: '4.31.1'
+
+    // Jackson - JSON Processing & YAML Support
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.3'
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.18.3'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.18.3'
     implementation group: 'org.yaml', name: 'snakeyaml', version: '2.4'
+
+    // AspectJ - AOP Support for Logging & Monitoring
+    implementation 'org.aspectj:aspectjrt:1.9.23'
+    runtimeOnly group: 'org.aspectj', name: 'aspectjweaver', version: '1.9.23'
+
+    // MapStruct - Object Mapping
+    implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.6.3'
+    annotationProcessor group: 'org.mapstruct', name: 'mapstruct-processor', version: '1.6.3'
+
+    // Testing - JUnit, Mockito, Testcontainers, and Spring Test
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
+    testImplementation 'org.mockito:mockito-core:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.10.0'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+    testImplementation 'org.springframework:spring-test'
+
+    // Testcontainers - Database Testing with PostgreSQL
+    testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.20.6'
+    testImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.20.6'
+    testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.20.6'
 }
 
 application {

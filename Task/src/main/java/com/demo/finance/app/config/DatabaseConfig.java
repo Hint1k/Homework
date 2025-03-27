@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  * are loaded from a .env file, validated, and set as system properties. It follows the
  * singleton pattern to provide a single instance of the configuration throughout the application.
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class DatabaseConfig {
 
     private static final Logger log = Logger.getLogger(DatabaseConfig.class.getName());
@@ -20,6 +20,7 @@ public class DatabaseConfig {
     private static final String DB_USERNAME = "DB_USERNAME";
     private static final String DB_PASSWORD = "DB_PASSWORD";
     private static final String DEFAULT_ENV_FILE = "/app/.env";
+    private static final String DEFAULT_YML_FILE = "/app/application.yml";
     private static final DatabaseConfig INSTANCE = new DatabaseConfig();
 
     /**
@@ -81,9 +82,11 @@ public class DatabaseConfig {
      */
     private void loadAndValidateProperties() {
         String envFilePath = System.getProperty("ENV_PATH", DEFAULT_ENV_FILE);
-        Set<String> requiredProperties = Set.of(DB_URL, DB_USERNAME, DB_PASSWORD);
+        String ymlFilePath = System.getProperty("YML_PATH", DEFAULT_YML_FILE);
+        Set<String> envProperties = Set.of(DB_USERNAME, DB_PASSWORD);
+        Set<String> ymlProperties = Set.of(DB_URL);
 
-        SystemPropLoader.loadAndSetProperties(envFilePath, requiredProperties);
+        SystemPropLoader.loadAndSetProperties(envFilePath, ymlFilePath, envProperties, ymlProperties);
 
         validateProperty(DB_URL);
         validateProperty(DB_USERNAME);

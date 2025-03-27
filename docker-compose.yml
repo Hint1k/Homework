@@ -16,6 +16,7 @@ services:
     restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - finance_logs:/app/logs
 
   finance:
     build:
@@ -38,3 +39,4 @@ services:
 
 volumes:
   postgres_data:
+  finance_logs:
