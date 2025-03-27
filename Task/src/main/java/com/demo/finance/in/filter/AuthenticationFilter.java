@@ -51,8 +51,8 @@ public class AuthenticationFilter implements Filter {
             httpResponse.getWriter().write("Authentication required.");
             return;
         }
+        Object currentUser = session.getAttribute("currentUser");
         if (isAdminEndpoint(requestURI)) {
-            Object currentUser = session.getAttribute("currentUser");
             if (currentUser instanceof UserDto user) {
                 if (!"admin".equalsIgnoreCase(user.getRole().getName())) {
                     httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -61,7 +61,6 @@ public class AuthenticationFilter implements Filter {
                 }
             }
         } else {
-            Object currentUser = session.getAttribute("currentUser");
             if (currentUser instanceof UserDto user) {
                 if (!"user".equalsIgnoreCase(user.getRole().getName())) {
                     httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);

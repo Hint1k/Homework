@@ -16,8 +16,16 @@ import java.util.logging.Logger;
 @Aspect
 public class LoggingAspect {
 
-    private static final Logger log = Logger.getLogger(LoggingAspect.class.getName());
+    private final Logger log;
     private static final long SLOW_METHOD_THRESHOLD_MS = 500;
+
+    public LoggingAspect() {
+        this.log = Logger.getLogger(LoggingAspect.class.getName());
+    }
+
+    public LoggingAspect(Logger log) {
+        this.log = log;
+    }
 
     /**
      * Defines a pointcut that matches all methods in the {@code com.demo.finance} package and its sub-packages.
