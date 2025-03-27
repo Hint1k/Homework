@@ -49,7 +49,7 @@ public class TaskMain {
         // Register Spring DispatcherServlet
         DispatcherServlet dispatcherServlet = new DispatcherServlet(context);
         ServletHolder servletHolder = new ServletHolder(dispatcherServlet);
-        contextHandler.addServlet(servletHolder, "/api/*");
+        contextHandler.addServlet(servletHolder, "/*");
 
         // Register filters manually in Jetty
         contextHandler.addFilter(new FilterHolder(context.getBean(ExceptionHandlerFilter.class)), "/*",

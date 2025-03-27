@@ -47,9 +47,9 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<Map<String, Object>> handleRegistration(@RequestBody String json) {
+    public ResponseEntity<Map<String, Object>> handleRegistration(@RequestBody UserDto userDtoNew) {
         try {
-            UserDto userDto = validationUtils.validateUserJson(json, Mode.REGISTER_USER);
+            UserDto userDto = validationUtils.validateUserJson(userDtoNew, Mode.REGISTER_USER);
             boolean success = registrationService.registerUser(userDto);
             if (success) {
                 User user = userService.getUserByEmail(userDto.getEmail());
@@ -68,9 +68,9 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<Map<String, Object>> handleAuthentication(@RequestBody String json, Model model) {
+    public ResponseEntity<Map<String, Object>> handleAuthentication(@RequestBody UserDto userDtoNew, Model model) {
         try {
-            UserDto userDto = validationUtils.validateUserJson(json, Mode.AUTHENTICATE);
+            UserDto userDto = validationUtils.validateUserJson(userDtoNew, Mode.AUTHENTICATE);
             boolean success = registrationService.authenticate(userDto);
             if (success) {
                 User user = userService.getUserByEmail(userDto.getEmail());
@@ -94,11 +94,10 @@ public class UserController extends BaseController {
     }
 
     @PutMapping
-    public ResponseEntity<Map<String, Object>> updateUser(@RequestBody String json,
-                                                          @SessionAttribute("currentUser") UserDto currentUserDto,
-                                                          Model model) {
+    public ResponseEntity<Map<String, Object>> updateUser(
+            @RequestBody UserDto userDtoNew, @SessionAttribute("currentUser") UserDto currentUserDto, Model model) {
         try {
-            UserDto userDto = validationUtils.validateUserJson(json, Mode.UPDATE_USER);
+            UserDto userDto = validationUtils.validateUserJson(userDtoNew, Mode.UPDATE_USER);
             boolean success = userService.updateOwnAccount(userDto, currentUserDto.getUserId());
             if (success) {
                 User updatedUser = userService.getUserByEmail(userDto.getEmail());
@@ -117,8 +116,8 @@ public class UserController extends BaseController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Map<String, Object>> deleteUser(@SessionAttribute("currentUser") UserDto userDto,
-                                                          SessionStatus sessionStatus) {
+    public ResponseEntity<Map<String, Object>> deleteUser(
+            @SessionAttribute("currentUser") UserDto userDto, SessionStatus sessionStatus) {
         try {
             boolean success = userService.deleteOwnAccount(userDto.getUserId());
             if (success) {

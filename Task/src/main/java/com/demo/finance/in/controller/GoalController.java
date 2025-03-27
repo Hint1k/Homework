@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -42,10 +43,10 @@ public class GoalController extends BaseController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> createGoal(
-            @RequestBody String json, @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestBody GoalDto goalDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            GoalDto goalDto = validationUtils.validateJson(json, Mode.GOAL_CREATE, GoalDto.class);
+            GoalDto goalDto = validationUtils.validateJson(goalDtoNew, Mode.GOAL_CREATE, GoalDto.class);
             Long goalId = goalService.createGoal(goalDto, userId);
             if (goalId != null) {
                 Goal goal = goalService.getGoal(goalId);
@@ -68,10 +69,10 @@ public class GoalController extends BaseController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getPaginatedGoals(
-            @RequestBody String json, @SessionAttribute("currentUser") UserDto currentUser) {
+            @ModelAttribute PaginationParams paramsNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            PaginationParams params = validationUtils.validatePaginationParams(json, Mode.PAGE);
+            PaginationParams params = validationUtils.validatePaginationParams(paramsNew, Mode.PAGE);
             PaginatedResponse<GoalDto> paginatedResponse =
                     goalService.getPaginatedGoalsForUser(userId, params.page(), params.size());
             return buildPaginatedResponse(userId, paginatedResponse);
@@ -103,11 +104,11 @@ public class GoalController extends BaseController {
 
     @PutMapping("/{goalId}")
     public ResponseEntity<Map<String, Object>> updateGoal(
-            @PathVariable String goalId, @RequestBody String json,
+            @PathVariable String goalId, @RequestBody GoalDto goalDtoNew,
             @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            GoalDto goalDto = validationUtils.validateGoalJson(json, Mode.GOAL_UPDATE, goalId);
+            GoalDto goalDto = validationUtils.validateGoalJson(goalDtoNew, Mode.GOAL_UPDATE, goalId);
             boolean success = goalService.updateGoal(goalDto, userId);
             if (success) {
                 Goal goal = goalService.getGoal(goalDto.getGoalId());

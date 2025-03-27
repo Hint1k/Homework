@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -43,11 +44,11 @@ public class TransactionController extends BaseController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> createTransaction(
-            @RequestBody String json, @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestBody TransactionDto transactionDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             TransactionDto transactionDto =
-                    validationUtils.validateJson(json, Mode.TRANSACTION_CREATE, TransactionDto.class);
+                    validationUtils.validateJson(transactionDtoNew, Mode.TRANSACTION_CREATE, TransactionDto.class);
             Long transactionId = transactionService.createTransaction(transactionDto, userId);
             if (transactionId != null) {
                 Transaction transaction = transactionService.getTransaction(transactionId);
@@ -70,10 +71,10 @@ public class TransactionController extends BaseController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getPaginatedTransactions(
-            @RequestBody String json, @SessionAttribute("currentUser") UserDto currentUser) {
+            @ModelAttribute PaginationParams paramsNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            PaginationParams params = validationUtils.validatePaginationParams(json, Mode.PAGE);
+            PaginationParams params = validationUtils.validatePaginationParams(paramsNew, Mode.PAGE);
             PaginatedResponse<TransactionDto> paginatedResponse =
                     transactionService.getPaginatedTransactionsForUser(userId, params.page(), params.size());
             return buildPaginatedResponse(userId, paginatedResponse);
@@ -106,12 +107,12 @@ public class TransactionController extends BaseController {
 
     @PutMapping("/{transactionId}")
     public ResponseEntity<Map<String, Object>> updateTransaction(
-            @PathVariable String transactionId, @RequestBody String json,
+            @PathVariable String transactionId, @RequestBody TransactionDto transactionDtoNew,
             @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            TransactionDto transactionDto =
-                    validationUtils.validateTransactionJson(json, Mode.TRANSACTION_UPDATE, transactionId);
+            TransactionDto transactionDto = validationUtils
+                    .validateTransactionJson(transactionDtoNew, Mode.TRANSACTION_UPDATE, transactionId);
             boolean success = transactionService.updateTransaction(transactionDto, userId);
             if (success) {
                 Transaction transaction = transactionService.getTransaction(transactionDto.getTransactionId());

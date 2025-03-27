@@ -1,5 +1,6 @@
 package com.demo.finance.in.controller;
 
+import com.demo.finance.domain.dto.ReportDatesDto;
 import com.demo.finance.domain.dto.ReportDto;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.mapper.ReportMapper;
@@ -39,10 +40,11 @@ public class ReportController extends BaseController {
 
     @PostMapping("/by-date")
     public ResponseEntity<Map<String, Object>> generateReportByDate(
-            @RequestBody String json, @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestBody ReportDatesDto reportDatesDto, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            Map<String, LocalDate> reportDates = validationUtils.validateReportJson(json, Mode.REPORT, userId);
+            Map<String, LocalDate> reportDates =
+                    validationUtils.validateReportJson(reportDatesDto, Mode.REPORT, userId);
             Report report =
                     reportService.generateReportByDate(userId, reportDates.get("fromDate"), reportDates.get("toDate"));
             if (report != null) {
@@ -61,10 +63,11 @@ public class ReportController extends BaseController {
 
     @GetMapping("/expenses-by-category")
     public ResponseEntity<Map<String, Object>> analyzeExpensesByCategory(
-            @RequestBody String json, @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestBody ReportDatesDto reportDatesDto, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            Map<String, LocalDate> reportDates = validationUtils.validateReportJson(json, Mode.REPORT, userId);
+            Map<String, LocalDate> reportDates =
+                    validationUtils.validateReportJson(reportDatesDto, Mode.REPORT, userId);
             Map<String, BigDecimal> expensesByCategory = reportService.analyzeExpensesByCategory(
                     userId, reportDates.get("fromDate"), reportDates.get("toDate"));
             if (!expensesByCategory.isEmpty()) {

@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,9 +47,9 @@ public class AdminController extends BaseController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Map<String, Object>> getPaginatedUsers(@RequestBody String json) {
+    public ResponseEntity<Map<String, Object>> getPaginatedUsers(@ModelAttribute PaginationParams paramsNew) {
         try {
-            PaginationParams params = validationUtils.validatePaginationParams(json, Mode.PAGE);
+            PaginationParams params = validationUtils.validatePaginationParams(paramsNew, Mode.PAGE);
             PaginatedResponse<UserDto> paginatedResponse = userService.getPaginatedUsers(params.page(), params.size());
             return buildPaginatedResponse(null, paginatedResponse);
         } catch (ValidationException e) {
@@ -59,10 +60,10 @@ public class AdminController extends BaseController {
 
     @GetMapping("/transactions/{userId}")
     public ResponseEntity<Map<String, Object>> getPaginatedTransactionsForUser(
-            @PathVariable String userId, @RequestBody String json) {
+            @PathVariable String userId, @ModelAttribute PaginationParams paramsNew) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.GET);
-            PaginationParams params = validationUtils.validatePaginationParams(json, Mode.PAGE);
+            PaginationParams params = validationUtils.validatePaginationParams(paramsNew, Mode.PAGE);
             PaginatedResponse<TransactionDto> paginatedResponse =
                     transactionService.getPaginatedTransactionsForUser(userIdLong, params.page(), params.size());
             return buildPaginatedResponse(userIdLong, paginatedResponse);
@@ -88,10 +89,10 @@ public class AdminController extends BaseController {
 
     @PatchMapping("/block/{userId}")
     public ResponseEntity<Map<String, Object>> blockUnblockUser(
-            @PathVariable String userId, @RequestBody String json) {
+            @PathVariable String userId, @RequestBody UserDto userDtoNew) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.BLOCK_UNBLOCK);
-            UserDto userDto = validationUtils.validateUserJson(json, Mode.BLOCK_UNBLOCK);
+            UserDto userDto = validationUtils.validateUserJson(userDtoNew, Mode.BLOCK_UNBLOCK);
             boolean success = adminService.blockOrUnblockUser(userIdLong, userDto);
             if (success) {
                 return buildSuccessResponse(HttpStatus.OK,
@@ -104,10 +105,11 @@ public class AdminController extends BaseController {
     }
 
     @PatchMapping("/role/{userId}")
-    public ResponseEntity<Map<String, Object>> updateUserRole(@PathVariable String userId, @RequestBody String json) {
+    public ResponseEntity<Map<String, Object>> updateUserRole(
+            @PathVariable String userId, @RequestBody UserDto userDtoNew) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.UPDATE_ROLE);
-            UserDto userDto = validationUtils.validateUserJson(json, Mode.UPDATE_ROLE);
+            UserDto userDto = validationUtils.validateUserJson(userDtoNew, Mode.UPDATE_ROLE);
             boolean success = adminService.updateUserRole(userIdLong, userDto);
             if (success) {
                 return buildSuccessResponse(

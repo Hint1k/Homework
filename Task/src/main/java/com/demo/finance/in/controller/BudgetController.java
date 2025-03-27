@@ -1,5 +1,6 @@
 package com.demo.finance.in.controller;
 
+import com.demo.finance.domain.dto.BudgetDto;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.domain.utils.Mode;
@@ -33,10 +34,10 @@ public class BudgetController extends BaseController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> setMonthlyBudget(
-            @RequestBody String json, @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestBody BudgetDto budgetDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            BigDecimal limit = validationUtils.validateBudgetJson(json, Mode.BUDGET, userId);
+            BigDecimal limit = validationUtils.validateBudgetJson(budgetDtoNew, Mode.BUDGET, userId);
             if (limit != null) {
                 Budget budget = budgetService.setMonthlyBudget(userId, limit);
                 if (budget != null) {
