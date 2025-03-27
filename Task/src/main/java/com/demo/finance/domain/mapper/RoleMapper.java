@@ -12,13 +12,8 @@ import org.mapstruct.factory.Mappers;
  * capabilities to facilitate the transformation of role-related data between the application's
  * persistence layer and its API layer.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface RoleMapper {
-
-    /**
-     * The singleton instance of the {@code RoleMapper}, initialized by MapStruct.
-     */
-    RoleMapper INSTANCE = Mappers.getMapper(RoleMapper.class);
 
     /**
      * Converts a {@link Role} entity into a {@link RoleDto} data transfer object.

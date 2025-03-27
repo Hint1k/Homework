@@ -33,14 +33,16 @@ public class AdminController extends BaseController {
     private final UserService userService;
     private final TransactionService transactionService;
     private final ValidationUtils validationUtils;
+    private final UserMapper userMapper;
 
     @Autowired
     public AdminController(AdminService adminService, UserService userService, TransactionService transactionService,
-                           ValidationUtils validationUtils) {
+                           ValidationUtils validationUtils, UserMapper userMapper) {
         this.adminService = adminService;
         this.userService = userService;
         this.transactionService = transactionService;
         this.validationUtils = validationUtils;
+        this.userMapper = userMapper;
     }
 
     @GetMapping("/")
@@ -75,7 +77,7 @@ public class AdminController extends BaseController {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.GET);
             User user = adminService.getUser(userIdLong);
             if (user != null) {
-                UserDto userDto = UserDto.removePassword(UserMapper.INSTANCE.toDto(user));
+                UserDto userDto = UserDto.removePassword(userMapper.toDto(user));
                 return buildSuccessResponse(HttpStatus.OK, "User details", userDto);
             }
             return buildErrorResponse(HttpStatus.NOT_FOUND, "User not found.");

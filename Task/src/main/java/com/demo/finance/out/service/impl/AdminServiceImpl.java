@@ -5,6 +5,8 @@ import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.AdminService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * The {@code AdminServiceImpl} class implements the {@link AdminService} interface
@@ -12,6 +14,7 @@ import com.demo.finance.out.service.AdminService;
  * It interacts with the database through the {@link UserRepository} to handle tasks such as retrieving,
  * updating, blocking/unblocking, and deleting users.
  */
+@Service
 public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
@@ -21,6 +24,7 @@ public class AdminServiceImpl implements AdminService {
      *
      * @param userRepository the repository used to interact with user data in the database
      */
+    @Autowired
     public AdminServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }

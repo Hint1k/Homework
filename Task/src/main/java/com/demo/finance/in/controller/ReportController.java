@@ -28,11 +28,13 @@ public class ReportController extends BaseController {
 
     private final ReportService reportService;
     private final ValidationUtils validationUtils;
+    private final ReportMapper reportMapper;
 
     @Autowired
-    public ReportController(ReportService reportService, ValidationUtils validationUtils) {
+    public ReportController(ReportService reportService, ValidationUtils validationUtils, ReportMapper reportMapper) {
         this.reportService = reportService;
         this.validationUtils = validationUtils;
+        this.reportMapper = reportMapper;
     }
 
     @PostMapping("/by-date")
@@ -44,7 +46,7 @@ public class ReportController extends BaseController {
             Report report =
                     reportService.generateReportByDate(userId, reportDates.get("fromDate"), reportDates.get("toDate"));
             if (report != null) {
-                ReportDto reportDto = ReportMapper.INSTANCE.toDto(report);
+                ReportDto reportDto = reportMapper.toDto(report);
                 return buildSuccessResponse(
                         HttpStatus.OK, "Report by dates generated successfully", reportDto);
             }
@@ -88,7 +90,7 @@ public class ReportController extends BaseController {
             Long userId = currentUser.getUserId();
             Report report = reportService.generateUserReport(userId);
             if (report != null) {
-                ReportDto reportDto = ReportMapper.INSTANCE.toDto(report);
+                ReportDto reportDto = reportMapper.toDto(report);
                 return buildSuccessResponse(HttpStatus.OK, "General report generated successfully", reportDto);
             }
             return buildErrorResponse(HttpStatus.NOT_FOUND, "No reports found for the user.");

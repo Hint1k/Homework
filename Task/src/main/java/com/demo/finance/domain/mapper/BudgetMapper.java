@@ -12,13 +12,8 @@ import org.mapstruct.factory.Mappers;
  * capabilities to facilitate the transformation of budget-related data between the application's
  * persistence layer and its API layer.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface BudgetMapper {
-
-    /**
-     * The singleton instance of the {@code BudgetMapper}, initialized by MapStruct.
-     */
-    BudgetMapper INSTANCE = Mappers.getMapper(BudgetMapper.class);
 
     /**
      * Converts a {@link Budget} entity into a {@link BudgetDto} data transfer object.

@@ -6,6 +6,8 @@ import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.BudgetRepository;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.BudgetService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.time.YearMonth;
  * It interacts with the database through the {@link BudgetRepository} and {@link TransactionRepository}
  * to manage budgets, calculate expenses, and retrieve budget data for users.
  */
+@Service
 public class BudgetServiceImpl implements BudgetService {
 
     private final BudgetRepository budgetRepository;
@@ -29,6 +32,7 @@ public class BudgetServiceImpl implements BudgetService {
      * @param budgetRepository      the repository used to interact with budget data in the database
      * @param transactionRepository the repository used to interact with transaction data in the database
      */
+    @Autowired
     public BudgetServiceImpl(BudgetRepository budgetRepository, TransactionRepository transactionRepository) {
         this.budgetRepository = budgetRepository;
         this.transactionRepository = transactionRepository;

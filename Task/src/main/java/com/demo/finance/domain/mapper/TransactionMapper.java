@@ -14,13 +14,8 @@ import org.mapstruct.factory.Mappers;
  * capabilities to facilitate the transformation of transaction-related data between the application's
  * persistence layer and its API layer.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface TransactionMapper {
-
-    /**
-     * The singleton instance of the {@code TransactionMapper}, initialized by MapStruct.
-     */
-    TransactionMapper INSTANCE = Mappers.getMapper(TransactionMapper.class);
 
     /**
      * Converts a {@link Transaction} entity into a {@link TransactionDto} data transfer object.

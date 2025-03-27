@@ -5,6 +5,8 @@ import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.ReportService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
  * It interacts with the database through the {@link TransactionRepository} and handles logic for
  * creating user-specific reports and analyzing expenses by category.
  */
+@Service
 public class ReportServiceImpl implements ReportService {
 
     private final TransactionRepository transactionRepository;
@@ -27,6 +30,7 @@ public class ReportServiceImpl implements ReportService {
      *
      * @param transactionRepository the repository used to interact with transaction data in the database
      */
+    @Autowired
     public ReportServiceImpl(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
     }

@@ -9,6 +9,8 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
@@ -20,6 +22,8 @@ import java.io.IOException;
  * - Admin-specific endpoints are accessible only to users with the "admin" role.
  * - All other protected endpoints are accessible only to users with the "user" role.
  */
+@Component
+@Order(1)
 public class AuthenticationFilter implements Filter {
 
     /**

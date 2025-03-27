@@ -31,11 +31,14 @@ public class TransactionController extends BaseController {
 
     private final TransactionService transactionService;
     private final ValidationUtils validationUtils;
+    private final TransactionMapper transactionMapper;
 
     @Autowired
-    public TransactionController(TransactionService transactionService, ValidationUtils validationUtils) {
+    public TransactionController(TransactionService transactionService, ValidationUtils validationUtils,
+                                 TransactionMapper transactionMapper) {
         this.transactionService = transactionService;
         this.validationUtils = validationUtils;
+        this.transactionMapper = transactionMapper;
     }
 
     @PostMapping
@@ -49,7 +52,7 @@ public class TransactionController extends BaseController {
             if (transactionId != null) {
                 Transaction transaction = transactionService.getTransaction(transactionId);
                 if (transaction != null) {
-                    TransactionDto transactionDtoCreated = TransactionMapper.INSTANCE.toDto(transaction);
+                    TransactionDto transactionDtoCreated = transactionMapper.toDto(transaction);
                     return buildSuccessResponse(
                             HttpStatus.CREATED, "Transaction created successfully", transactionDtoCreated);
                 }
@@ -91,7 +94,7 @@ public class TransactionController extends BaseController {
             Transaction transaction =
                     transactionService.getTransactionByUserIdAndTransactionId(userId, transactionIdLong);
             if (transaction != null) {
-                TransactionDto transactionDto = TransactionMapper.INSTANCE.toDto(transaction);
+                TransactionDto transactionDto = transactionMapper.toDto(transaction);
                 return buildSuccessResponse(HttpStatus.OK, "Transaction found successfully", transactionDto);
             }
             return buildErrorResponse(HttpStatus.NOT_FOUND,
@@ -113,7 +116,7 @@ public class TransactionController extends BaseController {
             if (success) {
                 Transaction transaction = transactionService.getTransaction(transactionDto.getTransactionId());
                 if (transaction != null) {
-                    TransactionDto transactionDtoUpdated = TransactionMapper.INSTANCE.toDto(transaction);
+                    TransactionDto transactionDtoUpdated = transactionMapper.toDto(transaction);
                     return buildSuccessResponse(
                             HttpStatus.OK, "Transaction updated successfully", transactionDtoUpdated);
                 }

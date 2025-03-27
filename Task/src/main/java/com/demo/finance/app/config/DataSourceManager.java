@@ -1,6 +1,8 @@
 package com.demo.finance.app.config;
 
 import com.demo.finance.exception.DatabaseConnectionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,25 +16,18 @@ import java.util.logging.Logger;
  * from the {@link DatabaseConfig} class. This class follows the singleton pattern
  * to prevent instantiation.
  */
+@Component
 public class DataSourceManager {
 
     private static final Logger log = Logger.getLogger(DataSourceManager.class.getName());
-    private static final DatabaseConfig config = DatabaseConfig.getInstance();
+    private final DatabaseConfig config;
 
-    /**
-     * Private constructor to prevent instantiation of this utility class.
-     */
-    private DataSourceManager() {
-    } // Private constructor to prevent instantiation
+    @Autowired
+    public DataSourceManager(DatabaseConfig config) {
+        this.config = config;
+    }
 
-    /**
-     * Retrieves a database connection using the configuration details (URL, username, password)
-     * provided by the {@link DatabaseConfig} class.
-     *
-     * @return a {@link Connection} object representing the database connection
-     * @throws DatabaseConnectionException if a SQLException occurs while establishing the connection
-     */
-    public static Connection getConnection() {
+    public Connection getConnection() {
         String url = config.getDbUrl();
         String username = config.getDbUsername();
         String password = config.getDbPassword();

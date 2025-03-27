@@ -8,6 +8,7 @@ import com.demo.finance.exception.ValidationException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
  * It ensures that input data adheres to expected formats and constraints, throwing exceptions
  * when validation fails.
  */
+@Component
 public class ValidationUtilsImpl implements ValidationUtils {
 
     private static final Pattern EMAIL_PATTERN =

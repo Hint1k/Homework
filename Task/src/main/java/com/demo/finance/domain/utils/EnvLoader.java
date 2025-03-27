@@ -1,5 +1,7 @@
 package com.demo.finance.domain.utils;
 
+import org.springframework.stereotype.Component;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,6 +17,7 @@ import java.util.logging.Logger;
  * properly formatted and handles errors such as missing files, malformed lines,
  * or duplicate keys.
  */
+@Component
 public class EnvLoader {
 
     private static final Logger log = Logger.getLogger(EnvLoader.class.getName());

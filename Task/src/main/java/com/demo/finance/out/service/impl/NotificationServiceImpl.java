@@ -12,6 +12,8 @@ import com.demo.finance.domain.model.Budget;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.EmailService;
 import com.demo.finance.out.service.NotificationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,6 +25,7 @@ import java.util.List;
  * and provides concrete implementations for fetching budget and goal notifications.
  * It interacts with various repositories and utilities to generate and send notifications to users.
  */
+@Service
 public class NotificationServiceImpl implements NotificationService {
 
     private final BudgetRepository budgetRepository;
@@ -42,6 +45,7 @@ public class NotificationServiceImpl implements NotificationService {
      * @param balanceUtils          the utility class used for balance calculations
      * @param emailService          the service used to send emails to users
      */
+    @Autowired
     public NotificationServiceImpl(BudgetRepository budgetRepository, GoalRepository goalRepository,
                                    TransactionRepository transactionRepository, UserRepository userRepository,
                                    BalanceUtils balanceUtils, EmailService emailService) {

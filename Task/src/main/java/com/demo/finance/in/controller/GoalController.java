@@ -31,11 +31,13 @@ public class GoalController extends BaseController {
 
     private final GoalService goalService;
     private final ValidationUtils validationUtils;
+    private final GoalMapper goalMapper;
 
     @Autowired
-    public GoalController(GoalService goalService, ValidationUtils validationUtils) {
+    public GoalController(GoalService goalService, ValidationUtils validationUtils, GoalMapper goalMapper) {
         this.goalService = goalService;
         this.validationUtils = validationUtils;
+        this.goalMapper = goalMapper;
     }
 
     @PostMapping
@@ -48,7 +50,7 @@ public class GoalController extends BaseController {
             if (goalId != null) {
                 Goal goal = goalService.getGoal(goalId);
                 if (goal != null) {
-                    GoalDto goalDtoCreated = GoalMapper.INSTANCE.toDto(goal);
+                    GoalDto goalDtoCreated = goalMapper.toDto(goal);
                     return buildSuccessResponse(
                             HttpStatus.CREATED, "Goal created successfully", goalDtoCreated);
                 }
@@ -89,7 +91,7 @@ public class GoalController extends BaseController {
             Long goalIdLong = validationUtils.parseLong(goalId);
             Goal goal = goalService.getGoalByUserIdAndGoalId(userId, goalIdLong);
             if (goal != null) {
-                GoalDto goalDto = GoalMapper.INSTANCE.toDto(goal);
+                GoalDto goalDto = goalMapper.toDto(goal);
                 return buildSuccessResponse(HttpStatus.OK, "Goal found successfully", goalDto);
             }
             return buildErrorResponse(
@@ -110,7 +112,7 @@ public class GoalController extends BaseController {
             if (success) {
                 Goal goal = goalService.getGoal(goalDto.getGoalId());
                 if (goal != null) {
-                    GoalDto goalDtoUpdated = GoalMapper.INSTANCE.toDto(goal);
+                    GoalDto goalDtoUpdated = goalMapper.toDto(goal);
                     return buildSuccessResponse(HttpStatus.OK, "Goal updated successfully", goalDtoUpdated);
                 }
                 return buildErrorResponse(

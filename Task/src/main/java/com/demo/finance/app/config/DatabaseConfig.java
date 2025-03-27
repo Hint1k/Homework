@@ -1,6 +1,7 @@
 package com.demo.finance.app.config;
 
 import com.demo.finance.domain.utils.SystemPropLoader;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Set;
 import java.util.logging.Logger;
@@ -11,6 +12,7 @@ import java.util.logging.Logger;
  * are loaded from a .env file, validated, and set as system properties. It follows the
  * singleton pattern to provide a single instance of the configuration throughout the application.
  */
+@Configuration
 public class DatabaseConfig {
 
     private static final Logger log = Logger.getLogger(DatabaseConfig.class.getName());

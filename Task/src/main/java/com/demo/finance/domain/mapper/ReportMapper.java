@@ -12,13 +12,8 @@ import org.mapstruct.factory.Mappers;
  * capabilities to facilitate the transformation of report-related data between the application's
  * persistence layer and its API layer.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface ReportMapper {
-
-    /**
-     * The singleton instance of the {@code ReportMapper}, initialized by MapStruct.
-     */
-    ReportMapper INSTANCE = Mappers.getMapper(ReportMapper.class);
 
     /**
      * Converts a {@link Report} entity into a {@link ReportDto} data transfer object.

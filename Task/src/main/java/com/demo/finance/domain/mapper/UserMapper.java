@@ -12,13 +12,8 @@ import org.mapstruct.factory.Mappers;
  * capabilities to facilitate the transformation of user-related data between the application's
  * persistence layer and its API layer.
  */
-@Mapper(uses = {RoleMapper.class})
+@Mapper(componentModel = "spring", uses = {RoleMapper.class})
 public interface UserMapper {
-
-    /**
-     * The singleton instance of the {@code UserMapper}, initialized by MapStruct.
-     */
-    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     /**
      * Converts a {@link User} entity into a {@link UserDto} data transfer object.

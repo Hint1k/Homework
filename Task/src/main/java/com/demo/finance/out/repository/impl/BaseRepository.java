@@ -3,6 +3,7 @@ package com.demo.finance.out.repository.impl;
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.utils.GeneratedKey;
 import com.demo.finance.exception.DatabaseException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -37,6 +38,13 @@ public abstract class BaseRepository {
      * Used to optimize setting generated keys on entities.
      */
     private static final Map<Class<?>, Method> SETTER_METHOD_CACHE = new HashMap<>();
+
+    protected final DataSourceManager dataSourceManager;
+
+    @Autowired
+    protected BaseRepository(DataSourceManager dataSourceManager) {
+        this.dataSourceManager = dataSourceManager;
+    }
 
     /**
      * Persists a new entity to the database by executing the provided SQL insert query.
@@ -139,7 +147,7 @@ public abstract class BaseRepository {
      * @return the result of the transactional operation, or {@code null} if an error occurs
      */
     protected <T> T executeWithinTransaction(TransactionalOperation<T> operation) {
-        try (Connection conn = DataSourceManager.getConnection()) {
+        try (Connection conn = dataSourceManager.getConnection()) {
             conn.setAutoCommit(false);
             try {
                 T result = operation.execute(conn);

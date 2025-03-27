@@ -1,5 +1,7 @@
 package com.demo.finance.domain.utils;
 
+import org.springframework.stereotype.Component;
+
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.Set;
@@ -9,6 +11,7 @@ import java.util.Set;
  * from a .env file into JVM system properties. This class ensures that all required
  * properties are present and valid before setting them as system properties.
  */
+@Component
 public class SystemPropLoader {
 
     private static final Logger log = Logger.getLogger(SystemPropLoader.class.getName());

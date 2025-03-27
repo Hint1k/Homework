@@ -6,7 +6,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.annotation.WebFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -25,11 +27,17 @@ import java.util.logging.Logger;
  * <p>Mapped to process all requests ("/*") to ensure comprehensive exception handling
  * across the entire application.</p>
  */
-@WebFilter("/*")
+@Component
+@Order(Integer.MIN_VALUE)
 public class ExceptionHandlerFilter implements Filter {
 
     private static final Logger log = Logger.getLogger(ExceptionHandlerFilter.class.getName());
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    @Autowired
+    public ExceptionHandlerFilter(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     /**
      * Processes each request by invoking the next filter in the chain and catching any

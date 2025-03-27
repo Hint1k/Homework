@@ -35,13 +35,15 @@ public class UserController extends BaseController {
     private final RegistrationService registrationService;
     private final UserService userService;
     private final ValidationUtils validationUtils;
+    private final UserMapper userMapper;
 
     @Autowired
     public UserController(RegistrationService registrationService, UserService userService,
-                          ValidationUtils validationUtils) {
+                          ValidationUtils validationUtils, UserMapper userMapper) {
         this.registrationService = registrationService;
         this.userService = userService;
         this.validationUtils = validationUtils;
+        this.userMapper = userMapper;
     }
 
     @PostMapping("/registration")
@@ -52,7 +54,7 @@ public class UserController extends BaseController {
             if (success) {
                 User user = userService.getUserByEmail(userDto.getEmail());
                 if (user != null) {
-                    UserDto registeredUserDto = UserDto.removePassword(UserMapper.INSTANCE.toDto(user));
+                    UserDto registeredUserDto = UserDto.removePassword(userMapper.toDto(user));
                     return buildSuccessResponse(
                             HttpStatus.CREATED, "User registered successfully", registeredUserDto);
                 }
@@ -73,7 +75,7 @@ public class UserController extends BaseController {
             if (success) {
                 User user = userService.getUserByEmail(userDto.getEmail());
                 if (user != null) {
-                    UserDto authUserDto = UserDto.removePassword(UserMapper.INSTANCE.toDto(user));
+                    UserDto authUserDto = UserDto.removePassword(userMapper.toDto(user));
                     model.addAttribute("currentUser", authUserDto);
                     return buildSuccessResponse(HttpStatus.OK, "Authentication successful", authUserDto);
                 }
@@ -101,7 +103,7 @@ public class UserController extends BaseController {
             if (success) {
                 User updatedUser = userService.getUserByEmail(userDto.getEmail());
                 if (updatedUser != null) {
-                    UserDto updatedUserDto = UserDto.removePassword(UserMapper.INSTANCE.toDto(updatedUser));
+                    UserDto updatedUserDto = UserDto.removePassword(userMapper.toDto(updatedUser));
                     model.addAttribute("currentUser", updatedUserDto);
                     return buildSuccessResponse(HttpStatus.OK, "User updated successfully", updatedUserDto);
                 }

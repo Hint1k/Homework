@@ -1,11 +1,13 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.out.service.EmailService;
+import org.springframework.stereotype.Service;
 
 /**
  * The EmailServiceImpl class simulates email notifications by printing details to the console.
  * It implements the EmailService interface for consistency with future real email services.
  */
+@Service
 public class EmailServiceImpl implements EmailService {
 
     /**

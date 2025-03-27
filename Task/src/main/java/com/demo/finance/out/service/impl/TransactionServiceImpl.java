@@ -6,6 +6,8 @@ import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.TransactionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -16,9 +18,11 @@ import java.util.logging.Logger;
  * It interacts with the database through the {@link TransactionRepository} and handles logic for creating,
  * retrieving, updating, deleting, and paginating transactions.
  */
+@Service
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
+    private final TransactionMapper transactionMapper;
 
     /**
      * Logger instance for logging events and errors in the {@code TransactionServiceImpl} class.
@@ -30,8 +34,10 @@ public class TransactionServiceImpl implements TransactionService {
      *
      * @param transactionRepository the repository used to interact with transaction data in the database
      */
-    public TransactionServiceImpl(TransactionRepository transactionRepository) {
+    @Autowired
+    public TransactionServiceImpl(TransactionRepository transactionRepository, TransactionMapper transactionMapper) {
         this.transactionRepository = transactionRepository;
+        this.transactionMapper = transactionMapper;
     }
 
     /**
@@ -49,7 +55,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Long createTransaction(TransactionDto dto, Long userId) {
-        Transaction transaction = TransactionMapper.INSTANCE.toEntity(dto);
+        Transaction transaction = transactionMapper.toEntity(dto);
         transaction.setUserId(userId);
         return transactionRepository.save(transaction);
     }
@@ -127,7 +133,7 @@ public class TransactionServiceImpl implements TransactionService {
         int offset = (page - 1) * size;
         List<Transaction> transactions = transactionRepository.findByUserId(userId, offset, size);
         int totalTransactions = transactionRepository.getTotalTransactionCountForUser(userId);
-        List<TransactionDto> dtoList = transactions.stream().map(TransactionMapper.INSTANCE::toDto).toList();
+        List<TransactionDto> dtoList = transactions.stream().map(transactionMapper::toDto).toList();
         return new PaginatedResponse<>(dtoList, totalTransactions, (int) Math.ceil((double) totalTransactions / size),
                 page, size);
     }

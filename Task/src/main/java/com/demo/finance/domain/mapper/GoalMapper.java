@@ -12,13 +12,8 @@ import org.mapstruct.factory.Mappers;
  * capabilities to facilitate the transformation of goal-related data between the application's
  * persistence layer and its API layer.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface GoalMapper {
-
-    /**
-     * The singleton instance of the {@code GoalMapper}, initialized by MapStruct.
-     */
-    GoalMapper INSTANCE = Mappers.getMapper(GoalMapper.class);
 
     /**
      * Converts a {@link Goal} entity into a {@link GoalDto} data transfer object.

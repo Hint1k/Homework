@@ -7,6 +7,8 @@ import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.UserService;
 import com.demo.finance.domain.mapper.UserMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -16,10 +18,12 @@ import java.util.List;
  * It interacts with the database through the {@link UserRepository} and handles logic for retrieving,
  * updating, deleting, and paginating users.
  */
+@Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordUtilsImpl passwordUtils;
+    private final UserMapper userMapper;
 
     /**
      * Constructs a new instance of {@code UserServiceImpl} with the provided repository and password utility.
@@ -27,9 +31,11 @@ public class UserServiceImpl implements UserService {
      * @param userRepository the repository used to interact with user data in the database
      * @param passwordUtils  the utility class used for password hashing and validation
      */
-    public UserServiceImpl(UserRepository userRepository, PasswordUtilsImpl passwordUtils) {
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository, PasswordUtilsImpl passwordUtils, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordUtils = passwordUtils;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -55,7 +61,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public boolean updateOwnAccount(UserDto userDto, Long userId) {
-        User user = UserMapper.INSTANCE.toEntity(userDto);
+        User user = userMapper.toEntity(userDto);
         User existingUser = userRepository.findById(user.getUserId());
         if (existingUser == null) {
             return false;
@@ -95,7 +101,7 @@ public class UserServiceImpl implements UserService {
         List<User> users = userRepository.findAll(offset, size);
         int totalUsers = userRepository.getTotalUserCount();
         List<UserDto> dtoList = users.stream().map(user ->
-                UserDto.removePassword(UserMapper.INSTANCE.toDto(user))).toList();
+                UserDto.removePassword(userMapper.toDto(user))).toList();
 
         return new PaginatedResponse<>(dtoList, totalUsers, (int) Math.ceil((double) totalUsers / size), page, size);
     }

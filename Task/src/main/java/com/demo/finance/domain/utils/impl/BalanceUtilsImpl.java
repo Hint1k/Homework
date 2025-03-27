@@ -5,6 +5,8 @@ import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.BalanceUtils;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,6 +16,7 @@ import java.util.List;
  * Implementation of the {@link BalanceUtils} interface for calculating the balance
  * towards a user's financial goal by considering both income and expenses within the goal's timeframe.
  */
+@Component
 public class BalanceUtilsImpl implements BalanceUtils {
 
     private final TransactionRepository transactionRepository;
@@ -23,6 +26,7 @@ public class BalanceUtilsImpl implements BalanceUtils {
      *
      * @param transactionRepository The repository to fetch the user's transactions.
      */
+    @Autowired
     public BalanceUtilsImpl(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
     }

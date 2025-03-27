@@ -6,6 +6,8 @@ import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.out.repository.GoalRepository;
 import com.demo.finance.out.service.GoalService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,17 +18,16 @@ import java.util.List;
  * It interacts with the database through the {@link GoalRepository} and handles logic for creating,
  * retrieving, updating, deleting, and paginating goals for users.
  */
+@Service
 public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
+    private final GoalMapper goalMapper;
 
-    /**
-     * Constructs a new instance of {@code GoalServiceImpl} with the provided repository.
-     *
-     * @param goalRepository the repository used to interact with goal data in the database
-     */
-    public GoalServiceImpl(GoalRepository goalRepository) {
+    @Autowired
+    public GoalServiceImpl(GoalRepository goalRepository, GoalMapper goalMapper) {
         this.goalRepository = goalRepository;
+        this.goalMapper = goalMapper;
     }
 
     /**
@@ -44,7 +45,7 @@ public class GoalServiceImpl implements GoalService {
      */
     @Override
     public Long createGoal(GoalDto goalDto, Long userId) {
-        Goal goal = GoalMapper.INSTANCE.toEntity(goalDto);
+        Goal goal = goalMapper.toEntity(goalDto);
         goal.setUserId(userId);
         goal.setSavedAmount(BigDecimal.ZERO);
         return goalRepository.save(goal);
@@ -123,7 +124,7 @@ public class GoalServiceImpl implements GoalService {
         int offset = (page - 1) * size;
         List<Goal> goals = goalRepository.findByUserId(userId, offset, size);
         int totalGoals = goalRepository.getTotalGoalCountForUser(userId);
-        List<GoalDto> dtoList = goals.stream().map(GoalMapper.INSTANCE::toDto).toList();
+        List<GoalDto> dtoList = goals.stream().map(goalMapper::toDto).toList();
         return new PaginatedResponse<>(dtoList, totalGoals, (int) Math.ceil((double) totalGoals / size),
                 page, size);
     }
