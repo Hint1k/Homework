@@ -46,10 +46,10 @@ public class AdminController extends BaseController {
         this.userMapper = userMapper;
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<Map<String, Object>> getPaginatedUsers(@ModelAttribute PaginationParams paramsNew) {
         try {
-            PaginationParams params = validationUtils.validatePaginationParams(paramsNew, Mode.PAGE);
+            PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
             PaginatedResponse<UserDto> paginatedResponse = userService.getPaginatedUsers(params.page(), params.size());
             return buildPaginatedResponse(null, paginatedResponse);
         } catch (ValidationException e) {
@@ -60,10 +60,10 @@ public class AdminController extends BaseController {
 
     @GetMapping("/transactions/{userId}")
     public ResponseEntity<Map<String, Object>> getPaginatedTransactionsForUser(
-            @PathVariable String userId, @ModelAttribute PaginationParams paramsNew) {
+            @PathVariable("userId") String userId, @ModelAttribute PaginationParams paramsNew) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.GET);
-            PaginationParams params = validationUtils.validatePaginationParams(paramsNew, Mode.PAGE);
+            PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
             PaginatedResponse<TransactionDto> paginatedResponse =
                     transactionService.getPaginatedTransactionsForUser(userIdLong, params.page(), params.size());
             return buildPaginatedResponse(userIdLong, paginatedResponse);
@@ -73,7 +73,7 @@ public class AdminController extends BaseController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<Map<String, Object>> getUserDetails(@PathVariable String userId) {
+    public ResponseEntity<Map<String, Object>> getUserDetails(@PathVariable("userId") String userId) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.GET);
             User user = adminService.getUser(userIdLong);
@@ -89,10 +89,10 @@ public class AdminController extends BaseController {
 
     @PatchMapping("/block/{userId}")
     public ResponseEntity<Map<String, Object>> blockUnblockUser(
-            @PathVariable String userId, @RequestBody UserDto userDtoNew) {
+            @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.BLOCK_UNBLOCK);
-            UserDto userDto = validationUtils.validateUserJson(userDtoNew, Mode.BLOCK_UNBLOCK);
+            UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.BLOCK_UNBLOCK);
             boolean success = adminService.blockOrUnblockUser(userIdLong, userDto);
             if (success) {
                 return buildSuccessResponse(HttpStatus.OK,
@@ -106,10 +106,10 @@ public class AdminController extends BaseController {
 
     @PatchMapping("/role/{userId}")
     public ResponseEntity<Map<String, Object>> updateUserRole(
-            @PathVariable String userId, @RequestBody UserDto userDtoNew) {
+            @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.UPDATE_ROLE);
-            UserDto userDto = validationUtils.validateUserJson(userDtoNew, Mode.UPDATE_ROLE);
+            UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.UPDATE_ROLE);
             boolean success = adminService.updateUserRole(userIdLong, userDto);
             if (success) {
                 return buildSuccessResponse(
@@ -122,7 +122,7 @@ public class AdminController extends BaseController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable String userId) {
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.DELETE);
             boolean success = adminService.deleteUser(userIdLong);

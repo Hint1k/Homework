@@ -153,23 +153,17 @@ DELETE http://localhost:8080/api/users
 ```
 
 ### Admin actions:
-GET http://localhost:8080/api/admin/users/
+GET http://localhost:8080/api/admin/users?page=1&size=10
 ```json 
-{
-  "page": 1,
-  "size": 10
-}
+{ }
 ```
 GET http://localhost:8080/api/admin/users/2
 ```json 
 { }
 ```
-GET http://localhost:8080/api/admin/users/transactions/2
+GET http://localhost:8080/api/admin/users/transactions/2?page=1&size=10
 ```json 
-{
-  "page": 1,
-  "size": 10
-}
+{ }
 ```
 PATCH http://localhost:8080/api/admin/users/role/2
 ```json 
@@ -189,12 +183,9 @@ DELETE http://localhost:8080/api/admin/users/2
 ```
 
 ### Transaction actions:
-GET http://localhost:8080/api/transactions/
+GET http://localhost:8080/api/transactions?page=1&size=10
 ```json 
-{
-  "page": 1,
-  "size": 10
-}
+{ }
 ```
 GET http://localhost:8080/api/transactions/1
 ```json 
@@ -224,12 +215,9 @@ DELETE http://localhost:8080/api/transactions/1
 ```
 
 ### Goal actions: 
-GET http://localhost:8080/api/goals/
+GET http://localhost:8080/api/goals?page=1&size=10
 ```json 
-{
-  "page": 1,
-  "size": 10
-}
+{ }
 ```
 GET http://localhost:8080/api/goals/1
 ```json 
@@ -249,8 +237,7 @@ PUT http://localhost:8080/api/goals/1
 {
   "goalName": "2",
   "targetAmount": "1500",
-  "duration": "3",
-  "startTime": "2025-03-30"
+  "duration": "3"
 }
 ```
 DELETE http://localhost:8080/api/goals/1

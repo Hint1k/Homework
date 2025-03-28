@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/budgets")
@@ -37,9 +36,9 @@ public class BudgetController extends BaseController {
             @RequestBody BudgetDto budgetDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            BigDecimal limit = validationUtils.validateBudgetJson(budgetDtoNew, Mode.BUDGET, userId);
-            if (limit != null) {
-                Budget budget = budgetService.setMonthlyBudget(userId, limit);
+           BudgetDto budgetDto = validationUtils.validateRequest(budgetDtoNew, Mode.BUDGET);
+            if (budgetDto.getMonthlyLimit() != null) {
+                Budget budget = budgetService.setMonthlyBudget(userId, budgetDto.getMonthlyLimit());
                 if (budget != null) {
                     return buildSuccessResponse(HttpStatus.OK, "Budget generated successfully", budget);
                 }

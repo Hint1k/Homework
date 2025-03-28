@@ -56,21 +56,24 @@ public class AuthenticationFilter implements Filter {
             return;
         }
         Object currentUser = session.getAttribute("currentUser");
+        if (!(currentUser instanceof UserDto user)) {
+            httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            httpResponse.getWriter().write("Invalid user session.");
+            return;
+        }
+        String role = user.getRole().getName().toLowerCase();
         if (isAdminEndpoint(requestURI)) {
-            if (currentUser instanceof UserDto user) {
-                if (!"admin".equalsIgnoreCase(user.getRole().getName())) {
-                    httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    httpResponse.getWriter().write("Access denied. Role \"admin\" required.");
-                    return;
-                }
+            if (!"admin".equalsIgnoreCase(role)) {
+                httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                httpResponse.getWriter().write("Access denied. Admin role required.");
+                return;
             }
-        } else {
-            if (currentUser instanceof UserDto user) {
-                if (!"user".equalsIgnoreCase(user.getRole().getName())) {
-                    httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    httpResponse.getWriter().write("Access denied. Role \"user\" required.");
-                    return;
-                }
+        }
+        else {
+            if (!"user".equalsIgnoreCase(role)) {
+                httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                httpResponse.getWriter().write("Access denied. User role required.");
+                return;
             }
         }
         chain.doFilter(request, response);
@@ -95,6 +98,7 @@ public class AuthenticationFilter implements Filter {
      * @return {@code true} if the request URI matches an admin-specific endpoint, {@code false} otherwise
      */
     private boolean isAdminEndpoint(String requestURI) {
-        return requestURI.startsWith("/api/admin/users/");
+        String path = requestURI.split("\\?")[0];
+        return path.startsWith("/api/admin/users");
     }
 }

@@ -9,6 +9,7 @@ import com.demo.finance.exception.DuplicateEmailException;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +50,7 @@ public class UserController extends BaseController {
     @PostMapping("/registration")
     public ResponseEntity<Map<String, Object>> handleRegistration(@RequestBody UserDto userDtoNew) {
         try {
-            UserDto userDto = validationUtils.validateUserJson(userDtoNew, Mode.REGISTER_USER);
+            UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.REGISTER_USER);
             boolean success = registrationService.registerUser(userDto);
             if (success) {
                 User user = userService.getUserByEmail(userDto.getEmail());
@@ -68,15 +69,16 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<Map<String, Object>> handleAuthentication(@RequestBody UserDto userDtoNew, Model model) {
+    public ResponseEntity<Map<String, Object>> handleAuthentication(
+            @RequestBody UserDto userDtoNew, HttpSession session) {
         try {
-            UserDto userDto = validationUtils.validateUserJson(userDtoNew, Mode.AUTHENTICATE);
+            UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.AUTHENTICATE);
             boolean success = registrationService.authenticate(userDto);
             if (success) {
                 User user = userService.getUserByEmail(userDto.getEmail());
                 if (user != null) {
                     UserDto authUserDto = UserDto.removePassword(userMapper.toDto(user));
-                    model.addAttribute("currentUser", authUserDto);
+                    session.setAttribute("currentUser", authUserDto);
                     return buildSuccessResponse(HttpStatus.OK, "Authentication successful", authUserDto);
                 }
                 return buildErrorResponse(
@@ -97,7 +99,7 @@ public class UserController extends BaseController {
     public ResponseEntity<Map<String, Object>> updateUser(
             @RequestBody UserDto userDtoNew, @SessionAttribute("currentUser") UserDto currentUserDto, Model model) {
         try {
-            UserDto userDto = validationUtils.validateUserJson(userDtoNew, Mode.UPDATE_USER);
+            UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.UPDATE_USER);
             boolean success = userService.updateOwnAccount(userDto, currentUserDto.getUserId());
             if (success) {
                 User updatedUser = userService.getUserByEmail(userDto.getEmail());

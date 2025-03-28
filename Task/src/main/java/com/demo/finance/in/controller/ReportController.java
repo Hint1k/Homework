@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -43,10 +42,9 @@ public class ReportController extends BaseController {
             @RequestBody ReportDatesDto reportDatesDto, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            Map<String, LocalDate> reportDates =
-                    validationUtils.validateReportJson(reportDatesDto, Mode.REPORT, userId);
+            ReportDatesDto reportDates = validationUtils.validateRequest(reportDatesDto, Mode.REPORT);
             Report report =
-                    reportService.generateReportByDate(userId, reportDates.get("fromDate"), reportDates.get("toDate"));
+                    reportService.generateReportByDate(userId, reportDates.getFromDate(), reportDates.getToDate());
             if (report != null) {
                 ReportDto reportDto = reportMapper.toDto(report);
                 return buildSuccessResponse(
@@ -66,10 +64,10 @@ public class ReportController extends BaseController {
             @RequestBody ReportDatesDto reportDatesDto, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            Map<String, LocalDate> reportDates =
-                    validationUtils.validateReportJson(reportDatesDto, Mode.REPORT, userId);
-            Map<String, BigDecimal> expensesByCategory = reportService.analyzeExpensesByCategory(
-                    userId, reportDates.get("fromDate"), reportDates.get("toDate"));
+            ReportDatesDto reportDates =
+                    validationUtils.validateRequest(reportDatesDto, Mode.REPORT);
+            Map<String, BigDecimal> expensesByCategory = reportService
+                    .analyzeExpensesByCategory(userId, reportDates.getFromDate(), reportDates.getToDate());
             if (!expensesByCategory.isEmpty()) {
                 return buildSuccessResponse(
                         HttpStatus.OK, "Expenses generated successfully", expensesByCategory);

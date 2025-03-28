@@ -46,7 +46,7 @@ public class GoalController extends BaseController {
             @RequestBody GoalDto goalDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            GoalDto goalDto = validationUtils.validateJson(goalDtoNew, Mode.GOAL_CREATE, GoalDto.class);
+            GoalDto goalDto = validationUtils.validateRequest(goalDtoNew, Mode.GOAL_CREATE);
             Long goalId = goalService.createGoal(goalDto, userId);
             if (goalId != null) {
                 Goal goal = goalService.getGoal(goalId);
@@ -72,7 +72,7 @@ public class GoalController extends BaseController {
             @ModelAttribute PaginationParams paramsNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            PaginationParams params = validationUtils.validatePaginationParams(paramsNew, Mode.PAGE);
+            PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
             PaginatedResponse<GoalDto> paginatedResponse =
                     goalService.getPaginatedGoalsForUser(userId, params.page(), params.size());
             return buildPaginatedResponse(userId, paginatedResponse);
@@ -86,7 +86,7 @@ public class GoalController extends BaseController {
 
     @GetMapping("/{goalId}")
     public ResponseEntity<Map<String, Object>> getGoalById(
-            @PathVariable String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
+            @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long goalIdLong = validationUtils.parseLong(goalId);
@@ -104,11 +104,13 @@ public class GoalController extends BaseController {
 
     @PutMapping("/{goalId}")
     public ResponseEntity<Map<String, Object>> updateGoal(
-            @PathVariable String goalId, @RequestBody GoalDto goalDtoNew,
+            @PathVariable("goalId") String goalId, @RequestBody GoalDto goalDtoNew,
             @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            GoalDto goalDto = validationUtils.validateGoalJson(goalDtoNew, Mode.GOAL_UPDATE, goalId);
+            Long goalIdLong = validationUtils.parseLong(goalId);
+            GoalDto goalDto = validationUtils.validateRequest(goalDtoNew, Mode.GOAL_UPDATE);
+            goalDto.setGoalId(goalIdLong);
             boolean success = goalService.updateGoal(goalDto, userId);
             if (success) {
                 Goal goal = goalService.getGoal(goalDto.getGoalId());
@@ -133,7 +135,7 @@ public class GoalController extends BaseController {
 
     @DeleteMapping("/{goalId}")
     public ResponseEntity<Map<String, Object>> deleteGoal(
-            @PathVariable String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
+            @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long goalIdLong = validationUtils.parseLong(goalId);

@@ -27,8 +27,8 @@ public abstract class BaseController {
         return new ResponseEntity<>(errorResponse, status);
     }
 
-    protected ResponseEntity<Map<String, Object>> buildErrorResponse(HttpStatus status, String errorMessage, 
-                                                                     Map<String, String> details) {
+    protected ResponseEntity<Map<String, Object>> buildErrorResponse(
+            HttpStatus status, String errorMessage, Map<String, String> details) {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("error", errorMessage);
         errorResponse.putAll(details);
@@ -36,8 +36,8 @@ public abstract class BaseController {
         return new ResponseEntity<>(errorResponse, status);
     }
 
-    protected <T> ResponseEntity<Map<String, Object>> buildPaginatedResponse(Long userId,
-                                                                             PaginatedResponse<T> paginatedResponse) {
+    protected <T> ResponseEntity<Map<String, Object>> buildPaginatedResponse(
+            Long userId, PaginatedResponse<T> paginatedResponse) {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("totalItems", paginatedResponse.totalItems());
         metadata.put("totalPages", paginatedResponse.totalPages());

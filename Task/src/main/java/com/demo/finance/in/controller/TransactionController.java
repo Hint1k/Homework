@@ -48,7 +48,7 @@ public class TransactionController extends BaseController {
         try {
             Long userId = currentUser.getUserId();
             TransactionDto transactionDto =
-                    validationUtils.validateJson(transactionDtoNew, Mode.TRANSACTION_CREATE, TransactionDto.class);
+                    validationUtils.validateRequest(transactionDtoNew, Mode.TRANSACTION_CREATE);
             Long transactionId = transactionService.createTransaction(transactionDto, userId);
             if (transactionId != null) {
                 Transaction transaction = transactionService.getTransaction(transactionId);
@@ -74,7 +74,7 @@ public class TransactionController extends BaseController {
             @ModelAttribute PaginationParams paramsNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            PaginationParams params = validationUtils.validatePaginationParams(paramsNew, Mode.PAGE);
+            PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
             PaginatedResponse<TransactionDto> paginatedResponse =
                     transactionService.getPaginatedTransactionsForUser(userId, params.page(), params.size());
             return buildPaginatedResponse(userId, paginatedResponse);
@@ -87,8 +87,8 @@ public class TransactionController extends BaseController {
     }
 
     @GetMapping("/{transactionId}")
-    public ResponseEntity<Map<String, Object>> getTransactionById
-            (@PathVariable String transactionId, @SessionAttribute("currentUser") UserDto currentUser) {
+    public ResponseEntity<Map<String, Object>> getTransactionById(
+            @PathVariable String transactionId, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long transactionIdLong = validationUtils.parseLong(transactionId);
@@ -107,12 +107,14 @@ public class TransactionController extends BaseController {
 
     @PutMapping("/{transactionId}")
     public ResponseEntity<Map<String, Object>> updateTransaction(
-            @PathVariable String transactionId, @RequestBody TransactionDto transactionDtoNew,
+            @PathVariable("transactionId") String transactionId, @RequestBody TransactionDto transactionDtoNew,
             @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-            TransactionDto transactionDto = validationUtils
-                    .validateTransactionJson(transactionDtoNew, Mode.TRANSACTION_UPDATE, transactionId);
+            Long transactionIdLong = validationUtils.parseLong(transactionId);
+            TransactionDto transactionDto =
+                    validationUtils.validateRequest(transactionDtoNew, Mode.TRANSACTION_UPDATE);
+            transactionDto.setTransactionId(transactionIdLong);
             boolean success = transactionService.updateTransaction(transactionDto, userId);
             if (success) {
                 Transaction transaction = transactionService.getTransaction(transactionDto.getTransactionId());
@@ -138,7 +140,8 @@ public class TransactionController extends BaseController {
 
     @DeleteMapping("/{transactionId}")
     public ResponseEntity<Map<String, Object>> deleteTransaction(
-            @PathVariable String transactionId, @SessionAttribute("currentUser") UserDto currentUser) {
+            @PathVariable("transactionId") String transactionId,
+            @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long transactionIdLong = validationUtils.parseLong(transactionId);

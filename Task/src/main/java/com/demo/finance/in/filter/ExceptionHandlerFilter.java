@@ -1,12 +1,10 @@
 package com.demo.finance.in.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -32,12 +30,6 @@ import java.util.logging.Logger;
 public class ExceptionHandlerFilter implements Filter {
 
     private static final Logger log = Logger.getLogger(ExceptionHandlerFilter.class.getName());
-    private final ObjectMapper objectMapper;
-
-    @Autowired
-    public ExceptionHandlerFilter(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
 
     /**
      * Processes each request by invoking the next filter in the chain and catching any
@@ -83,7 +75,7 @@ public class ExceptionHandlerFilter implements Filter {
             log.log(Level.SEVERE, "Unhandled exception: " + ex.getMessage(), ex);
             httpResponse.setStatus(statusCode);
             httpResponse.setContentType("application/json");
-            String jsonResponse = objectMapper.writeValueAsString(message);
+            String jsonResponse = String.format("{\"error\": \"%s\"}", message);
             httpResponse.getWriter().write(jsonResponse);
             log.log(Level.INFO, "7: JSON response written to the output stream");
         } catch (Exception handlerEx) {
