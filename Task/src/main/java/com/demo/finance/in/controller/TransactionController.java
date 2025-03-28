@@ -88,7 +88,7 @@ public class TransactionController extends BaseController {
 
     @GetMapping("/{transactionId}")
     public ResponseEntity<Map<String, Object>> getTransactionById(
-            @PathVariable String transactionId, @SessionAttribute("currentUser") UserDto currentUser) {
+            @PathVariable("transactionId") String transactionId, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long transactionIdLong = validationUtils.parseLong(transactionId);

@@ -75,6 +75,18 @@ dependencies {
     testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.20.6'
     testImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.20.6'
     testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.20.6'
+
+    // Swagger/OpenAPI Documentation
+    implementation group: 'io.swagger.core.v3', name: 'swagger-core', version: '2.2.28'
+    implementation group: 'io.swagger.core.v3', name: 'swagger-annotations', version: '2.2.28'
+    implementation group: 'io.swagger.core.v3', name: 'swagger-models', version: '2.2.28'
+
+    // Swagger UI Integration
+    implementation group: 'org.webjars', name: 'swagger-ui', version: '5.20.1'
+    implementation group: 'org.webjars', name: 'webjars-locator-core', version: '0.59'
+
+    // Jackson Module for Swagger
+    implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.28'
 }
 
 application {

@@ -67,7 +67,7 @@ docker-compose up --build
 
 ## Configuration
 
-The application uses **.env** file for database connection configuration. The credentials are:
+The application uses **.env** and **application.yml** files for credentials and configuration. The credentials are:
 ```
 Application admin's email = admin@demo.com
 Application admin's password = 123
@@ -77,7 +77,6 @@ Database name = financedb
 Database schema = finance
 Table names: users, transactions, goals, reports, budgets
 ```
-
 
 ---
 
@@ -99,7 +98,7 @@ To run tests with coverage using Jacoco
 ## Code Structure
 
 The project follows Clean Architecture principles with key packages:
-- `in.controllers` – Handles user input.
+- `in.controllers` – Rest Controllers.
 - `domain.model` – Contains entities.
 - `domain.utils` – Utility classes for validation and date handling.
 - `out.repository` – Manages database storage and retrieval.
@@ -109,9 +108,11 @@ The project follows Clean Architecture principles with key packages:
 ---
 
 ## Technological Stack
-- **Java Core**
+- **Java**
+- **Spring (Core, Web, MVC)**
 - **Gradle**
 - **PostgreSQL database**
+- **Swagger**
 - **Docker**
 - **JUnit 5, Mockito, AssertJ, Testcontainers**
 
@@ -134,6 +135,10 @@ POST http://localhost:8080/api/users/authenticate
 "email": "jay@demo.com",
 "password": "123"
 }
+```
+POST http://localhost:8080/api/users/logout
+```json 
+{ }
 ```
 PUT http://localhost:8080/api/users
 ```json 
@@ -191,7 +196,7 @@ GET http://localhost:8080/api/transactions/1
 ```json 
 { }
 ```
-POST http://localhost:8080/api/transactions/
+POST http://localhost:8080/api/transactions
 ```json 
 {
   "amount": "500",
@@ -223,7 +228,7 @@ GET http://localhost:8080/api/goals/1
 ```json 
 { }
 ```
-POST http://localhost:8080/api/goals/
+POST http://localhost:8080/api/goals
 ```json 
 {
   "goalName": "1",
@@ -250,7 +255,7 @@ GET http://localhost:8080/api/budgets/budget
 ```json 
 { }
 ```
-POST http://localhost:8080/api/budgets/
+POST http://localhost:8080/api/budgets
 ```json 
 {
   "monthlyLimit": "1500"

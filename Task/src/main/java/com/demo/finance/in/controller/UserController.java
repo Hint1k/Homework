@@ -9,6 +9,9 @@ import com.demo.finance.exception.DuplicateEmailException;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -70,15 +73,20 @@ public class UserController extends BaseController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<Map<String, Object>> handleAuthentication(
-            @RequestBody UserDto userDtoNew, HttpSession session) {
+            @RequestBody UserDto userDtoNew, HttpServletRequest request, HttpServletResponse response) {
         try {
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.AUTHENTICATE);
             boolean success = registrationService.authenticate(userDto);
             if (success) {
                 User user = userService.getUserByEmail(userDto.getEmail());
                 if (user != null) {
+                    HttpSession session = request.getSession();
+                    session.setMaxInactiveInterval(1800);
                     UserDto authUserDto = UserDto.removePassword(userMapper.toDto(user));
                     session.setAttribute("currentUser", authUserDto);
+                    String cookie = String.format("JSESSIONID=%s; Path=/; HttpOnly; SameSite=Strict%s",
+                            session.getId(), request.isSecure() ? "; Secure" : "");
+                    response.setHeader("Set-Cookie", cookie);
                     return buildSuccessResponse(HttpStatus.OK, "Authentication successful", authUserDto);
                 }
                 return buildErrorResponse(
@@ -88,6 +96,20 @@ public class UserController extends BaseController {
         } catch (ValidationException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logoutUser(HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        Cookie cookie = new Cookie("JSESSIONID", "");
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+        return buildSuccessResponse(HttpStatus.OK, "Logged out successfully", null);
     }
 
     @GetMapping("/me")

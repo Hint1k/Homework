@@ -87,7 +87,8 @@ public class AuthenticationFilter implements Filter {
      * @return {@code true} if the request URI matches a public endpoint, {@code false} otherwise
      */
     private boolean isPublicEndpoint(String requestURI) {
-        return requestURI.endsWith("/api/users/registration") || requestURI.endsWith("/api/users/authenticate");
+        return requestURI.endsWith("/api/users/registration") || requestURI.endsWith("/api/users/authenticate")
+                || requestURI.endsWith("/api/users/logout");
     }
 
     /**
@@ -99,6 +100,6 @@ public class AuthenticationFilter implements Filter {
      */
     private boolean isAdminEndpoint(String requestURI) {
         String path = requestURI.split("\\?")[0];
-        return path.startsWith("/api/admin/users");
+        return path.matches("^/api/admin/users(/.*)?$");
     }
 }

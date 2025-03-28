@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean updateOwnAccount(UserDto userDto, Long userId) {
         User user = userMapper.toEntity(userDto);
-        User existingUser = userRepository.findById(user.getUserId());
+        User existingUser = userRepository.findById(userId);
         if (existingUser == null) {
             return false;
         }
@@ -71,6 +71,7 @@ public class UserServiceImpl implements UserService {
         } else {
             user.setPassword(existingUser.getPassword());
         }
+        user.setUserId(userId);
         user.setRole(existingUser.getRole());
         user.setVersion(existingUser.getVersion() + 1);
         return userRepository.update(user);
