@@ -3,8 +3,6 @@ plugins {
     id 'jacoco'
     id 'jacoco-report-aggregation'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
-    id 'io.freefair.aspectj.post-compile-weaving' version '8.13'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'java-test-fixtures'
 }
@@ -33,17 +31,21 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.36'
     annotationProcessor 'org.projectlombok:lombok:1.18.36'
 
-    // Spring Framework Core and Web Components
+    // Spring Framework Core, Web Components and AOP
     implementation 'org.springframework:spring-context'
     implementation 'org.springframework:spring-web'
     implementation 'org.springframework:spring-webmvc'
+    implementation 'org.springframework:spring-aop'
+    implementation 'org.springframework:spring-aspects'
 
     // Jakarta Servlet API
-    compileOnly group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.1.0'
+    implementation group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.0.0'
 
     // Jetty - Embedded Web Server
     implementation group: 'org.eclipse.jetty', name: 'jetty-server', version: '11.0.25'
     implementation group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '11.0.25'
+    implementation group: 'org.eclipse.jetty', name: 'jetty-webapp', version: '11.0.25'
+    implementation group: 'org.eclipse.jetty', name: 'jetty-annotations', version: '11.0.25'
 
     // Database - PostgreSQL Driver & Liquibase for Migrations
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.5'
@@ -54,10 +56,6 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.18.3'
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.18.3'
     implementation group: 'org.yaml', name: 'snakeyaml', version: '2.4'
-
-    // AspectJ - AOP Support for Logging & Monitoring
-    implementation 'org.aspectj:aspectjrt:1.9.23'
-    runtimeOnly group: 'org.aspectj', name: 'aspectjweaver', version: '1.9.23'
 
     // MapStruct - Object Mapping
     implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.6.3'
@@ -76,21 +74,32 @@ dependencies {
     testImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.20.6'
     testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.20.6'
 
-    // Swagger/OpenAPI Documentation
-    implementation group: 'io.swagger.core.v3', name: 'swagger-core', version: '2.2.28'
-    implementation group: 'io.swagger.core.v3', name: 'swagger-annotations', version: '2.2.28'
-    implementation group: 'io.swagger.core.v3', name: 'swagger-models', version: '2.2.28'
-
-    // Swagger UI Integration
-    implementation group: 'org.webjars', name: 'swagger-ui', version: '5.20.1'
-    implementation group: 'org.webjars', name: 'webjars-locator-core', version: '0.59'
-
-    // Jackson Module for Swagger
-    implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: '2.2.28'
+    // Swagger
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.6'
+    implementation 'org.webjars:swagger-ui:5.9.0'
+    implementation 'org.webjars:webjars-locator-core:0.52'
 }
 
 application {
     mainClass = 'com.demo.finance.app.TaskMain'
+    applicationDefaultJvmArgs = [
+            '-Dorg.eclipse.jetty.server.webapp.ContainerIncludeJarPattern=.*',
+            '-Dspring.profiles.active=prod'
+    ]
+}
+
+distributions {
+    main {
+        contents {
+            from('src/main/resources') {
+                into 'resources'
+            }
+            from(configurations.runtimeClasspath) {
+                into 'lib'
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            }
+        }
+    }
 }
 
 sourceSets {
@@ -169,15 +178,20 @@ tasks.named('jacocoTestReport', JacocoReport) {
     }
 }
 
-jacoco {
-    toolVersion = "0.8.12"
+tasks.named('jar') {
+    manifest {
+        attributes(
+                'Main-Class': 'com.demo.finance.app.TaskMain',
+                'Class-Path': configurations.runtimeClasspath.collect { it.name }.join(' ')
+        )
+    }
+    into('lib') {
+        from configurations.runtimeClasspath
+    }
 }
 
-shadowJar {
-    mergeServiceFiles()
-    manifest {
-        attributes 'Main-Class': 'com.demo.finance.app.TaskMain'
-    }
+jacoco {
+    toolVersion = "0.8.12"
 }
 
 configurations {

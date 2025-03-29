@@ -1,6 +1,7 @@
 package com.demo.finance.domain.dto;
 
 import com.demo.finance.domain.model.Role;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
@@ -10,14 +11,28 @@ import lombok.Data;
  * layer and the persistence layer.
  */
 @Data
+@Schema(description = "Data transfer object for user information")
 public class UserDto {
 
+    @Schema(description = "Unique identifier of the user", example = "1")
     private Long userId;
+
+    @Schema(description = "Name of the user", example = "John Doe")
     private String name;
+
+    @Schema(description = "Email address of the user", example = "john.doe@example.com")
     private String email;
+
+    @Schema(description = "Password of the user", example = "P@ssw0rd")
     private String password;
+
+    @Schema(description = "Indicates if the user is blocked", example = "false")
     private boolean blocked;
+
+    @Schema(description = "Role of the user", example = "USER")
     private Role role;
+
+    @Schema(description = "Version for optimistic locking", example = "1")
     private Long version;
 
     /**

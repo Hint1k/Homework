@@ -56,7 +56,7 @@ https://github.com/Hint1k/homework
 ### Building and Running the Application
 Navigate to project root folder and run Gradle command:
 ```bash
-./gradlew clean shadowJar 
+./gradlew clean installDist
 ```
 Then run Docker command:
 ```bash
@@ -111,7 +111,7 @@ The project follows Clean Architecture principles with key packages:
 - **Java**
 - **Spring (Core, Web, MVC)**
 - **Gradle**
-- **PostgreSQL database**
+- **PostgreSQL**
 - **Swagger**
 - **Docker**
 - **JUnit 5, Mockito, AssertJ, Testcontainers**
@@ -119,6 +119,13 @@ The project follows Clean Architecture principles with key packages:
 ---
 
 ## Application endpoints
+
+### Swagger:
+Swagger UI and API Docs are accessible via links in a browser:
+``` 
+http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/v3/api-docs
+```
 
 ### User account actions:
 POST http://localhost:8080/api/users/registration 

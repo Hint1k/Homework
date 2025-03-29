@@ -68,8 +68,7 @@ public class AuthenticationFilter implements Filter {
                 httpResponse.getWriter().write("Access denied. Admin role required.");
                 return;
             }
-        }
-        else {
+        } else {
             if (!"user".equalsIgnoreCase(role)) {
                 httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 httpResponse.getWriter().write("Access denied. User role required.");
@@ -88,7 +87,9 @@ public class AuthenticationFilter implements Filter {
      */
     private boolean isPublicEndpoint(String requestURI) {
         return requestURI.endsWith("/api/users/registration") || requestURI.endsWith("/api/users/authenticate")
-                || requestURI.endsWith("/api/users/logout");
+                || requestURI.endsWith("/api/users/logout") || requestURI.startsWith("/swagger-ui/")
+                || requestURI.equals("/swagger-ui") || requestURI.equals("/swagger-ui.html")
+                || requestURI.startsWith("/v3/api-docs");
     }
 
     /**
