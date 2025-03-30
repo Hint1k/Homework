@@ -201,4 +201,105 @@ class ValidationUtilsImplTest {
                 .isInstanceOf(ValidationException.class)
                 .hasMessageContaining("Missing required field: name");
     }
+
+    @Test
+    @DisplayName("Validate UserDto - empty password - throws ValidationException")
+    void testValidateUser_EmptyPassword_ThrowsException() {
+        UserDto user = new UserDto(1L, "John", "john@test.com", "",
+                false, new Role("user"), 1L);
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(user, Mode.REGISTER_USER))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Password cannot be empty");
+    }
+
+    @Test
+    @DisplayName("Validate UserDto - empty name - throws ValidationException")
+    void testValidateUser_EmptyName_ThrowsException() {
+        UserDto user = new UserDto(1L, "", "john@test.com", "password123",
+                false, new Role("user"), 1L);
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(user, Mode.REGISTER_USER))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Name cannot be empty");
+    }
+
+    @Test
+    @DisplayName("Validate TransactionDto - empty category - throws ValidationException")
+    void testValidateTransaction_EmptyCategory_ThrowsException() {
+        TransactionDto transaction = new TransactionDto(1L, 1L, BigDecimal.valueOf(100),
+                "", LocalDate.now(), "Lunch", "EXPENSE");
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(transaction, Mode.TRANSACTION_CREATE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Category cannot be empty");
+    }
+
+    @Test
+    @DisplayName("Validate TransactionDto - invalid type - throws ValidationException")
+    void testValidateTransaction_InvalidType_ThrowsException() {
+        TransactionDto transaction = new TransactionDto(1L, 1L, BigDecimal.valueOf(100),
+                "Food", LocalDate.now(), "Lunch", "INVALID");
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(transaction, Mode.TRANSACTION_CREATE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Type must be either INCOME or EXPENSE");
+    }
+
+    @Test
+    @DisplayName("Validate GoalDto - empty goal name - throws ValidationException")
+    void testValidateGoal_EmptyName_ThrowsException() {
+        GoalDto goal = new GoalDto(1L, 1L, "", BigDecimal.valueOf(20000),
+                BigDecimal.ZERO, 12, LocalDate.now());
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(goal, Mode.GOAL_CREATE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Goal name cannot be empty");
+    }
+
+    @Test
+    @DisplayName("Validate PaginationParams - zero page - throws ValidationException")
+    void testValidatePagination_ZeroPage_ThrowsException() {
+        PaginationParams params = new PaginationParams(0, 10);
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(params, Mode.PAGE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Page must be positive integer");
+    }
+
+    @Test
+    @DisplayName("Parse user ID - admin role update attempt - throws ValidationException")
+    void testParseUserId_AdminRoleUpdate_ThrowsException() {
+        assertThatThrownBy(() -> validationUtils.parseUserId("1", Mode.UPDATE_ROLE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Default Admin role cannot be changed");
+    }
+
+    @Test
+    @DisplayName("Parse user ID - admin block attempt - throws ValidationException")
+    void testParseUserId_AdminBlock_ThrowsException() {
+        assertThatThrownBy(() -> validationUtils.parseUserId("1", Mode.BLOCK_UNBLOCK))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Default Admin cannot be blocked or unblocked");
+    }
+
+    @Test
+    @DisplayName("Validate UserDto - UPDATE_USER mode - validates correctly")
+    void testValidateUser_UpdateUserMode_Success() {
+        UserDto user = new UserDto(1L, "John", "john@test.com", "newpassword",
+                false, new Role("user"), 1L);
+
+        UserDto result = validationUtils.validateRequest(user, Mode.UPDATE_USER);
+        assertThat(result).isEqualTo(user);
+    }
+
+    @Test
+    @DisplayName("Validate UserDto - AUTHENTICATE mode - validates correctly")
+    void testValidateUser_AuthenticateMode_Success() {
+        UserDto user = new UserDto(null, null, "john@test.com", "password123",
+                false, null, null);
+
+        UserDto result = validationUtils.validateRequest(user, Mode.AUTHENTICATE);
+        assertThat(result).isEqualTo(user);
+    }
 }

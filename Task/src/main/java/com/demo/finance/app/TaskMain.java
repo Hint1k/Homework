@@ -76,7 +76,11 @@ public class TaskMain {
         try {
             server.start();
             log.info("Finance App is running inside Docker with Spring!");
-            server.join();
+
+            // Prevent blocking in tests
+            if (System.getProperty("TEST_ENV") == null) {
+                server.join();
+            }
         } catch (Exception e) {
             log.severe("Failed to start the server: " + e.getMessage());
             throw new RuntimeException(e);
