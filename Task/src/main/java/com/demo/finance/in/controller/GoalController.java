@@ -26,6 +26,14 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 
+/**
+ * The {@code GoalController} class is a REST controller that provides endpoints for managing user goals.
+ * It supports creating, retrieving, updating, and deleting goals for the currently logged-in user.
+ * <p>
+ * This controller leverages validation utilities to ensure that incoming requests meet the required constraints
+ * and formats. It also uses a service layer to perform business logic related to goals and a mapper to convert
+ * between entities and DTOs.
+ */
 @RestController
 @RequestMapping("/api/goals")
 public class GoalController extends BaseController {
@@ -34,6 +42,13 @@ public class GoalController extends BaseController {
     private final ValidationUtils validationUtils;
     private final GoalMapper goalMapper;
 
+    /**
+     * Constructs a new {@code GoalController} instance with the required dependencies.
+     *
+     * @param goalService     the service responsible for goal-related operations
+     * @param validationUtils the utility for validating request parameters and DTOs
+     * @param goalMapper      the mapper for converting between goal entities and DTOs
+     */
     @Autowired
     public GoalController(GoalService goalService, ValidationUtils validationUtils, GoalMapper goalMapper) {
         this.goalService = goalService;
@@ -41,6 +56,17 @@ public class GoalController extends BaseController {
         this.goalMapper = goalMapper;
     }
 
+    /**
+     * Creates a new goal for the currently logged-in user.
+     * <p>
+     * This endpoint validates the provided goal data and delegates the request to the goal service
+     * to create the goal. If the operation succeeds, a success response containing the created goal
+     * is returned; otherwise, an error response is returned.
+     *
+     * @param goalDtoNew  the request body containing the new goal data
+     * @param currentUser the currently logged-in user retrieved from the session
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @PostMapping
     public ResponseEntity<Map<String, Object>> createGoal(
             @RequestBody GoalDto goalDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
@@ -64,6 +90,16 @@ public class GoalController extends BaseController {
         }
     }
 
+    /**
+     * Retrieves a paginated list of goals for the currently logged-in user.
+     * <p>
+     * This endpoint validates the pagination parameters and delegates the request to the goal service
+     * to fetch the paginated response. If the parameters are invalid, an error response is returned.
+     *
+     * @param paramsNew   the pagination parameters provided in the request
+     * @param currentUser the currently logged-in user retrieved from the session
+     * @return a paginated response containing goal data or an error response if validation fails
+     */
     @GetMapping
     public ResponseEntity<Map<String, Object>> getPaginatedGoals(
             @ModelAttribute PaginationParams paramsNew, @SessionAttribute("currentUser") UserDto currentUser) {
@@ -81,6 +117,16 @@ public class GoalController extends BaseController {
         }
     }
 
+    /**
+     * Retrieves a specific goal by its ID for the currently logged-in user.
+     * <p>
+     * This endpoint validates the goal ID and ensures that the user owns the goal before retrieving it.
+     * If the goal is found, a success response is returned; otherwise, an error response is returned.
+     *
+     * @param goalId      the ID of the goal to retrieve
+     * @param currentUser the currently logged-in user retrieved from the session
+     * @return a success response containing the goal data or an error response if validation fails
+     */
     @GetMapping("/{goalId}")
     public ResponseEntity<Map<String, Object>> getGoalById(
             @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
@@ -99,6 +145,18 @@ public class GoalController extends BaseController {
         }
     }
 
+    /**
+     * Updates a specific goal for the currently logged-in user.
+     * <p>
+     * This endpoint validates the goal ID and the updated goal data before delegating the request to the goal
+     * service. If the operation succeeds, a success response containing the updated goal is returned; otherwise,
+     * an error response is returned.
+     *
+     * @param goalId      the ID of the goal to update
+     * @param goalDtoNew  the request body containing the updated goal data
+     * @param currentUser the currently logged-in user retrieved from the session
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @PutMapping("/{goalId}")
     public ResponseEntity<Map<String, Object>> updateGoal(
             @PathVariable("goalId") String goalId, @RequestBody GoalDto goalDtoNew,
@@ -127,6 +185,17 @@ public class GoalController extends BaseController {
         }
     }
 
+    /**
+     * Deletes a specific goal for the currently logged-in user.
+     * <p>
+     * This endpoint validates the goal ID and ensures that the user owns the goal before delegating the request
+     * to the goal service. If the operation succeeds, a success response is returned; otherwise, an error
+     * response is returned.
+     *
+     * @param goalId      the ID of the goal to delete
+     * @param currentUser the currently logged-in user retrieved from the session
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @DeleteMapping("/{goalId}")
     public ResponseEntity<Map<String, Object>> deleteGoal(
             @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {

@@ -12,17 +12,41 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 
+/**
+ * The {@code NotificationController} class is a REST controller that provides endpoints for retrieving
+ * notifications related to budgets and goals for the currently logged-in user.
+ * <p>
+ * This controller delegates notification-related operations to the {@link NotificationService} and ensures
+ * that responses are standardized using utility methods from the base controller. It handles scenarios where
+ * notifications are not found or errors occur during retrieval.
+ */
 @RestController
 @RequestMapping("/api/notifications")
 public class NotificationController extends BaseController {
 
     private final NotificationService notificationService;
 
+    /**
+     * Constructs a new {@code NotificationController} instance with the required dependencies.
+     *
+     * @param notificationService the service responsible for fetching budget and goal notifications
+     */
     @Autowired
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
     }
 
+    /**
+     * Retrieves a budget-related notification for the currently logged-in user.
+     * <p>
+     * This endpoint fetches the budget notification for the user identified by their session attributes.
+     * If a notification is found, it is returned in the response; otherwise, an appropriate error response
+     * is returned.
+     *
+     * @param currentUser the currently logged-in user retrieved from the session
+     * @return a success response containing the budget notification or an error response if no notification
+     * is found or an exception occurs
+     */
     @GetMapping("/budget")
     public ResponseEntity<Map<String, Object>> getBudgetNotification(
             @SessionAttribute("currentUser") UserDto currentUser) {
@@ -39,6 +63,17 @@ public class NotificationController extends BaseController {
         }
     }
 
+    /**
+     * Retrieves a goal-related notification for the currently logged-in user.
+     * <p>
+     * This endpoint fetches the goal notification for the user identified by their session attributes.
+     * If a notification is found, it is returned in the response; otherwise, an appropriate error response
+     * is returned.
+     *
+     * @param currentUser the currently logged-in user retrieved from the session
+     * @return a success response containing the goal notification or an error response if no notification
+     * is found or an exception occurs
+     */
     @GetMapping("/goal")
     public ResponseEntity<Map<String, Object>> getGoalNotification(
             @SessionAttribute("currentUser") UserDto currentUser) {

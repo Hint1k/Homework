@@ -31,6 +31,12 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
     private static final String FIND_BY_EMAIL_SQL = "SELECT * FROM finance.users WHERE email = ?";
     private static final String COUNT_SQL = "SELECT COUNT(*) AS total FROM finance.users";
 
+    /**
+     * Constructs a new {@code UserRepositoryImpl} instance with the required dependency
+     * for managing database connections.
+     *
+     * @param dataSourceManager the manager responsible for providing database connections
+     */
     @Autowired
     public UserRepositoryImpl(DataSourceManager dataSourceManager) {
         super(dataSourceManager);
@@ -93,7 +99,8 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      */
     @Override
     public int getTotalUserCount() {
-        return queryDatabase(COUNT_SQL, stmt -> {}, rs -> {
+        return queryDatabase(COUNT_SQL, stmt -> {
+        }, rs -> {
             if (rs.next()) {
                 return rs.getInt("total");
             }

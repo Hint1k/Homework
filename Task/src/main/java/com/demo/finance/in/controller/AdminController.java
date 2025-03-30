@@ -26,6 +26,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+/**
+ * The {@code AdminController} class is a REST controller that provides endpoints for administrative operations
+ * related to users and their transactions. It handles requests for user management, such as retrieving paginated
+ * user lists, blocking/unblocking users, updating roles, and deleting users. Additionally, it supports retrieving
+ * paginated transaction histories for specific users.
+ * <p>
+ * This controller leverages validation utilities to ensure that incoming requests meet the required constraints
+ * and formats. It also uses service layers to perform business logic and map entities to DTOs for secure responses.
+ */
 @RestController
 @RequestMapping("/api/admin/users")
 public class AdminController extends BaseController {
@@ -36,6 +45,15 @@ public class AdminController extends BaseController {
     private final ValidationUtils validationUtils;
     private final UserMapper userMapper;
 
+    /**
+     * Constructs a new {@code AdminController} instance with the required dependencies.
+     *
+     * @param adminService       the service responsible for admin-specific operations
+     * @param userService        the service responsible for user-related operations
+     * @param transactionService the service responsible for transaction-related operations
+     * @param validationUtils    the utility for validating request parameters and DTOs
+     * @param userMapper         the mapper for converting between user entities and DTOs
+     */
     @Autowired
     public AdminController(AdminService adminService, UserService userService, TransactionService transactionService,
                            ValidationUtils validationUtils, UserMapper userMapper) {
@@ -46,6 +64,15 @@ public class AdminController extends BaseController {
         this.userMapper = userMapper;
     }
 
+    /**
+     * Retrieves a paginated list of all users in the system.
+     * <p>
+     * This endpoint validates the pagination parameters and delegates the request to the user service
+     * to fetch the paginated response. If the parameters are invalid, an error response is returned.
+     *
+     * @param paramsNew the pagination parameters provided in the request
+     * @return a paginated response containing user data or an error response if validation fails
+     */
     @GetMapping
     public ResponseEntity<Map<String, Object>> getPaginatedUsers(@ModelAttribute PaginationParams paramsNew) {
         try {
@@ -58,6 +85,16 @@ public class AdminController extends BaseController {
         }
     }
 
+    /**
+     * Retrieves a paginated list of transactions for a specific user.
+     * <p>
+     * This endpoint validates the user ID and pagination parameters before delegating the request to the
+     * transaction service. If any validation fails, an error response is returned.
+     *
+     * @param userId    the ID of the user whose transactions are being retrieved
+     * @param paramsNew the pagination parameters provided in the request
+     * @return a paginated response containing transaction data or an error response if validation fails
+     */
     @GetMapping("/transactions/{userId}")
     public ResponseEntity<Map<String, Object>> getPaginatedTransactionsForUser(
             @PathVariable("userId") String userId, @ModelAttribute PaginationParams paramsNew) {
@@ -72,6 +109,16 @@ public class AdminController extends BaseController {
         }
     }
 
+    /**
+     * Retrieves detailed information about a specific user.
+     * <p>
+     * This endpoint validates the user ID and retrieves the user's details from the admin service. The password
+     * field is removed from the response for security reasons. If the user is not found or validation fails,
+     * an appropriate error response is returned.
+     *
+     * @param userId the ID of the user whose details are being retrieved
+     * @return a success response containing the user's details or an error response if validation fails
+     */
     @GetMapping("/{userId}")
     public ResponseEntity<Map<String, Object>> getUserDetails(@PathVariable("userId") String userId) {
         try {
@@ -87,6 +134,17 @@ public class AdminController extends BaseController {
         }
     }
 
+    /**
+     * Blocks or unblocks a specific user.
+     * <p>
+     * This endpoint validates the user ID and the request body containing the block status. It then delegates
+     * the request to the admin service to update the user's blocked status. If the operation succeeds, a success
+     * response is returned; otherwise, an error response is returned.
+     *
+     * @param userId     the ID of the user to block or unblock
+     * @param userDtoNew the request body containing the updated block status
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @PatchMapping("/block/{userId}")
     public ResponseEntity<Map<String, Object>> blockUnblockUser(
             @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
@@ -104,6 +162,17 @@ public class AdminController extends BaseController {
         }
     }
 
+    /**
+     * Updates the role of a specific user.
+     * <p>
+     * This endpoint validates the user ID and the request body containing the updated role. It then delegates
+     * the request to the admin service to update the user's role. If the operation succeeds, a success response
+     * is returned; otherwise, an error response is returned.
+     *
+     * @param userId     the ID of the user whose role is being updated
+     * @param userDtoNew the request body containing the updated role
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @PatchMapping("/role/{userId}")
     public ResponseEntity<Map<String, Object>> updateUserRole(
             @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
@@ -121,6 +190,15 @@ public class AdminController extends BaseController {
         }
     }
 
+    /**
+     * Deletes a specific user from the system.
+     * <p>
+     * This endpoint validates the user ID and delegates the request to the admin service to delete the user.
+     * If the operation succeeds, a success response is returned; otherwise, an error response is returned.
+     *
+     * @param userId the ID of the user to delete
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @DeleteMapping("/{userId}")
     public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) {
         try {

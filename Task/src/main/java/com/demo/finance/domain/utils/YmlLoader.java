@@ -26,7 +26,14 @@ public class YmlLoader {
     private static final Logger log = Logger.getLogger(YmlLoader.class.getName());
 
     /**
-     * Loads properties from a YAML file.
+     * Loads properties from a YAML file and returns them as a flat map of key-value pairs.
+     * <p>
+     * This method reads the YAML file at the specified path, parses its contents, and flattens
+     * nested structures into a single-level map. For example, a nested structure like
+     * {@code server.port: 8080} will be flattened to {@code "server.port": "8080"}.
+     * <p>
+     * If the file is missing, malformed, or contains duplicate keys, this method logs an error
+     * and throws a runtime exception with a descriptive message.
      *
      * @param filePath Path to the YAML file (e.g., "application.yml", "config/app.yml")
      * @return A map of key-value pairs from the YAML file
@@ -52,6 +59,25 @@ public class YmlLoader {
         return properties;
     }
 
+    /**
+     * Recursively flattens a nested YAML structure into a flat map of key-value pairs.
+     * <p>
+     * This method processes each key-value pair in the provided map. If a value is itself a map,
+     * the method recursively processes it, appending the current key to the parent key with a dot (.)
+     * separator. If a value is not a map, it is added to the properties map after validation.
+     * <p>
+     * The method performs the following validations:
+     * <ul>
+     *   <li>Skips keys that start with '#' or are empty, as they are considered comments or invalid.</li>
+     *   <li>Throws an exception if a duplicate key is found in the YAML file.</li>
+     *   <li>Throws an exception if a value is null or empty, indicating malformed data.</li>
+     * </ul>
+     *
+     * @param parentKey The parent key prefix for nested keys (empty for top-level keys)
+     * @param map       The current map being processed (may contain nested maps)
+     * @param properties The flat map of key-value pairs being populated
+     * @throws RuntimeException If duplicate keys or malformed key-value pairs are detected
+     */
     private static void flattenYaml(String parentKey, Map<String, Object> map, Map<String, String> properties) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String key = entry.getKey().trim();

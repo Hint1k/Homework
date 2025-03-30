@@ -19,6 +19,10 @@ import java.util.regex.Pattern;
  * and provides concrete implementations for validating various JSON inputs and parameters.
  * It ensures that input data adheres to expected formats and constraints, throwing exceptions
  * when validation fails.
+ * <p>
+ * This class uses reflection and predefined rules to validate required fields and specific
+ * constraints for different modes of operation. It supports validation for user data, transactions,
+ * goals, budgets, pagination parameters, and more.
  */
 @Component
 public class ValidationUtilsImpl implements ValidationUtils {
@@ -43,6 +47,19 @@ public class ValidationUtilsImpl implements ValidationUtils {
         REQUIRED_FIELDS_MAP.put(Mode.PAGE, List.of("page", "size"));
     }
 
+    /**
+     * Validates the given object based on the specified mode.
+     * <p>
+     * This method performs a series of validations depending on the type of the object and the mode.
+     * It checks for required fields, validates specific constraints for each DTO type, and throws
+     * a {@link ValidationException} if any validation fails.
+     *
+     * @param <T>    the type of the object to validate
+     * @param object the object to validate
+     * @param mode   the mode specifying the validation rules
+     * @return the validated object if all validations pass
+     * @throws ValidationException if any validation fails
+     */
     @Override
     public <T> T validateRequest(T object, Mode mode) {
         try {
@@ -68,6 +85,9 @@ public class ValidationUtilsImpl implements ValidationUtils {
 
     /**
      * Parses and validates a user ID string.
+     * <p>
+     * This method ensures that the user ID is a positive integer and adheres to mode-specific constraints.
+     * For example, certain operations like deletion or role updates are restricted for the default admin user.
      *
      * @param userIdString the string representation of the user ID
      * @param mode         the mode specifying additional constraints for the user ID
@@ -95,14 +115,13 @@ public class ValidationUtilsImpl implements ValidationUtils {
     /**
      * Parses a string value into a {@code Long}, ensuring it is non-null, non-empty, and in valid numeric format.
      * <p>
-     * This method trims the input string, checks for null or empty values,
-     * and attempts to parse it into a {@code Long}.
-     * If parsing fails due to an invalid numeric format, an exception is thrown with a descriptive error message.
+     * This method trims the input string, checks for null or empty values, and attempts to parse it into a
+     * {@code Long}. If parsing fails due to an invalid numeric format, an exception is thrown with a descriptive
+     * error message.
      *
      * @param value the string value to parse
      * @return the parsed {@code Long} value
-     * @throws IllegalArgumentException if the input value is null, empty,
-     *                                  or cannot be parsed into a valid {@code Long}
+     * @throws IllegalArgumentException if the input value is null, empty, or cannot be parsed into a valid {@code Long}
      */
     @Override
     public Long parseLong(String value) {
@@ -116,6 +135,16 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    /**
+     * Validates the required fields of the given DTO based on the specified mode.
+     * <p>
+     * This method retrieves the list of required fields for the given mode and checks each field using
+     * the {@link #checkField(Object, String)} method.
+     *
+     * @param dto  the DTO object to validate
+     * @param mode the mode specifying the required fields
+     * @throws ValidationException if any required field is missing or invalid
+     */
     private void validateRequiredFields(Object dto, Mode mode) {
         List<String> requiredFields = REQUIRED_FIELDS_MAP.getOrDefault(mode, List.of());
         for (String field : requiredFields) {
@@ -123,6 +152,16 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    /**
+     * Checks the existence and validity of a specific field in the given object using reflection.
+     * <p>
+     * This method dynamically invokes the getter method for the specified field and ensures that its value
+     * is not null. If the field is missing or inaccessible, a {@link ValidationException} is thrown.
+     *
+     * @param object    the object containing the field to check
+     * @param fieldName the name of the field to validate
+     * @throws ValidationException if the field is missing, inaccessible, or has a null value
+     */
     private void checkField(Object object, String fieldName) {
         try {
             if (object instanceof UserDto && "blocked".equals(fieldName)) {
@@ -154,6 +193,14 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    /**
+     * Validates pagination parameters to ensure they meet the required constraints.
+     * <p>
+     * This method checks that the page number and size are positive integers and that the size does not exceed 100.
+     *
+     * @param params the pagination parameters to validate
+     * @throws ValidationException if the page number or size is invalid
+     */
     private void validateParamsValues(PaginationParams params) {
         try {
             if (params.page() < 1) {
@@ -174,6 +221,16 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    /**
+     * Validates user-related fields based on the specified mode.
+     * <p>
+     * This method ensures that email, password, and name fields are valid and non-empty where applicable.
+     * Additional constraints are applied for role updates and authentication modes.
+     *
+     * @param dto  the user DTO to validate
+     * @param mode the mode specifying the validation rules
+     * @throws ValidationException if any user-related field is invalid
+     */
     private void validateUserFields(UserDto dto, Mode mode) {
         if (mode != Mode.UPDATE_ROLE && mode != Mode.BLOCK_UNBLOCK && !isValidEmail(dto.getEmail())) {
             throw new ValidationException("Invalid email format.");
@@ -190,6 +247,16 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    /**
+     * Validates transaction-related fields based on the specified mode.
+     * <p>
+     * This method ensures that the amount, category, description, and type fields are valid and non-empty
+     * where applicable. Additional constraints are applied for transaction creation mode.
+     *
+     * @param dto  the transaction DTO to validate
+     * @param mode the mode specifying the validation rules
+     * @throws ValidationException if any transaction-related field is invalid
+     */
     private void validateTransactionFields(TransactionDto dto, Mode mode) {
         if (dto.getAmount() == null || dto.getAmount().compareTo(BigDecimal.ZERO) < 0) {
             throw new ValidationException("Amount must be a positive number.");
@@ -208,6 +275,16 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    /**
+     * Validates goal-related fields based on the specified mode.
+     * <p>
+     * This method ensures that the goal name, target amount, duration, and start time fields are valid
+     * and non-empty where applicable. Additional constraints are applied for goal creation mode.
+     *
+     * @param dto  the goal DTO to validate
+     * @param mode the mode specifying the validation rules
+     * @throws ValidationException if any goal-related field is invalid
+     */
     private void validateGoalFields(GoalDto dto, Mode mode) {
         if (isBlank(dto.getGoalName())) {
             throw new ValidationException("Goal name cannot be empty.");
@@ -223,12 +300,29 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    /**
+     * Validates budget-related fields.
+     * <p>
+     * This method ensures that the monthly limit field is a positive number.
+     *
+     * @param dto the budget DTO to validate
+     * @throws ValidationException if the monthly limit is invalid
+     */
     private void validateBudgetFields(BudgetDto dto) {
         if (dto.getMonthlyLimit() == null || dto.getMonthlyLimit().compareTo(BigDecimal.ZERO) < 0) {
             throw new ValidationException("Monthly limit must be a positive number.");
         }
     }
 
+    /**
+     * Validates report date-related fields.
+     * <p>
+     * This method ensures that both the from date and to date fields are non-null and that the to date
+     * is not before the from date.
+     *
+     * @param dto the report dates DTO to validate
+     * @throws ValidationException if the date range is invalid
+     */
     private void validateReportDatesFields(ReportDatesDto dto) {
         if (dto.getFromDate() == null) {
             throw new ValidationException("From date cannot be null.");
@@ -241,13 +335,20 @@ public class ValidationUtilsImpl implements ValidationUtils {
         }
     }
 
+    /**
+     * Checks whether a given string is blank (null or empty after trimming).
+     *
+     * @param str the string to check
+     * @return {@code true} if the string is blank, {@code false} otherwise
+     */
     private boolean isBlank(String str) {
         return str == null || str.trim().isEmpty();
     }
 
     /**
      * Validates whether the provided email string conforms to a valid email format.
-     * Uses a predefined regular expression pattern to perform the validation.
+     * <p>
+     * This method uses a predefined regular expression pattern to perform the validation.
      *
      * @param email the email string to validate
      * @return {@code true} if the email matches the valid format, {@code false} otherwise
@@ -256,6 +357,12 @@ public class ValidationUtilsImpl implements ValidationUtils {
         return EMAIL_PATTERN.matcher(email).matches();
     }
 
+    /**
+     * Validates whether the provided type string is either "INCOME" or "EXPENSE".
+     *
+     * @param type the type string to validate
+     * @return {@code true} if the type is valid, {@code false} otherwise
+     */
     private boolean isValidType(String type) {
         return "INCOME".equalsIgnoreCase(type) || "EXPENSE".equalsIgnoreCase(type);
     }

@@ -26,6 +26,12 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
     private static final String FIND_BY_ID_SQL = "SELECT * FROM finance.budgets WHERE budget_id = ?";
     private static final String FIND_BY_USER_ID_SQL = "SELECT * FROM finance.budgets WHERE user_id = ?";
 
+    /**
+     * Constructs a new {@code BudgetRepositoryImpl} instance with the required dependency
+     * for managing database connections.
+     *
+     * @param dataSourceManager the manager responsible for providing database connections
+     */
     @Autowired
     public BudgetRepositoryImpl(DataSourceManager dataSourceManager) {
         super(dataSourceManager);

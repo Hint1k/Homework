@@ -28,19 +28,15 @@ import java.util.logging.Logger;
  */
 public abstract class BaseRepository {
 
-    /**
-     * Logger instance for logging events and errors in the {@code BaseRepository} class.
-     */
     protected static final Logger log = Logger.getLogger(BaseRepository.class.getName());
-
-    /**
-     * Cache for storing setter methods of entities annotated with {@link GeneratedKey}.
-     * Used to optimize setting generated keys on entities.
-     */
     private static final Map<Class<?>, Method> SETTER_METHOD_CACHE = new HashMap<>();
-
     protected final DataSourceManager dataSourceManager;
 
+    /**
+     * Constructs a new {@code BaseRepository} instance with the required dependency for managing database connections.
+     *
+     * @param dataSourceManager the manager responsible for providing database connections
+     */
     @Autowired
     protected BaseRepository(DataSourceManager dataSourceManager) {
         this.dataSourceManager = dataSourceManager;
@@ -49,9 +45,9 @@ public abstract class BaseRepository {
     /**
      * Persists a new entity to the database by executing the provided SQL insert query.
      *
-     * @param entity      the entity object to be persisted
-     * @param insertSql   the SQL insert query to execute
-     * @param setter      the callback interface to set parameters on the prepared statement
+     * @param entity    the entity object to be persisted
+     * @param insertSql the SQL insert query to execute
+     * @param setter    the callback interface to set parameters on the prepared statement
      */
     protected <T> void persistEntity(T entity, String insertSql, PreparedStatementSetter setter) {
         Long generatedId = insertRecord(insertSql, setter);
@@ -123,10 +119,10 @@ public abstract class BaseRepository {
     /**
      * Finds all records matching the provided SQL query and criteria.
      *
-     * @param sql     the SQL query to execute
-     * @param params  the list of parameters to bind to the query
-     * @param mapper  the callback interface to map the result set to an entity
-     * @param <T>     the type of the entities to retrieve
+     * @param sql    the SQL query to execute
+     * @param params the list of parameters to bind to the query
+     * @param mapper the callback interface to map the result set to an entity
+     * @param <T>    the type of the entities to retrieve
      * @return a {@link List} of mapped entities
      */
     protected <T> List<T> findAllRecordsByCriteria(String sql, List<Object> params, ResultSetMapper<T> mapper) {
@@ -167,10 +163,10 @@ public abstract class BaseRepository {
     /**
      * Executes a query on the database and processes the result set using the provided handler.
      *
-     * @param sql          the SQL query to execute
-     * @param setter       the callback interface to set parameters on the prepared statement
+     * @param sql           the SQL query to execute
+     * @param setter        the callback interface to set parameters on the prepared statement
      * @param resultHandler the callback interface to process the result set
-     * @param <T>          the type of the result returned by the handler
+     * @param <T>           the type of the result returned by the handler
      * @return the result of processing the result set
      */
     protected <T> T queryDatabase(String sql, PreparedStatementSetter setter, ResultSetHandler<T> resultHandler) {

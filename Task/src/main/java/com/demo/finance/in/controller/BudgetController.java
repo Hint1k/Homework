@@ -19,6 +19,13 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 
+/**
+ * The {@code BudgetController} class is a REST controller that provides endpoints for managing user budgets.
+ * It supports setting a monthly budget and retrieving budget-related data for the currently logged-in user.
+ * <p>
+ * This controller leverages validation utilities to ensure that incoming requests meet the required constraints
+ * and formats. It also uses a service layer to perform business logic related to budgets.
+ */
 @RestController
 @RequestMapping("/api/budgets")
 public class BudgetController extends BaseController {
@@ -26,12 +33,29 @@ public class BudgetController extends BaseController {
     private final BudgetService budgetService;
     private final ValidationUtils validationUtils;
 
+    /**
+     * Constructs a new {@code BudgetController} instance with the required dependencies.
+     *
+     * @param budgetService   the service responsible for budget-related operations
+     * @param validationUtils the utility for validating request parameters and DTOs
+     */
     @Autowired
     public BudgetController(BudgetService budgetService, ValidationUtils validationUtils) {
         this.budgetService = budgetService;
         this.validationUtils = validationUtils;
     }
 
+    /**
+     * Sets a monthly budget for the currently logged-in user.
+     * <p>
+     * This endpoint validates the provided budget data and delegates the request to the budget service
+     * to set the monthly budget. If the operation succeeds, a success response is returned; otherwise,
+     * an error response is returned.
+     *
+     * @param budgetDtoNew the request body containing the new budget data
+     * @param currentUser  the currently logged-in user retrieved from the session
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @PostMapping
     public ResponseEntity<Map<String, Object>> setMonthlyBudget(
             @RequestBody BudgetDto budgetDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
@@ -52,6 +76,15 @@ public class BudgetController extends BaseController {
         }
     }
 
+    /**
+     * Retrieves budget-related data for the currently logged-in user.
+     * <p>
+     * This endpoint retrieves the user's budget data from the budget service. If the data is found,
+     * a success response is returned; otherwise, an error response is returned.
+     *
+     * @param currentUser the currently logged-in user retrieved from the session
+     * @return a success response containing the budget data or an error response if the data is not found
+     */
     @GetMapping("/budget")
     public ResponseEntity<Map<String, Object>> getBudgetData(@SessionAttribute("currentUser") UserDto currentUser) {
         try {

@@ -36,7 +36,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final EmailService emailService;
 
     /**
-     * Constructs a new instance of {@code NotificationServiceImpl} with the provided repositories, utilities, and services.
+     * Constructs a new instance of {@code NotificationServiceImpl} with the provided repositories,
+     * utilities, and services.
      *
      * @param budgetRepository      the repository used to interact with budget data in the database
      * @param goalRepository        the repository used to interact with goal data in the database

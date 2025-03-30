@@ -18,10 +18,30 @@ import org.springframework.web.servlet.DispatcherServlet;
 import java.util.EnumSet;
 import java.util.logging.Logger;
 
+/**
+ * The {@code TaskMain} class serves as the entry point for the Finance Application.
+ * It initializes the Spring application context, configures the Jetty server, and starts the application.
+ * This class also handles Liquibase migrations, filter registration, and request logging configuration.
+ */
 public class TaskMain {
 
     private static final Logger log = Logger.getLogger(TaskMain.class.getName());
 
+    /**
+     * The main method initializes and starts the Finance Application.
+     * <p>
+     * This method performs the following steps:
+     * <ol>
+     *   <li>Initializes the Spring application context with the required configuration classes.</li>
+     *   <li>Sets up the Jetty server with a ServletContextHandler and registers the Spring DispatcherServlet.</li>
+     *   <li>Runs Liquibase migrations to apply database schema changes.</li>
+     *   <li>Registers filters for exception handling and authentication.</li>
+     *   <li>Configures request logging for the Jetty server.</li>
+     *   <li>Starts the Jetty server on port 8080 and logs the application status.</li>
+     * </ol>
+     *
+     * @param args command-line arguments (not used in this application)
+     */
     public static void main(String[] args) {
         log.info("Starting Finance Application...");
 
@@ -63,6 +83,15 @@ public class TaskMain {
         }
     }
 
+    /**
+     * Registers filters for the Jetty server.
+     * <p>
+     * This method adds the {@link ExceptionHandlerFilter} and {@link AuthenticationFilter} to the provided
+     * {@link ServletContextHandler}. The filters are applied to all requests and errors as specified.
+     *
+     * @param context        the Spring application context containing the filter beans
+     * @param contextHandler the Jetty {@link ServletContextHandler} to which the filters are added
+     */
     private static void registerFilters(AnnotationConfigWebApplicationContext context,
                                         ServletContextHandler contextHandler) {
         contextHandler.addFilter(
@@ -73,6 +102,14 @@ public class TaskMain {
                 "/*", EnumSet.of(DispatcherType.REQUEST));
     }
 
+    /**
+     * Configures request logging for the Jetty server.
+     * <p>
+     * This method sets up a custom request log format and associates it with an SLF4J logger. The log format includes
+     * details such as the client IP address, request method, response status, and user agent.
+     *
+     * @param server the Jetty {@link Server} instance to configure request logging for
+     */
     private static void configureRequestLogging(Server server) {
         Slf4jRequestLogWriter logWriter = new Slf4jRequestLogWriter();
         logWriter.setLoggerName("org.eclipse.jetty.server.RequestLog");

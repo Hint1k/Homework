@@ -34,6 +34,12 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
             + "goal_id = ? AND user_id = ?";
     private static final String COUNT_SQL = "SELECT COUNT(*) AS total FROM finance.users WHERE user_id = ?";
 
+    /**
+     * Constructs a new {@code GoalRepositoryImpl} instance with the required dependency
+     * for managing database connections.
+     *
+     * @param dataSourceManager the manager responsible for providing database connections
+     */
     @Autowired
     public GoalRepositoryImpl(DataSourceManager dataSourceManager) {
         super(dataSourceManager);

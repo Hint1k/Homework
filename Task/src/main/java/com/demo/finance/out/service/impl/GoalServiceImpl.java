@@ -24,6 +24,13 @@ public class GoalServiceImpl implements GoalService {
     private final GoalRepository goalRepository;
     private final GoalMapper goalMapper;
 
+    /**
+     * Constructs a new {@code GoalServiceImpl} instance with the required dependencies
+     * for managing goal-related operations.
+     *
+     * @param goalRepository the repository responsible for persisting and retrieving goal data
+     * @param goalMapper     the mapper for converting between {@link GoalDto} and {@link Goal} entities
+     */
     @Autowired
     public GoalServiceImpl(GoalRepository goalRepository, GoalMapper goalMapper) {
         this.goalRepository = goalRepository;

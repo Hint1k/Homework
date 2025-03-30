@@ -25,11 +25,6 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionMapper transactionMapper;
 
     /**
-     * Logger instance for logging events and errors in the {@code TransactionServiceImpl} class.
-     */
-    protected static final Logger log = Logger.getLogger(TransactionServiceImpl.class.getName());
-
-    /**
      * Constructs a new instance of {@code TransactionServiceImpl} with the provided repository.
      *
      * @param transactionRepository the repository used to interact with transaction data in the database

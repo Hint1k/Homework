@@ -8,6 +8,18 @@ package com.demo.finance.domain.utils;
  */
 public interface ValidationUtils {
 
+    /**
+     * Validates the given object based on the specified mode.
+     * <p>
+     * This method performs a series of validations depending on the type of the object and the mode.
+     * It checks for required fields, validates specific constraints for each DTO type, and throws
+     * an exception if any validation fails.
+     *
+     * @param <T>   the type of the object to validate
+     * @param object the object to validate
+     * @param mode   the mode specifying the validation rules
+     * @return the validated object if all validations pass
+     */
     <T> T validateRequest(T object, Mode mode);
 
     /**

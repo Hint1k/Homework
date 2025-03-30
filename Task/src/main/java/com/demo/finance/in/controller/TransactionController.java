@@ -26,6 +26,14 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 
+/**
+ * The {@code TransactionController} class is a REST controller that provides endpoints for managing user transactions.
+ * It supports creating, retrieving, updating, and deleting transactions for the currently logged-in user.
+ * <p>
+ * This controller leverages validation utilities to ensure that incoming requests meet the required constraints
+ * and formats. It also uses a service layer to perform business logic related to transactions and a mapper to convert
+ * between entities and DTOs.
+ */
 @RestController
 @RequestMapping("/api/transactions")
 public class TransactionController extends BaseController {
@@ -34,6 +42,13 @@ public class TransactionController extends BaseController {
     private final ValidationUtils validationUtils;
     private final TransactionMapper transactionMapper;
 
+    /**
+     * Constructs a new {@code TransactionController} instance with the required dependencies.
+     *
+     * @param transactionService the service responsible for transaction-related operations
+     * @param validationUtils    the utility for validating request parameters and DTOs
+     * @param transactionMapper  the mapper for converting between transaction entities and DTOs
+     */
     @Autowired
     public TransactionController(TransactionService transactionService, ValidationUtils validationUtils,
                                  TransactionMapper transactionMapper) {
@@ -42,6 +57,17 @@ public class TransactionController extends BaseController {
         this.transactionMapper = transactionMapper;
     }
 
+    /**
+     * Creates a new transaction for the currently logged-in user.
+     * <p>
+     * This endpoint validates the provided transaction data and delegates the request to the transaction service
+     * to create the transaction. If the operation succeeds, a success response containing the created transaction
+     * is returned; otherwise, an error response is returned.
+     *
+     * @param transactionDtoNew the request body containing the new transaction data
+     * @param currentUser       the currently logged-in user retrieved from the session
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @PostMapping
     public ResponseEntity<Map<String, Object>> createTransaction(
             @RequestBody TransactionDto transactionDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
@@ -66,6 +92,16 @@ public class TransactionController extends BaseController {
         }
     }
 
+    /**
+     * Retrieves a paginated list of transactions for the currently logged-in user.
+     * <p>
+     * This endpoint validates the pagination parameters and delegates the request to the transaction service
+     * to fetch the paginated response. If the parameters are invalid, an error response is returned.
+     *
+     * @param paramsNew   the pagination parameters provided in the request
+     * @param currentUser the currently logged-in user retrieved from the session
+     * @return a paginated response containing transaction data or an error response if validation fails
+     */
     @GetMapping
     public ResponseEntity<Map<String, Object>> getPaginatedTransactions(
             @ModelAttribute PaginationParams paramsNew, @SessionAttribute("currentUser") UserDto currentUser) {
@@ -83,6 +119,16 @@ public class TransactionController extends BaseController {
         }
     }
 
+    /**
+     * Retrieves a specific transaction by its ID for the currently logged-in user.
+     * <p>
+     * This endpoint validates the transaction ID and ensures that the user owns the transaction before retrieving it.
+     * If the transaction is found, a success response is returned; otherwise, an error response is returned.
+     *
+     * @param transactionId the ID of the transaction to retrieve
+     * @param currentUser   the currently logged-in user retrieved from the session
+     * @return a success response containing the transaction data or an error response if validation fails
+     */
     @GetMapping("/{transactionId}")
     public ResponseEntity<Map<String, Object>> getTransactionById(
             @PathVariable("transactionId") String transactionId, @SessionAttribute("currentUser") UserDto currentUser) {
@@ -102,6 +148,18 @@ public class TransactionController extends BaseController {
         }
     }
 
+    /**
+     * Updates a specific transaction for the currently logged-in user.
+     * <p>
+     * This endpoint validates the transaction ID and the updated transaction data before delegating the request to the
+     * transaction service. If the operation succeeds, a success response containing the updated transaction is
+     * returned; otherwise, an error response is returned.
+     *
+     * @param transactionId     the ID of the transaction to update
+     * @param transactionDtoNew the request body containing the updated transaction data
+     * @param currentUser       the currently logged-in user retrieved from the session
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @PutMapping("/{transactionId}")
     public ResponseEntity<Map<String, Object>> updateTransaction(
             @PathVariable("transactionId") String transactionId, @RequestBody TransactionDto transactionDtoNew,
@@ -132,6 +190,17 @@ public class TransactionController extends BaseController {
         }
     }
 
+    /**
+     * Deletes a specific transaction for the currently logged-in user.
+     * <p>
+     * This endpoint validates the transaction ID and ensures that the user owns the transaction before delegating the
+     * request to the transaction service. If the operation succeeds, a success response is returned; otherwise, an
+     * error response is returned.
+     *
+     * @param transactionId the ID of the transaction to delete
+     * @param currentUser   the currently logged-in user retrieved from the session
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @DeleteMapping("/{transactionId}")
     public ResponseEntity<Map<String, Object>> deleteTransaction(
             @PathVariable("transactionId") String transactionId,

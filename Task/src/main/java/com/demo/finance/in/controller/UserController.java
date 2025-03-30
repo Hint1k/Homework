@@ -36,6 +36,14 @@ import org.springframework.web.bind.support.SessionStatus;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * The {@code UserController} class is a REST controller that provides endpoints for user management,
+ * including registration, authentication, updating user details, logging out, and deleting accounts.
+ * <p>
+ * This controller leverages validation utilities to ensure that incoming requests meet the required constraints
+ * and formats. It also uses service layers to perform business logic related to user operations and a mapper
+ * to convert between entities and DTOs. Session attributes are used to manage the currently authenticated user.
+ */
 @RestController
 @RequestMapping("/api/users")
 @SessionAttributes("currentUser")
@@ -47,6 +55,14 @@ public class UserController extends BaseController {
     private final ValidationUtils validationUtils;
     private final UserMapper userMapper;
 
+    /**
+     * Constructs a new {@code UserController} instance with the required dependencies.
+     *
+     * @param registrationService the service responsible for user registration and authentication
+     * @param userService         the service responsible for user-related operations
+     * @param validationUtils     the utility for validating request parameters and DTOs
+     * @param userMapper          the mapper for converting between user entities and DTOs
+     */
     @Autowired
     public UserController(RegistrationService registrationService, UserService userService,
                           ValidationUtils validationUtils, UserMapper userMapper) {
@@ -56,6 +72,16 @@ public class UserController extends BaseController {
         this.userMapper = userMapper;
     }
 
+    /**
+     * Registers a new user with the provided details.
+     * <p>
+     * This endpoint validates the user data and delegates the request to the registration service
+     * to create the user. If the operation succeeds, a success response containing the registered user
+     * is returned; otherwise, an error response is returned.
+     *
+     * @param userDtoNew the request body containing the new user's details
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @Operation(summary = "Register a new user",
             description = "Registers a new user with the provided details.",
             responses = {@ApiResponse(responseCode = "201", description = "User registered successfully",
@@ -85,6 +111,18 @@ public class UserController extends BaseController {
         }
     }
 
+    /**
+     * Authenticates a user with the provided email and password.
+     * <p>
+     * This endpoint validates the user credentials and delegates the request to the registration service
+     * to authenticate the user. If successful, a session is created, and a success response containing the
+     * authenticated user is returned; otherwise, an error response is returned.
+     *
+     * @param userDtoNew the request body containing the user's email and password
+     * @param request    the HTTP servlet request used to manage the session
+     * @param response   the HTTP servlet response used to set cookies
+     * @return a success response if authentication succeeds or an error response if validation fails
+     */
     @Operation(summary = "Authenticate a user",
             description = "Authenticates a user with the provided email and password.",
             responses = {@ApiResponse(responseCode = "200", description = "Authentication successful",
@@ -121,6 +159,16 @@ public class UserController extends BaseController {
         }
     }
 
+    /**
+     * Logs out the currently authenticated user and invalidates the session.
+     * <p>
+     * This endpoint invalidates the user's session and clears the session cookie. A success response is
+     * returned upon completion.
+     *
+     * @param request  the HTTP servlet request used to invalidate the session
+     * @param response the HTTP servlet response used to clear cookies
+     * @return a success response indicating that the user has been logged out
+     */
     @Operation(summary = "Log out a user",
             description = "Logs out the currently authenticated user and invalidates the session.",
             responses = {@ApiResponse(responseCode = "200", description = "Logged out successfully"),
@@ -141,6 +189,14 @@ public class UserController extends BaseController {
         return buildSuccessResponse(HttpStatus.OK, "Logged out successfully", null);
     }
 
+    /**
+     * Retrieves details of the currently authenticated user.
+     * <p>
+     * This endpoint retrieves the user details from the session attributes and returns them in a success response.
+     *
+     * @param userDto the currently authenticated user retrieved from the session
+     * @return a success response containing the authenticated user's details
+     */
     @Operation(summary = "Get current user details",
             description = "Retrieves details of the currently authenticated user.",
             responses = {@ApiResponse(responseCode = "200", description = "User details retrieved successfully",
@@ -154,6 +210,18 @@ public class UserController extends BaseController {
         return buildSuccessResponse(HttpStatus.OK, "Authenticated user details", userDto);
     }
 
+    /**
+     * Updates the details of the currently authenticated user.
+     * <p>
+     * This endpoint validates the updated user data and delegates the request to the user service
+     * to update the user's details. If the operation succeeds, a success response containing the updated user
+     * is returned; otherwise, an error response is returned.
+     *
+     * @param userDtoNew     the request body containing the updated user details
+     * @param currentUserDto the currently authenticated user retrieved from the session
+     * @param model          the model used to update session attributes
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @Operation(summary = "Update user details",
             description = "Updates the details of the currently authenticated user.",
             responses = {@ApiResponse(responseCode = "200", description = "User updated successfully",
@@ -185,6 +253,17 @@ public class UserController extends BaseController {
         }
     }
 
+    /**
+     * Deletes the account of the currently authenticated user.
+     * <p>
+     * This endpoint delegates the request to the user service to delete the user's account. If the operation
+     * succeeds, the session is invalidated, and a success response is returned; otherwise, an error response
+     * is returned.
+     *
+     * @param userDto       the currently authenticated user retrieved from the session
+     * @param sessionStatus the session status used to mark the session as complete
+     * @return a success response if the operation succeeds or an error response if validation fails
+     */
     @Operation(summary = "Delete user account",
             description = "Deletes the account of the currently authenticated user.",
             responses = {@ApiResponse(responseCode = "200", description = "Account deleted successfully",
