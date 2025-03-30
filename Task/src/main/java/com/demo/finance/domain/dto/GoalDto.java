@@ -1,6 +1,8 @@
 package com.demo.finance.domain.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,6 +14,8 @@ import java.time.LocalDate;
  * between the API layer and the persistence layer.
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class GoalDto {
 
     private Long goalId;

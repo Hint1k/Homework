@@ -2,7 +2,9 @@ package com.demo.finance.domain.dto;
 
 import com.demo.finance.domain.model.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * The {@code UserDto} class represents a data transfer object (DTO) for user-related information.
@@ -11,6 +13,8 @@ import lombok.Data;
  * layer and the persistence layer.
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Data transfer object for user information")
 public class UserDto {
 

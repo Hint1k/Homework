@@ -52,26 +52,30 @@ public class AuthenticationFilter implements Filter {
         HttpSession session = httpRequest.getSession(false);
         if (session == null || session.getAttribute("currentUser") == null) {
             httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            httpResponse.getWriter().write("Authentication required.");
+            httpResponse.setContentType("application/json");
+            httpResponse.getWriter().write("{\"error\":\"Authentication required\"}");
             return;
         }
         Object currentUser = session.getAttribute("currentUser");
         if (!(currentUser instanceof UserDto user)) {
-            httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            httpResponse.getWriter().write("Invalid user session.");
+            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            httpResponse.setContentType("application/json");
+            httpResponse.getWriter().write("{\"error\":\"Invalid user session\"}");
             return;
         }
         String role = user.getRole().getName().toLowerCase();
         if (isAdminEndpoint(requestURI)) {
             if (!"admin".equalsIgnoreCase(role)) {
-                httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                httpResponse.getWriter().write("Access denied. Admin role required.");
+                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                httpResponse.setContentType("application/json");
+                httpResponse.getWriter().write("{\"error\":\"Access denied. Admin role required\"}");
                 return;
             }
         } else {
             if (!"user".equalsIgnoreCase(role)) {
-                httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                httpResponse.getWriter().write("Access denied. User role required.");
+                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                httpResponse.setContentType("application/json");
+                httpResponse.getWriter().write("{\"error\":\"Access denied. User role required\"}");
                 return;
             }
         }

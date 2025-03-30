@@ -50,7 +50,7 @@ public class SystemPropLoader {
             properties.put("DB_URL", properties.remove("app.db.url"));
         }
         if (!requiredProperties.isEmpty()) {
-            validateProperties(properties, requiredProperties);
+            validateProperties(properties, requiredProperties, sourceName);
         }
         setSystemProperties(properties);
     }
@@ -64,12 +64,13 @@ public class SystemPropLoader {
      * @param requiredProperties A set of property keys that must be validated.
      * @throws RuntimeException If any required property is missing or empty in the envVars map.
      */
-    private static void validateProperties(Map<String, String> envVars, Set<String> requiredProperties) {
+    private static void validateProperties(
+            Map<String, String> envVars, Set<String> requiredProperties, String sourceName) {
         for (String key : requiredProperties) {
             String value = envVars.get(key);
             if (value == null || value.trim().isEmpty()) {
                 log.severe("Validation failed: Required property '" + key
-                        + "' is missing or empty in the .env file.");
+                        + "' is missing or empty in the " + sourceName + " file.");
                 throw new RuntimeException("Validation failed: Required property '" + key
                         + "' is missing or empty.");
             }

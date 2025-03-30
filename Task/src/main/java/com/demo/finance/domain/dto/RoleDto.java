@@ -1,6 +1,8 @@
 package com.demo.finance.domain.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * The {@code RoleDto} class represents a data transfer object (DTO) for role-related information.
@@ -8,6 +10,8 @@ import lombok.Data;
  * such as between the API layer and the persistence layer.
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class RoleDto {
 
     private String name;

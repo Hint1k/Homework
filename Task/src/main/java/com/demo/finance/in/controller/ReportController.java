@@ -54,8 +54,6 @@ public class ReportController extends BaseController {
                     "No transactions found for the user in the specified date range.");
         } catch (ValidationException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid JSON format or input.");
         }
     }
 
@@ -78,9 +76,6 @@ public class ReportController extends BaseController {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (NumberFormatException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid user ID or date format.");
-        } catch (Exception e) {
-            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "An error occurred while analyzing expenses by category.");
         }
     }
 

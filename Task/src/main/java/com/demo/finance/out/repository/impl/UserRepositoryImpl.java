@@ -26,7 +26,6 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
     private static final String UPDATE_SQL = "UPDATE finance.users SET name = ?, email = ?, password = ?, "
             + "blocked = ?, role = ?, version = ? WHERE user_id = ?";
     private static final String DELETE_SQL = "DELETE FROM finance.users WHERE user_id = ?";
-    private static final String FIND_ALL_SQL = "SELECT * FROM finance.users";
     private static final String FIND_ALL_SQL_PAGINATED = "SELECT * FROM finance.users LIMIT ? OFFSET ?";
     private static final String FIND_BY_ID_SQL = "SELECT * FROM finance.users WHERE user_id = ?";
     private static final String FIND_BY_EMAIL_SQL = "SELECT * FROM finance.users WHERE email = ?";

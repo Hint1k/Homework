@@ -63,9 +63,6 @@ public class TransactionController extends BaseController {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Failed to create transaction.");
         } catch (ValidationException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            return buildErrorResponse(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while creating the transaction.");
         }
     }
 
@@ -132,9 +129,6 @@ public class TransactionController extends BaseController {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid transaction ID.");
         } catch (ValidationException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "An error occurred while updating the transaction.");
         }
     }
 

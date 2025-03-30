@@ -5,6 +5,7 @@ import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
+import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.BudgetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,7 +37,7 @@ public class BudgetController extends BaseController {
             @RequestBody BudgetDto budgetDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
-           BudgetDto budgetDto = validationUtils.validateRequest(budgetDtoNew, Mode.BUDGET);
+            BudgetDto budgetDto = validationUtils.validateRequest(budgetDtoNew, Mode.BUDGET);
             if (budgetDto.getMonthlyLimit() != null) {
                 Budget budget = budgetService.setMonthlyBudget(userId, budgetDto.getMonthlyLimit());
                 if (budget != null) {
@@ -46,8 +47,8 @@ public class BudgetController extends BaseController {
                         HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve budget details.");
             }
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Monthly limit must be provided.");
-        } catch (Exception e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid JSON format or input.");
+        } catch (ValidationException e) {
+            return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 

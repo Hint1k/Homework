@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 public class ExceptionHandlerFilter implements Filter {
 
     private static final Logger log = Logger.getLogger(ExceptionHandlerFilter.class.getName());
+    private static final String ERROR_RESPONSE_FORMAT = "{\"error\": \"%s\"}";
 
     /**
      * Processes each request by invoking the next filter in the chain and catching any
@@ -75,7 +76,7 @@ public class ExceptionHandlerFilter implements Filter {
             log.log(Level.SEVERE, "Unhandled exception: " + ex.getMessage(), ex);
             httpResponse.setStatus(statusCode);
             httpResponse.setContentType("application/json");
-            String jsonResponse = String.format("{\"error\": \"%s\"}", message);
+            String jsonResponse = String.format(ERROR_RESPONSE_FORMAT, message);
             httpResponse.getWriter().write(jsonResponse);
             log.log(Level.INFO, "7: JSON response written to the output stream");
         } catch (Exception handlerEx) {
@@ -84,7 +85,7 @@ public class ExceptionHandlerFilter implements Filter {
                 ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             try {
-                response.getWriter().write("{\"error\":\"An unexpected error occurred\"}");
+                response.getWriter().write(String.format(ERROR_RESPONSE_FORMAT, "An unexpected error occurred"));
             } catch (IOException e) {
                 log.log(Level.SEVERE, "Completely failed to write error response", e);
             }

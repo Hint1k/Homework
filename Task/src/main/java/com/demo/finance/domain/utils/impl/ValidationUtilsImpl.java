@@ -136,14 +136,20 @@ public class ValidationUtilsImpl implements ValidationUtils {
             boolean isRecord = object.getClass().isRecord();
             String methodName = isRecord ? fieldName
                     : "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
-            Method method = object.getClass().getMethod(methodName);
+            Method method;
+            try {
+                method = object.getClass().getMethod(methodName);
+            } catch (NoSuchMethodException e) {
+                throw new ValidationException("Field not found in DTO: " + fieldName);
+            }
             Object value = method.invoke(object);
             if (value == null) {
                 throw new ValidationException("Missing required field: " + fieldName);
             }
-        } catch (NoSuchMethodException e) {
-            throw new ValidationException("Field not found in DTO: " + fieldName);
         } catch (Exception e) {
+            if (e instanceof ValidationException) {
+                throw (ValidationException) e;
+            }
             throw new ValidationException("Cannot access field: " + fieldName);
         }
     }

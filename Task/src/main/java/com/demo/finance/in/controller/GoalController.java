@@ -61,9 +61,6 @@ public class GoalController extends BaseController {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Failed to create goal.");
         } catch (ValidationException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            return buildErrorResponse(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while creating the goal.");
         }
     }
 
@@ -127,9 +124,6 @@ public class GoalController extends BaseController {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid goal ID.");
         } catch (ValidationException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            return buildErrorResponse(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while updating the goal.");
         }
     }
 

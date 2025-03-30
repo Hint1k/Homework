@@ -6,12 +6,12 @@ import com.demo.finance.app.config.SwaggerConfig;
 import com.demo.finance.in.filter.AuthenticationFilter;
 import com.demo.finance.in.filter.ExceptionHandlerFilter;
 import jakarta.servlet.DispatcherType;
+import org.eclipse.jetty.server.CustomRequestLog;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.server.Slf4jRequestLogWriter;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -19,6 +19,7 @@ import java.util.EnumSet;
 import java.util.logging.Logger;
 
 public class TaskMain {
+
     private static final Logger log = Logger.getLogger(TaskMain.class.getName());
 
     public static void main(String[] args) {
@@ -26,8 +27,7 @@ public class TaskMain {
 
         // Initialize Spring context
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-        context.register(AppConfig.class);
-        context.register(SwaggerConfig.class);
+        context.register(AppConfig.class, SwaggerConfig.class);
 
         // Create the Jetty context handler
         ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -40,31 +40,19 @@ public class TaskMain {
         // Run Liquibase migrations
         context.getBean(LiquibaseManager.class).runMigrations();
 
-        // Start Jetty server
-        startJettyServer(context, contextHandler);
-    }
-
-    private static void startJettyServer(AnnotationConfigWebApplicationContext context,
-                                         ServletContextHandler contextHandler) {
-        Server server = new Server(8080);
-        contextHandler.addEventListener(new ContextLoaderListener(context));
-
         // Register Spring DispatcherServlet
         DispatcherServlet dispatcherServlet = new DispatcherServlet(context);
         ServletHolder servletHolder = new ServletHolder(dispatcherServlet);
         contextHandler.addServlet(servletHolder, "/*");
 
         // Register filters manually in Jetty
-        contextHandler.addFilter(new FilterHolder(context.getBean(ExceptionHandlerFilter.class)), "/*",
-                EnumSet.of(DispatcherType.REQUEST, DispatcherType.ERROR));
-        contextHandler.addFilter(new FilterHolder(context.getBean(AuthenticationFilter.class)), "/*",
-                EnumSet.of(DispatcherType.REQUEST));
+        registerFilters(context, contextHandler);
 
-        contextHandler.setResourceBase("classpath:/META-INF/resources/");
-        contextHandler.addServlet(DefaultServlet.class, "/swagger-ui/*");
-        contextHandler.addServlet(DefaultServlet.class, "/v3/api-docs/*");
-
+        // Configure server
+        Server server = new Server(8080);
         server.setHandler(contextHandler);
+        configureRequestLogging(server);
+
         try {
             server.start();
             log.info("Finance App is running inside Docker with Spring!");
@@ -73,5 +61,22 @@ public class TaskMain {
             log.severe("Failed to start the server: " + e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    private static void registerFilters(AnnotationConfigWebApplicationContext context,
+                                        ServletContextHandler contextHandler) {
+        contextHandler.addFilter(
+                new FilterHolder(context.getBean(ExceptionHandlerFilter.class)),
+                "/*", EnumSet.of(DispatcherType.REQUEST, DispatcherType.ERROR));
+        contextHandler.addFilter(
+                new FilterHolder(context.getBean(AuthenticationFilter.class)),
+                "/*", EnumSet.of(DispatcherType.REQUEST));
+    }
+
+    private static void configureRequestLogging(Server server) {
+        Slf4jRequestLogWriter logWriter = new Slf4jRequestLogWriter();
+        logWriter.setLoggerName("org.eclipse.jetty.server.RequestLog");
+        String logFormat = "%{client}a - %u %t '%r' %s %O '%{Referer}i' '%{User-Agent}i' '%C'";
+        server.setRequestLog(new CustomRequestLog(logWriter, logFormat));
     }
 }

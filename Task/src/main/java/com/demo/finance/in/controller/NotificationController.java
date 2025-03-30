@@ -33,11 +33,9 @@ public class NotificationController extends BaseController {
                 return buildSuccessResponse(HttpStatus.OK, notification, null);
             }
             return buildErrorResponse(HttpStatus.NOT_FOUND, "No budget notification found for the user.");
-        } catch (NumberFormatException e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid user ID.");
         } catch (Exception e) {
-            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "An error occurred while fetching the budget notification.");
+            return buildErrorResponse(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch budget notification.");
         }
     }
 
@@ -51,11 +49,9 @@ public class NotificationController extends BaseController {
                 return buildSuccessResponse(HttpStatus.OK, notification, null);
             }
             return buildErrorResponse(HttpStatus.NOT_FOUND, "No goal notification found for the user.");
-        } catch (NumberFormatException e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid user ID.");
         } catch (Exception e) {
-            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "An error occurred while fetching the goal notification.");
+            return buildErrorResponse(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch goal notification.");
         }
     }
 }
