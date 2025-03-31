@@ -19,7 +19,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @EnableWebMvc
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@ComponentScan(basePackages = {"com.demo.finance"})
+@ComponentScan(basePackages = {"com.demo.finance", "org.springdoc"})
 public class AppConfig implements WebMvcConfigurer {
 
     /**
@@ -40,20 +40,32 @@ public class AppConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Configures resource handlers to serve static resources such as Swagger UI and webjars.
+     * Configures resource handlers to serve static resources such as Swagger UI, webjars, and API documentation.
      * <p>
-     * This method maps the {@code /swagger-ui/**} path to the Swagger UI resources located in the classpath and maps
-     * the {@code /webjars/**} path to the webjars resources.
+     * This method maps the following paths:
+     * <ul>
+     *   <li>{@code /swagger-ui/**} to Swagger UI resources located in the classpath.</li>
+     *   <li>{@code /webjars/**} to webjars resources located in the classpath.</li>
+     *   <li>{@code /v3/api-docs/**} to OpenAPI documentation resources located in the classpath.</li>
+     * </ul>
+     * Resource chaining is disabled for development purposes to ensure resources are not cached.
      *
      * @param registry the {@link ResourceHandlerRegistry} used to define resource handlers
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Swagger UI
         registry.addResourceHandler("/swagger-ui/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/swagger-ui/5.20.1/");
+                .addResourceLocations("classpath:/META-INF/resources/swagger-ui/")
+                .resourceChain(false);
 
+        // Webjars
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
+
+        // API docs
+        registry.addResourceHandler("/v3/api-docs/**")
+                .addResourceLocations("classpath:/META-INF/resources/");
     }
 
     /**

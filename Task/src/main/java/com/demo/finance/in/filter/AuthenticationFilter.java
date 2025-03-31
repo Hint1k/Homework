@@ -92,8 +92,8 @@ public class AuthenticationFilter implements Filter {
     private boolean isPublicEndpoint(String requestURI) {
         return requestURI.endsWith("/api/users/registration") || requestURI.endsWith("/api/users/authenticate")
                 || requestURI.endsWith("/api/users/logout") || requestURI.startsWith("/swagger-ui/")
-                || requestURI.equals("/swagger-ui") || requestURI.equals("/swagger-ui.html")
-                || requestURI.startsWith("/v3/api-docs");
+                || requestURI.startsWith("/swagger-ui") || requestURI.equals("/swagger-ui.html")
+                || requestURI.equals("/")  || requestURI.startsWith("/v3/api-docs");
     }
 
     /**

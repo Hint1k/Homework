@@ -9,10 +9,6 @@ import com.demo.finance.exception.DuplicateEmailException;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,7 +43,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/users")
 @SessionAttributes("currentUser")
-@Tag(name = "User Management", description = "Endpoints for user registration, authentication, and management")
 public class UserController extends BaseController {
 
     private final RegistrationService registrationService;
@@ -82,14 +77,6 @@ public class UserController extends BaseController {
      * @param userDtoNew the request body containing the new user's details
      * @return a success response if the operation succeeds or an error response if validation fails
      */
-    @Operation(summary = "Register a new user",
-            description = "Registers a new user with the provided details.",
-            responses = {@ApiResponse(responseCode = "201", description = "User registered successfully",
-                    content = @Content(schema = @Schema(implementation = UserDto.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid request or duplicate email"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
     @PostMapping("/registration")
     public ResponseEntity<Map<String, Object>> handleRegistration(@RequestBody UserDto userDtoNew) {
         try {
@@ -123,15 +110,6 @@ public class UserController extends BaseController {
      * @param response   the HTTP servlet response used to set cookies
      * @return a success response if authentication succeeds or an error response if validation fails
      */
-    @Operation(summary = "Authenticate a user",
-            description = "Authenticates a user with the provided email and password.",
-            responses = {@ApiResponse(responseCode = "200", description = "Authentication successful",
-                    content = @Content(schema = @Schema(implementation = UserDto.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid request"),
-                    @ApiResponse(responseCode = "401", description = "Invalid credentials"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
     @PostMapping("/authenticate")
     public ResponseEntity<Map<String, Object>> handleAuthentication(
             @RequestBody UserDto userDtoNew, HttpServletRequest request, HttpServletResponse response) {
@@ -169,12 +147,6 @@ public class UserController extends BaseController {
      * @param response the HTTP servlet response used to clear cookies
      * @return a success response indicating that the user has been logged out
      */
-    @Operation(summary = "Log out a user",
-            description = "Logs out the currently authenticated user and invalidates the session.",
-            responses = {@ApiResponse(responseCode = "200", description = "Logged out successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
     @PostMapping("/logout")
     public ResponseEntity<Map<String, Object>> logoutUser(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession(false);
@@ -197,14 +169,6 @@ public class UserController extends BaseController {
      * @param userDto the currently authenticated user retrieved from the session
      * @return a success response containing the authenticated user's details
      */
-    @Operation(summary = "Get current user details",
-            description = "Retrieves details of the currently authenticated user.",
-            responses = {@ApiResponse(responseCode = "200", description = "User details retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = UserDto.class))),
-                    @ApiResponse(responseCode = "401", description = "User not authenticated"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getCurrentUser(@SessionAttribute("currentUser") UserDto userDto) {
         return buildSuccessResponse(HttpStatus.OK, "Authenticated user details", userDto);
@@ -222,15 +186,6 @@ public class UserController extends BaseController {
      * @param model          the model used to update session attributes
      * @return a success response if the operation succeeds or an error response if validation fails
      */
-    @Operation(summary = "Update user details",
-            description = "Updates the details of the currently authenticated user.",
-            responses = {@ApiResponse(responseCode = "200", description = "User updated successfully",
-                    content = @Content(schema = @Schema(implementation = UserDto.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid request"),
-                    @ApiResponse(responseCode = "401", description = "User not authenticated"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
     @PutMapping
     public ResponseEntity<Map<String, Object>> updateUser(
             @RequestBody UserDto userDtoNew, @SessionAttribute("currentUser") UserDto currentUserDto, Model model) {
@@ -264,15 +219,6 @@ public class UserController extends BaseController {
      * @param sessionStatus the session status used to mark the session as complete
      * @return a success response if the operation succeeds or an error response if validation fails
      */
-    @Operation(summary = "Delete user account",
-            description = "Deletes the account of the currently authenticated user.",
-            responses = {@ApiResponse(responseCode = "200", description = "Account deleted successfully",
-                    content = @Content(schema = @Schema(implementation = Map.class))),
-                    @ApiResponse(responseCode = "400", description = "Failed to delete account"),
-                    @ApiResponse(responseCode = "401", description = "User not authenticated"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
     @DeleteMapping
     public ResponseEntity<Map<String, Object>> deleteUser(
             @SessionAttribute("currentUser") UserDto userDto, SessionStatus sessionStatus) {

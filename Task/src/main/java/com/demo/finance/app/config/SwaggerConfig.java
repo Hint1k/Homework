@@ -1,10 +1,7 @@
 package com.demo.finance.app.config;
 
-import com.demo.finance.in.controller.UserController;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
-import org.springdoc.core.models.GroupedOpenApi;
-import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,10 +16,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
 
-    static {
-        SpringDocUtils.getConfig().addRestControllers(UserController.class);
-    }
-
     /**
      * Configures and customizes the OpenAPI documentation for the application.
      * <p>
@@ -36,22 +29,6 @@ public class SwaggerConfig {
         return new OpenAPI().info(new Info()
                 .title("My API")
                 .version("1.0")
-                .description("This is a sample API documentation"));
-    }
-
-    /**
-     * Configures a grouped OpenAPI definition for public API endpoints.
-     * <p>
-     * This method specifies which endpoint paths should be included in the "public" group
-     * of the API documentation. Only paths matching the pattern {@code /api/**} are included.
-     *
-     * @return an instance of {@link GroupedOpenApi} representing the grouped API definition
-     */
-    @Bean
-    public GroupedOpenApi publicApi() {
-        return GroupedOpenApi.builder()
-                .group("public")
-                .pathsToMatch("/api/**")
-                .build();
+                .description("This is a API documentation for my application"));
     }
 }

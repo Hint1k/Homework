@@ -97,11 +97,9 @@ public class TaskMain {
      */
     private static void registerFilters(AnnotationConfigWebApplicationContext context,
                                         ServletContextHandler contextHandler) {
-        contextHandler.addFilter(
-                new FilterHolder(context.getBean(ExceptionHandlerFilter.class)),
+        contextHandler.addFilter(new FilterHolder(context.getBean(ExceptionHandlerFilter.class)),
                 "/*", EnumSet.of(DispatcherType.REQUEST, DispatcherType.ERROR));
-        contextHandler.addFilter(
-                new FilterHolder(context.getBean(AuthenticationFilter.class)),
+        contextHandler.addFilter(new FilterHolder(context.getBean(AuthenticationFilter.class)),
                 "/*", EnumSet.of(DispatcherType.REQUEST));
     }
 
@@ -120,6 +118,13 @@ public class TaskMain {
         server.setRequestLog(new CustomRequestLog(logWriter, logFormat));
     }
 
+    /**
+     * Checks if the application is running in a test environment.
+     * <p>
+     * This method determines whether the "TEST_ENV" system property is set.
+     *
+     * @return true if the "TEST_ENV" system property is defined, false otherwise
+     */
     private static boolean isTestEnvironment() {
         return System.getProperty("TEST_ENV") != null;
     }
