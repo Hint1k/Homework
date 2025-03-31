@@ -1,0 +1,13 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog/changelog.xml">
+
+    <include file="000-drop-tables-test.xml" relativeToChangelogFile="true"/>
+    <include file="001-create-schema-test.xml" relativeToChangelogFile="true"/>
+    <include file="002-create-sequences-test.xml" relativeToChangelogFile="true"/>
+    <include file="003-create-tables-test.xml" relativeToChangelogFile="true"/>
+    <include file="004-insert-data-test.xml" relativeToChangelogFile="true"/>
+</databaseChangeLog>

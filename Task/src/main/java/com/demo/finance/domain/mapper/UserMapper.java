@@ -21,13 +21,6 @@ public interface UserMapper {
      * @param user the {@link User} entity to map
      * @return the corresponding {@link UserDto} object
      */
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "email", source = "email")
-    @Mapping(target = "password", source = "password")
-    @Mapping(target = "blocked", source = "blocked")
-    @Mapping(target = "role", source = "role")
-    @Mapping(target = "version", source = "version")
     UserDto toDto(User user);
 
     /**
@@ -36,12 +29,5 @@ public interface UserMapper {
      * @param userDto the {@link UserDto} object to map
      * @return the corresponding {@link User} entity
      */
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "email", source = "email")
-    @Mapping(target = "password", source = "password")
-    @Mapping(target = "blocked", source = "blocked")
-    @Mapping(target = "role", source = "role")
-    @Mapping(target = "version", source = "version")
     User toEntity(UserDto userDto);
 }

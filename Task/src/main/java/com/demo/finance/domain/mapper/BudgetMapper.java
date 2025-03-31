@@ -21,10 +21,6 @@ public interface BudgetMapper {
      * @param budget the {@link Budget} entity to map
      * @return the corresponding {@link BudgetDto} object
      */
-    @Mapping(target = "budgetId", source = "budgetId")
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "monthlyLimit", source = "monthlyLimit")
-    @Mapping(target = "currentExpenses", source = "currentExpenses")
     BudgetDto toDto(Budget budget);
 
     /**
@@ -33,9 +29,5 @@ public interface BudgetMapper {
      * @param budgetDto the {@link BudgetDto} object to map
      * @return the corresponding {@link Budget} entity
      */
-    @Mapping(target = "budgetId", source = "budgetId")
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "monthlyLimit", source = "monthlyLimit")
-    @Mapping(target = "currentExpenses", source = "currentExpenses")
     Budget toEntity(BudgetDto budgetDto);
 }

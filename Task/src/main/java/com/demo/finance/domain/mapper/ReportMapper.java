@@ -21,11 +21,6 @@ public interface ReportMapper {
      * @param report the {@link Report} entity to map
      * @return the corresponding {@link ReportDto} object
      */
-    @Mapping(target = "reportId", source = "reportId")
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "totalIncome", source = "totalIncome")
-    @Mapping(target = "totalExpense", source = "totalExpense")
-    @Mapping(target = "balance", source = "balance")
     ReportDto toDto(Report report);
 
     /**
@@ -34,10 +29,5 @@ public interface ReportMapper {
      * @param reportDto the {@link ReportDto} object to map
      * @return the corresponding {@link Report} entity
      */
-    @Mapping(target = "reportId", source = "reportId")
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "totalIncome", source = "totalIncome")
-    @Mapping(target = "totalExpense", source = "totalExpense")
-    @Mapping(target = "balance", source = "balance")
     Report toEntity(ReportDto reportDto);
 }

@@ -24,13 +24,7 @@ public interface TransactionMapper {
      * @param transaction the {@link Transaction} entity to map
      * @return the corresponding {@link TransactionDto} object
      */
-    @Mapping(target = "transactionId", source = "transactionId")
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "amount", source = "amount")
-    @Mapping(target = "category", source = "category")
-    @Mapping(target = "date", source = "date")
-    @Mapping(target = "description", source = "description")
-    @Mapping(target = "type", source = "type", qualifiedByName = "typeToString")
+     @Mapping(target = "type", source = "type", qualifiedByName = "typeToString")
     TransactionDto toDto(Transaction transaction);
 
     /**
@@ -40,12 +34,6 @@ public interface TransactionMapper {
      * @param transactionDto the {@link TransactionDto} object to map
      * @return the corresponding {@link Transaction} entity
      */
-    @Mapping(target = "transactionId", source = "transactionId")
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "amount", source = "amount")
-    @Mapping(target = "category", source = "category")
-    @Mapping(target = "date", source = "date")
-    @Mapping(target = "description", source = "description")
     @Mapping(target = "type", source = "type", qualifiedByName = "stringToType")
     Transaction toEntity(TransactionDto transactionDto);
 

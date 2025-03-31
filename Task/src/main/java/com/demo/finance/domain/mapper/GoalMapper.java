@@ -21,13 +21,6 @@ public interface GoalMapper {
      * @param goal the {@link Goal} entity to map
      * @return the corresponding {@link GoalDto} object
      */
-    @Mapping(target = "goalId", source = "goalId")
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "goalName", source = "goalName")
-    @Mapping(target = "targetAmount", source = "targetAmount")
-    @Mapping(target = "savedAmount", source = "savedAmount")
-    @Mapping(target = "duration", source = "duration")
-    @Mapping(target = "startTime", source = "startTime")
     GoalDto toDto(Goal goal);
 
     /**
@@ -36,12 +29,5 @@ public interface GoalMapper {
      * @param goalDto the {@link GoalDto} object to map
      * @return the corresponding {@link Goal} entity
      */
-    @Mapping(target = "goalId", source = "goalId")
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "goalName", source = "goalName")
-    @Mapping(target = "targetAmount", source = "targetAmount")
-    @Mapping(target = "savedAmount", source = "savedAmount")
-    @Mapping(target = "duration", source = "duration")
-    @Mapping(target = "startTime", source = "startTime")
     Goal toEntity(GoalDto goalDto);
 }

@@ -78,10 +78,10 @@ dependencies {
     testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.20.6'
 
     // Swagger
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.5.0'
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-api', version: '2.5.0'
-    implementation group: 'org.webjars', name: 'swagger-ui', version: '5.13.0'
-    implementation group: 'org.webjars', name: 'webjars-locator-core', version: '0.52'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.6'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-api', version: '2.8.6'
+    implementation group: 'org.webjars', name: 'swagger-ui', version: '5.20.1'
+    implementation group: 'org.webjars', name: 'webjars-locator-core', version: '0.59'
 
     // Jetty logging
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'

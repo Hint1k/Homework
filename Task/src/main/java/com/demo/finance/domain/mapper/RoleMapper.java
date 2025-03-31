@@ -21,7 +21,6 @@ public interface RoleMapper {
      * @param role the {@link Role} entity to map
      * @return the corresponding {@link RoleDto} object
      */
-    @Mapping(target = "name", source = "name")
     RoleDto toDto(Role role);
 
     /**
@@ -30,6 +29,5 @@ public interface RoleMapper {
      * @param roleDto the {@link RoleDto} object to map
      * @return the corresponding {@link Role} entity
      */
-    @Mapping(target = "name", source = "name")
     Role toEntity(RoleDto roleDto);
 }
