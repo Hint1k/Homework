@@ -1,4 +1,4 @@
-package com.demo.finance.filter;
+package com.demo.finance.in.filter;
 
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.Role;

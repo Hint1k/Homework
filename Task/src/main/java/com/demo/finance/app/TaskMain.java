@@ -77,8 +77,7 @@ public class TaskMain {
             server.start();
             log.info("Finance App is running inside Docker with Spring!");
 
-            // Prevent blocking in tests
-            if (System.getProperty("TEST_ENV") == null) {
+            if (!isTestEnvironment()) {
                 server.join();
             }
         } catch (Exception e) {
@@ -119,5 +118,9 @@ public class TaskMain {
         logWriter.setLoggerName("org.eclipse.jetty.server.RequestLog");
         String logFormat = "%{client}a - %u %t '%r' %s %O '%{Referer}i' '%{User-Agent}i' '%C'";
         server.setRequestLog(new CustomRequestLog(logWriter, logFormat));
+    }
+
+    private static boolean isTestEnvironment() {
+        return System.getProperty("TEST_ENV") != null;
     }
 }

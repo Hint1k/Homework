@@ -1,20 +1,21 @@
-package com.demo.finance.filter;
+package com.demo.finance.in.filter;
 
-import com.demo.finance.in.filter.ExceptionHandlerFilter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,14 +35,18 @@ class ExceptionHandlerFilterTest {
     private PrintWriter writer;
     @InjectMocks
     private ExceptionHandlerFilter filter;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     @DisplayName("Normal request should pass through filter chain without modification")
     void normalRequest_ShouldPassThrough() {
         try {
+            ArgumentCaptor<ExceptionHandlerFilter.ResponseWrapper> responseCaptor =
+                    ArgumentCaptor.forClass(ExceptionHandlerFilter.ResponseWrapper.class);
+
             filter.doFilter(request, response, chain);
-            verify(chain).doFilter(request, response);
+
+            verify(chain).doFilter(Mockito.eq(request), responseCaptor.capture());
+            assertThat(responseCaptor.getValue()).isNotNull();
         } catch (Exception e) {
             fail("Normal request should not throw exceptions: " + e.getMessage());
         }
@@ -52,9 +57,12 @@ class ExceptionHandlerFilterTest {
     void thrownException_ShouldReturn500() {
         try {
             when(response.getWriter()).thenReturn(writer);
-            doThrow(new RuntimeException("Test error")).when(chain).doFilter(request, response);
+            ExceptionHandlerFilter.ResponseWrapper realResponseWrapper = new ExceptionHandlerFilter.ResponseWrapper(response);
+            ExceptionHandlerFilter spyFilter = Mockito.spy(filter);
+            when(spyFilter.createResponseWrapper(response)).thenReturn(realResponseWrapper);
+            doThrow(new RuntimeException("Test error")).when(chain).doFilter(request, realResponseWrapper);
 
-            filter.doFilter(request, response, chain);
+            spyFilter.doFilter(request, response, chain);
 
             verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             verify(writer).write("{\"error\": \"Test error\"}");

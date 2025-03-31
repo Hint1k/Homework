@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +33,10 @@ public class ExceptionHandlerFilter implements Filter {
     private static final Logger log = Logger.getLogger(ExceptionHandlerFilter.class.getName());
     private static final String ERROR_RESPONSE_FORMAT = "{\"error\": \"%s\"}";
 
+    ResponseWrapper createResponseWrapper(HttpServletResponse response) {
+        return new ResponseWrapper(response);
+    }
+
     /**
      * Processes each request by invoking the next filter in the chain and catching any
      * exceptions that occur during request processing.
@@ -42,10 +47,14 @@ public class ExceptionHandlerFilter implements Filter {
      */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
+        ResponseWrapper wrappedResponse = createResponseWrapper((HttpServletResponse) response);
         try {
-            chain.doFilter(request, response);
+            chain.doFilter(request, wrappedResponse);
         } catch (Exception ex) {
-            handleException(response, ex);
+            if (wrappedResponse.isCommitted()) {
+                return;
+            }
+            handleException(wrappedResponse, ex);
         }
     }
 
@@ -89,6 +98,77 @@ public class ExceptionHandlerFilter implements Filter {
             } catch (IOException e) {
                 log.log(Level.SEVERE, "Completely failed to write error response", e);
             }
+        }
+    }
+
+    /**
+     * A wrapper for {@link HttpServletResponse} that tracks whether the response
+     * has been committed. This ensures that exception handling does not attempt
+     * to modify an already committed response.
+     *
+     * <p>This wrapper overrides status-setting and error-sending methods to update
+     * an internal flag, allowing filters to check whether further modifications
+     * to the response are possible.</p>
+     */
+    static class ResponseWrapper extends HttpServletResponseWrapper {
+        private boolean committed = false;
+
+        /**
+         * Constructs a new {@code ResponseWrapper} for the given {@link HttpServletResponse}.
+         *
+         * @param response the original HTTP response to wrap
+         */
+        public ResponseWrapper(HttpServletResponse response) {
+            super(response);
+        }
+
+        /**
+         * Sets the HTTP status code for the response and marks the response as committed.
+         *
+         * @param sc the HTTP status code
+         */
+        @Override
+        public void setStatus(int sc) {
+            committed = true;
+            super.setStatus(sc);
+        }
+
+        /**
+         * Sends an HTTP error response with the specified status code and message.
+         * This marks the response as committed.
+         *
+         * @param sc  the HTTP status code
+         * @param msg the error message
+         * @throws IOException if an input or output exception occurs
+         */
+        @Override
+        public void sendError(int sc, String msg) throws IOException {
+            committed = true;
+            super.sendError(sc, msg);
+        }
+
+        /**
+         * Sends an HTTP error response with the specified status code.
+         * This marks the response as committed.
+         *
+         * @param sc the HTTP status code
+         * @throws IOException if an input or output exception occurs
+         */
+        @Override
+        public void sendError(int sc) throws IOException {
+            committed = true;
+            super.sendError(sc);
+        }
+
+        /**
+         * Checks whether the response has been committed, either by this wrapper
+         * or by the underlying response.
+         *
+         * @return {@code true} if the response has been committed, {@code false} otherwise
+         */
+        @Override
+        public boolean isCommitted() {
+            return committed || super.isCommitted();
         }
     }
 }
