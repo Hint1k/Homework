@@ -6,7 +6,6 @@ import com.demo.finance.domain.model.Transaction;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.mapstruct.factory.Mappers;
 
 /**
  * The {@code TransactionMapper} interface defines methods for mapping between {@link Transaction} entities

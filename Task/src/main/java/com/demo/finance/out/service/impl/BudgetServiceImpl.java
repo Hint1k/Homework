@@ -49,7 +49,7 @@ public class BudgetServiceImpl implements BudgetService {
     @Override
     public Budget setMonthlyBudget(Long userId, BigDecimal limit) {
         Budget existingBudget = budgetRepository.findByUserId(userId);
-        boolean success = false;
+        boolean success;
         if (existingBudget != null) {
             existingBudget.setMonthlyLimit(limit);
             success = budgetRepository.update(existingBudget);

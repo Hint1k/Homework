@@ -3,8 +3,6 @@ package com.demo.finance.domain.mapper;
 import com.demo.finance.domain.dto.BudgetDto;
 import com.demo.finance.domain.model.Budget;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 /**
  * The {@code BudgetMapper} interface defines methods for mapping between {@link Budget} entities

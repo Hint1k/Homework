@@ -3,8 +3,6 @@ package com.demo.finance.domain.mapper;
 import com.demo.finance.domain.dto.GoalDto;
 import com.demo.finance.domain.model.Goal;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 /**
  * The {@code GoalMapper} interface defines methods for mapping between {@link Goal} entities

@@ -3,8 +3,6 @@ package com.demo.finance.domain.mapper;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.User;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 /**
  * The {@code UserMapper} interface defines methods for mapping between {@link User} entities and

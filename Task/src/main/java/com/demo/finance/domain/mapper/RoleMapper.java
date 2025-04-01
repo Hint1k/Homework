@@ -3,8 +3,6 @@ package com.demo.finance.domain.mapper;
 import com.demo.finance.domain.dto.RoleDto;
 import com.demo.finance.domain.model.Role;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 /**
  * The {@code RoleMapper} interface defines methods for mapping between {@link Role} entities
