@@ -3,7 +3,6 @@ package com.demo.finance.app;
 import com.demo.finance.app.config.AppConfig;
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.app.config.DatabaseConfig;
-import com.demo.finance.app.config.MySwaggerConfig;
 import com.demo.finance.in.filter.AuthenticationFilter;
 import com.demo.finance.in.filter.ExceptionHandlerFilter;
 import com.demo.finance.out.repository.impl.AbstractContainerBaseSetup;
@@ -21,6 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.springdoc.webmvc.ui.SwaggerConfig;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -77,7 +77,7 @@ public class TaskMainTest extends AbstractContainerBaseSetup {
        try {
            // Initialize Spring context
            AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-           context.register(AppConfig.class, MySwaggerConfig.class);
+           context.register(AppConfig.class, SwaggerConfig.class);
 
            // Create Jetty context handler
            ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);

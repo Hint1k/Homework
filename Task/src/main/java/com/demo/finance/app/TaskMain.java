@@ -2,7 +2,6 @@ package com.demo.finance.app;
 
 import com.demo.finance.app.config.AppConfig;
 import com.demo.finance.app.config.LiquibaseManager;
-import com.demo.finance.app.config.MySwaggerConfig;
 import com.demo.finance.in.filter.AuthenticationFilter;
 import com.demo.finance.in.filter.ExceptionHandlerFilter;
 import jakarta.servlet.DispatcherType;
@@ -12,6 +11,7 @@ import org.eclipse.jetty.server.Slf4jRequestLogWriter;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.springdoc.webmvc.ui.SwaggerConfig;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -50,7 +50,7 @@ public class TaskMain {
 
         // Initialize Spring context
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-        context.register(AppConfig.class, MySwaggerConfig.class);
+        context.register(AppConfig.class, SwaggerConfig.class);
 
         // Create the Jetty context handler
         ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
