@@ -38,10 +38,7 @@ import java.util.Map;
 
 import static com.demo.finance.domain.utils.SwaggerExamples.User.AUTHENTICATION_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.User.AUTHENTICATION_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.User.DELETE_ACCOUNT_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.User.DELETE_ACCOUNT_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.User.GET_DETAILS_REQUEST;
-import static com.demo.finance.domain.utils.SwaggerExamples.User.LOGOUT_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.User.LOGOUT_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.User.REGISTRATION_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.User.REGISTRATION_SUCCESS;
@@ -180,9 +177,7 @@ public class UserController extends BaseController {
      */
     @PostMapping("/logout")
     @Operation(summary = "Logout user", description = "Invalidates the current session")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = LOGOUT_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "User logged out successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = LOGOUT_SUCCESS)))
@@ -209,9 +204,7 @@ public class UserController extends BaseController {
      */
     @GetMapping("/me")
     @Operation(summary = "Get current user", description = "Returns authenticated user details")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = GET_DETAILS_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "User details received successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_DETAILS_SUCCESS)))
@@ -273,9 +266,7 @@ public class UserController extends BaseController {
      */
     @DeleteMapping
     @Operation(summary = "Delete account", description = "Permanently deletes the user account")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = DELETE_ACCOUNT_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Deleted user successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_ACCOUNT_SUCCESS)))

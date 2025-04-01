@@ -50,7 +50,6 @@ public final class SwaggerExamples {
                   "timestamp": "2025-04-01T12:00:00Z"
                 }
                 """;
-        public static final String LOGOUT_REQUEST = "{}";
         public static final String LOGOUT_SUCCESS = """
                 {
                     "message": "Logged out successfully",
@@ -81,7 +80,6 @@ public final class SwaggerExamples {
                             "timestamp": "2025-04-01T13:15:17.387825014Z"
                         }
                 """;
-        public static final String GET_DETAILS_REQUEST = "{}";
         public static final String GET_DETAILS_SUCCESS = """
                 {
                     "data": {
@@ -99,7 +97,6 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-01T13:09:56.074426539Z"
                 }
                 """;
-        public static final String DELETE_ACCOUNT_REQUEST = "{}";
         public static final String DELETE_ACCOUNT_SUCCESS = """
                 {
                     "data": {
@@ -115,7 +112,6 @@ public final class SwaggerExamples {
      * Example JSON strings for admin-related endpoints.
      */
     public static final class Admin {
-        public static final String GET_USERS_REQUEST = "{}";
         public static final String GET_USERS_SUCCESS = """
                 {
                     "metadata": {
@@ -150,7 +146,6 @@ public final class SwaggerExamples {
                     ]
                 }
                 """;
-        public static final String GET_USER_REQUEST = "{}";
         public static final String GET_USER_SUCCESS = """
                 {
                     "data": {
@@ -168,31 +163,30 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-01T14:14:52.883529502Z"
                 }
                 """;
-        public static final String GET_USER_TRANSACTIONS_REQUEST = "{}";
         public static final String GET_USER_TRANSACTIONS_SUCCESS = """
                 {
-                    "metadata": {
-                        "totalItems": 1,
-                        "user_id": 2,
-                        "totalPages": 1,
-                        "pageSize": 10,
-                        "currentPage": 1
-                    },
-                    "data": [
-                        {
-                            "transactionId": 2,
-                            "userId": 2,
-                            "amount": 250.00,
-                            "category": "Food",
-                            "date": [
-                                2025,
-                                5,
-                                23
-                            ],
-                            "description": "Grocery shopping",
-                            "type": "EXPENSE"
-                        }
-                    ]
+                     "metadata": {
+                         "totalItems": 1,
+                         "user_id": 2,
+                         "totalPages": 1,
+                         "pageSize": 10,
+                         "currentPage": 1
+                     },
+                     "data": [
+                         {
+                             "transactionId": 2,
+                             "userId": 2,
+                             "amount": 250.00,
+                             "category": "Food",
+                             "date": [
+                                 2025,
+                                 5,
+                                 23
+                             ],
+                             "description": "Grocery shopping",
+                             "type": "EXPENSE"
+                         }
+                     ]
                 }
                 """;
         public static final String UPDATE_ROLE_REQUEST = """
@@ -237,7 +231,6 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-01T14:16:16.009018082Z"
                 }
                 """;
-        public static final String DELETE_USER_REQUEST = "{}";
         public static final String DELETE_USER_SUCCESS = """
                 {
                     "data": {
@@ -253,15 +246,6 @@ public final class SwaggerExamples {
      * Example JSON strings for transaction-related endpoints.
      */
     public static final class Transaction {
-        public static final String GET_TRANSACTIONS_REQUEST = """
-                {
-                    "amount": "250",
-                    "category": "Food",
-                    "date": "2025-05-23",
-                    "description": "Grocery shopping",
-                    "type": "Expense"
-                }
-                """;
         public static final String GET_TRANSACTION_SUCCESS = """
                 {
                     "data": {
@@ -281,6 +265,32 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-01T14:20:51.419891845Z"
                 }
                 """;
+        public static final String GET_TRANSACTIONS_SUCCESS = """
+                {
+                    "metadata": {
+                        "totalItems": 1,
+                        "user_id": 2,
+                        "totalPages": 1,
+                        "pageSize": 10,
+                        "currentPage": 1
+                    },
+                    "data": [
+                        {
+                            "transactionId": 1,
+                            "userId": 2,
+                            "amount": 250.00,
+                            "category": "Food",
+                            "date": [
+                                2025,
+                                5,
+                                23
+                            ],
+                            "description": "Grocery shopping",
+                            "type": "EXPENSE"
+                        }
+                    ]
+                }
+                """;
         public static final String CREATE_TRANSACTION_REQUEST = """
                 {
                   "amount": "500",
@@ -291,51 +301,50 @@ public final class SwaggerExamples {
                 }
                 """;
         public static final String CREATE_TRANSACTION_SUCCESS = """
-                                {
-                    "data": {
-                        "transactionId": 1,
-                        "userId": 2,
-                        "amount": 500.00,
-                        "category": "Food",
-                        "date": [
-                            2025,
-                            3,
-                            23
-                        ],
-                        "description": "Grocery shopping",
-                        "type": "EXPENSE"
-                    },
-                    "message": "Transaction created successfully",
-                    "timestamp": "2025-04-01T14:18:41.374683647Z"
-                }
+                {
+                      "data": {
+                          "transactionId": 1,
+                          "userId": 2,
+                          "amount": 500.00,
+                          "category": "Food",
+                          "date": [
+                              2025,
+                              3,
+                              23
+                          ],
+                          "description": "Grocery shopping",
+                          "type": "EXPENSE"
+                      },
+                      "message": "Transaction created successfully",
+                      "timestamp": "2025-04-01T14:18:41.374683647Z"
+                 }
                 """;
         public static final String UPDATE_TRANSACTION_REQUEST = """
                 {
                   "amount": "750",
                   "category": "Luxury",
-                  "description": "Gold shopping",
+                  "description": "Gold shopping"
                 }
                 """;
         public static final String UPDATE_TRANSACTION_SUCCESS = """
                 {
-                    "data": {
-                        "transactionId": 1,
-                        "userId": 2,
-                        "amount": 750.00,
-                        "category": "Luxury",
-                        "date": [
-                            2025,
-                            5,
-                            23
-                        ],
-                        "description": "Gold shopping",
-                        "type": "EXPENSE"
-                    },
-                    "message": "Transaction updated successfully",
-                    "timestamp": "2025-04-01T14:21:23.526079462Z"
-                }
+                     "data": {
+                         "transactionId": 1,
+                         "userId": 2,
+                         "amount": 750.00,
+                         "category": "Luxury",
+                         "date": [
+                             2025,
+                             5,
+                             23
+                         ],
+                         "description": "Gold shopping",
+                         "type": "EXPENSE"
+                     },
+                     "message": "Transaction updated successfully",
+                     "timestamp": "2025-04-01T14:21:23.526079462Z"
+                 }
                 """;
-        public static final String DELETE_TRANSACTION_REQUEST = "{}";
         public static final String DELETE_TRANSACTION_SUCCESS = """
                 {
                     "data": {
@@ -351,7 +360,6 @@ public final class SwaggerExamples {
      * Example JSON strings for goal-related endpoints.
      */
     public static final class Goal {
-        public static final String GET_GOAL_REQUEST = "{}";
         public static final String GET_GOAL_SUCCESS = """
                 {
                     "data": {
@@ -371,7 +379,6 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-01T14:35:09.321050058Z"
                 }
                 """;
-        public static final String GET_GOALS_REQUEST = "{}";
         public static final String GET_GOALS_SUCCESS = """
                 {
                     "metadata": {
@@ -452,7 +459,6 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-01T14:31:24.355103445Z"
                 }
                 """;
-        public static final String DELETE_GOAL_REQUEST = "{}";
         public static final String DELETE_GOAL_SUCCESS = """
                 {
                     "data": {
@@ -468,7 +474,6 @@ public final class SwaggerExamples {
      * Example JSON strings for budget-related endpoints.
      */
     public static final class Budget {
-        public static final String GET_BUDGET_REQUEST = "{}";
         public static final String GET_BUDGET_SUCCESS = """
                 {
                     "data": {
@@ -505,11 +510,10 @@ public final class SwaggerExamples {
      * Example JSON strings for report-related endpoints.
      */
     public static final class Report {
-        public static final String GET_REPORT_REQUEST = "{}";
         public static final String GET_REPORT_SUCCESS = """
                 {
                     "data": {
-                        "reportId": null,
+                        "reportId": 1,
                         "userId": 2,
                         "totalIncome": 0,
                         "totalExpense": 250.00,
@@ -526,7 +530,6 @@ public final class SwaggerExamples {
                 }
                 """;
         public static final String EXPENSES_BY_CATEGORY_SUCCESS = """
-                                {
                 {
                     "data": {
                         "Food": 250.00
@@ -544,7 +547,7 @@ public final class SwaggerExamples {
         public static final String REPORT_BY_DATE_SUCCESS = """
                 {
                     "data": {
-                        "reportId": null,
+                        "reportId": 1,
                         "userId": 2,
                         "totalIncome": 0,
                         "totalExpense": 250.00,
@@ -560,14 +563,12 @@ public final class SwaggerExamples {
      * Example JSON strings for notification-related endpoints.
      */
     public static final class Notification {
-        public static final String GET_BUDGET_NOTIFICATIONS_REQUEST = "{}";
         public static final String GET_BUDGET_NOTIFICATIONS_SUCCESS = """
                 {
                     "message": "✅ Budget is under control. Remaining budget: 1500.00",
                     "timestamp": "2025-04-01T14:40:14.576916577Z"
                 }
                 """;
-        public static final String GET_GOAL_NOTIFICATIONS_REQUEST = "{}";
         public static final String GET_GOAL_NOTIFICATIONS_SUCCESS = """
                 {
                     "message": "⏳ Goal '1' progress: 0.00%",

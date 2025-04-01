@@ -13,10 +13,13 @@ import com.demo.finance.out.service.AdminService;
 import com.demo.finance.out.service.TransactionService;
 import com.demo.finance.out.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,13 +37,9 @@ import java.util.Map;
 
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.BLOCK_USER_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.BLOCK_USER_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Admin.DELETE_USER_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.DELETE_USER_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Admin.GET_USERS_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.GET_USERS_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Admin.GET_USER_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.GET_USER_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Admin.GET_USER_TRANSACTIONS_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.GET_USER_TRANSACTIONS_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.UPDATE_ROLE_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.UPDATE_ROLE_SUCCESS;
@@ -94,13 +93,11 @@ public class AdminController extends BaseController {
      */
     @GetMapping
     @Operation(summary = "Get users", description = "Returns paginated list of users")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = GET_USERS_REQUEST)))
     @ApiResponse(responseCode = "200", description = "Users retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PaginatedResponse.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_USERS_SUCCESS)))
-    public ResponseEntity<Map<String, Object>> getPaginatedUsers(@ModelAttribute PaginationParams paramsNew) {
+    public ResponseEntity<Map<String, Object>> getPaginatedUsers(
+            @ParameterObject @ModelAttribute PaginationParams paramsNew) {
         try {
             PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
             PaginatedResponse<UserDto> paginatedResponse = userService.getPaginatedUsers(params.page(), params.size());
@@ -123,14 +120,11 @@ public class AdminController extends BaseController {
      */
     @GetMapping("/transactions/{userId}")
     @Operation(summary = "Get user transactions", description = "Returns paginated transactions for user")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = GET_USER_TRANSACTIONS_REQUEST)))
     @ApiResponse(responseCode = "200", description = "User transactions retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PaginatedResponse.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_USER_TRANSACTIONS_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getPaginatedTransactionsForUser(
-            @PathVariable("userId") String userId, @ModelAttribute PaginationParams paramsNew) {
+            @PathVariable("userId") String userId, @ParameterObject @ModelAttribute PaginationParams paramsNew) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.GET);
             PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
@@ -154,9 +148,7 @@ public class AdminController extends BaseController {
      */
     @GetMapping("/{userId}")
     @Operation(summary = "Get user", description = "Returns user details by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = GET_USER_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "User details retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_USER_SUCCESS)))
@@ -255,9 +247,7 @@ public class AdminController extends BaseController {
      */
     @DeleteMapping("/{userId}")
     @Operation(summary = "Delete user", description = "Permanently deletes user account")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = DELETE_USER_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "User deleted successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_USER_SUCCESS)))

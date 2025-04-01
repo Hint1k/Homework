@@ -102,6 +102,8 @@ public class ReportServiceImpl implements ReportService {
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return new Report(userId, totalIncome, totalExpense);
+        Report report = new Report(userId, totalIncome, totalExpense);
+        report.setReportId(1L);
+        return report;
     }
 }

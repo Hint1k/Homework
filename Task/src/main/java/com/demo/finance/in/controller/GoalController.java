@@ -11,10 +11,13 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.GoalService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,11 +37,8 @@ import java.util.Map;
 
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.CREATE_GOAL_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.CREATE_GOAL_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Goal.DELETE_GOAL_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.DELETE_GOAL_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Goal.GET_GOALS_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.GET_GOALS_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Goal.GET_GOAL_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.GET_GOAL_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.UPDATE_GOAL_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.UPDATE_GOAL_SUCCESS;
@@ -127,14 +127,12 @@ public class GoalController extends BaseController {
      */
     @GetMapping
     @Operation(summary = "Get goals", description = "Returns paginated list of goals")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = GET_GOALS_REQUEST)))
     @ApiResponse(responseCode = "200", description = "Goals retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PaginatedResponse.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_GOALS_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getPaginatedGoals(
-            @ModelAttribute PaginationParams paramsNew, @SessionAttribute("currentUser") UserDto currentUser) {
+            @ParameterObject @ModelAttribute PaginationParams paramsNew,
+            @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
@@ -161,9 +159,7 @@ public class GoalController extends BaseController {
      */
     @GetMapping("/{goalId}")
     @Operation(summary = "Get goal", description = "Returns goal details by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = GET_GOAL_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Goal retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_GOAL_SUCCESS)))
@@ -244,9 +240,7 @@ public class GoalController extends BaseController {
      */
     @DeleteMapping("/{goalId}")
     @Operation(summary = "Delete goal", description = "Deletes goal by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = DELETE_GOAL_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Goal deleted successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_GOAL_SUCCESS)))

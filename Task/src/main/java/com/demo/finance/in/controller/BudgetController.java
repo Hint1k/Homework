@@ -27,7 +27,6 @@ import java.util.Map;
 
 import static com.demo.finance.domain.utils.SwaggerExamples.Budget.CREATE_BUDGET_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Budget.CREATE_BUDGET_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Budget.GET_BUDGET_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Budget.GET_BUDGET_SUCCESS;
 
 /**
@@ -105,9 +104,7 @@ public class BudgetController extends BaseController {
      */
     @GetMapping("/budget")
     @Operation(summary = "Get budget data", description = "Returns user's budget information")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = GET_BUDGET_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Budget data retrieved", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Map.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_BUDGET_SUCCESS)))

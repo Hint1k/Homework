@@ -11,10 +11,13 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +37,8 @@ import java.util.Map;
 
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.CREATE_TRANSACTION_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.CREATE_TRANSACTION_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.DELETE_TRANSACTION_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.DELETE_TRANSACTION_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.GET_TRANSACTIONS_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.GET_TRANSACTIONS_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.GET_TRANSACTION_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.UPDATE_TRANSACTION_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.UPDATE_TRANSACTION_SUCCESS;
@@ -127,14 +129,12 @@ public class TransactionController extends BaseController {
      */
     @GetMapping
     @Operation(summary = "Get transactions", description = "Returns paginated transactions")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = GET_TRANSACTIONS_REQUEST)))
     @ApiResponse(responseCode = "200", description = "Transactions retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PaginatedResponse.class),
-            examples = @ExampleObject(name = "SuccessResponse", value = GET_TRANSACTION_SUCCESS)))
+            examples = @ExampleObject(name = "SuccessResponse", value = GET_TRANSACTIONS_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getPaginatedTransactions(
-            @ModelAttribute PaginationParams paramsNew, @SessionAttribute("currentUser") UserDto currentUser) {
+            @ParameterObject @ModelAttribute PaginationParams paramsNew,
+            @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
@@ -161,9 +161,7 @@ public class TransactionController extends BaseController {
      */
     @GetMapping("/{transactionId}")
     @Operation(summary = "Get transaction", description = "Returns transaction by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = GET_TRANSACTIONS_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Transaction retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_TRANSACTION_SUCCESS)))
@@ -247,9 +245,7 @@ public class TransactionController extends BaseController {
      */
     @DeleteMapping("/{transactionId}")
     @Operation(summary = "Delete transaction", description = "Deletes transaction by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = DELETE_TRANSACTION_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Transaction deleted successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_TRANSACTION_SUCCESS)))

@@ -18,9 +18,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 
-import static com.demo.finance.domain.utils.SwaggerExamples.Notification.GET_BUDGET_NOTIFICATIONS_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Notification.GET_BUDGET_NOTIFICATIONS_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Notification.GET_GOAL_NOTIFICATIONS_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Notification.GET_GOAL_NOTIFICATIONS_SUCCESS;
 
 /**
@@ -60,10 +58,7 @@ public class NotificationController extends BaseController {
      */
     @GetMapping("/budget")
     @Operation(summary = "Get budget notification", description = "Retrieves budget-related notifications")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = GET_BUDGET_NOTIFICATIONS_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Budget notification retrieved", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = String.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_BUDGET_NOTIFICATIONS_SUCCESS)))
@@ -95,9 +90,7 @@ public class NotificationController extends BaseController {
      */
     @GetMapping("/goal")
     @Operation(summary = "Get goal notification", description = "Retrieves goal-related notifications")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = GET_GOAL_NOTIFICATIONS_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Goal notification retrieved", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = String.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_GOAL_NOTIFICATIONS_SUCCESS)))

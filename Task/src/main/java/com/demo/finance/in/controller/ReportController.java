@@ -30,7 +30,6 @@ import java.math.BigDecimal;
 
 import static com.demo.finance.domain.utils.SwaggerExamples.Report.EXPENSES_BY_CATEGORY_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Report.EXPENSES_BY_CATEGORY_SUCCESS;
-import static com.demo.finance.domain.utils.SwaggerExamples.Report.GET_REPORT_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Report.GET_REPORT_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Report.REPORT_BY_DATE_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Report.REPORT_BY_DATE_SUCCESS;
@@ -155,9 +154,7 @@ public class ReportController extends BaseController {
      */
     @GetMapping("/report")
     @Operation(summary = "Get general report", description = "Generates overall financial report")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
-            examples = @ExampleObject(value = GET_REPORT_REQUEST)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "General report generated", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_REPORT_SUCCESS)))
