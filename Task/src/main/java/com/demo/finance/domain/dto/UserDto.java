@@ -1,6 +1,8 @@
 package com.demo.finance.domain.dto;
 
 import com.demo.finance.domain.model.Role;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,12 +18,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserDto {
 
+    @Schema(description = "Unique identifier of the user", example = "2")
     private Long userId;
+
+    @Schema(description = "User's full name", example = "John Doe")
     private String name;
+
+    @Schema(description = "User's email address", example = "JohnDoe@demo.com")
     private String email;
+
+    @Schema(description = "User's password", example = "12345")
     private String password;
+
+    @Schema(description = "Indicates if the user account is blocked", example = "false")
     private boolean blocked;
+
+    @Schema(description = "User's role in the system (user or admin)", example = "user")
     private Role role;
+
+    @Schema(description = "Optimistic locking version number", example = "1")
     private Long version;
 
     /**

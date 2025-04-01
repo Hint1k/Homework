@@ -1,5 +1,6 @@
 package com.demo.finance.domain.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,8 +18,15 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class BudgetDto {
 
+    @Schema(description = "Unique identifier of the budget", example = "1")
     private Long budgetId;
+
+    @Schema(description = "ID of the user who owns the budget", example = "2")
     private Long userId;
+
+    @Schema(description = "Monthly spending limit amount", example = "1500.00")
     private BigDecimal monthlyLimit;
+
+    @Schema(description = "Current month's expenses so far", example = "750.00")
     private BigDecimal currentExpenses;
 }

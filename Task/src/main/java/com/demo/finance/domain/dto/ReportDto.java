@@ -1,5 +1,6 @@
 package com.demo.finance.domain.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,9 +18,18 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ReportDto {
 
+    @Schema(description = "Unique identifier of the report", example = "1")
     private Long reportId;
+
+    @Schema(description = "ID of the user who generated the report", example = "2")
     private Long userId;
+
+    @Schema(description = "Total income for the period", example = "3000.00")
     private BigDecimal totalIncome;
+
+    @Schema(description = "Total expenses for the period", example = "2000.00")
     private BigDecimal totalExpense;
+
+    @Schema(description = "Current balance (income - expenses)", example = "1000.00")
     private BigDecimal balance;
 }
