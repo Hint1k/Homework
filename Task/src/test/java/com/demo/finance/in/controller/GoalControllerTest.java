@@ -202,7 +202,7 @@ class GoalControllerTest {
                             .sessionAttr("currentUser", currentUser))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.message").value("Goal deleted successfully"))
-                    .andExpect(jsonPath("$.data").value(1));
+                    .andExpect(jsonPath("$.data.goalId").value(1));
 
             verify(validationUtils, times(1)).parseLong("1");
             verify(goalService, times(1))

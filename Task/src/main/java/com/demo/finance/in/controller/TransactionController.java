@@ -12,7 +12,9 @@ import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
+
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.CREATE_TRANSACTION_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.CREATE_TRANSACTION_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.DELETE_TRANSACTION_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.DELETE_TRANSACTION_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.GET_TRANSACTIONS_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.GET_TRANSACTION_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.UPDATE_TRANSACTION_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.UPDATE_TRANSACTION_SUCCESS;
 
 /**
  * The {@code TransactionController} class is a REST controller that provides endpoints for managing user transactions.
@@ -76,14 +87,11 @@ public class TransactionController extends BaseController {
     @Operation(summary = "Create transaction", description = "Creates a new transaction")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Transaction data", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class,
-            requiredProperties = {"amount", "category", "date", "description", "type"}, example = """
-            {
-              "amount": "500",
-              "category": "1",
-              "date": "2025-03-23",
-              "description": "1",
-              "type": "EXPENSE"
-            }""")))
+            requiredProperties = {"amount", "category", "date", "description", "type"},
+            example = CREATE_TRANSACTION_REQUEST)))
+    @ApiResponse(responseCode = "201", description = "Transaction created successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = CREATE_TRANSACTION_SUCCESS)))
     public ResponseEntity<Map<String, Object>> createTransaction(
             @RequestBody TransactionDto transactionDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -120,8 +128,11 @@ public class TransactionController extends BaseController {
     @GetMapping
     @Operation(summary = "Get transactions", description = "Returns paginated transactions")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = "{}")))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
+            examples = @ExampleObject(value = GET_TRANSACTIONS_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "Transactions retrieved successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PaginatedResponse.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = GET_TRANSACTION_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getPaginatedTransactions(
             @ModelAttribute PaginationParams paramsNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -151,8 +162,11 @@ public class TransactionController extends BaseController {
     @GetMapping("/{transactionId}")
     @Operation(summary = "Get transaction", description = "Returns transaction by ID")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = "{}")))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
+            examples = @ExampleObject(value = GET_TRANSACTIONS_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "Transaction retrieved successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = GET_TRANSACTION_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getTransactionById(
             @PathVariable("transactionId") String transactionId, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -187,12 +201,10 @@ public class TransactionController extends BaseController {
     @Operation(summary = "Update transaction", description = "Updates existing transaction")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated transaction data", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class,
-            requiredProperties = {"amount", "category", "description"}, example = """
-            {
-              "amount": "750",
-              "category": "2",
-              "description": "2"
-            }""")))
+            requiredProperties = {"amount", "category", "description"}, example = UPDATE_TRANSACTION_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "Transaction updated successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_TRANSACTION_SUCCESS)))
     public ResponseEntity<Map<String, Object>> updateTransaction(
             @PathVariable("transactionId") String transactionId, @RequestBody TransactionDto transactionDtoNew,
             @SessionAttribute("currentUser") UserDto currentUser) {
@@ -236,8 +248,11 @@ public class TransactionController extends BaseController {
     @DeleteMapping("/{transactionId}")
     @Operation(summary = "Delete transaction", description = "Deletes transaction by ID")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = "{}")))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
+            examples = @ExampleObject(value = DELETE_TRANSACTION_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "Transaction deleted successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = DELETE_TRANSACTION_SUCCESS)))
     public ResponseEntity<Map<String, Object>> deleteTransaction(
             @PathVariable("transactionId") String transactionId,
             @SessionAttribute("currentUser") UserDto currentUser) {
@@ -246,8 +261,8 @@ public class TransactionController extends BaseController {
             Long transactionIdLong = validationUtils.parseLong(transactionId);
             boolean success = transactionService.deleteTransaction(userId, transactionIdLong);
             if (success) {
-                return buildSuccessResponse(
-                        HttpStatus.OK, "Transaction deleted successfully", transactionIdLong);
+                return buildSuccessResponse(HttpStatus.OK, "Transaction deleted successfully",
+                        Map.of("transactionId", transactionIdLong));
             }
             return buildErrorResponse(HttpStatus.BAD_REQUEST,
                     "Failed to delete transaction or you are not the owner of the transaction.");

@@ -202,7 +202,7 @@ class AdminControllerTest {
             mockMvc.perform(delete("/api/admin/users/2"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.message").value("Account deleted successfully"))
-                    .andExpect(jsonPath("$.data").value(2));
+                    .andExpect(jsonPath("$.data.userId").value(2));
 
             verify(validationUtils, times(1)).parseUserId("2", Mode.DELETE);
             verify(adminService, times(1)).deleteUser(userId);

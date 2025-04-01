@@ -202,7 +202,7 @@ class TransactionControllerTest {
                             .sessionAttr("currentUser", currentUser))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.message").value("Transaction deleted successfully"))
-                    .andExpect(jsonPath("$.data").value(1));
+                    .andExpect(jsonPath("$.data.transactionId").value(1));
 
             verify(validationUtils, times(1)).parseLong("1");
             verify(transactionService, times(1))

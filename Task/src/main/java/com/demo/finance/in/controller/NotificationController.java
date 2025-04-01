@@ -4,7 +4,9 @@ import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.out.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,6 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
+
+import static com.demo.finance.domain.utils.SwaggerExamples.Notification.GET_BUDGET_NOTIFICATIONS_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.Notification.GET_BUDGET_NOTIFICATIONS_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.Notification.GET_GOAL_NOTIFICATIONS_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.Notification.GET_GOAL_NOTIFICATIONS_SUCCESS;
 
 /**
  * The {@code NotificationController} class is a REST controller that provides endpoints for retrieving
@@ -55,7 +62,11 @@ public class NotificationController extends BaseController {
     @Operation(summary = "Get budget notification", description = "Retrieves budget-related notifications")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = "{}")))
+            schema = @Schema(implementation = Object.class),
+            examples = @ExampleObject(value = GET_BUDGET_NOTIFICATIONS_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "Budget notification retrieved", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = String.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = GET_BUDGET_NOTIFICATIONS_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getBudgetNotification(
             @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -85,8 +96,11 @@ public class NotificationController extends BaseController {
     @GetMapping("/goal")
     @Operation(summary = "Get goal notification", description = "Retrieves goal-related notifications")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = "{}")))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
+            examples = @ExampleObject(value = GET_GOAL_NOTIFICATIONS_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "Goal notification retrieved", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = String.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = GET_GOAL_NOTIFICATIONS_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getGoalNotification(
             @SessionAttribute("currentUser") UserDto currentUser) {
         try {

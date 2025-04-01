@@ -9,7 +9,9 @@ import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.BudgetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,6 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
+
+import static com.demo.finance.domain.utils.SwaggerExamples.Budget.CREATE_BUDGET_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.Budget.CREATE_BUDGET_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.Budget.GET_BUDGET_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.Budget.GET_BUDGET_SUCCESS;
 
 /**
  * The {@code BudgetController} class is a REST controller that provides endpoints for managing user budgets.
@@ -64,10 +71,10 @@ public class BudgetController extends BaseController {
     @Operation(summary = "Set monthly budget", description = "Sets user's monthly budget limit")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Budget data", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BudgetDto.class,
-            requiredProperties = {"monthlyLimit"}, example = """
-            {
-              "monthlyLimit": "1500"
-            }""")))
+            requiredProperties = {"monthlyLimit"}, example = CREATE_BUDGET_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "Budget set successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Budget.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = CREATE_BUDGET_SUCCESS)))
     public ResponseEntity<Map<String, Object>> setMonthlyBudget(
             @RequestBody BudgetDto budgetDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -99,8 +106,11 @@ public class BudgetController extends BaseController {
     @GetMapping("/budget")
     @Operation(summary = "Get budget data", description = "Returns user's budget information")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = "{}")))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Object.class),
+            examples = @ExampleObject(value = GET_BUDGET_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "Budget data retrieved", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Map.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = GET_BUDGET_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getBudgetData(@SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();

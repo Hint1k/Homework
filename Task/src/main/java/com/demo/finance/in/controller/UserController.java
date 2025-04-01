@@ -11,7 +11,9 @@ import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,8 +34,20 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 
-import java.time.Instant;
 import java.util.Map;
+
+import static com.demo.finance.domain.utils.SwaggerExamples.User.AUTHENTICATION_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.AUTHENTICATION_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.DELETE_ACCOUNT_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.DELETE_ACCOUNT_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.GET_DETAILS_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.LOGOUT_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.LOGOUT_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.REGISTRATION_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.REGISTRATION_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.UPDATE_ACCOUNT_REQUEST;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.UPDATE_ACCOUNT_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.GET_DETAILS_SUCCESS;
 
 /**
  * The {@code UserController} class is a REST controller that provides endpoints for user management,
@@ -84,12 +98,10 @@ public class UserController extends BaseController {
     @Operation(summary = "Register user", description = "Creates a new user account")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User registration data", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
-            requiredProperties = {"name", "email", "password"}, example = """
-            {
-              "name": "John Doe",
-              "email": "user@example.com",
-              "password": "securePassword123"
-            }""")))
+            requiredProperties = {"name", "email", "password"}, example = REGISTRATION_REQUEST)))
+    @ApiResponse(responseCode = "201", description = "User registered successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = REGISTRATION_SUCCESS)))
     public ResponseEntity<Map<String, Object>> handleRegistration(@RequestBody UserDto userDtoNew) {
         try {
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.REGISTER_USER);
@@ -126,11 +138,10 @@ public class UserController extends BaseController {
     @Operation(summary = "Authenticate user", description = "Logs in a user with credentials")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User credentials", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
-            requiredProperties = {"email", "password"}, example = """
-            {
-              "email": "user@example.com",
-              "password": "securePassword123"
-            }""")))
+            requiredProperties = {"email", "password"}, example = AUTHENTICATION_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "User authenticated successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = AUTHENTICATION_SUCCESS)))
     public ResponseEntity<Map<String, Object>> handleAuthentication(
             @RequestBody UserDto userDtoNew, HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -171,7 +182,10 @@ public class UserController extends BaseController {
     @Operation(summary = "Logout user", description = "Invalidates the current session")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = "{}")))
+            schema = @Schema(implementation = Object.class, example = LOGOUT_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "User logged out successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = LOGOUT_SUCCESS)))
     public ResponseEntity<Map<String, Object>> logoutUser(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession(false);
         if (session != null) {
@@ -197,7 +211,10 @@ public class UserController extends BaseController {
     @Operation(summary = "Get current user", description = "Returns authenticated user details")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = "{}")))
+            schema = @Schema(implementation = Object.class, example = GET_DETAILS_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "User details received successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = GET_DETAILS_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getCurrentUser(@SessionAttribute("currentUser") UserDto userDto) {
         return buildSuccessResponse(HttpStatus.OK, "Authenticated user details", userDto);
     }
@@ -218,12 +235,10 @@ public class UserController extends BaseController {
     @Operation(summary = "Update user", description = "Updates user details")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated user data", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
-            requiredProperties = {"name", "email", "password"}, example = """
-            {
-              "name": "New Name",
-              "email": "new@example.com",
-              "password": "newPassword123"
-            }""")))
+            requiredProperties = {"name", "email", "password"}, example = UPDATE_ACCOUNT_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "Updated user successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_ACCOUNT_SUCCESS)))
     public ResponseEntity<Map<String, Object>> updateUser(
             @RequestBody UserDto userDtoNew, @SessionAttribute("currentUser") UserDto currentUserDto, Model model) {
         try {
@@ -260,7 +275,10 @@ public class UserController extends BaseController {
     @Operation(summary = "Delete account", description = "Permanently deletes the user account")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = Object.class, example = "{}")))
+            schema = @Schema(implementation = Object.class, example = DELETE_ACCOUNT_REQUEST)))
+    @ApiResponse(responseCode = "200", description = "Deleted user successfully", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = DELETE_ACCOUNT_SUCCESS)))
     public ResponseEntity<Map<String, Object>> deleteUser(
             @SessionAttribute("currentUser") UserDto userDto, SessionStatus sessionStatus) {
         try {
@@ -268,7 +286,7 @@ public class UserController extends BaseController {
             if (success) {
                 sessionStatus.setComplete();
                 return buildSuccessResponse(HttpStatus.OK, "Account deleted successfully",
-                        Map.of("email", userDto.getEmail(), "timestamp", Instant.now()));
+                        Map.of("email", userDto.getEmail()));
             }
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Failed to delete account.");
         } catch (Exception e) {
