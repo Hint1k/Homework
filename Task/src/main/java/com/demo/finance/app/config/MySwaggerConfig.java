@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * The {@code SwaggerConfig} class is a configuration class that sets up Swagger/OpenAPI documentation
+ * The {@code MySwaggerConfig} class is a configuration class that sets up Swagger/OpenAPI documentation
  * for the application. It defines the API information, groups endpoints, and registers specific controllers
  * to be included in the generated API documentation.
  * <p>
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * for organizing and describing the API endpoints.
  */
 @Configuration
-public class SwaggerConfig {
+public class MySwaggerConfig {
 
     /**
      * Configures and customizes the OpenAPI documentation for the application.
@@ -27,8 +27,8 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI().info(new Info()
-                .title("My API")
+                .title("Personal Finance Tracker API")
                 .version("1.0")
-                .description("This is a API documentation for my application"));
+                .description("This is a API documentation for Personal Finance Tracker"));
     }
 }

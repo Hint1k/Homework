@@ -2,7 +2,7 @@ package com.demo.finance.app;
 
 import com.demo.finance.app.config.AppConfig;
 import com.demo.finance.app.config.LiquibaseManager;
-import com.demo.finance.app.config.SwaggerConfig;
+import com.demo.finance.app.config.MySwaggerConfig;
 import com.demo.finance.in.filter.AuthenticationFilter;
 import com.demo.finance.in.filter.ExceptionHandlerFilter;
 import jakarta.servlet.DispatcherType;
@@ -50,7 +50,7 @@ public class TaskMain {
 
         // Initialize Spring context
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-        context.register(AppConfig.class, SwaggerConfig.class);
+        context.register(AppConfig.class, MySwaggerConfig.class);
 
         // Create the Jetty context handler
         ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);

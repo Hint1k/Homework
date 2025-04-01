@@ -3,11 +3,21 @@ package com.demo.finance.app.config;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The {@code AppConfig} class is a configuration class that defines application-wide settings
@@ -21,6 +31,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @ComponentScan(basePackages = {"com.demo.finance", "org.springdoc"})
 public class AppConfig implements WebMvcConfigurer {
+
+    private static final Logger log = Logger.getLogger(AppConfig.class.getName());
 
     /**
      * Configures Cross-Origin Resource Sharing (CORS) mappings to allow requests from specific origins and methods.
@@ -36,7 +48,9 @@ public class AppConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:8080") // Allow requests only from localhost:8080
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowCredentials(true);
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 
     /**
@@ -79,5 +93,35 @@ public class AppConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addRedirectViewController("/", "/swagger-ui/index.html");
+    }
+
+    /**
+     * Configures custom exception handling for specific error scenarios.
+     * <p>
+     * This method adds a custom {@link HandlerExceptionResolver} to handle {@link HttpMessageNotReadableException},
+     * which occurs when a request contains malformed JSON. If such an exception is caught, a structured JSON response
+     * with an HTTP 400 (Bad Request) status is returned. Other exceptions are not handled by this resolver.
+     * </p>
+     *
+     * @param resolvers the list of {@link HandlerExceptionResolver} instances to configure
+     */
+    @Override
+    public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
+        resolvers.add(0, (request, response, handler, e) -> {
+            if (e instanceof HttpMessageNotReadableException) {
+                try {
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    response.setStatus(HttpStatus.BAD_REQUEST.value());
+                    response.getWriter().write(
+                            "{\"error\":\"Invalid JSON format\",\"details\":\"Malformed request body\"}"
+                    );
+                    return new ModelAndView();
+                } catch (IOException ex) {
+                    log.log(Level.SEVERE, "Failed to write JSON error response", ex);
+                    return null;
+                }
+            }
+            return null;
+        });
     }
 }
