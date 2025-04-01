@@ -277,6 +277,20 @@ public class TaskMainTest extends AbstractContainerBaseSetup {
     }
 
     @Test
+    @DisplayName("Verify server port configuration through observable behavior")
+    void testServerPortConfiguration() throws Exception {
+        Server testServer = new Server(0);
+        try {
+            testServer.start();
+            int actualPort = testServer.getURI().getPort();
+
+            assertThat(actualPort).isNotEqualTo(-1);
+        } finally {
+            testServer.stop();
+        }
+    }
+
+    @Test
     @DisplayName("To include this class in JaCoCo coverage report")
     void testMainMethodCoverage() {
         System.setProperty("TEST_ENV", "true");

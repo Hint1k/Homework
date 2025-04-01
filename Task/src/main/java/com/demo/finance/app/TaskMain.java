@@ -16,6 +16,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.DispatcherServlet;
 
 import java.util.EnumSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -26,6 +27,8 @@ import java.util.logging.Logger;
 public class TaskMain {
 
     private static final Logger log = Logger.getLogger(TaskMain.class.getName());
+    private static final int DEFAULT_PORT = 8080;
+    private static final String SERVER_PORT_PROPERTY = "server.port";
 
     /**
      * The main method initializes and starts the Finance Application.
@@ -68,8 +71,8 @@ public class TaskMain {
         // Register filters manually in Jetty
         registerFilters(context, contextHandler);
 
-        // Configure server
-        Server server = new Server(8080);
+        // Configure server and port
+        Server server = new Server(getServerPort());
         server.setHandler(contextHandler);
         configureRequestLogging(server);
 
@@ -83,6 +86,32 @@ public class TaskMain {
         } catch (Exception e) {
             log.severe("Failed to start the server: " + e.getMessage());
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Helper method to resolve the server port from system properties with fallback to default.
+     * Handles cases where the port is not a number or property is missing.
+     *
+     * @return the resolved server port (either from system property or default)
+     */
+    private static int getServerPort() {
+        String portStr = System.getProperty(SERVER_PORT_PROPERTY);
+        if (portStr == null || portStr.trim().isEmpty()) {
+            log.warning(String.format("System property '%s' not found, using default port %d",
+                    SERVER_PORT_PROPERTY, DEFAULT_PORT));
+            return DEFAULT_PORT;
+        }
+        try {
+            int port = Integer.parseInt(portStr);
+            if (port <= 0 || port > 65535) {
+                throw new NumberFormatException("Port out of range");
+            }
+            return port;
+        } catch (NumberFormatException e) {
+            log.log(Level.WARNING,
+                    String.format("Invalid port number '%s', using default port %d", portStr, DEFAULT_PORT), e);
+            return DEFAULT_PORT;
         }
     }
 
