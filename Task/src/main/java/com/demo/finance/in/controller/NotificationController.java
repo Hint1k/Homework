@@ -2,8 +2,12 @@ package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.out.service.NotificationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +52,10 @@ public class NotificationController extends BaseController {
      * is found or an exception occurs
      */
     @GetMapping("/budget")
+    @Operation(summary = "Get budget notification", description = "Retrieves budget-related notifications")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> getBudgetNotification(
             @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -75,6 +83,10 @@ public class NotificationController extends BaseController {
      * is found or an exception occurs
      */
     @GetMapping("/goal")
+    @Operation(summary = "Get goal notification", description = "Retrieves goal-related notifications")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> getGoalNotification(
             @SessionAttribute("currentUser") UserDto currentUser) {
         try {

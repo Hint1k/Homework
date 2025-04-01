@@ -7,8 +7,12 @@ import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.BudgetService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,6 +61,13 @@ public class BudgetController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @PostMapping
+    @Operation(summary = "Set monthly budget", description = "Sets user's monthly budget limit")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Budget data", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BudgetDto.class,
+            requiredProperties = {"monthlyLimit"}, example = """
+            {
+              "monthlyLimit": "1500"
+            }""")))
     public ResponseEntity<Map<String, Object>> setMonthlyBudget(
             @RequestBody BudgetDto budgetDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -86,6 +97,10 @@ public class BudgetController extends BaseController {
      * @return a success response containing the budget data or an error response if the data is not found
      */
     @GetMapping("/budget")
+    @Operation(summary = "Get budget data", description = "Returns user's budget information")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> getBudgetData(@SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();

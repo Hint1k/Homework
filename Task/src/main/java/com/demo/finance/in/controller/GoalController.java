@@ -10,7 +10,11 @@ import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.GoalService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,6 +72,16 @@ public class GoalController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @PostMapping
+    @Operation(summary = "Create goal", description = "Creates a new financial goal")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Goal data", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class,
+            requiredProperties = {"goalName", "targetAmount", "duration", "startTime"}, example = """
+            {
+              "goalName": "1",
+              "targetAmount": "1500",
+              "duration": "3",
+              "startTime": "2025-01-01"
+            }""")))
     public ResponseEntity<Map<String, Object>> createGoal(
             @RequestBody GoalDto goalDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -101,6 +115,10 @@ public class GoalController extends BaseController {
      * @return a paginated response containing goal data or an error response if validation fails
      */
     @GetMapping
+    @Operation(summary = "Get goals", description = "Returns paginated list of goals")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> getPaginatedGoals(
             @ModelAttribute PaginationParams paramsNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -128,6 +146,10 @@ public class GoalController extends BaseController {
      * @return a success response containing the goal data or an error response if validation fails
      */
     @GetMapping("/{goalId}")
+    @Operation(summary = "Get goal", description = "Returns goal details by ID")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> getGoalById(
             @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -158,6 +180,15 @@ public class GoalController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @PutMapping("/{goalId}")
+    @Operation(summary = "Update goal", description = "Updates existing goal")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated goal data", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class,
+            requiredProperties = {"goalName", "targetAmount", "duration"}, example = """
+            {
+              "goalName": "2",
+              "targetAmount": "1500",
+              "duration": "3"
+            }""")))
     public ResponseEntity<Map<String, Object>> updateGoal(
             @PathVariable("goalId") String goalId, @RequestBody GoalDto goalDtoNew,
             @SessionAttribute("currentUser") UserDto currentUser) {
@@ -197,6 +228,10 @@ public class GoalController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @DeleteMapping("/{goalId}")
+    @Operation(summary = "Delete goal", description = "Deletes goal by ID")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> deleteGoal(
             @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
         try {

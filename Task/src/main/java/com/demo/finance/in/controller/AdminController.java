@@ -12,8 +12,12 @@ import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.AdminService;
 import com.demo.finance.out.service.TransactionService;
 import com.demo.finance.out.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,6 +78,10 @@ public class AdminController extends BaseController {
      * @return a paginated response containing user data or an error response if validation fails
      */
     @GetMapping
+    @Operation(summary = "Get users", description = "Returns paginated list of users")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> getPaginatedUsers(@ModelAttribute PaginationParams paramsNew) {
         try {
             PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
@@ -96,6 +104,10 @@ public class AdminController extends BaseController {
      * @return a paginated response containing transaction data or an error response if validation fails
      */
     @GetMapping("/transactions/{userId}")
+    @Operation(summary = "Get user transactions", description = "Returns paginated transactions for user")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> getPaginatedTransactionsForUser(
             @PathVariable("userId") String userId, @ModelAttribute PaginationParams paramsNew) {
         try {
@@ -120,6 +132,10 @@ public class AdminController extends BaseController {
      * @return a success response containing the user's details or an error response if validation fails
      */
     @GetMapping("/{userId}")
+    @Operation(summary = "Get user", description = "Returns user details by ID")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> getUserDetails(@PathVariable("userId") String userId) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.GET);
@@ -146,6 +162,13 @@ public class AdminController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @PatchMapping("/block/{userId}")
+    @Operation(summary = "Block/unblock user", description = "Updates user's blocked status")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Block status", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
+            requiredProperties = {"blocked"}, example = """
+            {
+              "blocked": false
+            }""")))
     public ResponseEntity<Map<String, Object>> blockUnblockUser(
             @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
         try {
@@ -174,6 +197,13 @@ public class AdminController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @PatchMapping("/role/{userId}")
+    @Operation(summary = "Update user role", description = "Updates user's role")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Role update data", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
+            requiredProperties = {"role"}, example = """
+            {
+              "role": "user"
+            }""")))
     public ResponseEntity<Map<String, Object>> updateUserRole(
             @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
         try {
@@ -200,6 +230,10 @@ public class AdminController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @DeleteMapping("/{userId}")
+    @Operation(summary = "Delete user", description = "Permanently deletes user account")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.DELETE);

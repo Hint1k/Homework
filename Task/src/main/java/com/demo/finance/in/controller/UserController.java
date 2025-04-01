@@ -9,13 +9,16 @@ import com.demo.finance.exception.DuplicateEmailException;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -78,6 +81,15 @@ public class UserController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @PostMapping("/registration")
+    @Operation(summary = "Register user", description = "Creates a new user account")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User registration data", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
+            requiredProperties = {"name", "email", "password"}, example = """
+            {
+              "name": "John Doe",
+              "email": "user@example.com",
+              "password": "securePassword123"
+            }""")))
     public ResponseEntity<Map<String, Object>> handleRegistration(@RequestBody UserDto userDtoNew) {
         try {
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.REGISTER_USER);
@@ -111,6 +123,14 @@ public class UserController extends BaseController {
      * @return a success response if authentication succeeds or an error response if validation fails
      */
     @PostMapping("/authenticate")
+    @Operation(summary = "Authenticate user", description = "Logs in a user with credentials")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User credentials", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
+            requiredProperties = {"email", "password"}, example = """
+            {
+              "email": "user@example.com",
+              "password": "securePassword123"
+            }""")))
     public ResponseEntity<Map<String, Object>> handleAuthentication(
             @RequestBody UserDto userDtoNew, HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -148,6 +168,10 @@ public class UserController extends BaseController {
      * @return a success response indicating that the user has been logged out
      */
     @PostMapping("/logout")
+    @Operation(summary = "Logout user", description = "Invalidates the current session")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> logoutUser(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession(false);
         if (session != null) {
@@ -170,6 +194,10 @@ public class UserController extends BaseController {
      * @return a success response containing the authenticated user's details
      */
     @GetMapping("/me")
+    @Operation(summary = "Get current user", description = "Returns authenticated user details")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> getCurrentUser(@SessionAttribute("currentUser") UserDto userDto) {
         return buildSuccessResponse(HttpStatus.OK, "Authenticated user details", userDto);
     }
@@ -187,6 +215,15 @@ public class UserController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @PutMapping
+    @Operation(summary = "Update user", description = "Updates user details")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated user data", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
+            requiredProperties = {"name", "email", "password"}, example = """
+            {
+              "name": "New Name",
+              "email": "new@example.com",
+              "password": "newPassword123"
+            }""")))
     public ResponseEntity<Map<String, Object>> updateUser(
             @RequestBody UserDto userDtoNew, @SessionAttribute("currentUser") UserDto currentUserDto, Model model) {
         try {
@@ -220,6 +257,10 @@ public class UserController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @DeleteMapping
+    @Operation(summary = "Delete account", description = "Permanently deletes the user account")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> deleteUser(
             @SessionAttribute("currentUser") UserDto userDto, SessionStatus sessionStatus) {
         try {

@@ -9,8 +9,12 @@ import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.ReportService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -65,6 +69,14 @@ public class ReportController extends BaseController {
      * @return a success response containing the generated report or an error response if validation fails
      */
     @PostMapping("/by-date")
+    @Operation(summary = "Generate report by date", description = "Creates financial report for date range")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Date range", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDatesDto.class,
+            requiredProperties = {"fromDate", "toDate"}, example = """
+            {
+              "fromDate": "2025-01-01",
+              "toDate": "2025-06-30"
+            }""")))
     public ResponseEntity<Map<String, Object>> generateReportByDate(
             @RequestBody ReportDatesDto reportDatesDto, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -96,6 +108,14 @@ public class ReportController extends BaseController {
      * @return a success response containing the categorized expenses or an error response if validation fails
      */
     @GetMapping("/expenses-by-category")
+    @Operation(summary = "Get expenses by category", description = "Analyzes expenses by category for date range")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Date range", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDatesDto.class,
+            requiredProperties = {"fromDate", "toDate"}, example = """
+            {
+              "fromDate": "2025-01-01",
+              "toDate": "2025-06-30"
+            }""")))
     public ResponseEntity<Map<String, Object>> analyzeExpensesByCategory(
             @RequestBody ReportDatesDto reportDatesDto, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -127,6 +147,10 @@ public class ReportController extends BaseController {
      * @return a success response containing the general report or an error response if no data is found
      */
     @GetMapping("/report")
+    @Operation(summary = "Get general report", description = "Generates overall financial report")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> generateGeneralReport(
             @SessionAttribute("currentUser") UserDto currentUser) {
         try {

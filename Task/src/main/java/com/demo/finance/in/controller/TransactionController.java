@@ -10,7 +10,11 @@ import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.TransactionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,6 +73,17 @@ public class TransactionController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @PostMapping
+    @Operation(summary = "Create transaction", description = "Creates a new transaction")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Transaction data", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class,
+            requiredProperties = {"amount", "category", "date", "description", "type"}, example = """
+            {
+              "amount": "500",
+              "category": "1",
+              "date": "2025-03-23",
+              "description": "1",
+              "type": "EXPENSE"
+            }""")))
     public ResponseEntity<Map<String, Object>> createTransaction(
             @RequestBody TransactionDto transactionDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -103,6 +118,10 @@ public class TransactionController extends BaseController {
      * @return a paginated response containing transaction data or an error response if validation fails
      */
     @GetMapping
+    @Operation(summary = "Get transactions", description = "Returns paginated transactions")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> getPaginatedTransactions(
             @ModelAttribute PaginationParams paramsNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -130,6 +149,10 @@ public class TransactionController extends BaseController {
      * @return a success response containing the transaction data or an error response if validation fails
      */
     @GetMapping("/{transactionId}")
+    @Operation(summary = "Get transaction", description = "Returns transaction by ID")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> getTransactionById(
             @PathVariable("transactionId") String transactionId, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -161,6 +184,15 @@ public class TransactionController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @PutMapping("/{transactionId}")
+    @Operation(summary = "Update transaction", description = "Updates existing transaction")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated transaction data", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class,
+            requiredProperties = {"amount", "category", "description"}, example = """
+            {
+              "amount": "750",
+              "category": "2",
+              "description": "2"
+            }""")))
     public ResponseEntity<Map<String, Object>> updateTransaction(
             @PathVariable("transactionId") String transactionId, @RequestBody TransactionDto transactionDtoNew,
             @SessionAttribute("currentUser") UserDto currentUser) {
@@ -202,6 +234,10 @@ public class TransactionController extends BaseController {
      * @return a success response if the operation succeeds or an error response if validation fails
      */
     @DeleteMapping("/{transactionId}")
+    @Operation(summary = "Delete transaction", description = "Deletes transaction by ID")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = Object.class, example = "{}")))
     public ResponseEntity<Map<String, Object>> deleteTransaction(
             @PathVariable("transactionId") String transactionId,
             @SessionAttribute("currentUser") UserDto currentUser) {
