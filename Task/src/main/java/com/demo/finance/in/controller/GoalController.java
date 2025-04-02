@@ -33,11 +33,16 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 
+import static com.demo.finance.domain.utils.SwaggerExamples.Admin.INVALID_PAGE_RESPONSE;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.CREATE_GOAL_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.CREATE_GOAL_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.DELETE_GOAL_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.GET_GOALS_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.GET_GOAL_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.Goal.GOAL_NOT_FOUND_RESPONSE;
+import static com.demo.finance.domain.utils.SwaggerExamples.Goal.INVALID_GOAL_ID_RESPONSE;
+import static com.demo.finance.domain.utils.SwaggerExamples.Goal.INVALID_JSON_RESPONSE;
+import static com.demo.finance.domain.utils.SwaggerExamples.Goal.MISSING_GOAL_FIELD_RESPONSE;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.UPDATE_GOAL_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.UPDATE_GOAL_SUCCESS;
 
@@ -91,6 +96,9 @@ public class GoalController extends BaseController {
     @ApiResponse(responseCode = "201", description = "Goal created successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = CREATE_GOAL_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad request - Invalid json format", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidJsonFormat",
+            value = INVALID_JSON_RESPONSE)))
     public ResponseEntity<Map<String, Object>> createGoal(
             @RequestBody GoalDto goalDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -128,6 +136,9 @@ public class GoalController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Goals retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PaginatedResponse.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_GOALS_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid page parameter", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidPage",
+            value = INVALID_PAGE_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getPaginatedGoals(
             @ParameterObject @ModelAttribute PaginationParams paramsNew,
             @SessionAttribute("currentUser") UserDto currentUser) {
@@ -161,6 +172,9 @@ public class GoalController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Goal retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_GOAL_SUCCESS)))
+    @ApiResponse(responseCode = "404", description = "Not Found - Goal not found", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "GoalNotFound",
+            value = GOAL_NOT_FOUND_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getGoalById(
             @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -173,8 +187,8 @@ public class GoalController extends BaseController {
             }
             return buildErrorResponse(
                     HttpStatus.NOT_FOUND, "Goal not found or you are not the owner of the goal.");
-        } catch (NumberFormatException e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid goal ID.");
+        } catch (ValidationException e) {
+            return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -198,6 +212,9 @@ public class GoalController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Goal updated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_GOAL_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Missing goal field ", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "ValidationError",
+            value = MISSING_GOAL_FIELD_RESPONSE)))
     public ResponseEntity<Map<String, Object>> updateGoal(
             @PathVariable("goalId") String goalId, @RequestBody GoalDto goalDtoNew,
             @SessionAttribute("currentUser") UserDto currentUser) {
@@ -218,8 +235,6 @@ public class GoalController extends BaseController {
             }
             return buildErrorResponse(
                     HttpStatus.BAD_REQUEST, "Failed to update goal or you are not the owner of the goal.");
-        } catch (NumberFormatException e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid goal ID.");
         } catch (ValidationException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -242,6 +257,9 @@ public class GoalController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Goal deleted successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_GOAL_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid goal ID format", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidGoalId",
+            value = INVALID_GOAL_ID_RESPONSE)))
     public ResponseEntity<Map<String, Object>> deleteGoal(
             @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -254,8 +272,8 @@ public class GoalController extends BaseController {
             }
             return buildErrorResponse(
                     HttpStatus.BAD_REQUEST, "Failed to delete goal or you are not the owner of the goal.");
-        } catch (NumberFormatException e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid goal ID");
+        } catch (ValidationException e) {
+            return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 }

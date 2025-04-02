@@ -256,18 +256,37 @@ class GoalControllerTest {
     }
 
     @Test
-    @DisplayName("Invalid goal ID - NumberFormatException")
+    @DisplayName("Invalid goal ID - ValidationException")
     void testGetGoalById_InvalidId() {
         try {
             when(validationUtils.parseLong("invalid"))
-                    .thenThrow(new NumberFormatException("Invalid goal ID"));
+                    .thenThrow(new ValidationException("Invalid numeric format for id: invalid"));
 
             mockMvc.perform(get("/api/goals/invalid")
                             .sessionAttr("currentUser", currentUser))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error").value("Invalid goal ID."));
+                    .andExpect(jsonPath("$.error")
+                            .value("Invalid numeric format for id: invalid"));
 
             verify(validationUtils, times(1)).parseLong("invalid");
+        } catch (Exception e) {
+            fail("Test failed due to exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("Negative goal ID - ValidationException")
+    void testGetGoalById_NegativeId() {
+        try {
+            when(validationUtils.parseLong("-1"))
+                    .thenThrow(new ValidationException("Id cannot be negative"));
+
+            mockMvc.perform(get("/api/goals/-1")
+                            .sessionAttr("currentUser", currentUser))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error").value("Id cannot be negative"));
+
+            verify(validationUtils, times(1)).parseLong("-1");
         } catch (Exception e) {
             fail("Test failed due to exception: " + e.getMessage());
         }

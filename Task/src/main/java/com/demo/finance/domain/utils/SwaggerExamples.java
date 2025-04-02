@@ -5,6 +5,7 @@ package com.demo.finance.domain.utils;
  * Organized by API endpoint categories.
  */
 public final class SwaggerExamples {
+
     /**
      * Example JSON strings for user-related endpoints.
      */
@@ -30,6 +31,12 @@ public final class SwaggerExamples {
                   "timestamp": "2025-04-01T12:00:00Z"
                 }
                 """;
+        public static final String INVALID_REGISTRATION_RESPONSE = """
+                {
+                    "error": "Validation error: Missing required field: name",
+                    "timestamp": "2025-04-02T05:24:25.495714235Z"
+                }
+                """;
         public static final String AUTHENTICATION_REQUEST = """
                 {
                   "email": "jay@demo.com",
@@ -48,6 +55,12 @@ public final class SwaggerExamples {
                   },
                   "message": "User authenticated successfully",
                   "timestamp": "2025-04-01T12:00:00Z"
+                }
+                """;
+        public static final String INVALID_CREDENTIALS_RESPONSE = """
+                {
+                    "error": "Invalid credentials.",
+                    "timestamp": "2025-04-02T05:19:29.720588708Z"
                 }
                 """;
         public static final String LOGOUT_SUCCESS = """
@@ -79,6 +92,12 @@ public final class SwaggerExamples {
                             "message": "User updated successfully",
                             "timestamp": "2025-04-01T13:15:17.387825014Z"
                         }
+                """;
+        public static final String MISSING_ACCOUNT_FIELD_RESPONSE = """
+                {
+                    "error": "Validation error: Missing required field: email",
+                    "timestamp": "2025-04-02T05:33:18.928604221Z"
+                }
                 """;
         public static final String GET_DETAILS_SUCCESS = """
                 {
@@ -163,6 +182,12 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-01T14:14:52.883529502Z"
                 }
                 """;
+        public static final String USER_NOT_FOUND_RESPONSE = """
+                {
+                    "error": "User not found.",
+                    "timestamp": "2025-04-02T05:36:57.875290445Z"
+                }
+                """;
         public static final String GET_USER_TRANSACTIONS_SUCCESS = """
                 {
                      "metadata": {
@@ -189,6 +214,18 @@ public final class SwaggerExamples {
                      ]
                 }
                 """;
+        public static final String INVALID_SIZE_RESPONSE = """
+                {
+                    "error": "Validation error: Size cannot exceed 100.",
+                    "timestamp": "2025-04-02T05:38:30.701197062Z"
+                }
+                """;
+        public static final String INVALID_PAGE_RESPONSE = """
+                {
+                    "error": "Invalid pagination parameters: Validation error: Page must be positive integer: -7",
+                    "timestamp": "2025-04-02T06:40:59.543748926Z"
+                }
+                """;
         public static final String UPDATE_ROLE_REQUEST = """
                 {
                   "role": "user"
@@ -211,6 +248,12 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-01T14:15:37.652176849Z"
                 }
                 """;
+        public static final String UPDATE_DEFAULT_ADMIN_RESPONSE = """
+                {
+                    "error": "Default Admin role cannot be changed",
+                    "timestamp": "2025-04-02T08:28:06.355623207Z"
+                }
+                """;
         public static final String BLOCK_USER_REQUEST = """
                 {
                   "blocked": false
@@ -231,6 +274,12 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-01T14:16:16.009018082Z"
                 }
                 """;
+        public static final String BLOCK_DEFAULT_ADMIN_RESPONSE = """
+                {
+                    "error": "Default Admin cannot be blocked or unblocked",
+                    "timestamp": "2025-04-02T08:28:09.726678036Z"
+                }
+                """;
         public static final String DELETE_USER_SUCCESS = """
                 {
                     "data": {
@@ -238,6 +287,12 @@ public final class SwaggerExamples {
                     },
                     "message": "Account deleted successfully",
                     "timestamp": "2025-04-01T14:52:29.386947135Z"
+                }
+                """;
+        public static final String INVALID_USER_ID_RESPONSE = """
+                {
+                    "error": "Invalid user ID format. User ID must be a positive integer.",
+                    "timestamp": "2025-04-02T06:34:05.728005962Z"
                 }
                 """;
     }
@@ -263,6 +318,12 @@ public final class SwaggerExamples {
                     },
                     "message": "Transaction found successfully",
                     "timestamp": "2025-04-01T14:20:51.419891845Z"
+                }
+                """;
+        public static final String TRANSACTION_NOT_FOUND_RESPONSE = """
+                {
+                    "error": "Transaction not found or you are not the owner of the transaction.",
+                    "timestamp": "2025-04-02T06:59:22.129736191Z"
                 }
                 """;
         public static final String GET_TRANSACTIONS_SUCCESS = """
@@ -300,6 +361,12 @@ public final class SwaggerExamples {
                   "type": "EXPENSE"
                 }
                 """;
+        public static final String INVALID_TRANSACTION_TYPE_RESPONSE = """
+                {
+                    "error": "Validation error: Type must be either INCOME or EXPENSE.",
+                    "timestamp": "2025-04-02T07:02:38.101826557Z"
+                }
+                """;
         public static final String CREATE_TRANSACTION_SUCCESS = """
                 {
                       "data": {
@@ -324,6 +391,12 @@ public final class SwaggerExamples {
                   "amount": "750",
                   "category": "Luxury",
                   "description": "Gold shopping"
+                }
+                """;
+        public static final String MISSING_TRANSACTION_FIELD_RESPONSE = """
+                {
+                    "error": "Validation error: Missing required field: amount",
+                    "timestamp": "2025-04-02T07:06:27.071108886Z"
                 }
                 """;
         public static final String UPDATE_TRANSACTION_SUCCESS = """
@@ -354,6 +427,12 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-01T14:46:47.064719554Z"
                 }
                 """;
+        public static final String INVALID_TRANSACTION_ID_RESPONSE = """
+                {
+                    "error": "Invalid numeric format for id: a",
+                    "timestamp": "2025-04-02T07:25:03.619473835Z"
+                }
+                """;
     }
 
     /**
@@ -377,6 +456,12 @@ public final class SwaggerExamples {
                     },
                     "message": "Goal found successfully",
                     "timestamp": "2025-04-01T14:35:09.321050058Z"
+                }
+                """;
+        public static final String INVALID_JSON_RESPONSE = """
+                {
+                    "error": "Invalid JSON format",
+                    "details": "Malformed request body"
                 }
                 """;
         public static final String GET_GOALS_SUCCESS = """
@@ -403,6 +488,12 @@ public final class SwaggerExamples {
                             ]
                         }
                     ]
+                }
+                """;
+        public static final String GOAL_NOT_FOUND_RESPONSE = """
+                {
+                    "error": "Goal not found or you are not the owner of the goal.",
+                    "timestamp": "2025-04-02T07:54:23.103440768Z"
                 }
                 """;
         public static final String CREATE_GOAL_REQUEST = """
@@ -459,6 +550,12 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-01T14:31:24.355103445Z"
                 }
                 """;
+        public static final String MISSING_GOAL_FIELD_RESPONSE = """
+                {
+                    "error": "Validation error: Missing required field: targetAmount",
+                    "timestamp": "2025-04-02T07:56:25.737010554Z"
+                }
+                """;
         public static final String DELETE_GOAL_SUCCESS = """
                 {
                     "data": {
@@ -466,6 +563,12 @@ public final class SwaggerExamples {
                     },
                     "message": "Goal deleted successfully",
                     "timestamp": "2025-04-01T14:47:34.849803678Z"
+                }
+                """;
+        public static final String INVALID_GOAL_ID_RESPONSE = """
+                {
+                    "error": "Invalid numeric format for id: a",
+                    "timestamp": "2025-04-02T08:02:27.821858249Z"
                 }
                 """;
     }
@@ -490,6 +593,12 @@ public final class SwaggerExamples {
         public static final String CREATE_BUDGET_REQUEST = """
                 {
                   "monthlyLimit": "1500"
+                }
+                """;
+        public static final String MISSING_BUDGET_FIELD_RESPONSE = """
+                {
+                    "error": "Validation error: Missing required field: monthlyLimit",
+                    "timestamp": "2025-04-02T08:06:42.557539762Z"
                 }
                 """;
         public static final String CREATE_BUDGET_SUCCESS = """
@@ -555,6 +664,12 @@ public final class SwaggerExamples {
                     },
                     "message": "Report by dates generated successfully",
                     "timestamp": "2025-04-01T14:42:23.221611821Z"
+                }
+                """;
+        public static final String MISSING_REPORT_FIELD_RESPONSE = """
+                {
+                    "error": "Validation error: Missing required field: fromDate",
+                    "timestamp": "2025-04-02T08:10:54.773234500Z"
                 }
                 """;
     }

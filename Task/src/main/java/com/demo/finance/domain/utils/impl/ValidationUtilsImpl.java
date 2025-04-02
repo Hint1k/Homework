@@ -129,7 +129,11 @@ public class ValidationUtilsImpl implements ValidationUtils {
             throw new ValidationException("Id cannot be null or empty.");
         }
         try {
-            return Long.parseLong(value.trim());
+            long id = Long.parseLong(value.trim());
+            if (id < 0) {
+                throw new ValidationException("Id cannot be negative");
+            }
+            return id;
         } catch (NumberFormatException e) {
             throw new ValidationException("Invalid numeric format for id: " + value);
         }

@@ -8,6 +8,7 @@ import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
+import com.demo.finance.exception.UserNotFoundException;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.AdminService;
 import com.demo.finance.out.service.TransactionService;
@@ -33,14 +34,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+import static com.demo.finance.domain.utils.SwaggerExamples.Admin.BLOCK_DEFAULT_ADMIN_RESPONSE;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.BLOCK_USER_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.BLOCK_USER_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.DELETE_USER_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.GET_USERS_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.GET_USER_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.GET_USER_TRANSACTIONS_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.Admin.INVALID_PAGE_RESPONSE;
+import static com.demo.finance.domain.utils.SwaggerExamples.Admin.INVALID_SIZE_RESPONSE;
+import static com.demo.finance.domain.utils.SwaggerExamples.Admin.INVALID_USER_ID_RESPONSE;
+import static com.demo.finance.domain.utils.SwaggerExamples.Admin.UPDATE_DEFAULT_ADMIN_RESPONSE;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.UPDATE_ROLE_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Admin.UPDATE_ROLE_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.Admin.USER_NOT_FOUND_RESPONSE;
 
 /**
  * The {@code AdminController} class is a REST controller that provides endpoints for administrative operations
@@ -94,6 +101,9 @@ public class AdminController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Users retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PaginatedResponse.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_USERS_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid page parameter", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidPage",
+            value = INVALID_PAGE_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getPaginatedUsers(
             @ParameterObject @ModelAttribute PaginationParams paramsNew) {
         try {
@@ -121,6 +131,9 @@ public class AdminController extends BaseController {
     @ApiResponse(responseCode = "200", description = "User transactions retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PaginatedResponse.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_USER_TRANSACTIONS_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid size parameter", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidSize",
+            value = INVALID_SIZE_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getPaginatedTransactionsForUser(
             @PathVariable("userId") String userId, @ParameterObject @ModelAttribute PaginationParams paramsNew) {
         try {
@@ -129,7 +142,7 @@ public class AdminController extends BaseController {
             PaginatedResponse<TransactionDto> paginatedResponse =
                     transactionService.getPaginatedTransactionsForUser(userIdLong, params.page(), params.size());
             return buildPaginatedResponse(userIdLong, paginatedResponse);
-        } catch (ValidationException e) {
+        } catch (ValidationException | IllegalArgumentException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
@@ -150,6 +163,9 @@ public class AdminController extends BaseController {
     @ApiResponse(responseCode = "200", description = "User details retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_USER_SUCCESS)))
+    @ApiResponse(responseCode = "404", description = "Not Found - User not found", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "UserNotFound",
+            value = USER_NOT_FOUND_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getUserDetails(@PathVariable("userId") String userId) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.GET);
@@ -159,7 +175,7 @@ public class AdminController extends BaseController {
                 return buildSuccessResponse(HttpStatus.OK, "User details", userDto);
             }
             return buildErrorResponse(HttpStatus.NOT_FOUND, "User not found.");
-        } catch (ValidationException e) {
+        } catch (ValidationException | IllegalArgumentException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
@@ -183,6 +199,9 @@ public class AdminController extends BaseController {
     @ApiResponse(responseCode = "200", description = "User blocked/unblocked successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = BLOCK_USER_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad request - Default admin can't be changed", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "DefaultAdmin",
+            value = BLOCK_DEFAULT_ADMIN_RESPONSE)))
     public ResponseEntity<Map<String, Object>> blockUnblockUser(
             @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
         try {
@@ -194,7 +213,7 @@ public class AdminController extends BaseController {
                         "User blocked/unblocked status changed successfully", UserDto.removePassword(userDto));
             }
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Failed to block/unblock user.");
-        } catch (ValidationException e) {
+        } catch (ValidationException | UserNotFoundException | IllegalArgumentException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
@@ -218,6 +237,9 @@ public class AdminController extends BaseController {
     @ApiResponse(responseCode = "200", description = "User role updated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_ROLE_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad request - Default admin can't be changed", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "DefaultAdmin",
+            value = UPDATE_DEFAULT_ADMIN_RESPONSE)))
     public ResponseEntity<Map<String, Object>> updateUserRole(
             @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
         try {
@@ -229,7 +251,7 @@ public class AdminController extends BaseController {
                         HttpStatus.OK, "User role updated successfully", UserDto.removePassword(userDto));
             }
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Failed to update role.");
-        } catch (ValidationException e) {
+        } catch (ValidationException | UserNotFoundException | IllegalArgumentException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
@@ -249,6 +271,9 @@ public class AdminController extends BaseController {
     @ApiResponse(responseCode = "200", description = "User deleted successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_USER_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid user ID format", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidUserId",
+            value = INVALID_USER_ID_RESPONSE)))
     public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) {
         try {
             Long userIdLong = validationUtils.parseUserId(userId, Mode.DELETE);
@@ -258,7 +283,7 @@ public class AdminController extends BaseController {
                         Map.of("userId", userIdLong));
             }
             return buildErrorResponse(HttpStatus.NOT_FOUND, "User not found.");
-        } catch (ValidationException e) {
+        } catch (ValidationException | IllegalArgumentException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }

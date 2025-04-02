@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -257,18 +258,37 @@ class TransactionControllerTest {
     }
 
     @Test
-    @DisplayName("Invalid transaction ID - NumberFormatException")
+    @DisplayName("Invalid transaction ID - ValidationException")
     void testGetTransactionById_InvalidId() {
         try {
             when(validationUtils.parseLong("invalid"))
-                    .thenThrow(new NumberFormatException("Invalid transaction ID"));
+                    .thenThrow(new ValidationException("Invalid numeric format for id: invalid"));
 
             mockMvc.perform(get("/api/transactions/invalid")
                             .sessionAttr("currentUser", currentUser))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error").value("Invalid transaction ID."));
+                    .andExpect(jsonPath("$.error")
+                            .value("Invalid numeric format for id: invalid"));
 
             verify(validationUtils, times(1)).parseLong("invalid");
+        } catch (Exception e) {
+            fail("Test failed due to exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("Negative transaction ID - ValidationException")
+    void testGetTransactionById_NegativeId() {
+        try {
+            when(validationUtils.parseLong("-1"))
+                    .thenThrow(new ValidationException("Id cannot be negative"));
+
+            mockMvc.perform(get("/api/transactions/-1")
+                            .sessionAttr("currentUser", currentUser))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error").value("Id cannot be negative"));
+
+            verify(validationUtils, times(1)).parseLong("-1");
         } catch (Exception e) {
             fail("Test failed due to exception: " + e.getMessage());
         }

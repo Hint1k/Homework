@@ -28,6 +28,7 @@ import java.util.Map;
 import static com.demo.finance.domain.utils.SwaggerExamples.Budget.CREATE_BUDGET_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Budget.CREATE_BUDGET_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Budget.GET_BUDGET_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.Budget.MISSING_BUDGET_FIELD_RESPONSE;
 
 /**
  * The {@code BudgetController} class is a REST controller that provides endpoints for managing user budgets.
@@ -74,6 +75,9 @@ public class BudgetController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Budget set successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Budget.class),
             examples = @ExampleObject(name = "SuccessResponse", value = CREATE_BUDGET_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Missing budget field ", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "ValidationError",
+            value = MISSING_BUDGET_FIELD_RESPONSE)))
     public ResponseEntity<Map<String, Object>> setMonthlyBudget(
             @RequestBody BudgetDto budgetDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {

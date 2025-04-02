@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import static com.demo.finance.domain.utils.SwaggerExamples.Report.EXPENSES_BY_CATEGORY_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Report.EXPENSES_BY_CATEGORY_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Report.GET_REPORT_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.Report.MISSING_REPORT_FIELD_RESPONSE;
 import static com.demo.finance.domain.utils.SwaggerExamples.Report.REPORT_BY_DATE_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Report.REPORT_BY_DATE_SUCCESS;
 
@@ -84,6 +85,9 @@ public class ReportController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Report generated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = REPORT_BY_DATE_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Missing report field ", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "ValidationError",
+            value = MISSING_REPORT_FIELD_RESPONSE)))
     public ResponseEntity<Map<String, Object>> generateReportByDate(
             @RequestBody ReportDatesDto reportDatesDto, @SessionAttribute("currentUser") UserDto currentUser) {
         try {

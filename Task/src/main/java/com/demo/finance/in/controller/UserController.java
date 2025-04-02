@@ -39,6 +39,9 @@ import java.util.Map;
 import static com.demo.finance.domain.utils.SwaggerExamples.User.AUTHENTICATION_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.User.AUTHENTICATION_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.User.DELETE_ACCOUNT_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.INVALID_CREDENTIALS_RESPONSE;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.INVALID_REGISTRATION_RESPONSE;
+import static com.demo.finance.domain.utils.SwaggerExamples.User.MISSING_ACCOUNT_FIELD_RESPONSE;
 import static com.demo.finance.domain.utils.SwaggerExamples.User.LOGOUT_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.User.REGISTRATION_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.User.REGISTRATION_SUCCESS;
@@ -99,6 +102,9 @@ public class UserController extends BaseController {
     @ApiResponse(responseCode = "201", description = "User registered successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = REGISTRATION_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Validation error", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "ValidationError",
+            value = INVALID_REGISTRATION_RESPONSE)))
     public ResponseEntity<Map<String, Object>> handleRegistration(@RequestBody UserDto userDtoNew) {
         try {
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.REGISTER_USER);
@@ -139,6 +145,9 @@ public class UserController extends BaseController {
     @ApiResponse(responseCode = "200", description = "User authenticated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = AUTHENTICATION_SUCCESS)))
+    @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidCredentials",
+            value = INVALID_CREDENTIALS_RESPONSE)))
     public ResponseEntity<Map<String, Object>> handleAuthentication(
             @RequestBody UserDto userDtoNew, HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -232,6 +241,9 @@ public class UserController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Updated user successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_ACCOUNT_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Missing account field", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "ValidationError",
+            value = MISSING_ACCOUNT_FIELD_RESPONSE)))
     public ResponseEntity<Map<String, Object>> updateUser(
             @RequestBody UserDto userDtoNew, @SessionAttribute("currentUser") UserDto currentUserDto, Model model) {
         try {

@@ -33,11 +33,16 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 
+import static com.demo.finance.domain.utils.SwaggerExamples.Admin.INVALID_SIZE_RESPONSE;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.CREATE_TRANSACTION_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.CREATE_TRANSACTION_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.DELETE_TRANSACTION_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.GET_TRANSACTIONS_SUCCESS;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.GET_TRANSACTION_SUCCESS;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.INVALID_TRANSACTION_ID_RESPONSE;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.INVALID_TRANSACTION_TYPE_RESPONSE;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.MISSING_TRANSACTION_FIELD_RESPONSE;
+import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.TRANSACTION_NOT_FOUND_RESPONSE;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.UPDATE_TRANSACTION_REQUEST;
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.UPDATE_TRANSACTION_SUCCESS;
 
@@ -92,6 +97,9 @@ public class TransactionController extends BaseController {
     @ApiResponse(responseCode = "201", description = "Transaction created successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = CREATE_TRANSACTION_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad request - Invalid transaction type", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidTransactionType",
+            value = INVALID_TRANSACTION_TYPE_RESPONSE)))
     public ResponseEntity<Map<String, Object>> createTransaction(
             @RequestBody TransactionDto transactionDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -130,6 +138,9 @@ public class TransactionController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Transactions retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PaginatedResponse.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_TRANSACTIONS_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid size parameter", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidSize",
+            value = INVALID_SIZE_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getPaginatedTransactions(
             @ParameterObject @ModelAttribute PaginationParams paramsNew,
             @SessionAttribute("currentUser") UserDto currentUser) {
@@ -163,6 +174,9 @@ public class TransactionController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Transaction retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_TRANSACTION_SUCCESS)))
+    @ApiResponse(responseCode = "404", description = "Not Found - Transaction not found", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "TransactionNotFound",
+            value = TRANSACTION_NOT_FOUND_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getTransactionById(
             @PathVariable("transactionId") String transactionId, @SessionAttribute("currentUser") UserDto currentUser) {
         try {
@@ -176,8 +190,8 @@ public class TransactionController extends BaseController {
             }
             return buildErrorResponse(HttpStatus.NOT_FOUND,
                     "Transaction not found or you are not the owner of the transaction.");
-        } catch (NumberFormatException e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid transaction ID.");
+        } catch (ValidationException e) {
+            return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -201,6 +215,9 @@ public class TransactionController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Transaction updated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_TRANSACTION_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Missing transaction field ", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "ValidationError",
+            value = MISSING_TRANSACTION_FIELD_RESPONSE)))
     public ResponseEntity<Map<String, Object>> updateTransaction(
             @PathVariable("transactionId") String transactionId, @RequestBody TransactionDto transactionDtoNew,
             @SessionAttribute("currentUser") UserDto currentUser) {
@@ -223,8 +240,6 @@ public class TransactionController extends BaseController {
             }
             return buildErrorResponse(HttpStatus.BAD_REQUEST,
                     "Failed to update transaction or you are not the owner of the transaction.");
-        } catch (NumberFormatException e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid transaction ID.");
         } catch (ValidationException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -247,6 +262,9 @@ public class TransactionController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Transaction deleted successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_TRANSACTION_SUCCESS)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid transaction ID format", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidTransactionId",
+            value = INVALID_TRANSACTION_ID_RESPONSE)))
     public ResponseEntity<Map<String, Object>> deleteTransaction(
             @PathVariable("transactionId") String transactionId,
             @SessionAttribute("currentUser") UserDto currentUser) {
@@ -260,8 +278,8 @@ public class TransactionController extends BaseController {
             }
             return buildErrorResponse(HttpStatus.BAD_REQUEST,
                     "Failed to delete transaction or you are not the owner of the transaction.");
-        } catch (NumberFormatException e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid transaction ID");
+        } catch (ValidationException e) {
+            return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 }
