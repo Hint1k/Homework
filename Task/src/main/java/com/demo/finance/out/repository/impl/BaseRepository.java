@@ -3,6 +3,7 @@ package com.demo.finance.out.repository.impl;
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.utils.GeneratedKey;
 import com.demo.finance.exception.DatabaseException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
@@ -17,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The {@code BaseRepository} class serves as an abstract base class for all repository implementations.
@@ -26,9 +25,9 @@ import java.util.logging.Logger;
  * leveraging JDBC to interact with the database. This class also includes utility methods for parameter binding,
  * result set mapping, and exception handling.
  */
+@Slf4j
 public abstract class BaseRepository {
 
-    protected static final Logger log = Logger.getLogger(BaseRepository.class.getName());
     private static final Map<Class<?>, Method> SETTER_METHOD_CACHE = new HashMap<>();
     protected final DataSourceManager dataSourceManager;
 
@@ -232,7 +231,7 @@ public abstract class BaseRepository {
      * @param e       the exception that caused the error
      */
     protected void logError(String message, Exception e) {
-        log.log(Level.SEVERE, message + ": " + e.getMessage(), e);
+        log.error("{}: {}", message, e.getMessage(), e);
         throw new DatabaseException(message, e);
     }
 

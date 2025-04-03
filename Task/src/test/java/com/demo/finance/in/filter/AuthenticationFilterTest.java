@@ -2,7 +2,6 @@ package com.demo.finance.in.filter;
 
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.Role;
-import com.demo.finance.in.filter.AuthenticationFilter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

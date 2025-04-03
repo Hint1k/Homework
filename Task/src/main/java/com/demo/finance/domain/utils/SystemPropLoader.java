@@ -1,10 +1,10 @@
 package com.demo.finance.domain.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import java.util.Set;
 
 /**
@@ -14,9 +14,8 @@ import java.util.Set;
  * setting them as system properties.
  */
 @Component
+@Slf4j
 public class SystemPropLoader {
-
-    private static final Logger log = Logger.getLogger(SystemPropLoader.class.getName());
 
     /**
      * Loads environment variables from a .env file and YAML file, validates them against a set of
@@ -69,8 +68,8 @@ public class SystemPropLoader {
         for (String key : requiredProperties) {
             String value = envVars.get(key);
             if (value == null || value.trim().isEmpty()) {
-                log.severe("Validation failed: Required property '" + key
-                        + "' is missing or empty in the " + sourceName + " file.");
+                log.error("Validation failed: Required property '{}' is missing or empty in the {} file.",
+                        key, sourceName);
                 throw new RuntimeException("Validation failed: Required property '" + key
                         + "' is missing or empty.");
             }
@@ -90,9 +89,9 @@ public class SystemPropLoader {
             String value = entry.getValue();
             if (System.getProperty(key) == null) {
                 System.setProperty(key, value);
-                log.fine("Set JVM property: " + key + "=" + value);
+                log.debug("Set JVM property: {}={}", key, value);
             } else {
-                log.fine("Skipped setting JVM property (already set): " + key);
+                log.debug("Skipped setting JVM property (already set): {}", key);
             }
         }
     }

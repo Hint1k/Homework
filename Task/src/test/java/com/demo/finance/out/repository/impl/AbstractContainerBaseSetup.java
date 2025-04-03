@@ -19,14 +19,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.fail;
 
 public abstract class AbstractContainerBaseSetup {
 
-    private static final Logger log = Logger.getLogger(AbstractContainerBaseSetup.class.getName());
     private static final String LIQUIBASE_CHANGELOG = "db/changelog/changelog-test.xml";
 
     private static class SingletonContainer {
@@ -60,7 +57,6 @@ public abstract class AbstractContainerBaseSetup {
                 liquibase.update(new Contexts(), new LabelExpression());
             }
         } catch (SQLException | LiquibaseException e) {
-            log.log(Level.SEVERE, "Failed to set up the database: " + e.getMessage(), e);
             fail("Database setup failed: " + e.getMessage());
         }
     }
@@ -73,7 +69,6 @@ public abstract class AbstractContainerBaseSetup {
             stmt.execute("DROP SCHEMA public CASCADE");
             stmt.execute("CREATE SCHEMA public");
         } catch (SQLException e) {
-            log.log(Level.SEVERE, "Failed to clean up the database: " + e.getMessage(), e);
             fail("Database cleanup failed: " + e.getMessage());
         }
     }

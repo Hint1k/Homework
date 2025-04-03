@@ -2,10 +2,10 @@ package com.demo.finance.app.config;
 
 import com.demo.finance.domain.utils.SystemPropLoader;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * The {@code DatabaseConfig} class is responsible for managing database-related configuration properties.
@@ -17,9 +17,9 @@ import java.util.logging.Logger;
  * exceptions to prevent misconfiguration.
  */
 @Component
+@Slf4j
 public class DatabaseConfig {
 
-    private static final Logger log = Logger.getLogger(DatabaseConfig.class.getName());
     private static final String DB_URL = "DB_URL";
     private static final String DB_USERNAME = "DB_USERNAME";
     private static final String DB_PASSWORD = "DB_PASSWORD";
@@ -119,7 +119,7 @@ public class DatabaseConfig {
     private void validateProperty(String propertyKey) {
         String propertyValue = System.getProperty(propertyKey);
         if (propertyValue == null || propertyValue.isEmpty()) {
-            log.severe(propertyKey + " is missing or empty in the system properties.");
+            log.error("{} is missing or empty in the system properties.", propertyKey);
             throw new RuntimeException(propertyKey + " is not configured.");
         }
     }

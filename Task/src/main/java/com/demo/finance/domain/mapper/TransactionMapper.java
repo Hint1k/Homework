@@ -23,7 +23,7 @@ public interface TransactionMapper {
      * @param transaction the {@link Transaction} entity to map
      * @return the corresponding {@link TransactionDto} object
      */
-     @Mapping(target = "type", source = "type", qualifiedByName = "typeToString")
+    @Mapping(target = "type", source = "type", qualifiedByName = "typeToString")
     TransactionDto toDto(Transaction transaction);
 
     /**

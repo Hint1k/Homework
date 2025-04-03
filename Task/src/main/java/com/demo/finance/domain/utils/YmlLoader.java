@@ -2,6 +2,7 @@ package com.demo.finance.domain.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -10,8 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A utility class for loading properties from a YAML file.
@@ -21,9 +20,8 @@ import java.util.logging.Logger;
  * or duplicate keys.
  */
 @Component
+@Slf4j
 public class YmlLoader {
-
-    private static final Logger log = Logger.getLogger(YmlLoader.class.getName());
 
     /**
      * Loads properties from a YAML file and returns them as a flat map of key-value pairs.
@@ -42,7 +40,7 @@ public class YmlLoader {
     public static Map<String, String> loadYml(String filePath) {
         Map<String, String> properties = new HashMap<>();
         try {
-            log.info("Loading properties from " + filePath);
+            log.info("Loading properties from {}", filePath);
 
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             Map<String, Object> yamlData = mapper.readValue(
@@ -50,9 +48,9 @@ public class YmlLoader {
             );
 
             flattenYaml("", yamlData, properties);
-            log.info("Successfully loaded " + properties.size() + " properties from " + filePath);
+            log.info("Successfully loaded {} properties from {}", properties.size(), filePath);
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Error loading YAML file: " + filePath, e);
+            log.error("Error loading YAML file: {}", filePath, e);
             throw new RuntimeException("Unable to find or read YAML file: " + filePath, e);
         }
 
@@ -95,17 +93,17 @@ public class YmlLoader {
                 flattenYaml(fullKey, nestedMap, properties);
             } else {
                 if (properties.containsKey(fullKey)) {
-                    log.severe("Duplicate key found in YAML file: " + fullKey);
+                    log.error("Duplicate key found in YAML file: {}", fullKey);
                     throw new RuntimeException("Duplicate key found in YAML file: " + fullKey);
                 }
 
                 if (value == null || value.toString().trim().isEmpty()) {
-                    log.severe("Malformed key-value pair in YAML file: " + fullKey + " -> " + value);
+                    log.error("Malformed key-value pair in YAML file: {} -> {}", fullKey, value);
                     throw new RuntimeException("Malformed key-value pair in YAML file: " + fullKey);
                 }
 
                 properties.put(fullKey, value.toString());
-                log.fine("Loaded property: " + fullKey + " -> " + value);
+                log.debug("Loaded property: {} -> {}", fullKey, value);
             }
         }
     }

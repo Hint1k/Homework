@@ -1,29 +1,28 @@
 package com.demo.finance.app.config;
 
 import com.demo.finance.out.repository.impl.AbstractContainerBaseSetup;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 
-import java.util.logging.Logger;
-
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Slf4j
 class LiquibaseManagerTest extends AbstractContainerBaseSetup {
 
-    private static final Logger log = Logger.getLogger(LiquibaseManagerTest.class.getName());
     private static LiquibaseManager liquibaseManager;
 
     @BeforeAll
     void setup() {
         DatabaseConfig databaseConfig = new DatabaseConfig();
         databaseConfig.init();
-        log.info("Database URL: " + databaseConfig.getDbUrl());
-        log.info("Database Username: " + databaseConfig.getDbUsername());
-        log.info("Database Password: " + databaseConfig.getDbPassword());
+        log.info("Database URL: {}", databaseConfig.getDbUrl());
+        log.info("Database Username: {}", databaseConfig.getDbUsername());
+        log.info("Database Password: {}", databaseConfig.getDbPassword());
         liquibaseManager = new LiquibaseManager(databaseConfig);
     }
 

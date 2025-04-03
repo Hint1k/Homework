@@ -5,14 +5,13 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Manages Liquibase database migrations.
@@ -20,9 +19,9 @@ import java.util.logging.Logger;
  * establishing a connection to the database, and executing Liquibase migrations.
  */
 @Component
+@Slf4j
 public class LiquibaseManager {
 
-    private static final Logger log = Logger.getLogger(LiquibaseManager.class.getName());
     private final DatabaseConfig databaseConfig;
     private static final String CHANGELOG = "db/changelog/changelog.xml";
 
@@ -65,7 +64,7 @@ public class LiquibaseManager {
             liquibase.update("");
             log.info("Liquibase migration completed successfully.");
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Failed to run Liquibase migrations: " + e.getMessage(), e);
+            log.error("Failed to run Liquibase migrations: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -79,12 +78,12 @@ public class LiquibaseManager {
     private void validateChangelogFile() {
         try (InputStream changelogStream = getClass().getClassLoader().getResourceAsStream(CHANGELOG)) {
             if (changelogStream == null) {
-                log.severe("Changelog file not found in the classpath: " + CHANGELOG);
+                log.error("Changelog file not found in the classpath: " + CHANGELOG);
                 throw new RuntimeException("Changelog file is missing. Please ensure it is located at " + CHANGELOG);
             }
             log.info("Changelog file found in the classpath: " + CHANGELOG);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error while checking for changelog file: " + e.getMessage(), e);
+            log.error("Error while checking for changelog file: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to verify the existence of the changelog file.", e);
         }
     }

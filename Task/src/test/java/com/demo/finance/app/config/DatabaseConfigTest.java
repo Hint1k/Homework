@@ -7,9 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class DatabaseConfigTest {
 
-    private static final Logger log = Logger.getLogger(DatabaseConfigTest.class.getName());
     @InjectMocks
     private DatabaseConfig databaseConfig;
 
@@ -32,8 +28,7 @@ class DatabaseConfigTest {
             System.setProperty("DB_USERNAME", "testuser");
             System.setProperty("DB_PASSWORD", "testpass");
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error occurred during test setup: " + e.getMessage(), e);
-            fail("Test setup failed due to an unexpected exception.");
+            fail("Test setup failed due to an unexpected exception.", e.getMessage());
         }
     }
 
@@ -54,8 +49,7 @@ class DatabaseConfigTest {
             assertThatThrownBy(() -> databaseConfig.getDbUrl()).isInstanceOf(RuntimeException.class)
                     .hasMessage("DB_URL is not configured.");
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error occurred while testing missing DB_URL: " + e.getMessage(), e);
-            fail("Test failed due to an unexpected exception while testing missing DB_URL.");
+            fail("Test failed due to an unexpected exception.", e.getMessage());
         }
     }
 
@@ -75,8 +69,7 @@ class DatabaseConfigTest {
             assertThatThrownBy(() -> databaseConfig.getDbUsername()).isInstanceOf(RuntimeException.class)
                     .hasMessage("DB_USERNAME is not configured.");
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error occurred while testing missing DB_USERNAME: " + e.getMessage(), e);
-            fail("Test failed due to an unexpected exception while testing missing DB_USERNAME.");
+            fail("Test failed due to an unexpected exception.", e.getMessage());
         }
     }
 
@@ -96,8 +89,7 @@ class DatabaseConfigTest {
             assertThatThrownBy(() -> databaseConfig.getDbPassword()).isInstanceOf(RuntimeException.class)
                     .hasMessage("DB_PASSWORD is not configured.");
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error occurred while testing missing DB_PASSWORD: " + e.getMessage(), e);
-            fail("Test failed due to an unexpected exception while testing missing DB_PASSWORD.");
+            fail("Test failed due to an unexpected exception.", e.getMessage());
         }
     }
 
@@ -117,10 +109,7 @@ class DatabaseConfigTest {
             System.clearProperty("DB_USERNAME");
             System.clearProperty("DB_PASSWORD");
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error occurred while testing override with system properties: "
-                    + e.getMessage(), e);
-            fail("Test failed due to an unexpected exception while testing override "
-                    + "with system properties.");
+            fail("Test failed due to an unexpected exception.", e.getMessage());
         }
     }
 
@@ -139,9 +128,7 @@ class DatabaseConfigTest {
             assertThatThrownBy(() -> databaseConfig.getDbPassword()).isInstanceOf(RuntimeException.class)
                     .hasMessage("DB_PASSWORD is not configured.");
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error occurred while testing missing system properties "
-                    + "fallback to default values: " + e.getMessage(), e);
-            fail("Test failed due to an unexpected exception while testing fallback to default values.");
+            fail("Test failed due to an unexpected exception.", e.getMessage());
         }
     }
 }

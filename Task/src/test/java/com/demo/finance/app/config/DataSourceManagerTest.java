@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import java.sql.Connection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
@@ -20,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DataSourceManagerTest extends AbstractContainerBaseSetup {
 
-    private static final Logger log = Logger.getLogger(DataSourceManagerTest.class.getName());
     private DataSourceManager dataSourceManager;
 
     @BeforeEach
@@ -61,9 +59,11 @@ class DataSourceManagerTest extends AbstractContainerBaseSetup {
 
     @Test
     @DisplayName("Connection is valid when established")
-    void testConnectionIsValid() throws Exception {
+    void testConnectionIsValid() {
         try (Connection connection = dataSourceManager.getConnection()) {
             assertThat(connection.isValid(5)).isTrue();
+        } catch (SQLException e) {
+           fail("An unexpected SQLException occurred." + e.getMessage());
         }
     }
 
@@ -72,11 +72,8 @@ class DataSourceManagerTest extends AbstractContainerBaseSetup {
             System.setProperty("DB_URL", "jdbc:postgresql://invalid-host:5432/testdb");
             System.setProperty("DB_USERNAME", "invalid_user");
             System.setProperty("DB_PASSWORD", "invalid_password");
-            log.info("Overridden database configuration with invalid credentials.");
         } catch (Exception e) {
-            String logMessage = "Failed to override database configuration: " + e.getMessage();
-            log.log(Level.SEVERE, logMessage);
-            fail("Exception occurred while overriding database configuration: " + e.getMessage());
+            fail("Failed to override database configuration." + e.getMessage());
         }
     }
 }
