@@ -103,13 +103,13 @@ The project follows Clean Architecture principles with key packages:
 - `domain.utils` – Utility classes for validation and date handling.
 - `out.repository` – Manages database storage and retrieval.
 - `out.service` – Implements core business logic and interacts with repositories.
-- `app` - Has main class and application configs
+- `app` - Has main class and application config classes
 - `resources.db.changelog` - Liquibase xml config files
 ---
 
 ## Technological Stack
 - **Java**
-- **Spring (Core, Web, MVC)**
+- **Spring (Boot, Web, AOP)**
 - **Gradle**
 - **PostgreSQL**
 - **Swagger**

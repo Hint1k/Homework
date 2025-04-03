@@ -21,14 +21,6 @@ repositories {
     mavenCentral()
 }
 
-dependencyManagement {
-    imports {
-        mavenBom('org.springframework.boot:spring-boot-dependencies:3.2.0') {
-            bomProperty 'spring-framework.version', '6.1.18'
-        }
-    }
-}
-
 dependencies {
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter'
@@ -43,9 +35,9 @@ dependencies {
     implementation group: 'org.liquibase', name: 'liquibase-core', version: '4.31.1'
 
     // MapStruct - Object Mapping
-    implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.5.5.Final'
-    implementation group: 'org.mapstruct', name: 'mapstruct-processor', version: '1.5.5.Final'
-    testImplementation group: 'org.mapstruct', name: 'mapstruct-processor', version: '1.5.5.Final'
+    implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.6.3'
+    annotationProcessor group: 'org.mapstruct', name: 'mapstruct-processor', version: '1.6.3'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok-mapstruct-binding', version: '0.2.0'
 
     // Testcontainers - Database Testing with PostgreSQL
     testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.20.6'
@@ -57,10 +49,10 @@ dependencies {
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-api', version: '2.3.0'
 
     // Lombok
-    compileOnly 'org.projectlombok:lombok:1.18.36'
-    annotationProcessor 'org.projectlombok:lombok:1.18.36'
-    testCompileOnly 'org.projectlombok:lombok:1.18.36'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.38'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.38'
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.38'
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.38'
 
     // Logging
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'
@@ -73,20 +65,6 @@ application {
             '-Dorg.eclipse.jetty.servlet.Default.useFileMappedBuffer=false',
             '-Djava.util.logging.config.file=/app/logging.properties'
     ]
-}
-
-distributions {
-    main {
-        contents {
-            from('src/main/resources') {
-                into 'resources'
-            }
-            from(configurations.runtimeClasspath) {
-                into 'lib'
-                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-            }
-        }
-    }
 }
 
 sourceSets {

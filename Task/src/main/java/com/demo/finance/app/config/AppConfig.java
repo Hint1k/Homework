@@ -1,8 +1,13 @@
 package com.demo.finance.app.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.postgresql.ds.PGSimpleDataSource;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -10,8 +15,10 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.List;
 
@@ -73,5 +80,54 @@ public class AppConfig implements WebMvcConfigurer {
             }
             return null;
         });
+    }
+
+    /**
+     * Configures view controllers to redirect specific paths to predefined views.
+     * <p>
+     * This method redirects the root path ({@code /}) to the Swagger UI index page ({@code /swagger-ui/index.html}),
+     * providing a convenient entry point for API documentation.
+     *
+     * @param registry the {@link ViewControllerRegistry} used to define view controllers
+     */
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/", "/swagger-ui/index.html");
+    }
+
+    @Bean
+    public JettyServletWebServerFactory jettyServletWebServerFactory() {
+        JettyServletWebServerFactory factory = new JettyServletWebServerFactory();
+        factory.setPort(8080);
+        return factory;
+    }
+
+    @Bean
+    @Primary
+    public DataSource dataSource(DatabaseConfig databaseConfig) {
+        PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        dataSource.setUrl(databaseConfig.getDbUrl());
+        dataSource.setUser(databaseConfig.getDbUsername());
+        dataSource.setPassword(databaseConfig.getDbPassword());
+        return dataSource;
+    }
+
+    @Bean
+    public LiquibaseManager liquibaseManager(DatabaseConfig databaseConfig) {
+        return new LiquibaseManager(databaseConfig);
+    }
+
+    @Bean
+    public CommandLineRunner init(LiquibaseManager liquibaseManager) {
+        return args -> liquibaseManager.runMigrations();
+    }
+
+    @Bean
+    public CommandLineRunner startupMessage() {
+        return args -> {
+            log.info("The Personal Finance Tracker is up and running!");
+            log.info("Swagger UI: http://localhost:8080");
+            log.info("API Docs: http://localhost:8080/v3/api-docs");
+        };
     }
 }
