@@ -25,8 +25,10 @@ import static org.mockito.Mockito.times;
 @ExtendWith(MockitoExtension.class)
 class BalanceUtilsImplTest {
 
-    @Mock private TransactionRepository transactionRepository;
-    @InjectMocks private BalanceUtilsImpl balanceUtils;
+    @Mock
+    private TransactionRepository transactionRepository;
+    @InjectMocks
+    private BalanceUtilsImpl balanceUtils;
 
     private Goal mockGoal;
 

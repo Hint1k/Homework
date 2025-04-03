@@ -1,6 +1,7 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
+import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
@@ -13,50 +14,66 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.any;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
-    @Mock private UserRepository userRepository;
-    @Mock private PasswordUtilsImpl passwordUtils;
-    @InjectMocks private UserServiceImpl userService;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private PasswordUtilsImpl passwordUtils;
+    @Mock
+    private UserMapper userMapper;
+    @InjectMocks
+    private UserServiceImpl userService;
+
+    private User createDefaultUser() {
+        return new User(1L, "John Doe", "john@example.com", "hashedPassword",
+                false, new Role("user"), 1L);
+    }
+
+    private UserDto createDefaultUserDto() {
+        UserDto dto = new UserDto();
+        dto.setUserId(1L);
+        dto.setName("John Doe");
+        dto.setEmail("john@example.com");
+        dto.setPassword("newPassword");
+        return dto;
+    }
 
     @Test
     @DisplayName("Update own account - existing user - updates successfully")
     void testUpdateOwnAccount_existingUser_updatesSuccessfully() {
-        Long userId = 1L;
-        Role role = new Role("USER");
-        String name = "John Doe";
-        String email = "john@example.com";
-        String newPassword = "newPassword";
-        String hashedPassword = "hashedPassword";
+        UserDto userDto = createDefaultUserDto();
+        User existingUser = createDefaultUser();
+        User mappedUser = new User();
+        mappedUser.setName(userDto.getName());
+        mappedUser.setEmail(userDto.getEmail());
 
-        UserDto userDto = new UserDto();
-        userDto.setUserId(userId);
-        userDto.setName(name);
-        userDto.setEmail(email);
-        userDto.setPassword(newPassword);
+        when(userRepository.findById(1L)).thenReturn(existingUser);
+        when(passwordUtils.hashPassword("newPassword")).thenReturn("hashedPassword");
+        when(userMapper.toEntity(userDto)).thenReturn(mappedUser);
+        when(userRepository.update(any(User.class))).thenReturn(true);
 
-        User existingUser = new User(userId, "Old Name", "old@example.com", "oldHashedPassword",
-                false, role, 1L);
-
-        User updatedUser = new User(userId, name, email, hashedPassword, false, role, 2L);
-
-        when(userRepository.findById(userId)).thenReturn(existingUser);
-        when(passwordUtils.hashPassword(newPassword)).thenReturn(hashedPassword);
-        when(userRepository.update(updatedUser)).thenReturn(true);
-
-        boolean result = userService.updateOwnAccount(userDto, userId);
+        boolean result = userService.updateOwnAccount(userDto, 1L);
 
         assertThat(result).isTrue();
-        verify(userRepository, times(1)).findById(userId);
-        verify(passwordUtils, times(1)).hashPassword(newPassword);
-        verify(userRepository, times(1)).update(updatedUser);
+        verify(userRepository).findById(1L);
+        verify(passwordUtils).hashPassword("newPassword");
+        verify(userMapper).toEntity(userDto);
+        verify(userRepository).update(argThat(user ->
+                user.getUserId().equals(1L) &&
+                        user.getName().equals("John Doe") &&
+                        user.getEmail().equals("john@example.com") &&
+                        user.getPassword().equals("hashedPassword") &&
+                        user.getRole().equals(new Role("user")) &&
+                        user.getVersion() == 2L
+        ));
     }
 
     @Test
@@ -74,63 +91,61 @@ class UserServiceImplTest {
     @Test
     @DisplayName("Update own account - password not provided - updates successfully")
     void testUpdateOwnAccount_nullPassword_UpdatesSuccessfully() {
-        Long userId = 1L;
-        String name = "John Doe";
-        String email = "john@example.com";
-        Role role = new Role("user");
-        String existingHashedPassword = "existingHashedPassword";
-
-        UserDto userDto = new UserDto();
-        userDto.setUserId(userId);
-        userDto.setName(name);
-        userDto.setEmail(email);
+        UserDto userDto = createDefaultUserDto();
         userDto.setPassword(null);
 
-        User existingUser = new User(userId, "Old Name", "old@example.com", existingHashedPassword,
-                false, role, 1L);
-        User updatedUser = new User(userId, name, email, existingHashedPassword, false, role, 2L);
+        User existingUser = createDefaultUser();
+        existingUser.setPassword("existingHashedPassword");
 
-        when(userRepository.findById(userId)).thenReturn(existingUser);
-        when(userRepository.update(updatedUser)).thenReturn(true);
+        User mappedUser = new User();
+        mappedUser.setName(userDto.getName());
+        mappedUser.setEmail(userDto.getEmail());
 
-        boolean result = userService.updateOwnAccount(userDto, userId);
+        when(userRepository.findById(1L)).thenReturn(existingUser);
+        when(userMapper.toEntity(userDto)).thenReturn(mappedUser);
+        when(userRepository.update(any(User.class))).thenReturn(true);
+
+        boolean result = userService.updateOwnAccount(userDto, 1L);
 
         assertThat(result).isTrue();
-        verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, times(1)).update(updatedUser);
+        verify(userRepository).findById(1L);
+        verify(userMapper).toEntity(userDto);
+        verify(userRepository).update(argThat(user ->
+                user.getPassword().equals("existingHashedPassword")
+        ));
         verify(passwordUtils, never()).hashPassword(any());
     }
 
     @Test
     @DisplayName("Update own account - update fails - returns false")
     void testUpdateOwnAccount_updateFails_returnsFalse() {
-        Long userId = 1L;
-        Role role = new Role("USER");
-        String name = "John Doe";
-        String email = "john@example.com";
-        String newPassword = "newPassword";
-        String hashedPassword = "hashedPassword";
+        UserDto userDto = createDefaultUserDto();
+        User existingUser = new User(1L, "Old Name", "old@example.com",
+                "oldHashedPassword", false, new Role("user"), 1L);
 
-        UserDto userDto = new UserDto();
-        userDto.setUserId(userId);
-        userDto.setName(name);
-        userDto.setEmail(email);
-        userDto.setPassword(newPassword);
+        User mappedUser = new User();
+        mappedUser.setName(userDto.getName());
+        mappedUser.setEmail(userDto.getEmail());
 
-        User existingUser = new User(userId, "Old Name", "old@example.com", "oldHashedPassword",
-                false, role, 1L);
-        User updatedUser = new User(userId, name, email, hashedPassword, false, role,2L);
+        when(userRepository.findById(1L)).thenReturn(existingUser);
+        when(passwordUtils.hashPassword("newPassword")).thenReturn("hashedPassword");
+        when(userMapper.toEntity(userDto)).thenReturn(mappedUser);
+        when(userRepository.update(any(User.class))).thenReturn(false);
 
-        when(userRepository.findById(userId)).thenReturn(existingUser);
-        when(passwordUtils.hashPassword(newPassword)).thenReturn(hashedPassword);
-        when(userRepository.update(updatedUser)).thenReturn(false);
-
-        boolean result = userService.updateOwnAccount(userDto, userId);
+        boolean result = userService.updateOwnAccount(userDto, 1L);
 
         assertThat(result).isFalse();
-        verify(userRepository, times(1)).findById(userId);
-        verify(passwordUtils, times(1)).hashPassword(newPassword);
-        verify(userRepository, times(1)).update(updatedUser);
+        verify(userRepository).findById(1L);
+        verify(passwordUtils).hashPassword("newPassword");
+        verify(userMapper).toEntity(userDto);
+        verify(userRepository).update(argThat(user ->
+                user.getUserId().equals(1L) &&
+                        user.getName().equals("John Doe") &&
+                        user.getEmail().equals("john@example.com") &&
+                        user.getPassword().equals("hashedPassword") &&
+                        user.getRole().equals(new Role("user")) &&
+                        user.getVersion() == 2L
+        ));
     }
 
     @Test

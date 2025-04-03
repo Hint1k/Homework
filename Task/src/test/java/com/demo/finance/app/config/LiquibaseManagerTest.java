@@ -19,12 +19,11 @@ class LiquibaseManagerTest extends AbstractContainerBaseSetup {
 
     @BeforeAll
     void setup() {
-        DatabaseConfig databaseConfig = DatabaseConfig.getInstance();
-
+        DatabaseConfig databaseConfig = new DatabaseConfig();
+        databaseConfig.init();
         log.info("Database URL: " + databaseConfig.getDbUrl());
         log.info("Database Username: " + databaseConfig.getDbUsername());
         log.info("Database Password: " + databaseConfig.getDbPassword());
-
         liquibaseManager = new LiquibaseManager(databaseConfig);
     }
 
@@ -41,7 +40,8 @@ class LiquibaseManagerTest extends AbstractContainerBaseSetup {
         System.setProperty("DB_USERNAME", "invalidUser");
         System.setProperty("DB_PASSWORD", "invalidPass");
 
-        DatabaseConfig invalidConfig = DatabaseConfig.getInstance();
+        DatabaseConfig invalidConfig = new DatabaseConfig();
+        invalidConfig.init();
         LiquibaseManager invalidLiquibaseManager = new LiquibaseManager(invalidConfig);
 
         assertThatThrownBy(invalidLiquibaseManager::runMigrations).isInstanceOf(RuntimeException.class)

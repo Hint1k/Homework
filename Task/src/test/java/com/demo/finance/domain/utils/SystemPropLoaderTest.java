@@ -29,83 +29,105 @@ class SystemPropLoaderTest {
         System.clearProperty("DB_URL");
         System.clearProperty("DB_USERNAME");
         System.clearProperty("DB_PASSWORD");
+        System.clearProperty("app.db.url");
     }
 
     @Test
-    @DisplayName("Load and set properties - valid .env file - sets system properties")
-    void testLoadAndSetProperties_validFile_setsSystemProperties(@TempDir Path tempDir) {
+    @DisplayName("Load and set properties - valid .env and yml files - sets system properties")
+    void testLoadAndSetProperties_validFiles_setsSystemProperties(@TempDir Path tempDir) {
         try {
             File envFile = tempDir.resolve(".env").toFile();
             try (FileWriter writer = new FileWriter(envFile)) {
-                writer.write("DB_URL=jdbc:postgresql://localhost:3306/testdb\n");
                 writer.write("DB_USERNAME=testuser\n");
                 writer.write("DB_PASSWORD=testpass\n");
             }
+            File ymlFile = tempDir.resolve("application.yml").toFile();
+            try (FileWriter writer = new FileWriter(ymlFile)) {
+                writer.write("app:\n");
+                writer.write("  db:\n");
+                writer.write("    url: jdbc:postgresql://localhost:5432/testdb\n");
+            }
+            Set<String> envProperties = Set.of("DB_USERNAME", "DB_PASSWORD");
+            Set<String> ymlProperties = Set.of("DB_URL");
+            SystemPropLoader.loadAndSetProperties(envFile.getAbsolutePath(), ymlFile.getAbsolutePath(),
+                    envProperties, ymlProperties);
 
-            Set<String> requiredProperties = Set.of("DB_URL", "DB_USERNAME", "DB_PASSWORD");
-            SystemPropLoader.loadAndSetProperties(envFile.getAbsolutePath(), requiredProperties);
-
-            assertThat(System.getProperty("DB_URL")).isEqualTo("jdbc:postgresql://localhost:3306/testdb");
+            assertThat(System.getProperty("DB_URL")).isEqualTo("jdbc:postgresql://localhost:5432/testdb");
             assertThat(System.getProperty("DB_USERNAME")).isEqualTo("testuser");
             assertThat(System.getProperty("DB_PASSWORD")).isEqualTo("testpass");
 
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Failed to load valid .env file: " + e.getMessage(), e);
-            fail("Exception occurred while loading valid .env file: " + e.getMessage());
+            log.log(Level.SEVERE, "Failed to create test files: " + e.getMessage(), e);
+            fail("Exception occurred while creating test files: " + e.getMessage());
         }
     }
 
     @Test
-    @DisplayName("Load and set properties - missing required property - throws RuntimeException")
-    void testLoadAndSetProperties_missingRequiredProperty_throwsRuntimeException(@TempDir Path tempDir) {
+    @DisplayName("Load and set properties - missing required env property - throws RuntimeException")
+    void testLoadAndSetProperties_missingRequiredEnvProperty_throwsRuntimeException(@TempDir Path tempDir) {
         try {
             File envFile = tempDir.resolve(".env").toFile();
             try (FileWriter writer = new FileWriter(envFile)) {
-                writer.write("DB_URL=jdbc:postgresql://localhost:5432/testdb\n");
                 writer.write("DB_USERNAME=testuser\n");
                 // Missing DB_PASSWORD
             }
+            File ymlFile = tempDir.resolve("application.yml").toFile();
+            try (FileWriter writer = new FileWriter(ymlFile)) {
+                writer.write("app:\n");
+                writer.write("  db:\n");
+                writer.write("    url: jdbc:postgresql://localhost:5432/testdb\n");
+            }
+            Set<String> envProperties = Set.of("DB_USERNAME", "DB_PASSWORD");
+            Set<String> ymlProperties = Set.of("app.db.url");
 
-            Set<String> requiredProperties = Set.of("DB_URL", "DB_USERNAME", "DB_PASSWORD");
-
-            assertThatThrownBy(() -> SystemPropLoader
-                    .loadAndSetProperties(envFile.getAbsolutePath(), requiredProperties))
+            assertThatThrownBy(() -> SystemPropLoader.loadAndSetProperties(
+                    envFile.getAbsolutePath(),
+                    ymlFile.getAbsolutePath(),
+                    envProperties,
+                    ymlProperties
+            ))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining(
                             "Validation failed: Required property 'DB_PASSWORD' is missing or empty.");
 
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Failed to create .env file with missing required property: "
-                    + e.getMessage(), e);
-            fail("Exception occurred while creating .env file with missing required property: "
-                    + e.getMessage());
+            log.log(Level.SEVERE, "Failed to create test files: " + e.getMessage(), e);
+            fail("Exception occurred while creating test files: " + e.getMessage());
         }
     }
 
     @Test
-    @DisplayName("Load and set properties - empty value for required property - throws RuntimeException")
-    void testLoadAndSetProperties_emptyValueForRequiredProperty_throwsRuntimeException(@TempDir Path tempDir) {
+    @DisplayName("Load and set properties - missing required yml property - throws RuntimeException")
+    void testLoadAndSetProperties_missingRequiredYmlProperty_throwsRuntimeException(@TempDir Path tempDir) {
         try {
             File envFile = tempDir.resolve(".env").toFile();
             try (FileWriter writer = new FileWriter(envFile)) {
-                writer.write("DB_URL=jdbc:postgresql://localhost:5432/testdb\n");
                 writer.write("DB_USERNAME=testuser\n");
-                writer.write("DB_PASSWORD=\n");  // Empty value
+                writer.write("DB_PASSWORD=testpass\n");
             }
+            File ymlFile = tempDir.resolve("application.yml").toFile();
+            try (FileWriter writer = new FileWriter(ymlFile)) {
+                writer.write("app:\n");
+                writer.write("  other:\n");
+                writer.write("    setting: value\n");
+                // Missing app.db.url
+            }
+            Set<String> envProperties = Set.of("DB_USERNAME", "DB_PASSWORD");
+            Set<String> ymlProperties = Set.of("app.db.url");
 
-            Set<String> requiredProperties = Set.of("DB_URL", "DB_USERNAME", "DB_PASSWORD");
-
-            assertThatThrownBy(() -> SystemPropLoader
-                    .loadAndSetProperties(envFile.getAbsolutePath(), requiredProperties))
+            assertThatThrownBy(() -> SystemPropLoader.loadAndSetProperties(
+                    envFile.getAbsolutePath(),
+                    ymlFile.getAbsolutePath(),
+                    envProperties,
+                    ymlProperties
+            ))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining(
-                            "Validation failed: Required property 'DB_PASSWORD' is missing or empty.");
+                            "Validation failed: Required property 'app.db.url' is missing or empty.");
 
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Failed to create .env file with empty required property: "
-                    + e.getMessage(), e);
-            fail("Exception occurred while creating .env file with empty required property: "
-                    + e.getMessage());
+            log.log(Level.SEVERE, "Failed to create test files: " + e.getMessage(), e);
+            fail("Exception occurred while creating test files: " + e.getMessage());
         }
     }
 
@@ -115,33 +137,73 @@ class SystemPropLoaderTest {
         try {
             File envFile = tempDir.resolve(".env").toFile();
             try (FileWriter writer = new FileWriter(envFile)) {
-                writer.write("DB_URL=jdbc:postgresql://localhost:5432/testdb\n");
                 writer.write("DB_USERNAME=testuser\n");
                 writer.write("DB_PASSWORD=testpass\n");
             }
-
+            File ymlFile = tempDir.resolve("application.yml").toFile();
+            try (FileWriter writer = new FileWriter(ymlFile)) {
+                writer.write("app:\n");
+                writer.write("  db:\n");
+                writer.write("    url: jdbc:postgresql://localhost:5432/testdb\n");
+            }
             System.setProperty("DB_URL", "jdbc:mysql://localhost:3306/testdb");
-            Set<String> requiredProperties = Set.of("DB_URL", "DB_USERNAME", "DB_PASSWORD");
-            SystemPropLoader.loadAndSetProperties(envFile.getAbsolutePath(), requiredProperties);
+            Set<String> envProperties = Set.of("DB_USERNAME", "DB_PASSWORD");
+            Set<String> ymlProperties = Set.of();
+            SystemPropLoader.loadAndSetProperties(envFile.getAbsolutePath(), ymlFile.getAbsolutePath(),
+                    envProperties, ymlProperties);
 
             assertThat(System.getProperty("DB_URL")).isEqualTo("jdbc:mysql://localhost:3306/testdb");
             assertThat(System.getProperty("DB_USERNAME")).isEqualTo("testuser");
             assertThat(System.getProperty("DB_PASSWORD")).isEqualTo("testpass");
 
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Failed to load valid .env file: " + e.getMessage(), e);
-            fail("Exception occurred while loading valid .env file: " + e.getMessage());
+            log.log(Level.SEVERE, "Failed to create test files: " + e.getMessage(), e);
+            fail("Exception occurred while creating test files: " + e.getMessage());
         }
     }
 
     @Test
-    @DisplayName("Load and set properties - file not found - throws RuntimeException")
-    void testLoadAndSetProperties_fileNotFound_throwsRuntimeException() {
-        String nonExistentFile = "non_existent.env";
-        Set<String> requiredProperties = Set.of("DB_URL", "DB_USERNAME", "DB_PASSWORD");
+    @DisplayName("Load and set properties - env file not found - throws RuntimeException")
+    void testLoadAndSetProperties_envFileNotFound_throwsRuntimeException() {
+        String nonExistentEnvFile = "non_existent.env";
+        String ymlFile = "application.yml";
+        Set<String> envProperties = Set.of("DB_USERNAME", "DB_PASSWORD");
+        Set<String> ymlProperties = Set.of("app.db.url");
 
-        assertThatThrownBy(() -> SystemPropLoader.loadAndSetProperties(nonExistentFile, requiredProperties))
+        assertThatThrownBy(() -> SystemPropLoader.loadAndSetProperties(
+                nonExistentEnvFile,
+                ymlFile,
+                envProperties,
+                ymlProperties
+        ))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Unable to find or read .env file");
+    }
+
+    @Test
+    @DisplayName("Load and set properties - yml file not found - throws RuntimeException")
+    void testLoadAndSetProperties_ymlFileNotFound_throwsRuntimeException(@TempDir Path tempDir) {
+        try {
+            File envFile = tempDir.resolve(".env").toFile();
+            try (FileWriter writer = new FileWriter(envFile)) {
+                writer.write("DB_USERNAME=testuser\n");
+                writer.write("DB_PASSWORD=testpass\n");
+            }
+            String nonExistentYmlFile = tempDir.resolve("non_existent.yml").toString();
+            Set<String> envProperties = Set.of("DB_USERNAME", "DB_PASSWORD");
+            Set<String> ymlProperties = Set.of("app.db.url");
+
+            assertThatThrownBy(() -> SystemPropLoader.loadAndSetProperties(
+                    envFile.getAbsolutePath(),
+                    nonExistentYmlFile,
+                    envProperties,
+                    ymlProperties
+            ))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Unable to find or read YAML file");
+
+        } catch (IOException e) {
+            fail("Failed to create test .env file", e);
+        }
     }
 }

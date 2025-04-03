@@ -1,16 +1,22 @@
 package com.demo.finance.app.config;
 
 import com.demo.finance.domain.utils.SystemPropLoader;
+import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
 
 import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- * A configuration class responsible for managing database connection details.
- * This class ensures that required database properties (DB_URL, DB_USERNAME, DB_PASSWORD)
- * are loaded from a .env file, validated, and set as system properties. It follows the
- * singleton pattern to provide a single instance of the configuration throughout the application.
+ * The {@code DatabaseConfig} class is responsible for managing database-related configuration properties.
+ * It ensures that required database properties (URL, username, and password) are loaded from system properties
+ * or external configuration files and validates their presence and correctness.
+ * <p>
+ * This class uses environment-specific configuration files (e.g., `.env` and `application.yml`) to load properties
+ * and provides methods to retrieve these properties securely. Missing or invalid properties will result in runtime
+ * exceptions to prevent misconfiguration.
  */
+@Component
 public class DatabaseConfig {
 
     private static final Logger log = Logger.getLogger(DatabaseConfig.class.getName());
@@ -18,31 +24,30 @@ public class DatabaseConfig {
     private static final String DB_USERNAME = "DB_USERNAME";
     private static final String DB_PASSWORD = "DB_PASSWORD";
     private static final String DEFAULT_ENV_FILE = "/app/.env";
-    private static final DatabaseConfig INSTANCE = new DatabaseConfig();
+    private static final String DEFAULT_YML_FILE = "/app/application.yml";
 
     /**
-     * Private constructor to enforce the singleton pattern.
-     * Loads and validates required database properties during initialization.
+     * Initializes the database configuration by loading and validating required properties.
+     * This method is automatically invoked after the bean is constructed.
+     * <p>
+     * It ensures that all required database properties are available in the system properties.
+     * If any property is missing or empty, a runtime exception is thrown.
+     *
+     * @see #loadAndValidateProperties()
      */
-    private DatabaseConfig() {
+    @PostConstruct
+    public void init() {
         loadAndValidateProperties();
     }
 
     /**
-     * Retrieves the singleton instance of the `DatabaseConfig` class.
-     *
-     * @return The singleton instance of `DatabaseConfig`.
-     */
-    public static DatabaseConfig getInstance() {
-        return INSTANCE;
-    }
-
-    /**
      * Retrieves the database URL from the system properties.
-     * Validates that the property is present and non-empty before returning it.
+     * <p>
+     * Before returning the value, this method validates that the property is present and non-empty.
+     * If the property is missing or invalid, a runtime exception is thrown.
      *
-     * @return The database URL as a string.
-     * @throws RuntimeException If the DB_URL property is missing or empty in the system properties.
+     * @return the database URL as a string
+     * @throws RuntimeException if the database URL is not configured
      */
     public String getDbUrl() {
         validateProperty(DB_URL);
@@ -51,10 +56,12 @@ public class DatabaseConfig {
 
     /**
      * Retrieves the database username from the system properties.
-     * Validates that the property is present and non-empty before returning it.
+     * <p>
+     * Before returning the value, this method validates that the property is present and non-empty.
+     * If the property is missing or invalid, a runtime exception is thrown.
      *
-     * @return The database username as a string.
-     * @throws RuntimeException If the DB_USERNAME property is missing or empty in the system properties.
+     * @return the database username as a string
+     * @throws RuntimeException if the database username is not configured
      */
     public String getDbUsername() {
         validateProperty(DB_USERNAME);
@@ -63,10 +70,12 @@ public class DatabaseConfig {
 
     /**
      * Retrieves the database password from the system properties.
-     * Validates that the property is present and non-empty before returning it.
+     * <p>
+     * Before returning the value, this method validates that the property is present and non-empty.
+     * If the property is missing or invalid, a runtime exception is thrown.
      *
-     * @return The database password as a string.
-     * @throws RuntimeException If the DB_PASSWORD property is missing or empty in the system properties.
+     * @return the database password as a string
+     * @throws RuntimeException if the database password is not configured
      */
     public String getDbPassword() {
         validateProperty(DB_PASSWORD);
@@ -74,14 +83,25 @@ public class DatabaseConfig {
     }
 
     /**
-     * Loads environment variables from a .env file, validates them, and sets them as system properties.
-     * Ensures that all required properties (DB_URL, DB_USERNAME, DB_PASSWORD) are present and valid.
+     * Loads and validates database-related properties from environment and YAML configuration files.
+     * <p>
+     * This method determines the paths to the `.env` and `application.yml` files based on system properties
+     * or default values. It then uses the {@link SystemPropLoader} utility to load the properties into
+     * the system properties.
+     * <p>
+     * After loading, it validates the presence and correctness of the required database properties:
+     * {@code DB_URL}, {@code DB_USERNAME}, and {@code DB_PASSWORD}.
+     *
+     * @see SystemPropLoader#loadAndSetProperties(String, String, Set, Set)
+     * @see #validateProperty(String)
      */
     private void loadAndValidateProperties() {
         String envFilePath = System.getProperty("ENV_PATH", DEFAULT_ENV_FILE);
-        Set<String> requiredProperties = Set.of(DB_URL, DB_USERNAME, DB_PASSWORD);
+        String ymlFilePath = System.getProperty("YML_PATH", DEFAULT_YML_FILE);
+        Set<String> envProperties = Set.of(DB_USERNAME, DB_PASSWORD);
+        Set<String> ymlProperties = Set.of(DB_URL);
 
-        SystemPropLoader.loadAndSetProperties(envFilePath, requiredProperties);
+        SystemPropLoader.loadAndSetProperties(envFilePath, ymlFilePath, envProperties, ymlProperties);
 
         validateProperty(DB_URL);
         validateProperty(DB_USERNAME);
@@ -89,10 +109,12 @@ public class DatabaseConfig {
     }
 
     /**
-     * Validates that a given property is present and non-empty in the system properties.
+     * Validates that a given property key exists in the system properties and is non-empty.
+     * <p>
+     * If the property is missing or empty, this method logs a severe error message and throws a runtime exception.
      *
-     * @param propertyKey The key of the property to validate.
-     * @throws RuntimeException If the property is missing or empty in the system properties.
+     * @param propertyKey the key of the property to validate
+     * @throws RuntimeException if the property is missing or empty
      */
     private void validateProperty(String propertyKey) {
         String propertyValue = System.getProperty(propertyKey);

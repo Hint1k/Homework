@@ -10,8 +10,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class PasswordUtilsImplTest {
-    
-    @InjectMocks private PasswordUtilsImpl passwordUtils;
+
+    @InjectMocks
+    private PasswordUtilsImpl passwordUtils;
 
     @Test
     @DisplayName("Hash password - ensures the password is hashed successfully")

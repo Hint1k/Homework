@@ -27,9 +27,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BudgetServiceImplTest {
 
-    @Mock private BudgetRepository budgetRepository;
-    @Mock private TransactionRepository transactionRepository;
-    @InjectMocks private BudgetServiceImpl budgetService;
+    @Mock
+    private BudgetRepository budgetRepository;
+    @Mock
+    private TransactionRepository transactionRepository;
+    @InjectMocks
+    private BudgetServiceImpl budgetService;
 
     @Test
     @DisplayName("Set monthly budget - new budget - returns budget")

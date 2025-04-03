@@ -35,13 +35,20 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
 
-    @Mock private BudgetRepository budgetRepository;
-    @Mock private GoalRepository goalRepository;
-    @Mock private TransactionRepository transactionRepository;
-    @Mock private UserRepository userRepository;
-    @Mock private BalanceUtils balanceUtils;
-    @Mock private EmailService emailService;
-    @InjectMocks private NotificationServiceImpl notificationService;
+    @Mock
+    private BudgetRepository budgetRepository;
+    @Mock
+    private GoalRepository goalRepository;
+    @Mock
+    private TransactionRepository transactionRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private BalanceUtils balanceUtils;
+    @Mock
+    private EmailService emailService;
+    @InjectMocks
+    private NotificationServiceImpl notificationService;
 
     @Test
     @DisplayName("Test that fetchBudgetNotification returns 'No budget set' when no budget is found for the user")

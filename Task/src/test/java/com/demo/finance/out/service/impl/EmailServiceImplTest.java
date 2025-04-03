@@ -11,7 +11,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class EmailServiceImplTest {
 
-    @InjectMocks private EmailServiceImpl emailService;
+    @InjectMocks
+    private EmailServiceImpl emailService;
 
     @Test
     @DisplayName("Test that sendEmail sends a simulated email to the console")

@@ -22,8 +22,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ReportServiceImplTest {
 
-    @Mock private TransactionRepository transactionRepository;
-    @InjectMocks private ReportServiceImpl reportService;
+    @Mock
+    private TransactionRepository transactionRepository;
+    @InjectMocks
+    private ReportServiceImpl reportService;
 
     @Test
     @DisplayName("Generate user report - transactions exist - returns report")

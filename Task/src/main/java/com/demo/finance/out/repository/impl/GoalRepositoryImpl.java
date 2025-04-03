@@ -1,7 +1,10 @@
 package com.demo.finance.out.repository.impl;
 
+import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.out.repository.GoalRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -15,6 +18,7 @@ import java.util.List;
  * and provides concrete implementations for goal data persistence operations.
  * It interacts directly with the database using SQL queries to perform CRUD operations on goal data.
  */
+@Repository
 public class GoalRepositoryImpl extends BaseRepository implements GoalRepository {
 
     private static final String INSERT_SQL = "INSERT INTO finance.goals (user_id, goal_name, target_amount, "
@@ -29,6 +33,17 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
     private static final String FIND_BY_USER_AND_GOAL_SQL = "SELECT * FROM finance.goals WHERE "
             + "goal_id = ? AND user_id = ?";
     private static final String COUNT_SQL = "SELECT COUNT(*) AS total FROM finance.users WHERE user_id = ?";
+
+    /**
+     * Constructs a new {@code GoalRepositoryImpl} instance with the required dependency
+     * for managing database connections.
+     *
+     * @param dataSourceManager the manager responsible for providing database connections
+     */
+    @Autowired
+    public GoalRepositoryImpl(DataSourceManager dataSourceManager) {
+        super(dataSourceManager);
+    }
 
     /**
      * Saves a new goal to the database by executing the corresponding SQL insert query.

@@ -1,6 +1,7 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
+import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.exception.DuplicateEmailException;
@@ -23,9 +24,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class RegistrationServiceImplTest {
 
-    @Mock private UserRepository userRepository;
-    @Mock private PasswordUtilsImpl passwordUtils;
-    @InjectMocks private RegistrationServiceImpl registrationService;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private PasswordUtilsImpl passwordUtils;
+    @Mock
+    private UserMapper userMapper;
+    @InjectMocks
+    private RegistrationServiceImpl registrationService;
 
     @Test
     @DisplayName("Register user - new email - returns true")
@@ -35,12 +41,19 @@ class RegistrationServiceImplTest {
         dto.setEmail("alice@mail.com");
         dto.setPassword("password123");
 
+        User userEntity = new User();
+        userEntity.setName("Alice");
+        userEntity.setEmail("alice@mail.com");
+        userEntity.setPassword("password123");
+
+        when(userMapper.toEntity(dto)).thenReturn(userEntity);
         when(userRepository.findByEmail("alice@mail.com")).thenReturn(null);
         when(passwordUtils.hashPassword("password123")).thenReturn("hashedPassword");
 
         boolean result = registrationService.registerUser(dto);
 
         assertThat(result).isTrue();
+        verify(userMapper).toEntity(dto);
         verify(userRepository).save(argThat(user ->
                 user.getName().equals("Alice") &&
                         user.getEmail().equals("alice@mail.com") &&
@@ -57,7 +70,14 @@ class RegistrationServiceImplTest {
         UserDto dto = new UserDto();
         dto.setEmail("existing@mail.com");
 
-        when(userRepository.findByEmail("existing@mail.com")).thenReturn(new User());
+        User existingUser = new User();
+        existingUser.setEmail("existing@mail.com");
+
+        User mappedUser = new User();
+        mappedUser.setEmail("existing@mail.com");
+
+        when(userMapper.toEntity(dto)).thenReturn(mappedUser);
+        when(userRepository.findByEmail("existing@mail.com")).thenReturn(existingUser);
 
         assertThatThrownBy(() -> registrationService.registerUser(dto))
                 .isInstanceOf(DuplicateEmailException.class)

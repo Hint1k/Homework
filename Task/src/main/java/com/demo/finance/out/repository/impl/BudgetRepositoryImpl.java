@@ -1,7 +1,10 @@
 package com.demo.finance.out.repository.impl;
 
+import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.out.repository.BudgetRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,6 +15,7 @@ import java.sql.SQLException;
  * and provides concrete implementations for budget data persistence operations.
  * It interacts directly with the database using SQL queries to perform CRUD operations on budget data.
  */
+@Repository
 public class BudgetRepositoryImpl extends BaseRepository implements BudgetRepository {
 
     private static final String INSERT_SQL = "INSERT INTO finance.budgets (user_id, monthly_limit, current_expenses) "
@@ -21,6 +25,17 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
     private static final String DELETE_SQL = "DELETE FROM finance.budgets WHERE budget_id = ?";
     private static final String FIND_BY_ID_SQL = "SELECT * FROM finance.budgets WHERE budget_id = ?";
     private static final String FIND_BY_USER_ID_SQL = "SELECT * FROM finance.budgets WHERE user_id = ?";
+
+    /**
+     * Constructs a new {@code BudgetRepositoryImpl} instance with the required dependency
+     * for managing database connections.
+     *
+     * @param dataSourceManager the manager responsible for providing database connections
+     */
+    @Autowired
+    public BudgetRepositoryImpl(DataSourceManager dataSourceManager) {
+        super(dataSourceManager);
+    }
 
     /**
      * Saves a new budget to the database by executing the corresponding SQL insert query.

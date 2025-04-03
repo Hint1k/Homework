@@ -5,13 +5,12 @@ import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -20,46 +19,75 @@ import java.util.regex.Pattern;
  * and provides concrete implementations for validating various JSON inputs and parameters.
  * It ensures that input data adheres to expected formats and constraints, throwing exceptions
  * when validation fails.
+ * <p>
+ * This class uses reflection and predefined rules to validate required fields and specific
+ * constraints for different modes of operation. It supports validation for user data, transactions,
+ * goals, budgets, pagination parameters, and more.
  */
+@Component
 public class ValidationUtilsImpl implements ValidationUtils {
 
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,}$");
 
-    private final ObjectMapper objectMapper;
+    private static final Map<Mode, List<String>> REQUIRED_FIELDS_MAP = new HashMap<>();
 
-    /**
-     * Constructs a new instance of {@code ValidationUtilsImpl} and initializes the {@link ObjectMapper}
-     * with support for Java 8 date and time types via the {@link JavaTimeModule}.
-     */
-    public ValidationUtilsImpl() {
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule());
+    static {
+        REQUIRED_FIELDS_MAP.put(Mode.TRANSACTION_CREATE, List.of("amount", "category", "date", "description", "type"));
+        REQUIRED_FIELDS_MAP.put(Mode.TRANSACTION_UPDATE, List.of("amount", "category", "description"));
+        REQUIRED_FIELDS_MAP.put(Mode.GOAL_CREATE, List.of("goalName", "targetAmount", "duration", "startTime"));
+        REQUIRED_FIELDS_MAP.put(Mode.GOAL_UPDATE, List.of("goalName", "targetAmount", "duration"));
+        REQUIRED_FIELDS_MAP.put(Mode.REGISTER_USER, List.of("name", "email", "password"));
+        REQUIRED_FIELDS_MAP.put(Mode.UPDATE_USER, List.of("name", "email", "password"));
+        REQUIRED_FIELDS_MAP.put(Mode.AUTHENTICATE, List.of("email", "password"));
+        REQUIRED_FIELDS_MAP.put(Mode.UPDATE_ROLE, List.of("role"));
+        REQUIRED_FIELDS_MAP.put(Mode.BLOCK_UNBLOCK, List.of("blocked"));
+        REQUIRED_FIELDS_MAP.put(Mode.REPORT, List.of("fromDate", "toDate"));
+        REQUIRED_FIELDS_MAP.put(Mode.BUDGET, List.of("monthlyLimit"));
+        REQUIRED_FIELDS_MAP.put(Mode.PAGE, List.of("page", "size"));
     }
 
     /**
-     * Validates a JSON string representing a user and maps it to a {@link UserDto} object.
+     * Validates the given object based on the specified mode.
+     * <p>
+     * This method performs a series of validations depending on the type of the object and the mode.
+     * It checks for required fields, validates specific constraints for each DTO type, and throws
+     * a {@link ValidationException} if any validation fails.
      *
-     * @param json the JSON string to validate
-     * @param mode the mode specifying the type of validation to perform
-     * @return the validated {@link UserDto} object
-     * @throws ValidationException if the JSON format is invalid or validation fails
+     * @param <T>    the type of the object to validate
+     * @param object the object to validate
+     * @param mode   the mode specifying the validation rules
+     * @return the validated object if all validations pass
+     * @throws ValidationException if any validation fails
      */
     @Override
-    public UserDto validateUserJson(String json, Mode mode) {
+    public <T> T validateRequest(T object, Mode mode) {
         try {
-            JsonNode jsonNode = objectMapper.readTree(json);
-            validateRequiredFields(jsonNode, mode);
-            UserDto userDto = objectMapper.readValue(json, UserDto.class);
-            validateFieldValues(jsonNode);
-            return userDto;
+            validateRequiredFields(object, mode);
+            if (object instanceof UserDto) {
+                validateUserFields((UserDto) object, mode);
+            } else if (object instanceof TransactionDto) {
+                validateTransactionFields((TransactionDto) object, mode);
+            } else if (object instanceof GoalDto) {
+                validateGoalFields((GoalDto) object, mode);
+            } else if (object instanceof BudgetDto) {
+                validateBudgetFields((BudgetDto) object);
+            } else if (object instanceof ReportDatesDto) {
+                validateReportDatesFields((ReportDatesDto) object);
+            } else if (object instanceof PaginationParams) {
+                validateParamsValues((PaginationParams) object);
+            }
+            return object;
         } catch (Exception e) {
-            throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
+            throw new ValidationException("Validation error: " + e.getMessage());
         }
     }
 
     /**
      * Parses and validates a user ID string.
+     * <p>
+     * This method ensures that the user ID is a positive integer and adheres to mode-specific constraints.
+     * For example, certain operations like deletion or role updates are restricted for the default admin user.
      *
      * @param userIdString the string representation of the user ID
      * @param mode         the mode specifying additional constraints for the user ID
@@ -87,178 +115,244 @@ public class ValidationUtilsImpl implements ValidationUtils {
     /**
      * Parses a string value into a {@code Long}, ensuring it is non-null, non-empty, and in valid numeric format.
      * <p>
-     * This method trims the input string, checks for null or empty values,
-     * and attempts to parse it into a {@code Long}.
-     * If parsing fails due to an invalid numeric format, an exception is thrown with a descriptive error message.
+     * This method trims the input string, checks for null or empty values, and attempts to parse it into a
+     * {@code Long}. If parsing fails due to an invalid numeric format, an exception is thrown with a descriptive
+     * error message.
      *
      * @param value the string value to parse
      * @return the parsed {@code Long} value
-     * @throws IllegalArgumentException if the input value is null, empty,
-     *                                  or cannot be parsed into a valid {@code Long}
+     * @throws IllegalArgumentException if the input value is null, empty, or cannot be parsed into a valid {@code Long}
      */
+    @Override
     public Long parseLong(String value) {
         if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException("Id cannot be null or empty.");
+            throw new ValidationException("Id cannot be null or empty.");
         }
         try {
-            return Long.parseLong(value.trim());
+            long id = Long.parseLong(value.trim());
+            if (id < 0) {
+                throw new ValidationException("Id cannot be negative");
+            }
+            return id;
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid numeric format for id: " + value);
+            throw new ValidationException("Invalid numeric format for id: " + value);
         }
     }
 
     /**
-     * Validates pagination parameters by parsing the JSON string, ensuring all required fields are present,
-     * and validating the values of the fields such as "page" and "size".
+     * Validates the required fields of the given DTO based on the specified mode.
      * <p>
-     * This implementation uses an ObjectMapper to parse the JSON string into a JsonNode.
-     * It delegates the validation of required fields to {@link #validateRequiredFields(JsonNode, Mode)}
-     * and the validation of parameter values to {@link #validateParamsValues(JsonNode)}.
+     * This method retrieves the list of required fields for the given mode and checks each field using
+     * the {@link #checkField(Object, String)} method.
      *
-     * @param json the JSON string containing pagination parameters (e.g., "page" and "size").
-     * @param mode the mode of validation, which determines the required fields and rules.
-     * @return a {@link PaginationParams} object containing validated page and size values.
-     * @throws ValidationException if the JSON format is invalid, required fields are missing,
-     *                             or any validation rule is violated.
+     * @param dto  the DTO object to validate
+     * @param mode the mode specifying the required fields
+     * @throws ValidationException if any required field is missing or invalid
      */
-    @Override
-    public PaginationParams validatePaginationParams(String json, Mode mode) {
-        try {
-            JsonNode jsonNode = objectMapper.readTree(json);
-            validateRequiredFields(jsonNode, mode);
-            return validateParamsValues(jsonNode);
-        } catch (Exception e) {
-            throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
+    private void validateRequiredFields(Object dto, Mode mode) {
+        List<String> requiredFields = REQUIRED_FIELDS_MAP.getOrDefault(mode, List.of());
+        for (String field : requiredFields) {
+            checkField(dto, field);
         }
     }
 
     /**
-     * Validates a JSON string representing a report request and extracts date ranges.
+     * Checks the existence and validity of a specific field in the given object using reflection.
+     * <p>
+     * This method dynamically invokes the getter method for the specified field and ensures that its value
+     * is not null. If the field is missing or inaccessible, a {@link ValidationException} is thrown.
      *
-     * @param json   the JSON string to validate
-     * @param mode   the mode specifying the type of validation to perform
-     * @param userId the user ID associated with the report
-     * @return a {@link Map} containing the validated "fromDate" and "toDate" as {@link LocalDate} objects
-     * @throws ValidationException if the JSON format is invalid or validation fails
+     * @param object    the object containing the field to check
+     * @param fieldName the name of the field to validate
+     * @throws ValidationException if the field is missing, inaccessible, or has a null value
      */
-    @Override
-    public Map<String, LocalDate> validateReportJson(String json, Mode mode, Long userId) {
+    private void checkField(Object object, String fieldName) {
         try {
-            JsonNode jsonNode = objectMapper.readTree(json);
-            validateRequiredFields(jsonNode, mode);
-            validateFieldValues(jsonNode);
-            LocalDate fromDate = LocalDate.parse(jsonNode.get("fromDate").asText());
-            LocalDate toDate = LocalDate.parse(jsonNode.get("toDate").asText());
-            if (toDate.isAfter(fromDate)) {
-                return Map.of("fromDate", fromDate, "toDate", toDate);
-            } else {
-                throw new ValidationException("FromDate cannot be after ToDate date");
+            if (object instanceof UserDto && "blocked".equals(fieldName)) {
+                Method method = object.getClass().getMethod("isBlocked");
+                Object value = method.invoke(object);
+                if (value == null) {
+                    throw new ValidationException("Missing required field: blocked");
+                }
+                return;
+            }
+            boolean isRecord = object.getClass().isRecord();
+            String methodName = isRecord ? fieldName
+                    : "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+            Method method;
+            try {
+                method = object.getClass().getMethod(methodName);
+            } catch (NoSuchMethodException e) {
+                throw new ValidationException("Field not found in DTO: " + fieldName);
+            }
+            Object value = method.invoke(object);
+            if (value == null) {
+                throw new ValidationException("Missing required field: " + fieldName);
             }
         } catch (Exception e) {
-            throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
+            if (e instanceof ValidationException) {
+                throw (ValidationException) e;
+            }
+            throw new ValidationException("Cannot access field: " + fieldName);
         }
     }
 
     /**
-     * Validates a JSON string representing a budget request and extracts the monthly limit.
-     *
-     * @param json   the JSON string to validate
-     * @param mode   the mode specifying the type of validation to perform
-     * @param userId the user ID associated with the budget
-     * @return the validated monthly limit as a {@link BigDecimal}
-     * @throws ValidationException if the JSON format is invalid or validation fails
-     */
-    @Override
-    public BigDecimal validateBudgetJson(String json, Mode mode, Long userId) {
-        try {
-            JsonNode jsonNode = objectMapper.readTree(json);
-            validateRequiredFields(jsonNode, mode);
-            validateFieldValues(jsonNode);
-            return BigDecimal.valueOf(jsonNode.get("monthlyLimit").asDouble());
-        } catch (Exception e) {
-            throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Validates a JSON string and maps it to a specified DTO object.
+     * Validates pagination parameters to ensure they meet the required constraints.
      * <p>
-     * This method validates the input JSON string, ensures all required fields are present,
-     * performs additional field value validations, and maps the JSON to the specified DTO class.
+     * This method checks that the page number and size are positive integers and that the size does not exceed 100.
      *
-     * @param json     the JSON string to validate
-     * @param mode     the mode specifying the type of validation to perform
-     * @param dtoClass the class of the DTO object to map the JSON to (e.g., {@link TransactionDto}, {@link GoalDto})
-     * @param <T>      the type of the DTO object
-     * @return the validated DTO object
-     * @throws ValidationException if the JSON format is invalid or validation fails
+     * @param params the pagination parameters to validate
+     * @throws ValidationException if the page number or size is invalid
      */
-    @Override
-    public <T> T validateJson(String json, Mode mode, Class<T> dtoClass) {
+    private void validateParamsValues(PaginationParams params) {
         try {
-            JsonNode jsonNode = objectMapper.readTree(json);
-            validateRequiredFields(jsonNode, mode);
-            T dto = objectMapper.readValue(json, dtoClass);
-            validateFieldValues(jsonNode);
-            return dto;
-        } catch (Exception e) {
-            throw new ValidationException("Invalid JSON format or validation error: " + e.getMessage());
+            if (params.page() < 1) {
+                throw new ValidationException("Page must be positive integer: " + params.page());
+            }
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid page number.");
+        }
+        try {
+            if (params.size() < 1) {
+                throw new ValidationException("Size must be positive integer: " + params.size());
+            }
+            if (params.size() > 100) {
+                throw new ValidationException("Size cannot exceed 100.");
+            }
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid size number.");
         }
     }
 
     /**
-     * Validates a JSON string representing a transaction, maps it to a {@link TransactionDto} object,
-     * and associates it with the provided transaction ID.
+     * Validates user-related fields based on the specified mode.
+     * <p>
+     * This method ensures that email, password, and name fields are valid and non-empty where applicable.
+     * Additional constraints are applied for role updates and authentication modes.
      *
-     * @param json          the JSON string to validate
-     * @param mode          the mode specifying the type of validation to perform
-     * @param transactionId the string representation of the transaction ID
-     * @return the validated {@link TransactionDto} object with the associated transaction ID
-     * @throws ValidationException if the JSON format is invalid or validation fails
+     * @param dto  the user DTO to validate
+     * @param mode the mode specifying the validation rules
+     * @throws ValidationException if any user-related field is invalid
      */
-    @Override
-    public TransactionDto validateTransactionJson(String json, Mode mode, String transactionId) {
-        Long parsedTransactionId = parseLong(transactionId);
-        TransactionDto transactionDto = validateJson(json, mode, TransactionDto.class);
-        transactionDto.setTransactionId(parsedTransactionId);
-        return transactionDto;
-    }
-
-    /**
-     * Validates a JSON string representing a goal, maps it to a {@link GoalDto} object,
-     * and associates it with the provided goal ID.
-     *
-     * @param json   the JSON string to validate
-     * @param mode   the mode specifying the type of validation to perform
-     * @param goalId the string representation of the goal ID
-     * @return the validated {@link GoalDto} object with the associated goal ID
-     * @throws ValidationException if the JSON format is invalid or validation fails
-     */
-    @Override
-    public GoalDto validateGoalJson(String json, Mode mode, String goalId) {
-        Long parsedGoalId = parseLong(goalId);
-        GoalDto goalDto = validateJson(json, mode, GoalDto.class);
-        goalDto.setGoalId(parsedGoalId);
-        return goalDto;
-    }
-
-    /**
-     * Checks if the specified field exists and is non-null in the provided JSON node.
-     * Throws a {@link ValidationException} if the field is missing or null.
-     *
-     * @param jsonNode  the JSON node to check for the field
-     * @param fieldName the name of the field to validate
-     * @throws ValidationException if the field is missing or null in the JSON node
-     */
-    private void checkField(JsonNode jsonNode, String fieldName) {
-        if (!jsonNode.hasNonNull(fieldName)) {
-            throw new ValidationException("Missing required field: " + fieldName);
+    private void validateUserFields(UserDto dto, Mode mode) {
+        if (mode != Mode.UPDATE_ROLE && mode != Mode.BLOCK_UNBLOCK && !isValidEmail(dto.getEmail())) {
+            throw new ValidationException("Invalid email format.");
         }
+        if (mode != Mode.UPDATE_ROLE && mode != Mode.BLOCK_UNBLOCK && isBlank(dto.getPassword())) {
+            throw new ValidationException("Password cannot be empty.");
+        }
+        if (mode != Mode.AUTHENTICATE && mode != Mode.UPDATE_ROLE && mode != Mode.BLOCK_UNBLOCK
+                && isBlank(dto.getName())) {
+            throw new ValidationException("Name cannot be empty.");
+        }
+        if (mode == Mode.UPDATE_ROLE && (dto.getRole() == null || isBlank(dto.getRole().getName()))) {
+            throw new ValidationException("Role cannot be empty.");
+        }
+    }
+
+    /**
+     * Validates transaction-related fields based on the specified mode.
+     * <p>
+     * This method ensures that the amount, category, description, and type fields are valid and non-empty
+     * where applicable. Additional constraints are applied for transaction creation mode.
+     *
+     * @param dto  the transaction DTO to validate
+     * @param mode the mode specifying the validation rules
+     * @throws ValidationException if any transaction-related field is invalid
+     */
+    private void validateTransactionFields(TransactionDto dto, Mode mode) {
+        if (dto.getAmount() == null || dto.getAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new ValidationException("Amount must be a positive number.");
+        }
+        if (mode == Mode.TRANSACTION_CREATE && dto.getDate() == null) {
+            throw new ValidationException("Transaction date cannot be null.");
+        }
+        if (isBlank(dto.getCategory())) {
+            throw new ValidationException("Category cannot be empty.");
+        }
+        if (isBlank(dto.getDescription())) {
+            throw new ValidationException("Description cannot be empty.");
+        }
+        if (mode == Mode.TRANSACTION_CREATE && !isValidType(dto.getType())) {
+            throw new ValidationException("Type must be either INCOME or EXPENSE.");
+        }
+    }
+
+    /**
+     * Validates goal-related fields based on the specified mode.
+     * <p>
+     * This method ensures that the goal name, target amount, duration, and start time fields are valid
+     * and non-empty where applicable. Additional constraints are applied for goal creation mode.
+     *
+     * @param dto  the goal DTO to validate
+     * @param mode the mode specifying the validation rules
+     * @throws ValidationException if any goal-related field is invalid
+     */
+    private void validateGoalFields(GoalDto dto, Mode mode) {
+        if (isBlank(dto.getGoalName())) {
+            throw new ValidationException("Goal name cannot be empty.");
+        }
+        if (dto.getTargetAmount() == null || dto.getTargetAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new ValidationException("Target amount must be a positive number.");
+        }
+        if (dto.getDuration() == null || dto.getDuration() < 1) {
+            throw new ValidationException("Duration must be a positive integer.");
+        }
+        if (mode == Mode.GOAL_CREATE && dto.getStartTime() == null) {
+            throw new ValidationException("Start time cannot be empty.");
+        }
+    }
+
+    /**
+     * Validates budget-related fields.
+     * <p>
+     * This method ensures that the monthly limit field is a positive number.
+     *
+     * @param dto the budget DTO to validate
+     * @throws ValidationException if the monthly limit is invalid
+     */
+    private void validateBudgetFields(BudgetDto dto) {
+        if (dto.getMonthlyLimit() == null || dto.getMonthlyLimit().compareTo(BigDecimal.ZERO) < 0) {
+            throw new ValidationException("Monthly limit must be a positive number.");
+        }
+    }
+
+    /**
+     * Validates report date-related fields.
+     * <p>
+     * This method ensures that both the from date and to date fields are non-null and that the to date
+     * is not before the from date.
+     *
+     * @param dto the report dates DTO to validate
+     * @throws ValidationException if the date range is invalid
+     */
+    private void validateReportDatesFields(ReportDatesDto dto) {
+        if (dto.getFromDate() == null) {
+            throw new ValidationException("From date cannot be null.");
+        }
+        if (dto.getToDate() == null) {
+            throw new ValidationException("To date cannot be null.");
+        }
+        if (dto.getToDate().isBefore(dto.getFromDate())) {
+            throw new ValidationException("To date cannot be before from date.");
+        }
+    }
+
+    /**
+     * Checks whether a given string is blank (null or empty after trimming).
+     *
+     * @param str the string to check
+     * @return {@code true} if the string is blank, {@code false} otherwise
+     */
+    private boolean isBlank(String str) {
+        return str == null || str.trim().isEmpty();
     }
 
     /**
      * Validates whether the provided email string conforms to a valid email format.
-     * Uses a predefined regular expression pattern to perform the validation.
+     * <p>
+     * This method uses a predefined regular expression pattern to perform the validation.
      *
      * @param email the email string to validate
      * @return {@code true} if the email matches the valid format, {@code false} otherwise
@@ -268,203 +362,12 @@ public class ValidationUtilsImpl implements ValidationUtils {
     }
 
     /**
-     * Validates the presence of required fields in the JSON node based on the specified mode.
+     * Validates whether the provided type string is either "INCOME" or "EXPENSE".
      *
-     * @param jsonNode the JSON node to validate
-     * @param mode     the mode specifying the required fields to check
-     * @throws ValidationException if any required field is missing
+     * @param type the type string to validate
+     * @return {@code true} if the type is valid, {@code false} otherwise
      */
-    private void validateRequiredFields(JsonNode jsonNode, Mode mode) {
-        switch (mode) {
-            case TRANSACTION_CREATE:
-                checkField(jsonNode, "amount");
-                checkField(jsonNode, "category");
-                checkField(jsonNode, "date");
-                checkField(jsonNode, "description");
-                checkField(jsonNode, "type");
-                break;
-            case TRANSACTION_UPDATE:
-                checkField(jsonNode, "amount");
-                checkField(jsonNode, "category");
-                checkField(jsonNode, "description");
-                break;
-            case GOAL_CREATE:
-                checkField(jsonNode, "goalName");
-                checkField(jsonNode, "targetAmount");
-                checkField(jsonNode, "duration");
-                checkField(jsonNode, "startTime");
-                break;
-            case GOAL_UPDATE:
-                checkField(jsonNode, "goalName");
-                checkField(jsonNode, "targetAmount");
-                checkField(jsonNode, "duration");
-                break;
-            case REGISTER_USER:
-            case UPDATE_USER:
-                checkField(jsonNode, "name");
-                checkField(jsonNode, "email");
-                checkField(jsonNode, "password");
-                break;
-            case AUTHENTICATE:
-                checkField(jsonNode, "email");
-                checkField(jsonNode, "password");
-                break;
-            case UPDATE_ROLE:
-                checkField(jsonNode, "role");
-                break;
-            case BLOCK_UNBLOCK:
-                checkField(jsonNode, "blocked");
-                break;
-            case REPORT:
-                checkField(jsonNode, "fromDate");
-                checkField(jsonNode, "toDate");
-                break;
-            case BUDGET:
-                checkField(jsonNode, "monthlyLimit");
-                break;
-            case PAGE:
-                checkField(jsonNode, "page");
-                checkField(jsonNode, "size");
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * Validates the values of pagination parameters ("page" and "size") extracted from the provided JsonNode.
-     * <p>
-     * The "page" value must be a positive integer greater than or equal to 1.
-     * The "size" value must be a positive integer between 1 and 100 (inclusive).
-     *
-     * @param jsonNode the JsonNode containing the pagination parameters to validate.
-     * @return a {@link PaginationParams} object containing the validated page and size values.
-     * If a parameter is missing, its value will default to -1.
-     * @throws ValidationException if the "page" or "size" values are invalid (e.g., non-numeric or out of range).
-     */
-    private PaginationParams validateParamsValues(JsonNode jsonNode) {
-        int page = -1, size = -1;
-        if (jsonNode.has("page")) {
-            try {
-                page = Integer.parseInt(jsonNode.get("page").asText());
-                if (page < 1) {
-                    throw new ValidationException("Page must be positive integer: " + page);
-                }
-            } catch (NumberFormatException e) {
-                throw new ValidationException("Invalid page number.");
-            }
-        }
-        if (jsonNode.has("size")) {
-            try {
-                size = Integer.parseInt(jsonNode.get("size").asText());
-                if (size < 1) {
-                    throw new ValidationException("Size must be positive integer: " + size);
-                }
-                if (size > 100) {
-                    throw new IllegalArgumentException("Size cannot exceed 100.");
-                }
-            } catch (NumberFormatException e) {
-                throw new ValidationException("Invalid size number.");
-            }
-        }
-        return new PaginationParams(page, size);
-    }
-
-    /**
-     * Validates the values of fields in the provided JSON node based on the specified mode.
-     * Ensures that each field adheres to its expected format and constraints, throwing a
-     * {@link ValidationException} if any validation fails. The following validations are performed:
-     * <ul>
-     *   <li>userId: Must be a non-null Long value.</li>
-     *   <li>email: Must conform to a valid email format.</li>
-     *   <li>password: Must not be empty or blank.</li>
-     *   <li>fromDate and toDate: Must be valid dates in the correct format, and toDate must be after fromDate.</li>
-     *   <li>blocked: Must be a boolean value.</li>
-     *   <li>monthlyLimit, amount, targetAmount, savedAmount: Must be positive numeric values.</li>
-     *   <li>date and startTime: Must be valid dates in the correct format.</li>
-     *   <li>type: Must be either "INCOME" or "EXPENSE".</li>
-     *   <li>duration: Must be a positive integer.</li>
-     * </ul>
-     *
-     * @param jsonNode the JSON node containing the fields to validate
-     * @throws ValidationException if any field value fails validation
-     */
-    private void validateFieldValues(JsonNode jsonNode) {
-        if (jsonNode.has("email") && !isValidEmail(jsonNode.get("email").asText())) {
-            throw new ValidationException("Invalid email format.");
-        }
-        if (jsonNode.has("password")) {
-            String password = jsonNode.get("password").asText();
-            if (password.isBlank()) {
-                throw new ValidationException("Password cannot be empty.");
-            }
-        }
-        if (jsonNode.has("fromDate")) {
-            try {
-                LocalDate.parse(jsonNode.get("fromDate").asText());
-            } catch (DateTimeParseException e) {
-                throw new ValidationException("Invalid date format.");
-            }
-        }
-        if (jsonNode.has("toDate")) {
-            try {
-                LocalDate.parse(jsonNode.get("toDate").asText());
-            } catch (DateTimeParseException e) {
-                throw new ValidationException("Invalid date format.");
-            }
-        }
-        if (jsonNode.has("blocked") && !jsonNode.get("blocked").isBoolean()) {
-            throw new ValidationException("Blocked field must be a boolean.");
-        }
-        if (jsonNode.has("monthlyLimit")) {
-            BigDecimal amount = new BigDecimal(jsonNode.get("monthlyLimit").asText());
-            if (amount.compareTo(BigDecimal.ZERO) < 0) {
-                throw new ValidationException("Amount must be positive.");
-            }
-        }
-        if (jsonNode.has("amount")) {
-            BigDecimal amount = new BigDecimal(jsonNode.get("amount").asText());
-            if (amount.compareTo(BigDecimal.ZERO) < 0) {
-                throw new ValidationException("Amount must be positive.");
-            }
-        }
-        if (jsonNode.has("date")) {
-            try {
-                LocalDate.parse(jsonNode.get("date").asText());
-            } catch (DateTimeParseException e) {
-                throw new ValidationException("Invalid date format.");
-            }
-        }
-        if (jsonNode.has("type")) {
-            String type = jsonNode.get("type").asText();
-            if (!type.equalsIgnoreCase("INCOME") && !type.equalsIgnoreCase("EXPENSE")) {
-                throw new ValidationException("Type must be either INCOME or EXPENSE.");
-            }
-        }
-        if (jsonNode.has("targetAmount")) {
-            BigDecimal targetAmount = new BigDecimal(jsonNode.get("targetAmount").asText());
-            if (targetAmount.compareTo(BigDecimal.ZERO) < 0) {
-                throw new ValidationException("Target amount must be positive.");
-            }
-        }
-        if (jsonNode.has("savedAmount")) {
-            BigDecimal savedAmount = new BigDecimal(jsonNode.get("savedAmount").asText());
-            if (savedAmount.compareTo(BigDecimal.ZERO) < 0) {
-                throw new ValidationException("Saved amount must be positive.");
-            }
-        }
-        if (jsonNode.has("duration")) {
-            int duration = jsonNode.get("duration").asInt();
-            if (duration <= 0) {
-                throw new ValidationException("Duration must be a positive integer.");
-            }
-        }
-        if (jsonNode.has("startTime")) {
-            try {
-                LocalDate.parse(jsonNode.get("startTime").asText());
-            } catch (DateTimeParseException e) {
-                throw new ValidationException("Invalid start time format.");
-            }
-        }
+    private boolean isValidType(String type) {
+        return "INCOME".equalsIgnoreCase(type) || "EXPENSE".equalsIgnoreCase(type);
     }
 }

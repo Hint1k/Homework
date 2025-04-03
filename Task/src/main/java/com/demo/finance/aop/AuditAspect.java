@@ -5,6 +5,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.JoinPoint;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import java.util.logging.Logger;
  * along with the user ID of the actor, if available.
  */
 @Aspect
+@Component
 public class AuditAspect {
 
     private static final Logger log = Logger.getLogger(AuditAspect.class.getName());

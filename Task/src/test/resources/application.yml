@@ -1,0 +1,5 @@
+app:
+  db:
+    url: "jdbc:postgresql://localhost:5432/testdb"
+server:
+  port: 8080

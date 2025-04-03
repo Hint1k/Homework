@@ -1,6 +1,7 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.GoalDto;
+import com.demo.finance.domain.mapper.GoalMapper;
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.out.repository.GoalRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -24,8 +25,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GoalServiceImplTest {
 
-    @Mock private GoalRepository goalRepository;
-    @InjectMocks private GoalServiceImpl goalService;
+    @Mock
+    private GoalRepository goalRepository;
+    @Mock
+    private GoalMapper goalMapper;
+    @InjectMocks
+    private GoalServiceImpl goalService;
 
     @Test
     @DisplayName("Create goal - valid goal - returns goal ID")
@@ -36,15 +41,23 @@ class GoalServiceImplTest {
         dto.setTargetAmount(new BigDecimal(5000));
         dto.setDuration(12);
 
+        Goal goalEntity = new Goal();
+        goalEntity.setGoalName("Car");
+        goalEntity.setTargetAmount(new BigDecimal(5000));
+        goalEntity.setDuration(12);
+
+        when(goalMapper.toEntity(dto)).thenReturn(goalEntity);
         when(goalRepository.save(any(Goal.class))).thenReturn(123L);
 
         Long result = goalService.createGoal(dto, 12L);
 
         assertThat(result).isEqualTo(123L);
+        verify(goalMapper).toEntity(dto);
         verify(goalRepository).save(argThat(goal ->
                 goal.getGoalName().equals("Car") &&
                         goal.getTargetAmount().equals(new BigDecimal(5000)) &&
-                        goal.getSavedAmount().equals(BigDecimal.ZERO)
+                        goal.getSavedAmount().equals(BigDecimal.ZERO) &&
+                        goal.getUserId().equals(12L)
         ));
     }
 

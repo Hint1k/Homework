@@ -1,8 +1,11 @@
 package com.demo.finance.out.repository.impl;
 
+import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -17,6 +20,7 @@ import java.util.List;
  * and provides concrete implementations for transaction data persistence operations.
  * It interacts directly with the database using SQL queries to perform CRUD operations on transaction data.
  */
+@Repository
 public class TransactionRepositoryImpl extends BaseRepository implements TransactionRepository {
 
     private static final String INSERT_SQL = "INSERT INTO finance.transactions (user_id, amount, category, date, "
@@ -31,6 +35,17 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
     private static final String FIND_BY_USER_AND_TRANSACTION_SQL = "SELECT * FROM finance.transactions WHERE "
             + "transaction_id = ? AND user_id = ?";
     private static final String COUNT_SQL = "SELECT COUNT(*) AS total FROM finance.transactions WHERE user_id = ?";
+
+    /**
+     * Constructs a new {@code TransactionRepositoryImpl} instance with the required dependency
+     * for managing database connections.
+     *
+     * @param dataSourceManager the manager responsible for providing database connections
+     */
+    @Autowired
+    public TransactionRepositoryImpl(DataSourceManager dataSourceManager) {
+        super(dataSourceManager);
+    }
 
     /**
      * Saves a new transaction to the database by executing the corresponding SQL insert query.
@@ -202,8 +217,8 @@ public class TransactionRepositoryImpl extends BaseRepository implements Transac
     /**
      * Sets the parameters for a prepared SQL statement based on the provided transaction data.
      *
-     * @param stmt         the {@link PreparedStatement} to populate with parameters
-     * @param transaction  the {@link Transaction} object containing the data to set
+     * @param stmt        the {@link PreparedStatement} to populate with parameters
+     * @param transaction the {@link Transaction} object containing the data to set
      * @throws SQLException if an error occurs while setting parameters
      */
     private void setTransactionParameters(PreparedStatement stmt, Transaction transaction) throws SQLException {

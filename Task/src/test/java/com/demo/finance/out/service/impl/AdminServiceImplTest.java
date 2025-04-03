@@ -2,6 +2,7 @@ package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
+import com.demo.finance.exception.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,14 +12,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.DisplayName;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
+
 import com.demo.finance.domain.dto.UserDto;
 
 @ExtendWith(MockitoExtension.class)
 class AdminServiceImplTest {
 
-    @Mock private UserRepository userRepository;
-    @InjectMocks private AdminServiceImpl adminService;
+    @Mock
+    private UserRepository userRepository;
+    @InjectMocks
+    private AdminServiceImpl adminService;
 
     @Test
     @DisplayName("Get user - existing user - returns user")
@@ -81,26 +86,28 @@ class AdminServiceImplTest {
     }
 
     @Test
-    @DisplayName("Update user role - non-existing user - returns false")
-    void testUpdateUserRole_nonExistingUser_returnsFalse() {
+    @DisplayName("Update user role - non-existing user - throws UserNotFoundException")
+    void testUpdateUserRole_nonExistingUser_throwsException() {
+        Long userId = 1L;
         UserDto userDto = new UserDto();
-        userDto.setUserId(1L);
+        userDto.setUserId(userId);
 
-        when(userRepository.findById(1L)).thenReturn(null);
+        when(userRepository.findById(userId)).thenReturn(null);
 
-        boolean result = adminService.updateUserRole(1L, userDto);
-
-        assertThat(result).isFalse();
+        assertThatThrownBy(() -> adminService.updateUserRole(userId, userDto))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User with ID " + userId + " not found");
     }
 
     @Test
-    @DisplayName("Block or unblock user - non-existing user - returns false")
-    void testBlockOrUnblockUser_nonExistingUser_returnsFalse() {
-        when(userRepository.findById(1L)).thenReturn(null);
+    @DisplayName("Block or unblock user - non-existing user - throws UserNotFoundException")
+    void testBlockOrUnblockUser_nonExistingUser_throwsException() {
+        Long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(null);
 
-        boolean result = adminService.blockOrUnblockUser(1L, new UserDto());
-
-        assertThat(result).isFalse();
+        assertThatThrownBy(() -> adminService.blockOrUnblockUser(userId, new UserDto()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User with ID " + userId + " not found");
     }
 
     @Test

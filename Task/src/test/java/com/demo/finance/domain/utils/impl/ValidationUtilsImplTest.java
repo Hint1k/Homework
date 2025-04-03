@@ -1,8 +1,11 @@
 package com.demo.finance.domain.utils.impl;
 
+import com.demo.finance.domain.dto.BudgetDto;
 import com.demo.finance.domain.dto.GoalDto;
+import com.demo.finance.domain.dto.ReportDatesDto;
 import com.demo.finance.domain.dto.TransactionDto;
 import com.demo.finance.domain.dto.UserDto;
+import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.exception.ValidationException;
@@ -14,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -26,40 +28,129 @@ class ValidationUtilsImplTest {
     private ValidationUtilsImpl validationUtils;
 
     @Test
-    @DisplayName("Validate user JSON with valid input - returns UserDto")
-    void testValidateUserJson_ValidInput_ReturnsUserDto() {
-        String json = "{\"name\":\"John\",\"email\":\"john@test.com\",\"password\":\"pass123\"}";
-        UserDto result = validationUtils.validateUserJson(json, Mode.REGISTER_USER);
-        assertThat(result.getName()).isEqualTo("John");
-        assertThat(result.getEmail()).isEqualTo("john@test.com");
+    @DisplayName("Validate UserDto - valid input - returns validated object")
+    void testValidateUser_ValidInput_Success() {
+        UserDto user = new UserDto(1L, "John", "john@test.com", "password123",
+                false, new Role("user"), 1L);
+
+        UserDto result = validationUtils.validateRequest(user, Mode.REGISTER_USER);
+        assertThat(result).isEqualTo(user);
     }
 
     @Test
-    @DisplayName("Validate user JSON with invalid email - throws ValidationException")
-    void testValidateUserJson_InvalidEmail_ThrowsException() {
-        String json = "{\"name\":\"John\",\"email\":\"invalid\",\"password\":\"pass123\"}";
-        assertThatThrownBy(() -> validationUtils.validateUserJson(json, Mode.REGISTER_USER))
+    @DisplayName("Validate UserDto - invalid email - throws ValidationException")
+    void testValidateUser_InvalidEmail_ThrowsException() {
+        UserDto user = new UserDto(1L, "John", "invalid-email", "password123",
+                false, new Role("user"), 1L);
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(user, Mode.REGISTER_USER))
                 .isInstanceOf(ValidationException.class)
                 .hasMessageContaining("Invalid email format");
     }
 
     @Test
-    @DisplayName("Parse valid user ID - returns Long")
+    @DisplayName("Validate TransactionDto - valid input - returns validated object")
+    void testValidateTransaction_ValidInput_Success() {
+        TransactionDto transaction = new TransactionDto(1L, 1L, BigDecimal.valueOf(100),
+                "Food", LocalDate.now(), "Lunch", "EXPENSE");
+
+        TransactionDto result = validationUtils.validateRequest(transaction, Mode.TRANSACTION_CREATE);
+        assertThat(result).isEqualTo(transaction);
+    }
+
+    @Test
+    @DisplayName("Validate TransactionDto - negative amount - throws ValidationException")
+    void testValidateTransaction_NegativeAmount_ThrowsException() {
+        TransactionDto transaction = new TransactionDto(1L, 1L, BigDecimal.valueOf(-100),
+                "Food", LocalDate.now(), "Lunch", "EXPENSE");
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(transaction, Mode.TRANSACTION_CREATE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Amount must be a positive number");
+    }
+
+    @Test
+    @DisplayName("Validate GoalDto - valid input - returns validated object")
+    void testValidateGoal_ValidInput_Success() {
+        GoalDto goal = new GoalDto(1L, 1L, "New Car", BigDecimal.valueOf(20000),
+                BigDecimal.ZERO, 12, LocalDate.now());
+
+        GoalDto result = validationUtils.validateRequest(goal, Mode.GOAL_CREATE);
+        assertThat(result).isEqualTo(goal);
+    }
+
+    @Test
+    @DisplayName("Validate GoalDto - zero duration - throws ValidationException")
+    void testValidateGoal_ZeroDuration_ThrowsException() {
+        GoalDto goal = new GoalDto(1L, 1L, "New Car", BigDecimal.valueOf(20000),
+                BigDecimal.ZERO, 0, LocalDate.now());
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(goal, Mode.GOAL_CREATE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Duration must be a positive integer");
+    }
+
+    @Test
+    @DisplayName("Validate PaginationParams - valid input - returns validated object")
+    void testValidatePagination_ValidInput_Success() {
+        PaginationParams params = new PaginationParams(1, 10);
+
+        PaginationParams result = validationUtils.validateRequest(params, Mode.PAGE);
+        assertThat(result).isEqualTo(params);
+    }
+
+    @Test
+    @DisplayName("Validate PaginationParams - size too large - throws ValidationException")
+    void testValidatePagination_SizeTooLarge_ThrowsException() {
+        PaginationParams params = new PaginationParams(1, 101);
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(params, Mode.PAGE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Size cannot exceed 100");
+    }
+
+    @Test
+    @DisplayName("Validate ReportDatesDto - valid dates - returns validated object")
+    void testValidateReportDates_ValidDates_Success() {
+        ReportDatesDto dates = new ReportDatesDto(
+                LocalDate.of(2023, 1, 1),
+                LocalDate.of(2023, 1, 31)
+        );
+
+        ReportDatesDto result = validationUtils.validateRequest(dates, Mode.REPORT);
+        assertThat(result).isEqualTo(dates);
+    }
+
+    @Test
+    @DisplayName("Validate ReportDatesDto - invalid date order - throws ValidationException")
+    void testValidateReportDates_InvalidOrder_ThrowsException() {
+        ReportDatesDto dates = new ReportDatesDto(
+                LocalDate.of(2023, 1, 31),
+                LocalDate.of(2023, 1, 1)
+        );
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(dates, Mode.REPORT))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("To date cannot be before from date");
+    }
+
+    @Test
+    @DisplayName("Parse user ID - valid input - returns Long")
     void testParseUserId_ValidInput_ReturnsLong() {
         Long result = validationUtils.parseUserId("123", Mode.DELETE);
         assertThat(result).isEqualTo(123L);
     }
 
     @Test
-    @DisplayName("Parse invalid user ID - throws IllegalArgumentException")
-    void testParseUserId_InvalidInput_ThrowsException() {
+    @DisplayName("Parse user ID - invalid format - throws ValidationException")
+    void testParseUserId_InvalidFormat_ThrowsException() {
         assertThatThrownBy(() -> validationUtils.parseUserId("abc", Mode.DELETE))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Invalid user ID format. User ID must be a positive integer.");
+                .hasMessageContaining("Invalid user ID format");
     }
 
     @Test
-    @DisplayName("Parse admin user ID for delete - throws ValidationException")
+    @DisplayName("Parse user ID - admin deletion attempt - throws ValidationException")
     void testParseUserId_AdminDelete_ThrowsException() {
         assertThatThrownBy(() -> validationUtils.parseUserId("1", Mode.DELETE))
                 .isInstanceOf(ValidationException.class)
@@ -67,136 +158,148 @@ class ValidationUtilsImplTest {
     }
 
     @Test
-    @DisplayName("Validate pagination params with valid input - returns PaginationParams")
-    void testValidatePaginationParams_ValidInput_ReturnsParams() {
-        String json = "{\"page\":1,\"size\":10}";
-        PaginationParams result = validationUtils.validatePaginationParams(json, Mode.PAGE);
-        assertThat(result.page()).isEqualTo(1);
-        assertThat(result.size()).isEqualTo(10);
-    }
-
-    @Test
-    @DisplayName("Validate pagination params with large size - throws Exception")
-    void testValidatePaginationParams_SizeTooLarge_ThrowsException() {
-        String json = "{\"page\":1,\"size\":101}";
-        assertThatThrownBy(() -> validationUtils.validatePaginationParams(json, Mode.PAGE))
-                .isInstanceOf(ValidationException.class)
-                .hasMessageContaining("Size cannot exceed 100");
-    }
-
-    @Test
-    @DisplayName("Validate report JSON with valid dates - returns date map")
-    void testValidateReportJson_ValidDates_ReturnsMap() {
-        String json = "{\"fromDate\":\"2023-01-01\",\"toDate\":\"2023-01-31\"}";
-        Map<String, LocalDate> result = validationUtils.validateReportJson(json, Mode.REPORT, 1L);
-        assertThat(result.get("fromDate")).isEqualTo(LocalDate.of(2023, 1, 1));
-        assertThat(result.get("toDate")).isEqualTo(LocalDate.of(2023, 1, 31));
-    }
-
-    @Test
-    @DisplayName("Validate report JSON with invalid date order - throws Exception")
-    void testValidateReportJson_InvalidDateOrder_ThrowsException() {
-        String json = "{\"fromDate\":\"2023-01-31\",\"toDate\":\"2023-01-01\"}";
-        assertThatThrownBy(() -> validationUtils.validateReportJson(json, Mode.REPORT, 1L))
-                .isInstanceOf(ValidationException.class)
-                .hasMessageContaining("FromDate cannot be after ToDate");
-    }
-
-    @Test
-    @DisplayName("Validate budget JSON with valid limit - returns BigDecimal")
-    void testValidateBudgetJson_ValidLimit_ReturnsBigDecimal() {
-        String json = "{\"monthlyLimit\":1000.50}";
-        BigDecimal result = validationUtils.validateBudgetJson(json, Mode.BUDGET, 1L);
-        assertThat(result).isEqualTo(BigDecimal.valueOf(1000.50));
-    }
-
-    @Test
-    @DisplayName("Validate transaction JSON with valid input - returns TransactionDto")
-    void testValidateTransactionJson_ValidInput_ReturnsDto() {
-        String json = "{\"userId\":1,\"amount\":100,\"category\":\"Food\",\"date\":\"2023-01-01\","
-                + "\"description\": \"1\", \"type\":\"EXPENSE\"}";
-        TransactionDto result = validationUtils.validateJson(json, Mode.TRANSACTION_CREATE, TransactionDto.class);
-        assertThat(result.getAmount()).isEqualTo(BigDecimal.valueOf(100));
-        assertThat(result.getType()).isEqualTo("EXPENSE");
-    }
-
-    @Test
-    @DisplayName("Validate goal JSON with valid input - returns GoalDto")
-    void testValidateGoalJson_ValidInput_ReturnsDto() {
-        String json = "{\"userId\":1,\"goalName\":\"Car\",\"targetAmount\":10000,"
-                + "\"duration\":12,\"startTime\":\"2025-03-30\"}";
-        GoalDto result = validationUtils.validateJson(json, Mode.GOAL_CREATE, GoalDto.class);
-        assertThat(result.getGoalName()).isEqualTo("Car");
-        assertThat(result.getTargetAmount()).isEqualTo(BigDecimal.valueOf(10000));
-    }
-
-    @Test
-    @DisplayName("Validate JSON with missing required field - throws Exception")
-    void testValidateJson_MissingField_ThrowsException() {
-        String json = "{\"name\":\"John\"}";
-        assertThatThrownBy(() -> validationUtils.validateUserJson(json, Mode.REGISTER_USER))
-                .isInstanceOf(ValidationException.class)
-                .hasMessageContaining("Missing required field");
-    }
-
-    @Test
-    @DisplayName("Parse long with valid input - returns Long")
+    @DisplayName("Parse long - valid input - returns Long")
     void testParseLong_ValidInput_ReturnsLong() {
         Long result = validationUtils.parseLong("123");
         assertThat(result).isEqualTo(123L);
     }
 
     @Test
-    @DisplayName("Parse long with empty input - throws Exception")
+    @DisplayName("Parse long - empty input - throws ValidationException")
     void testParseLong_EmptyInput_ThrowsException() {
         assertThatThrownBy(() -> validationUtils.parseLong(""))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ValidationException.class)
                 .hasMessageContaining("Id cannot be null or empty");
     }
 
     @Test
-    @DisplayName("Validate field values with negative amount - throws Exception")
-    void testValidateFieldValues_NegativeAmount_ThrowsException() {
-        String json = "{\"userId\":10,\"amount\":\"-100\",\"category\":\"1\",\"date\":\"2025-03-23\","
-                + "\"description\":\"1\",\"type\":\"EXPENSE\"}";
-        assertThatThrownBy(() -> validationUtils.validateJson(json, Mode.TRANSACTION_CREATE, TransactionDto.class))
-                .isInstanceOf(ValidationException.class)
-                .hasMessageContaining("Amount must be positive");
+    @DisplayName("Validate BudgetDto - valid input - returns validated object")
+    void testValidateBudget_ValidInput_Success() {
+        BudgetDto budget = new BudgetDto(1L, 1L, BigDecimal.valueOf(1000), BigDecimal.valueOf(500));
+
+        BudgetDto result = validationUtils.validateRequest(budget, Mode.BUDGET);
+        assertThat(result).isEqualTo(budget);
     }
 
     @Test
-    @DisplayName("Validate field values with invalid type - throws Exception")
-    void testValidateFieldValues_InvalidType_ThrowsException() {
-        String json = "{\"userId\":1,\"amount\":100,\"category\":\"Food\",\"date\":\"2023-01-01\","
-                + "\"description\": \"1\", \"type\":\"INVALID\"}";
-        assertThatThrownBy(() -> validationUtils.validateJson(json, Mode.TRANSACTION_CREATE, TransactionDto.class))
+    @DisplayName("Validate BudgetDto - negative limit - throws ValidationException")
+    void testValidateBudget_NegativeLimit_ThrowsException() {
+        BudgetDto budget = new BudgetDto(1L, 1L, BigDecimal.valueOf(-1000), BigDecimal.valueOf(500));
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(budget, Mode.BUDGET))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Monthly limit must be a positive number");
+    }
+
+    @Test
+    @DisplayName("Validate fields - missing required field - throws ValidationException")
+    void testValidateFields_MissingRequired_ThrowsException() {
+        UserDto user = new UserDto(1L, null, "john@test.com", "password123",
+                false, new Role("user"), 1L);
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(user, Mode.REGISTER_USER))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Missing required field: name");
+    }
+
+    @Test
+    @DisplayName("Validate UserDto - empty password - throws ValidationException")
+    void testValidateUser_EmptyPassword_ThrowsException() {
+        UserDto user = new UserDto(1L, "John", "john@test.com", "",
+                false, new Role("user"), 1L);
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(user, Mode.REGISTER_USER))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Password cannot be empty");
+    }
+
+    @Test
+    @DisplayName("Validate UserDto - empty name - throws ValidationException")
+    void testValidateUser_EmptyName_ThrowsException() {
+        UserDto user = new UserDto(1L, "", "john@test.com", "password123",
+                false, new Role("user"), 1L);
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(user, Mode.REGISTER_USER))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Name cannot be empty");
+    }
+
+    @Test
+    @DisplayName("Validate TransactionDto - empty category - throws ValidationException")
+    void testValidateTransaction_EmptyCategory_ThrowsException() {
+        TransactionDto transaction = new TransactionDto(1L, 1L, BigDecimal.valueOf(100),
+                "", LocalDate.now(), "Lunch", "EXPENSE");
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(transaction, Mode.TRANSACTION_CREATE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Category cannot be empty");
+    }
+
+    @Test
+    @DisplayName("Validate TransactionDto - invalid type - throws ValidationException")
+    void testValidateTransaction_InvalidType_ThrowsException() {
+        TransactionDto transaction = new TransactionDto(1L, 1L, BigDecimal.valueOf(100),
+                "Food", LocalDate.now(), "Lunch", "INVALID");
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(transaction, Mode.TRANSACTION_CREATE))
                 .isInstanceOf(ValidationException.class)
                 .hasMessageContaining("Type must be either INCOME or EXPENSE");
     }
 
     @Test
-    @DisplayName("Validate user JSON with ID for update - returns UserDto with ID")
-    void testValidateUserJson_WithIdForUpdate_ReturnsDtoWithId() {
-        String json = "{\"userId\":1,\"name\":\"John\",\"email\":\"john@test.com\",\"password\":\"pass123\"}";
-        UserDto result = validationUtils.validateUserJson(json, Mode.UPDATE_USER);
-        assertThat(result.getUserId()).isEqualTo(1L);
+    @DisplayName("Validate GoalDto - empty goal name - throws ValidationException")
+    void testValidateGoal_EmptyName_ThrowsException() {
+        GoalDto goal = new GoalDto(1L, 1L, "", BigDecimal.valueOf(20000),
+                BigDecimal.ZERO, 12, LocalDate.now());
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(goal, Mode.GOAL_CREATE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Goal name cannot be empty");
     }
 
     @Test
-    @DisplayName("Validate transaction JSON with ID - returns TransactionDto with ID")
-    void testValidateTransactionJson_WithId_ReturnsDtoWithId() {
-        String json = "{\"userId\":1,\"amount\":100,\"category\":1,\"description\":1}";
-        TransactionDto result = validationUtils
-                .validateTransactionJson(json, Mode.TRANSACTION_UPDATE, "123");
-        assertThat(result.getTransactionId()).isEqualTo(123L);
+    @DisplayName("Validate PaginationParams - zero page - throws ValidationException")
+    void testValidatePagination_ZeroPage_ThrowsException() {
+        PaginationParams params = new PaginationParams(0, 10);
+
+        assertThatThrownBy(() -> validationUtils.validateRequest(params, Mode.PAGE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Page must be positive integer");
     }
 
     @Test
-    @DisplayName("Validate goal JSON with ID - returns GoalDto with ID")
-    void testValidateGoalJson_WithId_ReturnsDtoWithId() {
-        String json = "{\"userId\":1,\"goalName\":\"Car\",\"targetAmount\":10000,"
-                + "\"duration\":12,\"startTime\":\"2025-03-30\"}";
-        GoalDto result = validationUtils.validateGoalJson(json, Mode.GOAL_UPDATE, "456");
-        assertThat(result.getGoalId()).isEqualTo(456L);
+    @DisplayName("Parse user ID - admin role update attempt - throws ValidationException")
+    void testParseUserId_AdminRoleUpdate_ThrowsException() {
+        assertThatThrownBy(() -> validationUtils.parseUserId("1", Mode.UPDATE_ROLE))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Default Admin role cannot be changed");
+    }
+
+    @Test
+    @DisplayName("Parse user ID - admin block attempt - throws ValidationException")
+    void testParseUserId_AdminBlock_ThrowsException() {
+        assertThatThrownBy(() -> validationUtils.parseUserId("1", Mode.BLOCK_UNBLOCK))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Default Admin cannot be blocked or unblocked");
+    }
+
+    @Test
+    @DisplayName("Validate UserDto - UPDATE_USER mode - validates correctly")
+    void testValidateUser_UpdateUserMode_Success() {
+        UserDto user = new UserDto(1L, "John", "john@test.com", "newpassword",
+                false, new Role("user"), 1L);
+
+        UserDto result = validationUtils.validateRequest(user, Mode.UPDATE_USER);
+        assertThat(result).isEqualTo(user);
+    }
+
+    @Test
+    @DisplayName("Validate UserDto - AUTHENTICATE mode - validates correctly")
+    void testValidateUser_AuthenticateMode_Success() {
+        UserDto user = new UserDto(null, null, "john@test.com", "password123",
+                false, null, null);
+
+        UserDto result = validationUtils.validateRequest(user, Mode.AUTHENTICATE);
+        assertThat(result).isEqualTo(user);
     }
 }

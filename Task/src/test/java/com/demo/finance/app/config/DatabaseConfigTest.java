@@ -1,6 +1,7 @@
 package com.demo.finance.app.config;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,22 +18,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DatabaseConfigTest {
 
     private static final Logger log = Logger.getLogger(DatabaseConfigTest.class.getName());
+    @InjectMocks
     private DatabaseConfig databaseConfig;
 
     @BeforeEach
     void setUp() {
         try {
             System.setProperty("ENV_PATH", "src/test/resources/.env");
-
             System.clearProperty("DB_URL");
             System.clearProperty("DB_USERNAME");
             System.clearProperty("DB_PASSWORD");
-
             System.setProperty("DB_URL", "jdbc:postgresql://localhost:5432/testdb");
             System.setProperty("DB_USERNAME", "testuser");
             System.setProperty("DB_PASSWORD", "testpass");
-
-            databaseConfig = DatabaseConfig.getInstance();
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error occurred during test setup: " + e.getMessage(), e);
             fail("Test setup failed due to an unexpected exception.");
@@ -43,6 +41,7 @@ class DatabaseConfigTest {
     @DisplayName("Get DB URL - Success scenario")
     void testGetDbUrl_Success() {
         String dbUrl = databaseConfig.getDbUrl();
+
         assertThat(dbUrl).isEqualTo("jdbc:postgresql://localhost:5432/testdb");
     }
 
@@ -110,8 +109,6 @@ class DatabaseConfigTest {
             System.setProperty("DB_USERNAME", "overriddenUser");
             System.setProperty("DB_PASSWORD", "overriddenPass");
 
-            databaseConfig = DatabaseConfig.getInstance();
-
             assertThat(databaseConfig.getDbUrl()).isEqualTo("jdbc:postgresql://localhost:5432/overridden");
             assertThat(databaseConfig.getDbUsername()).isEqualTo("overriddenUser");
             assertThat(databaseConfig.getDbPassword()).isEqualTo("overriddenPass");
@@ -134,8 +131,6 @@ class DatabaseConfigTest {
             System.clearProperty("DB_URL");
             System.clearProperty("DB_USERNAME");
             System.clearProperty("DB_PASSWORD");
-
-            databaseConfig = DatabaseConfig.getInstance();
 
             assertThatThrownBy(() -> databaseConfig.getDbUrl()).isInstanceOf(RuntimeException.class)
                     .hasMessage("DB_URL is not configured.");

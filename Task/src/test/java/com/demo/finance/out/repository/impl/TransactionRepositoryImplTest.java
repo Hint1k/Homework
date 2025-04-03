@@ -1,5 +1,7 @@
 package com.demo.finance.out.repository.impl;
 
+import com.demo.finance.app.config.DataSourceManager;
+import com.demo.finance.app.config.DatabaseConfig;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import org.junit.jupiter.api.TestInstance;
@@ -20,7 +22,10 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
 
     @BeforeAll
     void setupRepository() {
-        repository = new TransactionRepositoryImpl();
+        DatabaseConfig databaseConfig = new DatabaseConfig();
+        databaseConfig.init();
+        DataSourceManager dataSourceManager = new DataSourceManager(databaseConfig);
+        repository = new TransactionRepositoryImpl(dataSourceManager);
     }
 
     @Test

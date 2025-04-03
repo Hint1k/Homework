@@ -1,6 +1,7 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.TransactionDto;
+import com.demo.finance.domain.mapper.TransactionMapper;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.TransactionRepository;
@@ -24,8 +25,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceImplTest {
 
-    @Mock private TransactionRepository transactionRepository;
-    @InjectMocks private TransactionServiceImpl transactionService;
+    @Mock
+    private TransactionRepository transactionRepository;
+    @Mock
+    private TransactionMapper transactionMapper;
+    @InjectMocks
+    private TransactionServiceImpl transactionService;
 
     @Test
     @DisplayName("Create transaction - valid transaction - returns transaction ID")
@@ -38,11 +43,14 @@ class TransactionServiceImplTest {
         dto.setDescription("Dinner");
         dto.setType(Type.EXPENSE.name());
 
+        Transaction transaction = new Transaction();
+        when(transactionMapper.toEntity(dto)).thenReturn(transaction);
         when(transactionRepository.save(any(Transaction.class))).thenReturn(123L);
 
         Long result = transactionService.createTransaction(dto, 1L);
 
         assertThat(result).isEqualTo(123L);
+        verify(transactionMapper).toEntity(dto);
         verify(transactionRepository).save(any(Transaction.class));
     }
 

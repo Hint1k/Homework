@@ -3,8 +3,6 @@ package com.demo.finance.domain.mapper;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.User;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 /**
  * The {@code UserMapper} interface defines methods for mapping between {@link User} entities and
@@ -12,13 +10,8 @@ import org.mapstruct.factory.Mappers;
  * capabilities to facilitate the transformation of user-related data between the application's
  * persistence layer and its API layer.
  */
-@Mapper(uses = {RoleMapper.class})
+@Mapper(componentModel = "spring", uses = {RoleMapper.class})
 public interface UserMapper {
-
-    /**
-     * The singleton instance of the {@code UserMapper}, initialized by MapStruct.
-     */
-    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     /**
      * Converts a {@link User} entity into a {@link UserDto} data transfer object.
@@ -26,13 +19,6 @@ public interface UserMapper {
      * @param user the {@link User} entity to map
      * @return the corresponding {@link UserDto} object
      */
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "email", source = "email")
-    @Mapping(target = "password", source = "password")
-    @Mapping(target = "blocked", source = "blocked")
-    @Mapping(target = "role", source = "role")
-    @Mapping(target = "version", source = "version")
     UserDto toDto(User user);
 
     /**
@@ -41,12 +27,5 @@ public interface UserMapper {
      * @param userDto the {@link UserDto} object to map
      * @return the corresponding {@link User} entity
      */
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "email", source = "email")
-    @Mapping(target = "password", source = "password")
-    @Mapping(target = "blocked", source = "blocked")
-    @Mapping(target = "role", source = "role")
-    @Mapping(target = "version", source = "version")
     User toEntity(UserDto userDto);
 }

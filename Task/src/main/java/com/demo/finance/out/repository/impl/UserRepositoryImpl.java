@@ -1,8 +1,11 @@
 package com.demo.finance.out.repository.impl;
 
+import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,6 +18,7 @@ import java.util.List;
  * and provides concrete implementations for user data persistence operations.
  * It interacts directly with the database using SQL queries to perform CRUD operations on user data.
  */
+@Repository
 public class UserRepositoryImpl extends BaseRepository implements UserRepository {
 
     private static final String INSERT_SQL = "INSERT INTO finance.users "
@@ -22,11 +26,21 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
     private static final String UPDATE_SQL = "UPDATE finance.users SET name = ?, email = ?, password = ?, "
             + "blocked = ?, role = ?, version = ? WHERE user_id = ?";
     private static final String DELETE_SQL = "DELETE FROM finance.users WHERE user_id = ?";
-    private static final String FIND_ALL_SQL = "SELECT * FROM finance.users";
     private static final String FIND_ALL_SQL_PAGINATED = "SELECT * FROM finance.users LIMIT ? OFFSET ?";
     private static final String FIND_BY_ID_SQL = "SELECT * FROM finance.users WHERE user_id = ?";
     private static final String FIND_BY_EMAIL_SQL = "SELECT * FROM finance.users WHERE email = ?";
     private static final String COUNT_SQL = "SELECT COUNT(*) AS total FROM finance.users";
+
+    /**
+     * Constructs a new {@code UserRepositoryImpl} instance with the required dependency
+     * for managing database connections.
+     *
+     * @param dataSourceManager the manager responsible for providing database connections
+     */
+    @Autowired
+    public UserRepositoryImpl(DataSourceManager dataSourceManager) {
+        super(dataSourceManager);
+    }
 
     /**
      * Saves a new user to the database by executing the corresponding SQL insert query.
@@ -85,7 +99,8 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      */
     @Override
     public int getTotalUserCount() {
-        return queryDatabase(COUNT_SQL, stmt -> {}, rs -> {
+        return queryDatabase(COUNT_SQL, stmt -> {
+        }, rs -> {
             if (rs.next()) {
                 return rs.getInt("total");
             }

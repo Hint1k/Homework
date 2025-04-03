@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog/004-insert-data.xml">
+
+    <changeSet id="004-insert-data" author="hint1k">
+        <!-- Insert Admin User -->
+        <insert tableName="users" schemaName="finance">
+            <column name="name" value="admin"/>
+            <column name="email" value="${ADMIN_EMAIL}"/>
+            <column name="password" value="${ADMIN_PASSWORD}"/>
+            <column name="blocked" value="false"/>
+            <column name="role" value="admin"/>
+            <column name="version" value="1"/>
+        </insert>
+
+        <!-- Reset sequence to avoid ID conflicts -->
+        <alterSequence sequenceName="users_user_id_seq" schemaName="finance" incrementBy="1" minValue="1"
+                       cycle="false"/>
+    </changeSet>
+</databaseChangeLog>

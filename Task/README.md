@@ -56,7 +56,7 @@ https://github.com/Hint1k/homework
 ### Building and Running the Application
 Navigate to project root folder and run Gradle command:
 ```bash
-./gradlew clean shadowJar 
+./gradlew clean installDist
 ```
 Then run Docker command:
 ```bash
@@ -67,7 +67,7 @@ docker-compose up --build
 
 ## Configuration
 
-The application uses **.env** file for database connection configuration. The credentials are:
+The application uses **.env** and **application.yml** files for credentials and configuration. The credentials are:
 ```
 Application admin's email = admin@demo.com
 Application admin's password = 123
@@ -77,7 +77,6 @@ Database name = financedb
 Database schema = finance
 Table names: users, transactions, goals, reports, budgets
 ```
-
 
 ---
 
@@ -99,7 +98,7 @@ To run tests with coverage using Jacoco
 ## Code Structure
 
 The project follows Clean Architecture principles with key packages:
-- `in.controllers` – Handles user input.
+- `in.controllers` – Rest Controllers.
 - `domain.model` – Contains entities.
 - `domain.utils` – Utility classes for validation and date handling.
 - `out.repository` – Manages database storage and retrieval.
@@ -109,15 +108,24 @@ The project follows Clean Architecture principles with key packages:
 ---
 
 ## Technological Stack
-- **Java Core**
+- **Java**
+- **Spring (Core, Web, MVC)**
 - **Gradle**
-- **PostgreSQL database**
+- **PostgreSQL**
+- **Swagger**
 - **Docker**
 - **JUnit 5, Mockito, AssertJ, Testcontainers**
 
 ---
 
 ## Application endpoints
+
+### Swagger:
+Swagger UI and API Docs are accessible via links in a browser:
+``` 
+http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/v3/api-docs
+```
 
 ### User account actions:
 POST http://localhost:8080/api/users/registration 
@@ -134,6 +142,10 @@ POST http://localhost:8080/api/users/authenticate
 "email": "jay@demo.com",
 "password": "123"
 }
+```
+POST http://localhost:8080/api/users/logout
+```json 
+{ }
 ```
 PUT http://localhost:8080/api/users
 ```json 
@@ -153,23 +165,17 @@ DELETE http://localhost:8080/api/users
 ```
 
 ### Admin actions:
-GET http://localhost:8080/api/admin/users/
+GET http://localhost:8080/api/admin/users?page=1&size=10
 ```json 
-{
-  "page": 1,
-  "size": 10
-}
+{ }
 ```
 GET http://localhost:8080/api/admin/users/2
 ```json 
 { }
 ```
-GET http://localhost:8080/api/admin/users/transactions/2
+GET http://localhost:8080/api/admin/users/transactions/2?page=1&size=10
 ```json 
-{
-  "page": 1,
-  "size": 10
-}
+{ }
 ```
 PATCH http://localhost:8080/api/admin/users/role/2
 ```json 
@@ -189,18 +195,15 @@ DELETE http://localhost:8080/api/admin/users/2
 ```
 
 ### Transaction actions:
-GET http://localhost:8080/api/transactions/
+GET http://localhost:8080/api/transactions?page=1&size=10
 ```json 
-{
-  "page": 1,
-  "size": 10
-}
+{ }
 ```
 GET http://localhost:8080/api/transactions/1
 ```json 
 { }
 ```
-POST http://localhost:8080/api/transactions/
+POST http://localhost:8080/api/transactions
 ```json 
 {
   "amount": "500",
@@ -224,18 +227,15 @@ DELETE http://localhost:8080/api/transactions/1
 ```
 
 ### Goal actions: 
-GET http://localhost:8080/api/goals/
+GET http://localhost:8080/api/goals?page=1&size=10
 ```json 
-{
-  "page": 1,
-  "size": 10
-}
+{ }
 ```
 GET http://localhost:8080/api/goals/1
 ```json 
 { }
 ```
-POST http://localhost:8080/api/goals/
+POST http://localhost:8080/api/goals
 ```json 
 {
   "goalName": "1",
@@ -249,8 +249,7 @@ PUT http://localhost:8080/api/goals/1
 {
   "goalName": "2",
   "targetAmount": "1500",
-  "duration": "3",
-  "startTime": "2025-03-30"
+  "duration": "3"
 }
 ```
 DELETE http://localhost:8080/api/goals/1
@@ -263,7 +262,7 @@ GET http://localhost:8080/api/budgets/budget
 ```json 
 { }
 ```
-POST http://localhost:8080/api/budgets/
+POST http://localhost:8080/api/budgets
 ```json 
 {
   "monthlyLimit": "1500"

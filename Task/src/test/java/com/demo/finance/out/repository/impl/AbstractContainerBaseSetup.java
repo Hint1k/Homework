@@ -1,5 +1,13 @@
 package com.demo.finance.out.repository.impl;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -19,16 +27,15 @@ import static org.assertj.core.api.Assertions.fail;
 public abstract class AbstractContainerBaseSetup {
 
     private static final Logger log = Logger.getLogger(AbstractContainerBaseSetup.class.getName());
+    private static final String LIQUIBASE_CHANGELOG = "db/changelog/changelog-test.xml";
 
     private static class SingletonContainer {
         @SuppressWarnings("resource")
         private static final PostgreSQLContainer<?> INSTANCE =
-                new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"))
-                        .withDatabaseName("testdb")
-                        .withUsername("testuser")
-                        .withPassword("testpass")
-                        .withReuse(true)
+                new PostgreSQLContainer<>(DockerImageName.parse("postgres:16")).withDatabaseName("testdb")
+                        .withUsername("testuser").withPassword("testpass").withReuse(true)
                         .waitingFor(Wait.forListeningPort());
+
         static {
             INSTANCE.start();
         }
@@ -41,55 +48,18 @@ public abstract class AbstractContainerBaseSetup {
     static void setupDatabase() {
         try {
             System.setProperty("ENV_PATH", "src/test/resources/.env");
+            System.setProperty("YML_PATH", "src/test/resources/application.yml");
             System.setProperty("DB_URL", String.format("jdbc:postgresql://localhost:%d/testdb",
                     POSTGRESQL_CONTAINER.getFirstMappedPort()
             ));
-            try (Connection conn = DriverManager.getConnection(
-                    POSTGRESQL_CONTAINER.getJdbcUrl(),
-                    POSTGRESQL_CONTAINER.getUsername(),
-                    POSTGRESQL_CONTAINER.getPassword());
-                 Statement stmt = conn.createStatement()) {
-
-                stmt.execute("CREATE SCHEMA IF NOT EXISTS finance");
-
-                stmt.execute("CREATE TABLE IF NOT EXISTS finance.budgets (" +
-                        "budget_id SERIAL PRIMARY KEY, " +
-                        "user_id BIGINT NOT NULL, " +
-                        "monthly_limit DECIMAL(19,2) NOT NULL, " +
-                        "current_expenses DECIMAL(19,2) NOT NULL" +
-                        ");");
-
-                stmt.execute("CREATE TABLE IF NOT EXISTS finance.goals (" +
-                        "goal_id SERIAL PRIMARY KEY, " +
-                        "user_id BIGINT NOT NULL, " +
-                        "goal_name VARCHAR(255) NOT NULL, " +
-                        "target_amount DECIMAL(19,2) NOT NULL, " +
-                        "saved_amount DECIMAL(19,2) NOT NULL, " +
-                        "duration INT NOT NULL, " +
-                        "start_time DATE NOT NULL" +
-                        ");");
-
-                stmt.execute("CREATE TABLE IF NOT EXISTS finance.transactions (" +
-                        "transaction_id SERIAL PRIMARY KEY, " +
-                        "user_id BIGINT NOT NULL, " +
-                        "amount DECIMAL(19,2) NOT NULL, " +
-                        "category VARCHAR(255) NOT NULL, " +
-                        "date DATE NOT NULL, " +
-                        "description VARCHAR(255), " +
-                        "type VARCHAR(50) NOT NULL" +
-                        ");");
-
-                stmt.execute("CREATE TABLE IF NOT EXISTS finance.users (" +
-                        "user_id SERIAL PRIMARY KEY, " +
-                        "name VARCHAR(255) NOT NULL, " +
-                        "email VARCHAR(255) UNIQUE NOT NULL, " +
-                        "password VARCHAR(255) NOT NULL, " +
-                        "blocked BOOLEAN NOT NULL DEFAULT FALSE, " +
-                        "role VARCHAR(50) NOT NULL, " +
-                        "version BIGINT NOT NULL" +
-                        ");");
+            try (Connection conn = DriverManager.getConnection(POSTGRESQL_CONTAINER.getJdbcUrl(),
+                    POSTGRESQL_CONTAINER.getUsername(), POSTGRESQL_CONTAINER.getPassword())) {
+                Database database = DatabaseFactory.getInstance()
+                        .findCorrectDatabaseImplementation(new JdbcConnection(conn));
+                Liquibase liquibase = new Liquibase(LIQUIBASE_CHANGELOG, new ClassLoaderResourceAccessor(), database);
+                liquibase.update(new Contexts(), new LabelExpression());
             }
-        } catch (SQLException e) {
+        } catch (SQLException | LiquibaseException e) {
             log.log(Level.SEVERE, "Failed to set up the database: " + e.getMessage(), e);
             fail("Database setup failed: " + e.getMessage());
         }
@@ -97,15 +67,11 @@ public abstract class AbstractContainerBaseSetup {
 
     @BeforeEach
     void cleanDatabase() {
-        try (Connection conn = DriverManager.getConnection(
-                POSTGRESQL_CONTAINER.getJdbcUrl(),
-                POSTGRESQL_CONTAINER.getUsername(),
-                POSTGRESQL_CONTAINER.getPassword());
+        try (Connection conn = DriverManager.getConnection(POSTGRESQL_CONTAINER.getJdbcUrl(),
+                POSTGRESQL_CONTAINER.getUsername(), POSTGRESQL_CONTAINER.getPassword());
              Statement stmt = conn.createStatement()) {
-
-            stmt.execute(
-                    "TRUNCATE TABLE finance.goals, finance.transactions, finance.users, finance.budgets CASCADE"
-            );
+            stmt.execute("DROP SCHEMA public CASCADE");
+            stmt.execute("CREATE SCHEMA public");
         } catch (SQLException e) {
             log.log(Level.SEVERE, "Failed to clean up the database: " + e.getMessage(), e);
             fail("Database cleanup failed: " + e.getMessage());

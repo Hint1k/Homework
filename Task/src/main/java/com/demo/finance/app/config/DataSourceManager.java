@@ -1,6 +1,8 @@
 package com.demo.finance.app.config;
 
 import com.demo.finance.exception.DatabaseConnectionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,30 +11,44 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A utility class responsible for managing database connections.
- * It provides a static method to retrieve a connection using configuration details
- * from the {@link DatabaseConfig} class. This class follows the singleton pattern
- * to prevent instantiation.
+ * The {@code DataSourceManager} class is responsible for managing database connections.
+ * It uses the configuration provided by the {@link DatabaseConfig} class to establish
+ * a connection to the database via JDBC.
+ * <p>
+ * This class ensures that database connection errors are logged appropriately and
+ * wrapped in a custom exception for better error handling.
  */
+@Component
 public class DataSourceManager {
 
     private static final Logger log = Logger.getLogger(DataSourceManager.class.getName());
-    private static final DatabaseConfig config = DatabaseConfig.getInstance();
+    private final DatabaseConfig config;
 
     /**
-     * Private constructor to prevent instantiation of this utility class.
-     */
-    private DataSourceManager() {
-    } // Private constructor to prevent instantiation
-
-    /**
-     * Retrieves a database connection using the configuration details (URL, username, password)
-     * provided by the {@link DatabaseConfig} class.
+     * Constructs a new {@code DataSourceManager} instance with the provided database configuration.
+     * <p>
+     * This constructor is annotated with {@code @Autowired}, enabling Spring to inject
+     * the required {@link DatabaseConfig} dependency automatically.
      *
-     * @return a {@link Connection} object representing the database connection
-     * @throws DatabaseConnectionException if a SQLException occurs while establishing the connection
+     * @param config the database configuration containing URL, username, and password
      */
-    public static Connection getConnection() {
+    @Autowired
+    public DataSourceManager(DatabaseConfig config) {
+        this.config = config;
+    }
+
+    /**
+     * Establishes and returns a connection to the database using the configured URL,
+     * username, and password from the {@link DatabaseConfig} instance.
+     * <p>
+     * If the connection fails due to invalid credentials, network issues, or other SQL-related
+     * problems, the error is logged at the SEVERE level, and a custom
+     * {@link DatabaseConnectionException} is thrown with detailed information about the failure.
+     *
+     * @return a {@link Connection} object representing the established database connection
+     * @throws DatabaseConnectionException if the connection cannot be established
+     */
+    public Connection getConnection() {
         String url = config.getDbUrl();
         String username = config.getDbUsername();
         String password = config.getDbPassword();

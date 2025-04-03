@@ -9,6 +9,8 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
@@ -20,6 +22,8 @@ import java.io.IOException;
  * - Admin-specific endpoints are accessible only to users with the "admin" role.
  * - All other protected endpoints are accessible only to users with the "user" role.
  */
+@Component
+@Order(1)
 public class AuthenticationFilter implements Filter {
 
     /**
@@ -48,26 +52,31 @@ public class AuthenticationFilter implements Filter {
         HttpSession session = httpRequest.getSession(false);
         if (session == null || session.getAttribute("currentUser") == null) {
             httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            httpResponse.getWriter().write("Authentication required.");
+            httpResponse.setContentType("application/json");
+            httpResponse.getWriter().write("{\"error\":\"Authentication required\"}");
             return;
         }
+        Object currentUser = session.getAttribute("currentUser");
+        if (!(currentUser instanceof UserDto user)) {
+            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            httpResponse.setContentType("application/json");
+            httpResponse.getWriter().write("{\"error\":\"Invalid user session\"}");
+            return;
+        }
+        String role = user.getRole().getName().toLowerCase();
         if (isAdminEndpoint(requestURI)) {
-            Object currentUser = session.getAttribute("currentUser");
-            if (currentUser instanceof UserDto user) {
-                if (!"admin".equalsIgnoreCase(user.getRole().getName())) {
-                    httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    httpResponse.getWriter().write("Access denied. Role \"admin\" required.");
-                    return;
-                }
+            if (!"admin".equalsIgnoreCase(role)) {
+                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                httpResponse.setContentType("application/json");
+                httpResponse.getWriter().write("{\"error\":\"Access denied. Admin role required\"}");
+                return;
             }
         } else {
-            Object currentUser = session.getAttribute("currentUser");
-            if (currentUser instanceof UserDto user) {
-                if (!"user".equalsIgnoreCase(user.getRole().getName())) {
-                    httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    httpResponse.getWriter().write("Access denied. Role \"user\" required.");
-                    return;
-                }
+            if (!"user".equalsIgnoreCase(role)) {
+                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                httpResponse.setContentType("application/json");
+                httpResponse.getWriter().write("{\"error\":\"Access denied. User role required\"}");
+                return;
             }
         }
         chain.doFilter(request, response);
@@ -81,7 +90,10 @@ public class AuthenticationFilter implements Filter {
      * @return {@code true} if the request URI matches a public endpoint, {@code false} otherwise
      */
     private boolean isPublicEndpoint(String requestURI) {
-        return requestURI.endsWith("/api/users/registration") || requestURI.endsWith("/api/users/authenticate");
+        return requestURI.endsWith("/api/users/registration") || requestURI.endsWith("/api/users/authenticate")
+                || requestURI.endsWith("/api/users/logout") || requestURI.startsWith("/swagger-ui/")
+                || requestURI.startsWith("/swagger-ui") || requestURI.equals("/swagger-ui.html")
+                || requestURI.equals("/")  || requestURI.startsWith("/v3/api-docs");
     }
 
     /**
@@ -92,6 +104,7 @@ public class AuthenticationFilter implements Filter {
      * @return {@code true} if the request URI matches an admin-specific endpoint, {@code false} otherwise
      */
     private boolean isAdminEndpoint(String requestURI) {
-        return requestURI.startsWith("/api/admin/users/");
+        String path = requestURI.split("\\?")[0];
+        return path.matches("^/api/admin/users(/.*)?$");
     }
 }

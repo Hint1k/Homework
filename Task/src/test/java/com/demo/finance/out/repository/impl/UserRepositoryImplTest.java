@@ -1,5 +1,7 @@
 package com.demo.finance.out.repository.impl;
 
+import com.demo.finance.app.config.DataSourceManager;
+import com.demo.finance.app.config.DatabaseConfig;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import org.junit.jupiter.api.TestInstance;
@@ -10,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserRepositoryImplTest extends AbstractContainerBaseSetup {
@@ -19,7 +20,10 @@ class UserRepositoryImplTest extends AbstractContainerBaseSetup {
 
     @BeforeAll
     void setupRepository() {
-        repository = new UserRepositoryImpl();
+        DatabaseConfig databaseConfig = new DatabaseConfig();
+        databaseConfig.init();
+        DataSourceManager dataSourceManager = new DataSourceManager(databaseConfig);
+        repository = new UserRepositoryImpl(dataSourceManager);
     }
 
     @Test

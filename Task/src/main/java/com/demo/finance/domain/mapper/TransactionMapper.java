@@ -6,7 +6,6 @@ import com.demo.finance.domain.model.Transaction;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.mapstruct.factory.Mappers;
 
 /**
  * The {@code TransactionMapper} interface defines methods for mapping between {@link Transaction} entities
@@ -14,13 +13,8 @@ import org.mapstruct.factory.Mappers;
  * capabilities to facilitate the transformation of transaction-related data between the application's
  * persistence layer and its API layer.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface TransactionMapper {
-
-    /**
-     * The singleton instance of the {@code TransactionMapper}, initialized by MapStruct.
-     */
-    TransactionMapper INSTANCE = Mappers.getMapper(TransactionMapper.class);
 
     /**
      * Converts a {@link Transaction} entity into a {@link TransactionDto} data transfer object.
@@ -29,13 +23,7 @@ public interface TransactionMapper {
      * @param transaction the {@link Transaction} entity to map
      * @return the corresponding {@link TransactionDto} object
      */
-    @Mapping(target = "transactionId", source = "transactionId")
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "amount", source = "amount")
-    @Mapping(target = "category", source = "category")
-    @Mapping(target = "date", source = "date")
-    @Mapping(target = "description", source = "description")
-    @Mapping(target = "type", source = "type", qualifiedByName = "typeToString")
+     @Mapping(target = "type", source = "type", qualifiedByName = "typeToString")
     TransactionDto toDto(Transaction transaction);
 
     /**
@@ -45,12 +33,6 @@ public interface TransactionMapper {
      * @param transactionDto the {@link TransactionDto} object to map
      * @return the corresponding {@link Transaction} entity
      */
-    @Mapping(target = "transactionId", source = "transactionId")
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "amount", source = "amount")
-    @Mapping(target = "category", source = "category")
-    @Mapping(target = "date", source = "date")
-    @Mapping(target = "description", source = "description")
     @Mapping(target = "type", source = "type", qualifiedByName = "stringToType")
     Transaction toEntity(TransactionDto transactionDto);
 

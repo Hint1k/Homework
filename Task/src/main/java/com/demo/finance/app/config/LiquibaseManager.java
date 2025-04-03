@@ -5,6 +5,8 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -17,6 +19,7 @@ import java.util.logging.Logger;
  * This class is responsible for validating the existence of the changelog file,
  * establishing a connection to the database, and executing Liquibase migrations.
  */
+@Component
 public class LiquibaseManager {
 
     private static final Logger log = Logger.getLogger(LiquibaseManager.class.getName());
@@ -28,6 +31,7 @@ public class LiquibaseManager {
      *
      * @param databaseConfig The configuration containing database connection details (URL, username, password).
      */
+    @Autowired
     public LiquibaseManager(DatabaseConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
     }

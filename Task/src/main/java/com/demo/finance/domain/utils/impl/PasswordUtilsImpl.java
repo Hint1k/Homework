@@ -1,6 +1,7 @@
 package com.demo.finance.domain.utils.impl;
 
 import com.demo.finance.domain.utils.PasswordUtils;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -11,6 +12,7 @@ import java.util.Base64;
  * The {@code PasswordUtils} class provides methods for securely hashing and checking passwords.
  * It uses the PBKDF2 (Password-Based Key Derivation Function 2) algorithm for hashing passwords with a salt.
  */
+@Component
 public class PasswordUtilsImpl implements PasswordUtils {
 
     /**

@@ -8,6 +8,8 @@ import com.demo.finance.exception.DuplicateEmailException;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.domain.mapper.UserMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * The {@code RegistrationServiceImpl} class implements the {@link RegistrationService} interface
@@ -15,10 +17,12 @@ import com.demo.finance.domain.mapper.UserMapper;
  * It interacts with the database through the {@link UserRepository} and handles logic for
  * securely registering users and verifying their credentials.
  */
+@Service
 public class RegistrationServiceImpl implements RegistrationService {
 
     private final UserRepository userRepository;
     private final PasswordUtilsImpl passwordUtils;
+    private final UserMapper userMapper;
 
     /**
      * Constructs a new instance of {@code RegistrationServiceImpl} with the provided repository and password utility.
@@ -26,9 +30,12 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @param userRepository the repository used to interact with user data in the database
      * @param passwordUtils  the utility class used for password hashing and validation
      */
-    public RegistrationServiceImpl(UserRepository userRepository, PasswordUtilsImpl passwordUtils) {
+    @Autowired
+    public RegistrationServiceImpl(UserRepository userRepository, PasswordUtilsImpl passwordUtils,
+                                   UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordUtils = passwordUtils;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -45,7 +52,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      */
     @Override
     public boolean registerUser(UserDto userDto) {
-        User user = UserMapper.INSTANCE.toEntity(userDto);
+        User user = userMapper.toEntity(userDto);
         if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new DuplicateEmailException("Email is already registered: " + user.getEmail());
         }

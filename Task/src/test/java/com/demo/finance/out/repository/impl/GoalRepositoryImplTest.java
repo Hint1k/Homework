@@ -1,5 +1,7 @@
 package com.demo.finance.out.repository.impl;
 
+import com.demo.finance.app.config.DataSourceManager;
+import com.demo.finance.app.config.DatabaseConfig;
 import com.demo.finance.domain.model.Goal;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,7 +21,10 @@ class GoalRepositoryImplTest extends AbstractContainerBaseSetup {
 
     @BeforeAll
     void setupRepository() {
-        repository = new GoalRepositoryImpl();
+        DatabaseConfig databaseConfig = new DatabaseConfig();
+        databaseConfig.init();
+        DataSourceManager dataSourceManager = new DataSourceManager(databaseConfig);
+        repository = new GoalRepositoryImpl(dataSourceManager);
     }
 
     @Test
