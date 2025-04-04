@@ -30,6 +30,7 @@ import java.util.List;
  * Spring's web MVC capabilities and AspectJ-based proxying.
  */
 @Configuration
+@EnableAspectJAutoProxy
 @Slf4j
 public class AppConfig implements WebMvcConfigurer {
 

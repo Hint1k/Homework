@@ -3,3 +3,29 @@ app:
     url: "jdbc:postgresql://postgres:5432/financedb"
 server:
   port: 8080
+logging:
+  level:
+    root: INFO
+    com.demo.finance: INFO
+    com.demo.finance.app.config: WARN
+    com.demo.finance.in.controller: INFO
+    com.demo.finance.out.repository: WARN
+    com.demo.finance.domain.model: ERROR
+    com.demo.finance.exception: ERROR
+    com.demo.finance.in.filter: INFO
+    liquibase: WARN
+    org.springframework.web: WARN
+    org.springdoc: WARN
+    org.springdoc.core: WARN
+    org.springdoc.api: WARN
+    org.springdoc.webmvc: WARN
+    org.eclipse.jetty: WARN
+    org.eclipse.jetty.server: WARN
+    org.eclipse.jetty.client: WARN
+  file:
+    name: /app/logs/app.log
+  pattern:
+    console: '{"timestamp":"%date{yyyy-MM-dd HH:mm:ss}","level":"%level","class":"%logger{36}","message":"%message"}%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+  max-history: 5
+  max-size: 10MB

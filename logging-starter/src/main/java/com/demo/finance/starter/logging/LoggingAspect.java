@@ -1,4 +1,4 @@
-package com.demo.finance.aop;
+package com.demo.finance.starter.logging;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -6,6 +6,7 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -18,6 +19,7 @@ import java.util.logging.Logger;
  */
 @Aspect
 @Component
+@ConditionalOnBean(annotation = EnableLogging.class)
 public class LoggingAspect {
 
     private final Logger log;
@@ -45,7 +47,7 @@ public class LoggingAspect {
      * Defines a pointcut that matches all method executions within the com.demo.finance package
      * and its sub-packages. This pointcut is used by the advice methods in this aspect.
      */
-    @Pointcut("execution(* com.demo.finance..*(..))")
+    @Pointcut("execution(* com.demo.finance..*(..)) && !within(com.demo.finance.starter.logging..*)")
     public void allMethods() {
     }
 
@@ -63,9 +65,7 @@ public class LoggingAspect {
         long startTime = System.currentTimeMillis();
         String methodName = joinPoint.getSignature().toShortString();
         Object[] args = joinPoint.getArgs();
-
         Object result = joinPoint.proceed();
-
         long executionTime = System.currentTimeMillis() - startTime;
         if (executionTime > SLOW_METHOD_THRESHOLD_MS) {
             log.warning("[SLOW METHOD] " + methodName + " executed in " + executionTime
@@ -73,7 +73,6 @@ public class LoggingAspect {
         } else {
             log.info("[METHOD] " + methodName + " executed in " + executionTime + " ms");
         }
-
         return result;
     }
 

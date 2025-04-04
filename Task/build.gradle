@@ -56,6 +56,10 @@ dependencies {
 
     // Logging
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'
+
+    // My modules
+    implementation project(':audit-starter')
+    implementation project(':logging-starter')
 }
 
 application {
@@ -63,7 +67,7 @@ application {
     applicationDefaultJvmArgs = [
             '-Dorg.eclipse.jetty.server.webapp.ContainerIncludeJarPattern=.*',
             '-Dorg.eclipse.jetty.servlet.Default.useFileMappedBuffer=false',
-            '-Djava.util.logging.config.file=/app/logging.properties'
+//            '-Djava.util.logging.config.file=/app/logging.properties'
     ]
 }
 

@@ -1,5 +1,6 @@
 package com.demo.finance.app;
 
+import com.demo.finance.starter.logging.EnableLogging;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.SpringApplication;
 
@@ -8,6 +9,7 @@ import org.springframework.boot.SpringApplication;
  * It initializes the Spring Boot application and starts the embedded Jetty server.
  */
 @SpringBootApplication(scanBasePackages = "com.demo.finance")
+@EnableLogging
 public class TaskMain {
 
     /**
@@ -22,7 +24,7 @@ public class TaskMain {
      *   <li>Initializes the Spring application context, including dependency injection and bean wiring.</li>
      * </ul>
      * <p>
-     * The application is configured to use Spring Boot's auto-configuration and component scanning features,
+     * The application is configured to use Spring Boot's autoconfiguration and component scanning features,
      * ensuring that all required components are discovered and registered during startup.
      *
      * @param args command-line arguments passed to the application (not used in this implementation)

@@ -2,6 +2,7 @@ package com.demo.finance.domain.dto;
 
 import com.demo.finance.domain.model.Role;
 
+import com.demo.finance.starter.audit.AuditableUser;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class UserDto implements AuditableUser {
 
     @Schema(description = "Unique identifier of the user", example = "2")
     private Long userId;

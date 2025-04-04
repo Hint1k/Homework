@@ -1,0 +1,41 @@
+plugins {
+    id 'java-library'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.demo'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:3.2.0"
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.named('compileJava') {
+    inputs.files(tasks.named('processResources'))
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
