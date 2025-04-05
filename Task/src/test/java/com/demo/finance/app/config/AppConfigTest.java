@@ -1,69 +1,45 @@
 package com.demo.finance.app.config;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+import javax.sql.DataSource;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@WebMvcTest(AppConfig.class)
 class AppConfigTest {
 
-    @LocalServerPort
-    private int port;
+    @Autowired
+    private MockMvc mockMvc;
+    @MockBean
+    private DatabaseConfig databaseConfig;
+    @MockBean
+    private DataSource dataSource;
+    @MockBean
+    private LiquibaseManager liquibaseManager;
 
-    private final RestTemplate restTemplate = new RestTemplate();
-
-    private String getBaseUrl() {
-        return "http://localhost:" + port;
-    }
-
-    @BeforeAll
-    static void setup() {
-        System.setProperty("ENV_PATH", "src/test/resources/.env");
-        System.setProperty("YML_PATH", "src/test/resources/application.yml");
+    @Test
+    void testCorsConfiguration() throws Exception {
+        mockMvc.perform(options("/api/users/authenticate")
+                        .header("Origin", "http://localhost:8080")
+                        .header("Access-Control-Request-Method", "GET"))
+                .andExpect(status().isOk())
+                .andExpect(header().exists("Access-Control-Allow-Origin"))
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:8080"))
+                .andExpect(header().exists("Access-Control-Allow-Methods"))
+                .andExpect(header().string("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS"))
+                .andExpect(header().exists("Access-Control-Allow-Credentials"))
+                .andExpect(header().string("Access-Control-Allow-Credentials", "true"));
     }
 
     @Test
-    @DisplayName("Verify CORS allowed on authenticate endpoint")
-    void testAuthenticateEndpointCors() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Origin", "http://localhost:8080");
-        headers.add("Access-Control-Request-Method", "POST");
-
-        RequestEntity<Void> request = RequestEntity.options(getBaseUrl() + "/api/users/authenticate")
-                .headers(headers).build();
-
-        ResponseEntity<String> response = restTemplate.exchange(request, String.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getHeaders().get("Access-Control-Allow-Origin")).contains("http://localhost:8080");
-        assertThat(response.getHeaders().get("Access-Control-Allow-Methods")).contains("POST");
-    }
-
-    @Test
-    @DisplayName("Verify Swagger UI is accessible")
-    void testSwaggerUI() {
-        ResponseEntity<String> response =
-                restTemplate.getForEntity(getBaseUrl() + "/swagger-ui/index.html", String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    }
-
-    @Test
-    @DisplayName("Verify invalid JSON returns 400 Bad Request")
-    void testMalformedJsonErrorHandling() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<String> request = new HttpEntity<>("{ invalid json }", headers);
-        ResponseEntity<String> response =
-                restTemplate.postForEntity(getBaseUrl() + "/api/users/authenticate", request, String.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).contains("Invalid JSON format");
+    void testViewControllerRedirect() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/swagger-ui/index.html"));
     }
 }

@@ -18,38 +18,30 @@ import java.util.Set;
 public class SystemPropLoader {
 
     /**
-     * Loads environment variables from a .env file and YAML file, validates them against a set of
+     * Loads environment variables from a .env file, validates them against a set of
      * required properties, and sets them as JVM system properties if they are not already set.
      *
      * @param envFilePath   The path to the .env file containing sensitive key-value pairs (e.g., credentials).
-     * @param ymlFilePath   The path to the YAML file containing non-sensitive configuration settings.
      * @param envProperties A set of required property keys that must be present and non-empty in the .env file.
      */
-    public static void loadAndSetProperties(String envFilePath, String ymlFilePath, Set<String> envProperties,
-                                            Set<String> ymlProperties) {
-        processProperties("env", envFilePath, envProperties, EnvLoader::loadEnv);
-        processProperties("yml", ymlFilePath, ymlProperties, YmlLoader::loadYml);
-
-        log.info("All properties from .env and YAML have been successfully loaded, validated, and set.");
+    public static void loadAndSetProperties(String envFilePath, Set<String> envProperties) {
+        processProperties(envFilePath, envProperties, EnvLoader::loadEnv);
+        log.info("All properties from .env have been successfully loaded, validated, and set.");
     }
 
     /**
      * Helper method to load, validate, and set properties from a given source.
      *
-     * @param sourceName         Name of the source (e.g., "environment", "YAML") for logging.
      * @param filePath           Path to the file to be loaded.
      * @param requiredProperties Set of required properties for validation (can be empty if validation is not needed).
      * @param loaderFunction     Function that loads the properties from the file.
      */
-    private static void processProperties(String sourceName, String filePath, Set<String> requiredProperties,
+    private static void processProperties(String filePath, Set<String> requiredProperties,
                                           Function<String, Map<String, String>> loaderFunction) {
-        log.info("Loading properties from " + sourceName + " file: " + filePath);
+        log.info("Loading properties from {} file: {}", "env", filePath);
         Map<String, String> properties = loaderFunction.apply(filePath);
-        if (properties.containsKey("app.db.url")) {
-            properties.put("DB_URL", properties.remove("app.db.url"));
-        }
         if (!requiredProperties.isEmpty()) {
-            validateProperties(properties, requiredProperties, sourceName);
+            validateProperties(properties, requiredProperties);
         }
         setSystemProperties(properties);
     }
@@ -63,15 +55,12 @@ public class SystemPropLoader {
      * @param requiredProperties A set of property keys that must be validated.
      * @throws RuntimeException If any required property is missing or empty in the envVars map.
      */
-    private static void validateProperties(
-            Map<String, String> envVars, Set<String> requiredProperties, String sourceName) {
+    private static void validateProperties(Map<String, String> envVars, Set<String> requiredProperties) {
         for (String key : requiredProperties) {
             String value = envVars.get(key);
             if (value == null || value.trim().isEmpty()) {
-                log.error("Validation failed: Required property '{}' is missing or empty in the {} file.",
-                        key, sourceName);
-                throw new RuntimeException("Validation failed: Required property '" + key
-                        + "' is missing or empty.");
+                log.error("Validation failed: Required property '{}' is missing or empty in the {} file.", key, "env");
+                throw new RuntimeException("Validation failed: Required property '" + key + "' is missing or empty.");
             }
         }
         log.info("All required properties passed validation.");

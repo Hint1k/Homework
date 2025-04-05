@@ -1,7 +1,6 @@
 package com.demo.finance.app.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.CommandLineRunner;
@@ -10,20 +9,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.sql.DataSource;
-import java.io.IOException;
-import java.time.format.DateTimeParseException;
-import java.util.List;
 
 /**
  * The {@code AppConfig} class is a configuration class that defines application-wide settings
@@ -57,36 +48,6 @@ public class AppConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Configures custom exception handling for specific error scenarios.
-     * <p>
-     * This method adds a custom {@link HandlerExceptionResolver} to handle {@link HttpMessageNotReadableException},
-     * which occurs when a request contains malformed JSON. If such an exception is caught, a structured JSON response
-     * with an HTTP 400 (Bad Request) status is returned. Other exceptions are not handled by this resolver.
-     * </p>
-     *
-     * @param resolvers the list of {@link HandlerExceptionResolver} instances to configure
-     */
-    @Override
-    public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
-        resolvers.add(0, (request, response, handler, e) -> {
-            if (e instanceof HttpMessageNotReadableException) {
-                try {
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    response.setStatus(HttpStatus.BAD_REQUEST.value());
-                    response.getWriter().write(
-                            "{\"error\":\"Invalid JSON format\",\"details\":\"Malformed request body\"}"
-                    );
-                    return new ModelAndView();
-                } catch (IOException ex) {
-                    log.error("Failed to write JSON error response", ex);
-                    return null;
-                }
-            }
-            return null;
-        });
-    }
-
-    /**
      * Configures view controllers to redirect specific paths to predefined views.
      * <p>
      * This method redirects the root path ({@code /}) to the Swagger UI index page ({@code /swagger-ui/index.html}),
@@ -100,15 +61,13 @@ public class AppConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Configures the embedded Jetty web server factory with a specific port.
+     * Configures the embedded Jetty web server factory with a specific port indicated in application.yml.
      *
      * @return configured JettyServletWebServerFactory instance
      */
     @Bean
     public JettyServletWebServerFactory jettyServletWebServerFactory() {
-        JettyServletWebServerFactory factory = new JettyServletWebServerFactory();
-        factory.setPort(8080);
-        return factory;
+        return new JettyServletWebServerFactory();
     }
 
     /**
