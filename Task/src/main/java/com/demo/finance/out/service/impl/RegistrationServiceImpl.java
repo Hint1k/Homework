@@ -8,7 +8,7 @@ import com.demo.finance.exception.DuplicateEmailException;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.domain.mapper.UserMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,25 +18,12 @@ import org.springframework.stereotype.Service;
  * securely registering users and verifying their credentials.
  */
 @Service
+@RequiredArgsConstructor
 public class RegistrationServiceImpl implements RegistrationService {
 
     private final UserRepository userRepository;
     private final PasswordUtilsImpl passwordUtils;
     private final UserMapper userMapper;
-
-    /**
-     * Constructs a new instance of {@code RegistrationServiceImpl} with the provided repository and password utility.
-     *
-     * @param userRepository the repository used to interact with user data in the database
-     * @param passwordUtils  the utility class used for password hashing and validation
-     */
-    @Autowired
-    public RegistrationServiceImpl(UserRepository userRepository, PasswordUtilsImpl passwordUtils,
-                                   UserMapper userMapper) {
-        this.userRepository = userRepository;
-        this.passwordUtils = passwordUtils;
-        this.userMapper = userMapper;
-    }
 
     /**
      * Registers a new user in the system after performing necessary validations and transformations.

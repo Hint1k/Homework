@@ -3,7 +3,6 @@ package com.demo.finance.out.repository.impl;
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.out.repository.BudgetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
@@ -32,7 +31,6 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      *
      * @param dataSourceManager the manager responsible for providing database connections
      */
-    @Autowired
     public BudgetRepositoryImpl(DataSourceManager dataSourceManager) {
         super(dataSourceManager);
     }

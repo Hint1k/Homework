@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,25 +47,12 @@ import static com.demo.finance.domain.utils.SwaggerExamples.Report.REPORT_BY_DAT
  */
 @RestController
 @RequestMapping("/api/reports")
+@RequiredArgsConstructor
 public class ReportController extends BaseController {
 
     private final ReportService reportService;
     private final ValidationUtils validationUtils;
     private final ReportMapper reportMapper;
-
-    /**
-     * Constructs a new {@code ReportController} instance with the required dependencies.
-     *
-     * @param reportService   the service responsible for report-related operations
-     * @param validationUtils the utility for validating request parameters and DTOs
-     * @param reportMapper    the mapper for converting between report entities and DTOs
-     */
-    @Autowired
-    public ReportController(ReportService reportService, ValidationUtils validationUtils, ReportMapper reportMapper) {
-        this.reportService = reportService;
-        this.validationUtils = validationUtils;
-        this.reportMapper = reportMapper;
-    }
 
     /**
      * Generates a financial report for the currently logged-in user based on a specified date range.

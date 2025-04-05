@@ -5,8 +5,8 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -20,20 +20,11 @@ import java.sql.DriverManager;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class LiquibaseManager {
 
     private final DatabaseConfig databaseConfig;
     private static final String CHANGELOG = "db/changelog/changelog.xml";
-
-    /**
-     * Constructs a new instance of {@code LiquibaseManager} with the provided database configuration.
-     *
-     * @param databaseConfig The configuration containing database connection details (URL, username, password).
-     */
-    @Autowired
-    public LiquibaseManager(DatabaseConfig databaseConfig) {
-        this.databaseConfig = databaseConfig;
-    }
 
     /**
      * Executes the Liquibase migration process.

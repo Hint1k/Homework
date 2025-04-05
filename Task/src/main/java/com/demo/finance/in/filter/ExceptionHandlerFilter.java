@@ -11,8 +11,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A global exception handling filter that intercepts and processes uncaught exceptions

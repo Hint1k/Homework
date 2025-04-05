@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
@@ -57,25 +57,12 @@ import static com.demo.finance.domain.utils.SwaggerExamples.Goal.UPDATE_GOAL_SUC
  */
 @RestController
 @RequestMapping("/api/goals")
+@RequiredArgsConstructor
 public class GoalController extends BaseController {
 
     private final GoalService goalService;
     private final ValidationUtils validationUtils;
     private final GoalMapper goalMapper;
-
-    /**
-     * Constructs a new {@code GoalController} instance with the required dependencies.
-     *
-     * @param goalService     the service responsible for goal-related operations
-     * @param validationUtils the utility for validating request parameters and DTOs
-     * @param goalMapper      the mapper for converting between goal entities and DTOs
-     */
-    @Autowired
-    public GoalController(GoalService goalService, ValidationUtils validationUtils, GoalMapper goalMapper) {
-        this.goalService = goalService;
-        this.validationUtils = validationUtils;
-        this.goalMapper = goalMapper;
-    }
 
     /**
      * Creates a new goal for the currently logged-in user.

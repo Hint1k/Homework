@@ -4,7 +4,6 @@ import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
@@ -37,7 +36,6 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
      *
      * @param dataSourceManager the manager responsible for providing database connections
      */
-    @Autowired
     public UserRepositoryImpl(DataSourceManager dataSourceManager) {
         super(dataSourceManager);
     }

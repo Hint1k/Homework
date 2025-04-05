@@ -10,8 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;

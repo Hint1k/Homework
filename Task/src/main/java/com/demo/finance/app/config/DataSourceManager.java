@@ -1,8 +1,8 @@
 package com.demo.finance.app.config;
 
 import com.demo.finance.exception.DatabaseConnectionException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
@@ -19,22 +19,10 @@ import java.sql.SQLException;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class DataSourceManager {
 
     private final DatabaseConfig config;
-
-    /**
-     * Constructs a new {@code DataSourceManager} instance with the provided database configuration.
-     * <p>
-     * This constructor is annotated with {@code @Autowired}, enabling Spring to inject
-     * the required {@link DatabaseConfig} dependency automatically.
-     *
-     * @param config the database configuration containing URL, username, and password
-     */
-    @Autowired
-    public DataSourceManager(DatabaseConfig config) {
-        this.config = config;
-    }
 
     /**
      * Establishes and returns a connection to the database using the configured URL,

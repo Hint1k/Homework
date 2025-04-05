@@ -3,8 +3,8 @@ package com.demo.finance.out.repository.impl;
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.utils.GeneratedKey;
 import com.demo.finance.exception.DatabaseException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -26,20 +26,11 @@ import java.util.Optional;
  * result set mapping, and exception handling.
  */
 @Slf4j
+@RequiredArgsConstructor
 public abstract class BaseRepository {
 
     private static final Map<Class<?>, Method> SETTER_METHOD_CACHE = new HashMap<>();
     protected final DataSourceManager dataSourceManager;
-
-    /**
-     * Constructs a new {@code BaseRepository} instance with the required dependency for managing database connections.
-     *
-     * @param dataSourceManager the manager responsible for providing database connections
-     */
-    @Autowired
-    protected BaseRepository(DataSourceManager dataSourceManager) {
-        this.dataSourceManager = dataSourceManager;
-    }
 
     /**
      * Persists a new entity to the database by executing the provided SQL insert query.

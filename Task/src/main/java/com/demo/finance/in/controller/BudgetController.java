@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,22 +40,11 @@ import static com.demo.finance.domain.utils.SwaggerExamples.Budget.MISSING_BUDGE
  */
 @RestController
 @RequestMapping("/api/budgets")
+@RequiredArgsConstructor
 public class BudgetController extends BaseController {
 
     private final BudgetService budgetService;
     private final ValidationUtils validationUtils;
-
-    /**
-     * Constructs a new {@code BudgetController} instance with the required dependencies.
-     *
-     * @param budgetService   the service responsible for budget-related operations
-     * @param validationUtils the utility for validating request parameters and DTOs
-     */
-    @Autowired
-    public BudgetController(BudgetService budgetService, ValidationUtils validationUtils) {
-        this.budgetService = budgetService;
-        this.validationUtils = validationUtils;
-    }
 
     /**
      * Sets a monthly budget for the currently logged-in user.

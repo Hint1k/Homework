@@ -1,19 +1,19 @@
 package com.demo.finance.starter.logging;
 
+import nl.altindag.log.LogCaptor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.logging.Logger;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LoggingAspectTest {
@@ -23,82 +23,74 @@ class LoggingAspectTest {
     @Mock
     private ProceedingJoinPoint joinPoint;
     @Mock
-    private Logger logger;
+    private JoinPoint joinPointForException;
 
     @Test
     @DisplayName("Should log normal execution time")
-    void shouldLogNormalExecution() {
-        try {
-            Mockito.when(joinPoint.proceed()).thenReturn("result");
-            Mockito.when(joinPoint.getSignature()).thenReturn(Mockito.mock(MethodSignature.class));
+    void shouldLogNormalExecution() throws Throwable {
+        try (LogCaptor logCaptor = LogCaptor.forClass(LoggingAspect.class)) {
+            when(joinPoint.proceed()).thenReturn("result");
+            when(joinPoint.getSignature()).thenReturn(mock(MethodSignature.class));
 
             loggingAspect.logExecutionTime(joinPoint);
 
-            Mockito.verify(logger).info(ArgumentMatchers.matches("\\[METHOD\\].*executed in \\d+ ms"));
-        } catch (Throwable t) {
-            Assertions.fail("Unexpected exception thrown: " + t.getMessage());
+            assertThat(logCaptor.getInfoLogs())
+                    .anyMatch(log -> log.matches("\\[METHOD].*executed in \\d+ ms"));
         }
     }
 
     @Test
     @DisplayName("Should log warning when method execution exceeds slow threshold")
-    void shouldLogSlowMethodWhenExceedingThreshold() {
-        try {
-            MethodSignature signature = Mockito.mock(MethodSignature.class);
-            Mockito.when(signature.toShortString()).thenReturn("TestClass.testMethod()");
+    void shouldLogSlowMethodWhenExceedingThreshold() throws Throwable {
+        try (LogCaptor logCaptor = LogCaptor.forClass(LoggingAspect.class)) {
+            MethodSignature signature = mock(MethodSignature.class);
+            when(signature.toShortString()).thenReturn("TestClass.testMethod()");
 
-            Mockito.when(joinPoint.getSignature()).thenReturn(signature);
-            Mockito.when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            Mockito.when(joinPoint.proceed()).thenAnswer(inv -> {
+            when(joinPoint.getSignature()).thenReturn(signature);
+            when(joinPoint.getArgs()).thenReturn(new Object[]{});
+            when(joinPoint.proceed()).thenAnswer(inv -> {
                 Thread.sleep(600);
                 return "result";
             });
 
             loggingAspect.logExecutionTime(joinPoint);
 
-            Mockito.verify(logger).warning(ArgumentMatchers.contains("[SLOW METHOD]"));
-            Mockito.verify(logger).warning(ArgumentMatchers.contains("TestClass.testMethod()"));
-        } catch (Throwable t) {
-            Assertions.fail("Unexpected exception thrown: " + t.getMessage());
+            assertThat(logCaptor.getWarnLogs())
+                    .anyMatch(log -> log.contains("[SLOW METHOD] TestClass.testMethod()"));
         }
     }
 
     @Test
     @DisplayName("Should log info when method execution is under threshold")
-    void shouldLogInfoForNormalExecution() {
-        try {
-            MethodSignature signature = Mockito.mock(MethodSignature.class);
-            Mockito.when(signature.toShortString()).thenReturn("TestClass.fastMethod()");
+    void shouldLogInfoForNormalExecution() throws Throwable {
+        try (LogCaptor logCaptor = LogCaptor.forClass(LoggingAspect.class)) {
+            MethodSignature signature = mock(MethodSignature.class);
+            when(signature.toShortString()).thenReturn("TestClass.fastMethod()");
 
-            Mockito.when(joinPoint.getSignature()).thenReturn(signature);
-            Mockito.when(joinPoint.getArgs()).thenReturn(new Object[]{});
-            Mockito.when(joinPoint.proceed()).thenReturn("result");
+            when(joinPoint.getSignature()).thenReturn(signature);
+            when(joinPoint.getArgs()).thenReturn(new Object[]{});
+            when(joinPoint.proceed()).thenReturn("result");
 
             loggingAspect.logExecutionTime(joinPoint);
 
-            Mockito.verify(logger).info(ArgumentMatchers.contains("TestClass.fastMethod()"));
-            Mockito.verify(logger, Mockito.never()).warning(ArgumentMatchers.anyString());
-        } catch (Throwable t) {
-            Assertions.fail("Unexpected exception thrown: " + t.getMessage());
+            assertThat(logCaptor.getInfoLogs()).anyMatch(log -> log.contains("TestClass.fastMethod()"));
+            assertThat(logCaptor.getWarnLogs()).isEmpty();
         }
     }
 
     @Test
     @DisplayName("Should log exceptions")
     void shouldLogExceptions() {
-        try {
-            JoinPoint joinPoint = Mockito.mock(JoinPoint.class);
-            MethodSignature signature = Mockito.mock(MethodSignature.class);
-            Mockito.when(joinPoint.getSignature()).thenReturn(signature);
-            Mockito.when(signature.toShortString()).thenReturn("TestClass.method()");
+        try (LogCaptor logCaptor = LogCaptor.forClass(LoggingAspect.class)) {
+            MethodSignature signature = mock(MethodSignature.class);
+            when(joinPointForException.getSignature()).thenReturn(signature);
+            when(signature.toShortString()).thenReturn("TestClass.method()");
 
             RuntimeException exception = new RuntimeException("test error");
-            loggingAspect.logException(joinPoint, exception);
+            loggingAspect.logException(joinPointForException, exception);
 
-            Mockito.verify(logger).severe(ArgumentMatchers.contains(
-                    "[ERROR] Exception in method TestClass.method(): test error"));
-        } catch (Exception e) {
-            Assertions.fail("Unexpected exception thrown: " + e.getMessage());
+            assertThat(logCaptor.getErrorLogs())
+                    .anyMatch(log -> log.contains("[ERROR] Exception in method TestClass.method(): test error"));
         }
     }
 }

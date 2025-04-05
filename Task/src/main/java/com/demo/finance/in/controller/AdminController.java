@@ -18,8 +18,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +60,7 @@ import static com.demo.finance.domain.utils.SwaggerExamples.Admin.USER_NOT_FOUND
  */
 @RestController
 @RequestMapping("/api/admin/users")
+@RequiredArgsConstructor
 public class AdminController extends BaseController {
 
     private final AdminService adminService;
@@ -67,25 +68,6 @@ public class AdminController extends BaseController {
     private final TransactionService transactionService;
     private final ValidationUtils validationUtils;
     private final UserMapper userMapper;
-
-    /**
-     * Constructs a new {@code AdminController} instance with the required dependencies.
-     *
-     * @param adminService       the service responsible for admin-specific operations
-     * @param userService        the service responsible for user-related operations
-     * @param transactionService the service responsible for transaction-related operations
-     * @param validationUtils    the utility for validating request parameters and DTOs
-     * @param userMapper         the mapper for converting between user entities and DTOs
-     */
-    @Autowired
-    public AdminController(AdminService adminService, UserService userService, TransactionService transactionService,
-                           ValidationUtils validationUtils, UserMapper userMapper) {
-        this.adminService = adminService;
-        this.userService = userService;
-        this.transactionService = transactionService;
-        this.validationUtils = validationUtils;
-        this.userMapper = userMapper;
-    }
 
     /**
      * Retrieves a paginated list of all users in the system.

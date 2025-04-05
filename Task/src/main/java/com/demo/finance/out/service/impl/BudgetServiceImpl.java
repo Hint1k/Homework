@@ -6,7 +6,7 @@ import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.BudgetRepository;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.BudgetService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,22 +21,11 @@ import java.time.YearMonth;
  * to manage budgets, calculate expenses, and retrieve budget data for users.
  */
 @Service
+@RequiredArgsConstructor
 public class BudgetServiceImpl implements BudgetService {
 
     private final BudgetRepository budgetRepository;
     private final TransactionRepository transactionRepository;
-
-    /**
-     * Constructs a new instance of {@code BudgetServiceImpl} with the provided repositories.
-     *
-     * @param budgetRepository      the repository used to interact with budget data in the database
-     * @param transactionRepository the repository used to interact with transaction data in the database
-     */
-    @Autowired
-    public BudgetServiceImpl(BudgetRepository budgetRepository, TransactionRepository transactionRepository) {
-        this.budgetRepository = budgetRepository;
-        this.transactionRepository = transactionRepository;
-    }
 
     /**
      * Sets or updates the monthly budget limit for a specific user.

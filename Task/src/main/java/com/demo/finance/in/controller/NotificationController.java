@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,19 +32,10 @@ import static com.demo.finance.domain.utils.SwaggerExamples.Notification.GET_GOA
  */
 @RestController
 @RequestMapping("/api/notifications")
+@RequiredArgsConstructor
 public class NotificationController extends BaseController {
 
     private final NotificationService notificationService;
-
-    /**
-     * Constructs a new {@code NotificationController} instance with the required dependencies.
-     *
-     * @param notificationService the service responsible for fetching budget and goal notifications
-     */
-    @Autowired
-    public NotificationController(NotificationService notificationService) {
-        this.notificationService = notificationService;
-    }
 
     /**
      * Retrieves a budget-related notification for the currently logged-in user.

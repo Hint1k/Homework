@@ -6,7 +6,7 @@ import com.demo.finance.domain.model.User;
 import com.demo.finance.exception.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.AdminService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,19 +16,10 @@ import org.springframework.stereotype.Service;
  * updating, blocking/unblocking, and deleting users.
  */
 @Service
+@RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
-
-    /**
-     * Constructs a new instance of {@code AdminServiceImpl} with the provided repository.
-     *
-     * @param userRepository the repository used to interact with user data in the database
-     */
-    @Autowired
-    public AdminServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     /**
      * Retrieves a specific user by their unique user ID.

@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
@@ -57,26 +57,12 @@ import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.UPDATE_T
  */
 @RestController
 @RequestMapping("/api/transactions")
+@RequiredArgsConstructor
 public class TransactionController extends BaseController {
 
     private final TransactionService transactionService;
     private final ValidationUtils validationUtils;
     private final TransactionMapper transactionMapper;
-
-    /**
-     * Constructs a new {@code TransactionController} instance with the required dependencies.
-     *
-     * @param transactionService the service responsible for transaction-related operations
-     * @param validationUtils    the utility for validating request parameters and DTOs
-     * @param transactionMapper  the mapper for converting between transaction entities and DTOs
-     */
-    @Autowired
-    public TransactionController(TransactionService transactionService, ValidationUtils validationUtils,
-                                 TransactionMapper transactionMapper) {
-        this.transactionService = transactionService;
-        this.validationUtils = validationUtils;
-        this.transactionMapper = transactionMapper;
-    }
 
     /**
      * Creates a new transaction for the currently logged-in user.

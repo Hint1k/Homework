@@ -19,7 +19,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -61,29 +61,13 @@ import static com.demo.finance.domain.utils.SwaggerExamples.User.GET_DETAILS_SUC
 @RestController
 @RequestMapping("/api/users")
 @SessionAttributes("currentUser")
+@RequiredArgsConstructor
 public class UserController extends BaseController {
 
     private final RegistrationService registrationService;
     private final UserService userService;
     private final ValidationUtils validationUtils;
     private final UserMapper userMapper;
-
-    /**
-     * Constructs a new {@code UserController} instance with the required dependencies.
-     *
-     * @param registrationService the service responsible for user registration and authentication
-     * @param userService         the service responsible for user-related operations
-     * @param validationUtils     the utility for validating request parameters and DTOs
-     * @param userMapper          the mapper for converting between user entities and DTOs
-     */
-    @Autowired
-    public UserController(RegistrationService registrationService, UserService userService,
-                          ValidationUtils validationUtils, UserMapper userMapper) {
-        this.registrationService = registrationService;
-        this.userService = userService;
-        this.validationUtils = validationUtils;
-        this.userMapper = userMapper;
-    }
 
     /**
      * Registers a new user with the provided details.

@@ -1,5 +1,6 @@
 package com.demo.finance.starter.audit;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.JoinPoint;
@@ -8,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 /**
  * The {@code AuditAspect} class is an Aspect-Oriented Programming (AOP) aspect that provides auditing
@@ -19,9 +19,8 @@ import java.util.logging.Logger;
  */
 @Aspect
 @Component
+@Slf4j
 public class AuditAspect {
-
-    private static final Logger log = Logger.getLogger(AuditAspect.class.getName());
 
     /**
      * Defines a pointcut that matches method executions within service packages of the application.
@@ -57,8 +56,8 @@ public class AuditAspect {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
         String userId = extractUserIdFromArgs(args);
-        log.info(() -> String.format("[AUDIT] User %s performed action: %s with arguments: %s. Result: %s",
-                userId, methodName, Arrays.toString(args), result));
+        log.info("[AUDIT] User {} performed action: {} with arguments: {}. Result: {}",
+                userId, methodName, Arrays.toString(args), result);
     }
 
     /**

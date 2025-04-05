@@ -20,6 +20,7 @@ public final class SwaggerExamples {
         public static final String REGISTRATION_SUCCESS = """
                 {
                   "data": {
+                    "userId": 2,
                     "name": "jay",
                     "email": "jay@demo.com",
                     "password": null,
@@ -46,6 +47,7 @@ public final class SwaggerExamples {
         public static final String AUTHENTICATION_SUCCESS = """
                 {
                   "data": {
+                    "userId": 2,
                     "name": "jay",
                     "email": "jay@demo.com",
                     "password": null,

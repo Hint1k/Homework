@@ -6,7 +6,7 @@ import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.TransactionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,21 +18,11 @@ import java.util.List;
  * retrieving, updating, deleting, and paginating transactions.
  */
 @Service
+@RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
-
-    /**
-     * Constructs a new instance of {@code TransactionServiceImpl} with the provided repository.
-     *
-     * @param transactionRepository the repository used to interact with transaction data in the database
-     */
-    @Autowired
-    public TransactionServiceImpl(TransactionRepository transactionRepository, TransactionMapper transactionMapper) {
-        this.transactionRepository = transactionRepository;
-        this.transactionMapper = transactionMapper;
-    }
 
     /**
      * Creates a new transaction in the system based on the provided transaction data.

@@ -25,6 +25,10 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.38'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.38'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'
+    testImplementation group: 'io.github.hakky54', name: 'logcaptor', version: '2.10.1'
 }
 
 tasks.named('test') {

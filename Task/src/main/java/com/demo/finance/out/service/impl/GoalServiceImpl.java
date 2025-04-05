@@ -6,7 +6,7 @@ import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.out.repository.GoalRepository;
 import com.demo.finance.out.service.GoalService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,23 +19,11 @@ import java.util.List;
  * retrieving, updating, deleting, and paginating goals for users.
  */
 @Service
+@RequiredArgsConstructor
 public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
     private final GoalMapper goalMapper;
-
-    /**
-     * Constructs a new {@code GoalServiceImpl} instance with the required dependencies
-     * for managing goal-related operations.
-     *
-     * @param goalRepository the repository responsible for persisting and retrieving goal data
-     * @param goalMapper     the mapper for converting between {@link GoalDto} and {@link Goal} entities
-     */
-    @Autowired
-    public GoalServiceImpl(GoalRepository goalRepository, GoalMapper goalMapper) {
-        this.goalRepository = goalRepository;
-        this.goalMapper = goalMapper;
-    }
 
     /**
      * Creates a new financial goal in the system based on the provided goal data.

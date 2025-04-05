@@ -1,4 +1,4 @@
-package com.demo.finance.exceptions;
+package com.demo.finance.exception;
 
 import com.demo.finance.app.TaskMain;
 import com.demo.finance.app.config.DatabaseConfig;
