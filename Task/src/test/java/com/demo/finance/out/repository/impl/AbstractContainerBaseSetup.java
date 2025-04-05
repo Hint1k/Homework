@@ -20,8 +20,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static org.assertj.core.api.Assertions.fail;
-
 public abstract class AbstractContainerBaseSetup {
 
     private static final String LIQUIBASE_CHANGELOG = "db/changelog/changelog-test.xml";
@@ -42,34 +40,28 @@ public abstract class AbstractContainerBaseSetup {
     protected static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER = SingletonContainer.INSTANCE;
 
     @BeforeAll
-    static void setupDatabase() {
-        try {
-            System.setProperty("ENV_PATH", "src/test/resources/.env");
-            System.setProperty("YML_PATH", "src/test/resources/application.yml");
-            System.setProperty("DB_URL", String.format("jdbc:postgresql://localhost:%d/testdb",
-                    POSTGRESQL_CONTAINER.getFirstMappedPort()
-            ));
-            try (Connection conn = DriverManager.getConnection(POSTGRESQL_CONTAINER.getJdbcUrl(),
-                    POSTGRESQL_CONTAINER.getUsername(), POSTGRESQL_CONTAINER.getPassword())) {
-                Database database = DatabaseFactory.getInstance()
-                        .findCorrectDatabaseImplementation(new JdbcConnection(conn));
-                Liquibase liquibase = new Liquibase(LIQUIBASE_CHANGELOG, new ClassLoaderResourceAccessor(), database);
-                liquibase.update(new Contexts(), new LabelExpression());
-            }
-        } catch (SQLException | LiquibaseException e) {
-            fail("Database setup failed: " + e.getMessage());
+    static void setupDatabase() throws LiquibaseException, SQLException {
+        System.setProperty("ENV_PATH", "src/test/resources/.env");
+        System.setProperty("YML_PATH", "src/test/resources/application.yml");
+        System.setProperty("DB_URL", String.format("jdbc:postgresql://localhost:%d/testdb",
+                POSTGRESQL_CONTAINER.getFirstMappedPort()
+        ));
+        try (Connection conn = DriverManager.getConnection(POSTGRESQL_CONTAINER.getJdbcUrl(),
+                POSTGRESQL_CONTAINER.getUsername(), POSTGRESQL_CONTAINER.getPassword())) {
+            Database database = DatabaseFactory.getInstance()
+                    .findCorrectDatabaseImplementation(new JdbcConnection(conn));
+            Liquibase liquibase = new Liquibase(LIQUIBASE_CHANGELOG, new ClassLoaderResourceAccessor(), database);
+            liquibase.update(new Contexts(), new LabelExpression());
         }
     }
 
     @BeforeEach
-    void cleanDatabase() {
+    void cleanDatabase() throws SQLException {
         try (Connection conn = DriverManager.getConnection(POSTGRESQL_CONTAINER.getJdbcUrl(),
                 POSTGRESQL_CONTAINER.getUsername(), POSTGRESQL_CONTAINER.getPassword());
              Statement stmt = conn.createStatement()) {
             stmt.execute("DROP SCHEMA public CASCADE");
             stmt.execute("CREATE SCHEMA public");
-        } catch (SQLException e) {
-            fail("Database cleanup failed: " + e.getMessage());
         }
     }
 }

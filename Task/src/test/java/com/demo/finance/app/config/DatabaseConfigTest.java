@@ -4,11 +4,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,17 +17,13 @@ class DatabaseConfigTest {
 
     @BeforeEach
     void setUp() {
-        try {
-            databaseConfig = new DatabaseConfig();
-            ReflectionTestUtils.setField(databaseConfig, "injectedUrl",
-                    "jdbc:postgresql://localhost:5432/testdb");
-            System.setProperty("ENV_PATH", "src/test/resources/.env");
-            System.setProperty("DB_USERNAME", "testuser");
-            System.setProperty("DB_PASSWORD", "testpass");
-            databaseConfig.init();
-        } catch (Exception e) {
-            fail("Test setup failed due to an unexpected exception.", e);
-        }
+        databaseConfig = new DatabaseConfig();
+        ReflectionTestUtils.setField(databaseConfig, "injectedUrl",
+                "jdbc:postgresql://localhost:5432/testdb");
+        System.setProperty("ENV_PATH", "src/test/resources/.env");
+        System.setProperty("DB_USERNAME", "testuser");
+        System.setProperty("DB_PASSWORD", "testpass");
+        databaseConfig.init();
     }
 
     @Test

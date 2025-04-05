@@ -24,7 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -81,174 +80,146 @@ class AdminControllerTest {
 
     @Test
     @DisplayName("Get paginated users - Success scenario")
-    void testGetPaginatedUsers_Success() {
-        try {
-            PaginationParams params = createPaginationParams();
-            PaginatedResponse<UserDto> response = new PaginatedResponse<>(
-                    List.of(createUserDto(1L, "user1@example.com", "User One")),
-                    10, 1, 1, 10);
+    void testGetPaginatedUsers_Success() throws Exception {
+        PaginationParams params = createPaginationParams();
+        PaginatedResponse<UserDto> response = new PaginatedResponse<>(
+                List.of(createUserDto(1L, "user1@example.com", "User One")),
+                10, 1, 1, 10);
 
-            when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE))).thenReturn(params);
-            when(userService.getPaginatedUsers(1, 10)).thenReturn(response);
+        when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE))).thenReturn(params);
+        when(userService.getPaginatedUsers(1, 10)).thenReturn(response);
 
-            mockMvc.perform(get("/api/admin/users")
-                            .param("page", "1")
-                            .param("size", "10"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data").exists())
-                    .andExpect(jsonPath("$.metadata.totalItems").value(10));
+        mockMvc.perform(get("/api/admin/users")
+                        .param("page", "1")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.metadata.totalItems").value(10));
 
-            verify(validationUtils, times(1))
-                    .validateRequest(any(PaginationParams.class), eq(Mode.PAGE));
-            verify(userService, times(1)).getPaginatedUsers(1, 10);
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1))
+                .validateRequest(any(PaginationParams.class), eq(Mode.PAGE));
+        verify(userService, times(1)).getPaginatedUsers(1, 10);
     }
 
     @Test
     @DisplayName("Get user transactions - Success scenario")
-    void testGetUserTransactions_Success() {
-        try {
-            Long userId = 2L;
-            PaginationParams params = createPaginationParams();
-            PaginatedResponse<TransactionDto> response = new PaginatedResponse<>(
-                    List.of(createTransactionDto()),
-                    5, 1, 1, 10);
+    void testGetUserTransactions_Success() throws Exception {
+        Long userId = 2L;
+        PaginationParams params = createPaginationParams();
+        PaginatedResponse<TransactionDto> response = new PaginatedResponse<>(
+                List.of(createTransactionDto()),
+                5, 1, 1, 10);
 
-            when(validationUtils.parseUserId("2", Mode.GET)).thenReturn(userId);
-            when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE))).thenReturn(params);
-            when(transactionService.getPaginatedTransactionsForUser(userId, 1, 10)).thenReturn(response);
+        when(validationUtils.parseUserId("2", Mode.GET)).thenReturn(userId);
+        when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE))).thenReturn(params);
+        when(transactionService.getPaginatedTransactionsForUser(userId, 1, 10)).thenReturn(response);
 
-            mockMvc.perform(get("/api/admin/users/transactions/2")
-                            .param("page", "1")
-                            .param("size", "10"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data").exists())
-                    .andExpect(jsonPath("$.metadata.user_id").value(2));
+        mockMvc.perform(get("/api/admin/users/transactions/2")
+                        .param("page", "1")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.metadata.user_id").value(2));
 
-            verify(validationUtils, times(1)).parseUserId("2", Mode.GET);
-            verify(validationUtils, times(1))
-                    .validateRequest(any(PaginationParams.class), eq(Mode.PAGE));
-            verify(transactionService, times(1))
-                    .getPaginatedTransactionsForUser(userId, 1, 10);
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1)).parseUserId("2", Mode.GET);
+        verify(validationUtils, times(1))
+                .validateRequest(any(PaginationParams.class), eq(Mode.PAGE));
+        verify(transactionService, times(1))
+                .getPaginatedTransactionsForUser(userId, 1, 10);
     }
 
     @Test
     @DisplayName("Block/unblock user - Success scenario")
-    void testBlockOrUnblockUser_Success() {
-        try {
-            Long userId = 2L;
-            UserDto userDto = createUserDto(userId, "user@example.com", null);
-            userDto.setBlocked(true);
+    void testBlockOrUnblockUser_Success() throws Exception {
+        Long userId = 2L;
+        UserDto userDto = createUserDto(userId, "user@example.com", null);
+        userDto.setBlocked(true);
 
-            when(validationUtils.parseUserId("2", Mode.BLOCK_UNBLOCK)).thenReturn(userId);
-            when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.BLOCK_UNBLOCK))).thenReturn(userDto);
-            when(adminService.blockOrUnblockUser(userId, userDto)).thenReturn(true);
+        when(validationUtils.parseUserId("2", Mode.BLOCK_UNBLOCK)).thenReturn(userId);
+        when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.BLOCK_UNBLOCK))).thenReturn(userDto);
+        when(adminService.blockOrUnblockUser(userId, userDto)).thenReturn(true);
 
-            mockMvc.perform(patch("/api/admin/users/block/2")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"blocked\":true}"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.message")
-                            .value("User blocked/unblocked status changed successfully"));
+        mockMvc.perform(patch("/api/admin/users/block/2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"blocked\":true}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message")
+                        .value("User blocked/unblocked status changed successfully"));
 
-            verify(validationUtils, times(1)).parseUserId("2", Mode.BLOCK_UNBLOCK);
-            verify(validationUtils, times(1))
-                    .validateRequest(any(UserDto.class), eq(Mode.BLOCK_UNBLOCK));
-            verify(adminService, times(1)).blockOrUnblockUser(userId, userDto);
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1)).parseUserId("2", Mode.BLOCK_UNBLOCK);
+        verify(validationUtils, times(1))
+                .validateRequest(any(UserDto.class), eq(Mode.BLOCK_UNBLOCK));
+        verify(adminService, times(1)).blockOrUnblockUser(userId, userDto);
     }
 
     @Test
     @DisplayName("Update user role - Success scenario")
-    void testUpdateUserRole_Success() {
-        try {
-            Long userId = 2L;
-            UserDto userDto = createUserDto(userId, "user@example.com", null);
+    void testUpdateUserRole_Success() throws Exception {
+        Long userId = 2L;
+        UserDto userDto = createUserDto(userId, "user@example.com", null);
 
-            when(validationUtils.parseUserId("2", Mode.UPDATE_ROLE)).thenReturn(userId);
-            when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.UPDATE_ROLE))).thenReturn(userDto);
-            when(adminService.updateUserRole(userId, userDto)).thenReturn(true);
+        when(validationUtils.parseUserId("2", Mode.UPDATE_ROLE)).thenReturn(userId);
+        when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.UPDATE_ROLE))).thenReturn(userDto);
+        when(adminService.updateUserRole(userId, userDto)).thenReturn(true);
 
-            mockMvc.perform(patch("/api/admin/users/role/2")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"role\":\"ADMIN\"}"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.message").value("User role updated successfully"));
+        mockMvc.perform(patch("/api/admin/users/role/2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"role\":\"ADMIN\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("User role updated successfully"));
 
-            verify(validationUtils, times(1)).parseUserId("2", Mode.UPDATE_ROLE);
-            verify(validationUtils, times(1))
-                    .validateRequest(any(UserDto.class), eq(Mode.UPDATE_ROLE));
-            verify(adminService, times(1)).updateUserRole(userId, userDto);
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1)).parseUserId("2", Mode.UPDATE_ROLE);
+        verify(validationUtils, times(1))
+                .validateRequest(any(UserDto.class), eq(Mode.UPDATE_ROLE));
+        verify(adminService, times(1)).updateUserRole(userId, userDto);
     }
 
     @Test
     @DisplayName("Delete user - Success scenario")
-    void testDeleteUser_Success() {
-        try {
-            Long userId = 2L;
-            when(validationUtils.parseUserId("2", Mode.DELETE)).thenReturn(userId);
-            when(adminService.deleteUser(userId)).thenReturn(true);
+    void testDeleteUser_Success() throws Exception {
+        Long userId = 2L;
+        when(validationUtils.parseUserId("2", Mode.DELETE)).thenReturn(userId);
+        when(adminService.deleteUser(userId)).thenReturn(true);
 
-            mockMvc.perform(delete("/api/admin/users/2"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.message").value("Account deleted successfully"))
-                    .andExpect(jsonPath("$.data.userId").value(2));
+        mockMvc.perform(delete("/api/admin/users/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Account deleted successfully"))
+                .andExpect(jsonPath("$.data.userId").value(2));
 
-            verify(validationUtils, times(1)).parseUserId("2", Mode.DELETE);
-            verify(adminService, times(1)).deleteUser(userId);
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1)).parseUserId("2", Mode.DELETE);
+        verify(adminService, times(1)).deleteUser(userId);
     }
 
     @Test
     @DisplayName("Invalid pagination - ValidationException")
-    void testGetPaginatedUsers_ValidationException() {
-        try {
-            when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE)))
-                    .thenThrow(new ValidationException("Invalid page number"));
+    void testGetPaginatedUsers_ValidationException() throws Exception {
+        when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE)))
+                .thenThrow(new ValidationException("Invalid page number"));
 
-            mockMvc.perform(get("/api/admin/users")
-                            .param("page", "0")
-                            .param("size", "10"))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error")
-                            .value("Invalid pagination parameters: Invalid page number"));
+        mockMvc.perform(get("/api/admin/users")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("Invalid pagination parameters: Invalid page number"));
 
-            verify(validationUtils, times(1))
-                    .validateRequest(any(PaginationParams.class), eq(Mode.PAGE));
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1))
+                .validateRequest(any(PaginationParams.class), eq(Mode.PAGE));
     }
 
     @Test
     @DisplayName("User not found - GET request")
-    void testGetUserDetails_UserNotFound() {
-        try {
-            Long userId = 2L;
-            when(validationUtils.parseUserId("2", Mode.GET)).thenReturn(userId);
-            when(adminService.getUser(userId)).thenReturn(null);
+    void testGetUserDetails_UserNotFound() throws Exception {
+        Long userId = 2L;
+        when(validationUtils.parseUserId("2", Mode.GET)).thenReturn(userId);
+        when(adminService.getUser(userId)).thenReturn(null);
 
-            mockMvc.perform(get("/api/admin/users/2"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error").value("User not found."));
+        mockMvc.perform(get("/api/admin/users/2"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("User not found."));
 
-            verify(validationUtils, times(1)).parseUserId("2", Mode.GET);
-            verify(adminService, times(1)).getUser(userId);
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1)).parseUserId("2", Mode.GET);
+        verify(adminService, times(1)).getUser(userId);
     }
 
     @Test

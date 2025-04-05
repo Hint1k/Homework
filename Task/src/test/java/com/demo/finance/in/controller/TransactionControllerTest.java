@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -75,221 +74,185 @@ class TransactionControllerTest {
 
     @Test
     @DisplayName("Create transaction - Success scenario")
-    void testCreateTransaction_Success() {
-        try {
-            String content = "{\"amount\":100.0,\"category\":\"Food\",\"description\":\"Lunch\",\"type\":\"EXPENSE\"}";
-            when(validationUtils.validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_CREATE)))
-                    .thenReturn(transactionDto);
-            when(transactionService.createTransaction(any(TransactionDto.class), anyLong()))
-                    .thenReturn(1L);
-            when(transactionService.getTransaction(1L))
-                    .thenReturn(transaction);
-            when(transactionMapper.toDto(any(Transaction.class)))
-                    .thenReturn(transactionDto);
+    void testCreateTransaction_Success() throws Exception {
+        String content = "{\"amount\":100.0,\"category\":\"Food\",\"description\":\"Lunch\",\"type\":\"EXPENSE\"}";
+        when(validationUtils.validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_CREATE)))
+                .thenReturn(transactionDto);
+        when(transactionService.createTransaction(any(TransactionDto.class), anyLong()))
+                .thenReturn(1L);
+        when(transactionService.getTransaction(1L))
+                .thenReturn(transaction);
+        when(transactionMapper.toDto(any(Transaction.class)))
+                .thenReturn(transactionDto);
 
-            mockMvc.perform(post("/api/transactions")
-                            .sessionAttr("currentUser", currentUser)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(content))
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.message").value("Transaction created successfully"))
-                    .andExpect(jsonPath("$.data.transactionId").value(1));
+        mockMvc.perform(post("/api/transactions")
+                        .sessionAttr("currentUser", currentUser)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.message").value("Transaction created successfully"))
+                .andExpect(jsonPath("$.data.transactionId").value(1));
 
-            verify(validationUtils, times(1))
-                    .validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_CREATE));
-            verify(transactionService, times(1))
-                    .createTransaction(any(TransactionDto.class), eq(1L));
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1))
+                .validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_CREATE));
+        verify(transactionService, times(1))
+                .createTransaction(any(TransactionDto.class), eq(1L));
     }
 
     @Test
     @DisplayName("Get paginated transactions - Success scenario")
-    void testGetPaginatedTransactions_Success() {
-        try {
-            PaginationParams params = createPaginationParams();
-            PaginatedResponse<TransactionDto> response = new PaginatedResponse<>(
-                    List.of(transactionDto), 1, 1, 1, 10);
+    void testGetPaginatedTransactions_Success() throws Exception {
+        PaginationParams params = createPaginationParams();
+        PaginatedResponse<TransactionDto> response = new PaginatedResponse<>(
+                List.of(transactionDto), 1, 1, 1, 10);
 
-            when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE)))
-                    .thenReturn(params);
-            when(transactionService.getPaginatedTransactionsForUser(1L, 1, 10))
-                    .thenReturn(response);
+        when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE)))
+                .thenReturn(params);
+        when(transactionService.getPaginatedTransactionsForUser(1L, 1, 10))
+                .thenReturn(response);
 
-            mockMvc.perform(get("/api/transactions")
-                            .sessionAttr("currentUser", currentUser)
-                            .param("page", "1")
-                            .param("size", "10"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data").exists())
-                    .andExpect(jsonPath("$.metadata.user_id").value(1));
+        mockMvc.perform(get("/api/transactions")
+                        .sessionAttr("currentUser", currentUser)
+                        .param("page", "1")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.metadata.user_id").value(1));
 
-            verify(validationUtils, times(1))
-                    .validateRequest(any(PaginationParams.class), eq(Mode.PAGE));
-            verify(transactionService, times(1))
-                    .getPaginatedTransactionsForUser(1L, 1, 10);
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1))
+                .validateRequest(any(PaginationParams.class), eq(Mode.PAGE));
+        verify(transactionService, times(1))
+                .getPaginatedTransactionsForUser(1L, 1, 10);
     }
 
     @Test
     @DisplayName("Get transaction by ID - Success scenario")
-    void testGetTransactionById_Success() {
-        try {
-            when(validationUtils.parseLong("1")).thenReturn(1L);
-            when(transactionService.getTransactionByUserIdAndTransactionId(1L, 1L))
-                    .thenReturn(transaction);
-            when(transactionMapper.toDto(any(Transaction.class)))
-                    .thenReturn(transactionDto);
+    void testGetTransactionById_Success() throws Exception {
+        when(validationUtils.parseLong("1")).thenReturn(1L);
+        when(transactionService.getTransactionByUserIdAndTransactionId(1L, 1L))
+                .thenReturn(transaction);
+        when(transactionMapper.toDto(any(Transaction.class)))
+                .thenReturn(transactionDto);
 
-            mockMvc.perform(get("/api/transactions/1")
-                            .sessionAttr("currentUser", currentUser))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.message").value("Transaction found successfully"))
-                    .andExpect(jsonPath("$.data.transactionId").value(1));
+        mockMvc.perform(get("/api/transactions/1")
+                        .sessionAttr("currentUser", currentUser))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Transaction found successfully"))
+                .andExpect(jsonPath("$.data.transactionId").value(1));
 
-            verify(validationUtils, times(1)).parseLong("1");
-            verify(transactionService, times(1))
-                    .getTransactionByUserIdAndTransactionId(1L, 1L);
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1)).parseLong("1");
+        verify(transactionService, times(1))
+                .getTransactionByUserIdAndTransactionId(1L, 1L);
     }
 
     @Test
     @DisplayName("Update transaction - Success scenario")
-    void testUpdateTransaction_Success() {
-        try {
-            when(validationUtils.parseLong("1")).thenReturn(1L);
-            when(validationUtils.validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_UPDATE)))
-                    .thenReturn(transactionDto);
-            when(transactionService.updateTransaction(any(TransactionDto.class), eq(1L)))
-                    .thenReturn(true);
-            when(transactionService.getTransaction(1L))
-                    .thenReturn(transaction);
-            when(transactionMapper.toDto(any(Transaction.class)))
-                    .thenReturn(transactionDto);
+    void testUpdateTransaction_Success() throws Exception {
+        when(validationUtils.parseLong("1")).thenReturn(1L);
+        when(validationUtils.validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_UPDATE)))
+                .thenReturn(transactionDto);
+        when(transactionService.updateTransaction(any(TransactionDto.class), eq(1L)))
+                .thenReturn(true);
+        when(transactionService.getTransaction(1L))
+                .thenReturn(transaction);
+        when(transactionMapper.toDto(any(Transaction.class)))
+                .thenReturn(transactionDto);
 
-            mockMvc.perform(put("/api/transactions/1")
-                            .sessionAttr("currentUser", currentUser)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"amount\":150.0,\"category\":\"Food\",\"description\":\"Dinner\"}"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.message").value("Transaction updated successfully"))
-                    .andExpect(jsonPath("$.data.transactionId").value(1));
+        mockMvc.perform(put("/api/transactions/1")
+                        .sessionAttr("currentUser", currentUser)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"amount\":150.0,\"category\":\"Food\",\"description\":\"Dinner\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Transaction updated successfully"))
+                .andExpect(jsonPath("$.data.transactionId").value(1));
 
-            verify(validationUtils, times(1)).parseLong("1");
-            verify(validationUtils, times(1))
-                    .validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_UPDATE));
-            verify(transactionService, times(1))
-                    .updateTransaction(any(TransactionDto.class), eq(1L));
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1)).parseLong("1");
+        verify(validationUtils, times(1))
+                .validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_UPDATE));
+        verify(transactionService, times(1))
+                .updateTransaction(any(TransactionDto.class), eq(1L));
     }
 
     @Test
     @DisplayName("Delete transaction - Success scenario")
-    void testDeleteTransaction_Success() {
-        try {
-            when(validationUtils.parseLong("1")).thenReturn(1L);
-            when(transactionService.deleteTransaction(1L, 1L))
-                    .thenReturn(true);
+    void testDeleteTransaction_Success() throws Exception {
+        when(validationUtils.parseLong("1")).thenReturn(1L);
+        when(transactionService.deleteTransaction(1L, 1L))
+                .thenReturn(true);
 
-            mockMvc.perform(delete("/api/transactions/1")
-                            .sessionAttr("currentUser", currentUser))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.message").value("Transaction deleted successfully"))
-                    .andExpect(jsonPath("$.data.transactionId").value(1));
+        mockMvc.perform(delete("/api/transactions/1")
+                        .sessionAttr("currentUser", currentUser))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Transaction deleted successfully"))
+                .andExpect(jsonPath("$.data.transactionId").value(1));
 
-            verify(validationUtils, times(1)).parseLong("1");
-            verify(transactionService, times(1))
-                    .deleteTransaction(1L, 1L);
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1)).parseLong("1");
+        verify(transactionService, times(1))
+                .deleteTransaction(1L, 1L);
     }
 
     @Test
     @DisplayName("Create transaction - ValidationException")
-    void testCreateTransaction_ValidationException() {
-        try {
-            String content = "{\"amount\":-100.0,\"category\":\"Foo\",\"description\":\"Bar\",\"type\":\"EXPENSE\"}";
-            when(validationUtils.validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_CREATE)))
-                    .thenThrow(new ValidationException("Amount must be positive"));
+    void testCreateTransaction_ValidationException() throws Exception {
+        String content = "{\"amount\":-100.0,\"category\":\"Foo\",\"description\":\"Bar\",\"type\":\"EXPENSE\"}";
+        when(validationUtils.validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_CREATE)))
+                .thenThrow(new ValidationException("Amount must be positive"));
 
-            mockMvc.perform(post("/api/transactions")
-                            .sessionAttr("currentUser", currentUser)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(content))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error").value("Amount must be positive"));
+        mockMvc.perform(post("/api/transactions")
+                        .sessionAttr("currentUser", currentUser)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Amount must be positive"));
 
-            verify(validationUtils, times(1))
-                    .validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_CREATE));
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1))
+                .validateRequest(any(TransactionDto.class), eq(Mode.TRANSACTION_CREATE));
     }
 
     @Test
     @DisplayName("Get transaction by ID - Not found")
-    void testGetTransactionById_NotFound() {
-        try {
-            when(validationUtils.parseLong("1")).thenReturn(1L);
-            when(transactionService.getTransactionByUserIdAndTransactionId(1L, 1L))
-                    .thenReturn(null);
+    void testGetTransactionById_NotFound() throws Exception {
+        when(validationUtils.parseLong("1")).thenReturn(1L);
+        when(transactionService.getTransactionByUserIdAndTransactionId(1L, 1L))
+                .thenReturn(null);
 
-            mockMvc.perform(get("/api/transactions/1")
-                            .sessionAttr("currentUser", currentUser))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error")
-                            .value("Transaction not found or you are not the owner of the transaction."));
+        mockMvc.perform(get("/api/transactions/1")
+                        .sessionAttr("currentUser", currentUser))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error")
+                        .value("Transaction not found or you are not the owner of the transaction."));
 
-            verify(validationUtils, times(1)).parseLong("1");
-            verify(transactionService, times(1))
-                    .getTransactionByUserIdAndTransactionId(1L, 1L);
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1)).parseLong("1");
+        verify(transactionService, times(1))
+                .getTransactionByUserIdAndTransactionId(1L, 1L);
     }
 
     @Test
     @DisplayName("Invalid transaction ID - ValidationException")
-    void testGetTransactionById_InvalidId() {
-        try {
-            when(validationUtils.parseLong("invalid"))
-                    .thenThrow(new ValidationException("Invalid numeric format for id: invalid"));
+    void testGetTransactionById_InvalidId() throws Exception {
+        when(validationUtils.parseLong("invalid"))
+                .thenThrow(new ValidationException("Invalid numeric format for id: invalid"));
 
-            mockMvc.perform(get("/api/transactions/invalid")
-                            .sessionAttr("currentUser", currentUser))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error")
-                            .value("Invalid numeric format for id: invalid"));
+        mockMvc.perform(get("/api/transactions/invalid")
+                        .sessionAttr("currentUser", currentUser))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("Invalid numeric format for id: invalid"));
 
-            verify(validationUtils, times(1)).parseLong("invalid");
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1)).parseLong("invalid");
     }
 
     @Test
     @DisplayName("Negative transaction ID - ValidationException")
-    void testGetTransactionById_NegativeId() {
-        try {
-            when(validationUtils.parseLong("-1"))
-                    .thenThrow(new ValidationException("Id cannot be negative"));
+    void testGetTransactionById_NegativeId() throws Exception {
+        when(validationUtils.parseLong("-1"))
+                .thenThrow(new ValidationException("Id cannot be negative"));
 
-            mockMvc.perform(get("/api/transactions/-1")
-                            .sessionAttr("currentUser", currentUser))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error").value("Id cannot be negative"));
+        mockMvc.perform(get("/api/transactions/-1")
+                        .sessionAttr("currentUser", currentUser))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Id cannot be negative"));
 
-            verify(validationUtils, times(1)).parseLong("-1");
-        } catch (Exception e) {
-            fail("Test failed due to exception: " + e.getMessage());
-        }
+        verify(validationUtils, times(1)).parseLong("-1");
     }
 }

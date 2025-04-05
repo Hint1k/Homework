@@ -12,7 +12,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,21 +58,14 @@ class DataSourceManagerTest extends AbstractContainerBaseSetup {
 
     @Test
     @DisplayName("Connection is valid when established")
-    void testConnectionIsValid() {
-        try (Connection connection = dataSourceManager.getConnection()) {
-            assertThat(connection.isValid(5)).isTrue();
-        } catch (SQLException e) {
-           fail("An unexpected SQLException occurred." + e.getMessage());
-        }
+    void testConnectionIsValid() throws SQLException {
+        Connection connection = dataSourceManager.getConnection();
+        assertThat(connection.isValid(5)).isTrue();
     }
 
     private void overrideDatabaseConfig() {
-        try {
-            System.setProperty("DB_URL", "jdbc:postgresql://invalid-host:5432/testdb");
-            System.setProperty("DB_USERNAME", "invalid_user");
-            System.setProperty("DB_PASSWORD", "invalid_password");
-        } catch (Exception e) {
-            fail("Failed to override database configuration." + e.getMessage());
-        }
+        System.setProperty("DB_URL", "jdbc:postgresql://invalid-host:5432/testdb");
+        System.setProperty("DB_USERNAME", "invalid_user");
+        System.setProperty("DB_PASSWORD", "invalid_password");
     }
 }
