@@ -10,6 +10,7 @@ import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -97,8 +98,8 @@ public class UserController extends BaseController {
     @PostMapping("/registration")
     @Operation(summary = "Register user", description = "Creates a new user account")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User registration data", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
-            requiredProperties = {"name", "email", "password"}, example = REGISTRATION_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = REGISTRATION_REQUEST)))
     @ApiResponse(responseCode = "201", description = "User registered successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = REGISTRATION_SUCCESS)))
@@ -140,8 +141,8 @@ public class UserController extends BaseController {
     @PostMapping("/authenticate")
     @Operation(summary = "Authenticate user", description = "Logs in a user with credentials")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User credentials", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
-            requiredProperties = {"email", "password"}, example = AUTHENTICATION_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = AUTHENTICATION_REQUEST)))
     @ApiResponse(responseCode = "200", description = "User authenticated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = AUTHENTICATION_SUCCESS)))
@@ -186,7 +187,6 @@ public class UserController extends BaseController {
      */
     @PostMapping("/logout")
     @Operation(summary = "Logout user", description = "Invalidates the current session")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "User logged out successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = LOGOUT_SUCCESS)))
@@ -213,11 +213,11 @@ public class UserController extends BaseController {
      */
     @GetMapping("/me")
     @Operation(summary = "Get current user", description = "Returns authenticated user details")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "User details received successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_DETAILS_SUCCESS)))
-    public ResponseEntity<Map<String, Object>> getCurrentUser(@SessionAttribute("currentUser") UserDto userDto) {
+    public ResponseEntity<Map<String, Object>> getCurrentUser(
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto userDto) {
         return buildSuccessResponse(HttpStatus.OK, "Authenticated user details", userDto);
     }
 
@@ -236,8 +236,8 @@ public class UserController extends BaseController {
     @PutMapping
     @Operation(summary = "Update user", description = "Updates user details")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated user data", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
-            requiredProperties = {"name", "email", "password"}, example = UPDATE_ACCOUNT_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_ACCOUNT_REQUEST)))
     @ApiResponse(responseCode = "200", description = "Updated user successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_ACCOUNT_SUCCESS)))
@@ -278,12 +278,11 @@ public class UserController extends BaseController {
      */
     @DeleteMapping
     @Operation(summary = "Delete account", description = "Permanently deletes the user account")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Deleted user successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_ACCOUNT_SUCCESS)))
     public ResponseEntity<Map<String, Object>> deleteUser(
-            @SessionAttribute("currentUser") UserDto userDto, SessionStatus sessionStatus) {
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto userDto, SessionStatus sessionStatus) {
         try {
             boolean success = userService.deleteOwnAccount(userDto.getUserId());
             if (success) {

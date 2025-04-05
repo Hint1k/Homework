@@ -11,6 +11,7 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -91,9 +92,8 @@ public class TransactionController extends BaseController {
     @PostMapping
     @Operation(summary = "Create transaction", description = "Creates a new transaction")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Transaction data", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class,
-            requiredProperties = {"amount", "category", "date", "description", "type"},
-            example = CREATE_TRANSACTION_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = CREATE_TRANSACTION_REQUEST)))
     @ApiResponse(responseCode = "201", description = "Transaction created successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = CREATE_TRANSACTION_SUCCESS)))
@@ -143,7 +143,7 @@ public class TransactionController extends BaseController {
             value = INVALID_SIZE_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getPaginatedTransactions(
             @ParameterObject @ModelAttribute PaginationParams paramsNew,
-            @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
@@ -170,7 +170,6 @@ public class TransactionController extends BaseController {
      */
     @GetMapping("/{transactionId}")
     @Operation(summary = "Get transaction", description = "Returns transaction by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Transaction retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_TRANSACTION_SUCCESS)))
@@ -178,7 +177,8 @@ public class TransactionController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "TransactionNotFound",
             value = TRANSACTION_NOT_FOUND_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getTransactionById(
-            @PathVariable("transactionId") String transactionId, @SessionAttribute("currentUser") UserDto currentUser) {
+            @PathVariable("transactionId") String transactionId,
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long transactionIdLong = validationUtils.parseLong(transactionId);
@@ -210,8 +210,8 @@ public class TransactionController extends BaseController {
     @PutMapping("/{transactionId}")
     @Operation(summary = "Update transaction", description = "Updates existing transaction")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated transaction data", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class,
-            requiredProperties = {"amount", "category", "description"}, example = UPDATE_TRANSACTION_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_TRANSACTION_REQUEST)))
     @ApiResponse(responseCode = "200", description = "Transaction updated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_TRANSACTION_SUCCESS)))
@@ -258,7 +258,6 @@ public class TransactionController extends BaseController {
      */
     @DeleteMapping("/{transactionId}")
     @Operation(summary = "Delete transaction", description = "Deletes transaction by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Transaction deleted successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_TRANSACTION_SUCCESS)))
@@ -267,7 +266,7 @@ public class TransactionController extends BaseController {
             value = INVALID_TRANSACTION_ID_RESPONSE)))
     public ResponseEntity<Map<String, Object>> deleteTransaction(
             @PathVariable("transactionId") String transactionId,
-            @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long transactionIdLong = validationUtils.parseLong(transactionId);

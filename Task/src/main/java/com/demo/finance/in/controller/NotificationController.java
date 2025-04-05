@@ -3,6 +3,7 @@ package com.demo.finance.in.controller;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.out.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -58,12 +59,11 @@ public class NotificationController extends BaseController {
      */
     @GetMapping("/budget")
     @Operation(summary = "Get budget notification", description = "Retrieves budget-related notifications")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Budget notification retrieved", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = String.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_BUDGET_NOTIFICATIONS_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getBudgetNotification(
-            @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             String notification = notificationService.fetchBudgetNotification(userId);
@@ -90,12 +90,11 @@ public class NotificationController extends BaseController {
      */
     @GetMapping("/goal")
     @Operation(summary = "Get goal notification", description = "Retrieves goal-related notifications")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Goal notification retrieved", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = String.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_GOAL_NOTIFICATIONS_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getGoalNotification(
-            @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             String notification = notificationService.fetchGoalNotification(userId);

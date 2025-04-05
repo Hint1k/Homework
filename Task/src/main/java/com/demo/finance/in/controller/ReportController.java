@@ -10,6 +10,7 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -80,8 +81,8 @@ public class ReportController extends BaseController {
     @PostMapping("/by-date")
     @Operation(summary = "Generate report by date", description = "Creates financial report for date range")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Date range", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDatesDto.class,
-            requiredProperties = {"fromDate", "toDate"}, example = REPORT_BY_DATE_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDatesDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = REPORT_BY_DATE_REQUEST)))
     @ApiResponse(responseCode = "200", description = "Report generated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = REPORT_BY_DATE_SUCCESS)))
@@ -121,13 +122,14 @@ public class ReportController extends BaseController {
     @GetMapping("/expenses-by-category")
     @Operation(summary = "Get expenses by category", description = "Analyzes expenses by category for date range")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Date range", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDatesDto.class,
-            requiredProperties = {"fromDate", "toDate"}, example = EXPENSES_BY_CATEGORY_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDatesDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = EXPENSES_BY_CATEGORY_REQUEST)))
     @ApiResponse(responseCode = "200", description = "Expenses analysis successful", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Map.class),
             examples = @ExampleObject(name = "SuccessResponse", value = EXPENSES_BY_CATEGORY_SUCCESS)))
     public ResponseEntity<Map<String, Object>> analyzeExpensesByCategory(
-            @RequestBody ReportDatesDto reportDatesDto, @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestBody ReportDatesDto reportDatesDto,
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             ReportDatesDto reportDates =
@@ -158,12 +160,11 @@ public class ReportController extends BaseController {
      */
     @GetMapping("/report")
     @Operation(summary = "Get general report", description = "Generates overall financial report")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "General report generated", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_REPORT_SUCCESS)))
     public ResponseEntity<Map<String, Object>> generateGeneralReport(
-            @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Report report = reportService.generateUserReport(userId);

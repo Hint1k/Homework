@@ -159,7 +159,6 @@ public class AdminController extends BaseController {
      */
     @GetMapping("/{userId}")
     @Operation(summary = "Get user", description = "Returns user details by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "User details retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_USER_SUCCESS)))
@@ -194,8 +193,8 @@ public class AdminController extends BaseController {
     @PatchMapping("/block/{userId}")
     @Operation(summary = "Block/unblock user", description = "Updates user's blocked status")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Block status", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
-            requiredProperties = {"blocked"}, example = BLOCK_USER_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = BLOCK_USER_REQUEST)))
     @ApiResponse(responseCode = "200", description = "User blocked/unblocked successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = BLOCK_USER_SUCCESS)))
@@ -232,8 +231,8 @@ public class AdminController extends BaseController {
     @PatchMapping("/role/{userId}")
     @Operation(summary = "Update user role", description = "Updates user's role")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Role update data", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
-            requiredProperties = {"role"}, example = UPDATE_ROLE_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_ROLE_REQUEST)))
     @ApiResponse(responseCode = "200", description = "User role updated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_ROLE_SUCCESS)))
@@ -267,7 +266,6 @@ public class AdminController extends BaseController {
      */
     @DeleteMapping("/{userId}")
     @Operation(summary = "Delete user", description = "Permanently deletes user account")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "User deleted successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_USER_SUCCESS)))

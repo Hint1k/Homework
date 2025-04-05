@@ -8,6 +8,7 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.BudgetService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -70,8 +71,8 @@ public class BudgetController extends BaseController {
     @PostMapping
     @Operation(summary = "Set monthly budget", description = "Sets user's monthly budget limit")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Budget data", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BudgetDto.class,
-            requiredProperties = {"monthlyLimit"}, example = CREATE_BUDGET_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BudgetDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = CREATE_BUDGET_REQUEST)))
     @ApiResponse(responseCode = "200", description = "Budget set successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Budget.class),
             examples = @ExampleObject(name = "SuccessResponse", value = CREATE_BUDGET_SUCCESS)))
@@ -108,11 +109,11 @@ public class BudgetController extends BaseController {
      */
     @GetMapping("/budget")
     @Operation(summary = "Get budget data", description = "Returns user's budget information")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Budget data retrieved", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Map.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_BUDGET_SUCCESS)))
-    public ResponseEntity<Map<String, Object>> getBudgetData(@SessionAttribute("currentUser") UserDto currentUser) {
+    public ResponseEntity<Map<String, Object>> getBudgetData(
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Map<String, Object> budgetData = budgetService.getBudgetData(userId);

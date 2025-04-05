@@ -1,7 +1,9 @@
 package com.demo.finance.app.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.postgresql.ds.PGSimpleDataSource;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +22,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 /**
@@ -96,6 +99,11 @@ public class AppConfig implements WebMvcConfigurer {
         registry.addRedirectViewController("/", "/swagger-ui/index.html");
     }
 
+    /**
+     * Configures the embedded Jetty web server factory with a specific port.
+     *
+     * @return configured JettyServletWebServerFactory instance
+     */
     @Bean
     public JettyServletWebServerFactory jettyServletWebServerFactory() {
         JettyServletWebServerFactory factory = new JettyServletWebServerFactory();
@@ -103,6 +111,12 @@ public class AppConfig implements WebMvcConfigurer {
         return factory;
     }
 
+    /**
+     * Creates and configures the primary datasource for the application.
+     *
+     * @param databaseConfig the configuration properties for database connection
+     * @return configured PostgreSQL datasource instance
+     */
     @Bean
     @Primary
     public DataSource dataSource(DatabaseConfig databaseConfig) {
@@ -113,18 +127,35 @@ public class AppConfig implements WebMvcConfigurer {
         return dataSource;
     }
 
+    /**
+     * Creates a Liquibase manager bean for database migrations.
+     *
+     * @param databaseConfig the configuration properties for database connection
+     * @return configured Liquibase manager instance
+     */
     @Bean
     public LiquibaseManager liquibaseManager(DatabaseConfig databaseConfig) {
         return new LiquibaseManager(databaseConfig);
     }
 
+    /**
+     * Initializes database migrations using Liquibase.
+     *
+     * @param liquibaseManager the Liquibase manager instance
+     * @return CommandLineRunner that executes database migrations
+     */
     @Bean
     public CommandLineRunner init(LiquibaseManager liquibaseManager) {
         return args -> liquibaseManager.runMigrations();
     }
 
+    /**
+     * Provides startup message displaying application availability and endpoints.
+     *
+     * @return ApplicationRunner that logs important startup information
+     */
     @Bean
-    public CommandLineRunner startupMessage() {
+    public ApplicationRunner startupMessage() {
         return args -> {
             log.info("The Personal Finance Tracker is up and running!");
             log.info("Swagger UI: http://localhost:8080");

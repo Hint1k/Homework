@@ -45,8 +45,8 @@ dependencies {
     testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.20.6'
 
     // Swagger
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.3.0'
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-api', version: '2.3.0'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-api', version: '2.6.0'
 
     // Lombok
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.38'
@@ -67,7 +67,6 @@ application {
     applicationDefaultJvmArgs = [
             '-Dorg.eclipse.jetty.server.webapp.ContainerIncludeJarPattern=.*',
             '-Dorg.eclipse.jetty.servlet.Default.useFileMappedBuffer=false',
-//            '-Djava.util.logging.config.file=/app/logging.properties'
     ]
 }
 

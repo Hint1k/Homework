@@ -11,6 +11,7 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.GoalService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -90,9 +91,8 @@ public class GoalController extends BaseController {
     @PostMapping
     @Operation(summary = "Create goal", description = "Creates a new financial goal")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Goal data", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class,
-            requiredProperties = {"goalName", "targetAmount", "duration", "startTime"},
-            example = CREATE_GOAL_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = CREATE_GOAL_REQUEST)))
     @ApiResponse(responseCode = "201", description = "Goal created successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = CREATE_GOAL_SUCCESS)))
@@ -141,7 +141,7 @@ public class GoalController extends BaseController {
             value = INVALID_PAGE_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getPaginatedGoals(
             @ParameterObject @ModelAttribute PaginationParams paramsNew,
-            @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
@@ -168,7 +168,6 @@ public class GoalController extends BaseController {
      */
     @GetMapping("/{goalId}")
     @Operation(summary = "Get goal", description = "Returns goal details by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Goal retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_GOAL_SUCCESS)))
@@ -176,7 +175,8 @@ public class GoalController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "GoalNotFound",
             value = GOAL_NOT_FOUND_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getGoalById(
-            @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
+            @PathVariable("goalId") String goalId,
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long goalIdLong = validationUtils.parseLong(goalId);
@@ -207,8 +207,8 @@ public class GoalController extends BaseController {
     @PutMapping("/{goalId}")
     @Operation(summary = "Update goal", description = "Updates existing goal")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated goal data", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class,
-            requiredProperties = {"goalName", "targetAmount", "duration"}, example = UPDATE_GOAL_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_GOAL_REQUEST)))
     @ApiResponse(responseCode = "200", description = "Goal updated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_GOAL_SUCCESS)))
@@ -253,7 +253,6 @@ public class GoalController extends BaseController {
      */
     @DeleteMapping("/{goalId}")
     @Operation(summary = "Delete goal", description = "Deletes goal by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Goal deleted successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_GOAL_SUCCESS)))
@@ -261,7 +260,8 @@ public class GoalController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidGoalId",
             value = INVALID_GOAL_ID_RESPONSE)))
     public ResponseEntity<Map<String, Object>> deleteGoal(
-            @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
+            @PathVariable("goalId") String goalId,
+            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long goalIdLong = validationUtils.parseLong(goalId);
