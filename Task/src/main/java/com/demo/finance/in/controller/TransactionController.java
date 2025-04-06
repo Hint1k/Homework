@@ -27,10 +27,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 
@@ -48,12 +48,18 @@ import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.UPDATE_T
 import static com.demo.finance.domain.utils.SwaggerExamples.Transaction.UPDATE_TRANSACTION_SUCCESS;
 
 /**
- * The {@code TransactionController} class is a REST controller that provides endpoints for managing user transactions.
- * It supports creating, retrieving, updating, and deleting transactions for the currently logged-in user.
+ * REST controller for managing user transactions.
  * <p>
- * This controller leverages validation utilities to ensure that incoming requests meet the required constraints
- * and formats. It also uses a service layer to perform business logic related to transactions and a mapper to convert
- * between entities and DTOs.
+ * Provides endpoints to create, retrieve, update, and delete transactions
+ * for the currently authenticated user. All operations validate input data,
+ * enforce ownership constraints, and return standardized responses.
+ * <p>
+ * This controller uses the {@link TransactionService} to perform business logic,
+ * {@link ValidationUtils} to validate inputs, and {@link TransactionMapper} to map
+ * between domain and DTO objects. Responses are built using helper methods inherited
+ * from {@link BaseController}.
+ * <p>
+ * Accessible under the path <code>/api/transactions</code>.
  */
 @RestController
 @RequestMapping("/api/transactions")
@@ -65,15 +71,17 @@ public class TransactionController extends BaseController {
     private final TransactionMapper transactionMapper;
 
     /**
-     * Creates a new transaction for the currently logged-in user.
+     * Creates a new transaction for the currently authenticated user.
      * <p>
-     * This endpoint validates the provided transaction data and delegates the request to the transaction service
-     * to create the transaction. If the operation succeeds, a success response containing the created transaction
-     * is returned; otherwise, an error response is returned.
+     * This method validates the input transaction data, creates the transaction
+     * using the {@link TransactionService}, and returns a success or error response
+     * depending on the outcome. If successful, the created transaction details are
+     * returned in the response.
+     * </p>
      *
-     * @param transactionDtoNew the request body containing the new transaction data
-     * @param currentUser       the currently logged-in user retrieved from the session
-     * @return a success response if the operation succeeds or an error response if validation fails
+     * @param transactionDtoNew the transaction data to be created
+     * @param currentUser       the currently authenticated user
+     * @return a {@link ResponseEntity} containing the result of the operation
      */
     @PostMapping
     @Operation(summary = "Create transaction", description = "Creates a new transaction")
@@ -87,7 +95,7 @@ public class TransactionController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidTransactionType",
             value = INVALID_TRANSACTION_TYPE_RESPONSE)))
     public ResponseEntity<Map<String, Object>> createTransaction(
-            @RequestBody TransactionDto transactionDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestBody TransactionDto transactionDtoNew, @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             TransactionDto transactionDto =
@@ -110,14 +118,15 @@ public class TransactionController extends BaseController {
     }
 
     /**
-     * Retrieves a paginated list of transactions for the currently logged-in user.
+     * Retrieves paginated transactions for the currently authenticated user.
      * <p>
-     * This endpoint validates the pagination parameters and delegates the request to the transaction service
-     * to fetch the paginated response. If the parameters are invalid, an error response is returned.
+     * This method accepts pagination parameters (page size and number), validates them,
+     * and returns a paginated list of transactions using the {@link TransactionService}.
+     * </p>
      *
-     * @param paramsNew   the pagination parameters provided in the request
-     * @param currentUser the currently logged-in user retrieved from the session
-     * @return a paginated response containing transaction data or an error response if validation fails
+     * @param paramsNew   the pagination parameters
+     * @param currentUser the currently authenticated user
+     * @return a {@link ResponseEntity} containing the paginated transactions
      */
     @GetMapping
     @Operation(summary = "Get transactions", description = "Returns paginated transactions")
@@ -129,7 +138,7 @@ public class TransactionController extends BaseController {
             value = INVALID_SIZE_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getPaginatedTransactions(
             @ParameterObject @ModelAttribute PaginationParams paramsNew,
-            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
@@ -145,14 +154,16 @@ public class TransactionController extends BaseController {
     }
 
     /**
-     * Retrieves a specific transaction by its ID for the currently logged-in user.
+     * Retrieves a specific transaction by its ID for the currently authenticated user.
      * <p>
-     * This endpoint validates the transaction ID and ensures that the user owns the transaction before retrieving it.
-     * If the transaction is found, a success response is returned; otherwise, an error response is returned.
+     * This method checks if the transaction exists and belongs to the authenticated user.
+     * If the transaction is found, its details are returned. Otherwise, an error response
+     * is returned indicating that the transaction was not found or the user is not authorized.
+     * </p>
      *
      * @param transactionId the ID of the transaction to retrieve
-     * @param currentUser   the currently logged-in user retrieved from the session
-     * @return a success response containing the transaction data or an error response if validation fails
+     * @param currentUser   the currently authenticated user
+     * @return a {@link ResponseEntity} containing the transaction details or error message
      */
     @GetMapping("/{transactionId}")
     @Operation(summary = "Get transaction", description = "Returns transaction by ID")
@@ -164,7 +175,7 @@ public class TransactionController extends BaseController {
             value = TRANSACTION_NOT_FOUND_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getTransactionById(
             @PathVariable("transactionId") String transactionId,
-            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long transactionIdLong = validationUtils.parseLong(transactionId);
@@ -182,16 +193,17 @@ public class TransactionController extends BaseController {
     }
 
     /**
-     * Updates a specific transaction for the currently logged-in user.
+     * Updates an existing transaction for the currently authenticated user.
      * <p>
-     * This endpoint validates the transaction ID and the updated transaction data before delegating the request to the
-     * transaction service. If the operation succeeds, a success response containing the updated transaction is
-     * returned; otherwise, an error response is returned.
+     * This method validates the input transaction data, checks ownership of the transaction,
+     * and updates it using the {@link TransactionService}. If successful, the updated transaction
+     * details are returned. If the update fails, an error response is returned.
+     * </p>
      *
      * @param transactionId     the ID of the transaction to update
-     * @param transactionDtoNew the request body containing the updated transaction data
-     * @param currentUser       the currently logged-in user retrieved from the session
-     * @return a success response if the operation succeeds or an error response if validation fails
+     * @param transactionDtoNew the updated transaction data
+     * @param currentUser       the currently authenticated user
+     * @return a {@link ResponseEntity} containing the result of the update operation
      */
     @PutMapping("/{transactionId}")
     @Operation(summary = "Update transaction", description = "Updates existing transaction")
@@ -206,7 +218,7 @@ public class TransactionController extends BaseController {
             value = MISSING_TRANSACTION_FIELD_RESPONSE)))
     public ResponseEntity<Map<String, Object>> updateTransaction(
             @PathVariable("transactionId") String transactionId, @RequestBody TransactionDto transactionDtoNew,
-            @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long transactionIdLong = validationUtils.parseLong(transactionId);
@@ -232,15 +244,16 @@ public class TransactionController extends BaseController {
     }
 
     /**
-     * Deletes a specific transaction for the currently logged-in user.
+     * Deletes a specific transaction by its ID for the currently authenticated user.
      * <p>
-     * This endpoint validates the transaction ID and ensures that the user owns the transaction before delegating the
-     * request to the transaction service. If the operation succeeds, a success response is returned; otherwise, an
-     * error response is returned.
+     * This method validates the transaction ID, checks ownership of the transaction,
+     * and deletes it using the {@link TransactionService}. If the transaction is successfully
+     * deleted, a success response is returned. If not, an error response is returned.
+     * </p>
      *
      * @param transactionId the ID of the transaction to delete
-     * @param currentUser   the currently logged-in user retrieved from the session
-     * @return a success response if the operation succeeds or an error response if validation fails
+     * @param currentUser   the currently authenticated user
+     * @return a {@link ResponseEntity} containing the result of the delete operation
      */
     @DeleteMapping("/{transactionId}")
     @Operation(summary = "Delete transaction", description = "Deletes transaction by ID")
@@ -252,7 +265,7 @@ public class TransactionController extends BaseController {
             value = INVALID_TRANSACTION_ID_RESPONSE)))
     public ResponseEntity<Map<String, Object>> deleteTransaction(
             @PathVariable("transactionId") String transactionId,
-            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long transactionIdLong = validationUtils.parseLong(transactionId);

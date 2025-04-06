@@ -21,10 +21,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 import java.math.BigDecimal;
@@ -37,13 +37,13 @@ import static com.demo.finance.domain.utils.SwaggerExamples.Report.REPORT_BY_DAT
 import static com.demo.finance.domain.utils.SwaggerExamples.Report.REPORT_BY_DATE_SUCCESS;
 
 /**
- * The {@code ReportController} class is a REST controller that provides endpoints for generating various types
- * of financial reports for the currently logged-in user. It supports generating reports by date range, analyzing
- * expenses by category, and creating general financial reports.
+ * REST controller for managing financial reports.
  * <p>
- * This controller leverages validation utilities to ensure that incoming requests meet the required constraints
- * and formats. It also uses a service layer to perform business logic related to reports and a mapper to convert
- * between entities and DTOs.
+ * Provides endpoints to generate various types of financial reports such as general report,
+ * report by date range, and expenses categorized by type. Relies on {@code ReportService} and
+ * {@code ReportMapper} for processing and formatting report data, and {@code ValidationUtils}
+ * for validating request payloads.
+ * </p>
  */
 @RestController
 @RequestMapping("/api/reports")
@@ -55,15 +55,16 @@ public class ReportController extends BaseController {
     private final ReportMapper reportMapper;
 
     /**
-     * Generates a financial report for the currently logged-in user based on a specified date range.
+     * Generates a financial report based on a provided date range.
      * <p>
-     * This endpoint validates the provided date range and delegates the request to the report service
-     * to generate the report. If the operation succeeds, a success response containing the report data
-     * is returned; otherwise, an error response is returned.
+     * Validates the input date range and retrieves a report for the specified user.
+     * Returns a {@code ReportDto} on success, or an error if input validation fails
+     * or no transactions exist in the date range.
+     * </p>
      *
-     * @param reportDatesDto the request body containing the date range for the report
-     * @param currentUser    the currently logged-in user retrieved from the session
-     * @return a success response containing the generated report or an error response if validation fails
+     * @param reportDatesDto the date range for the report
+     * @param currentUser    the currently authenticated user
+     * @return a {@code ResponseEntity} containing the generated report or an error message
      */
     @PostMapping("/by-date")
     @Operation(summary = "Generate report by date", description = "Creates financial report for date range")
@@ -77,7 +78,7 @@ public class ReportController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "ValidationError",
             value = MISSING_REPORT_FIELD_RESPONSE)))
     public ResponseEntity<Map<String, Object>> generateReportByDate(
-            @RequestBody ReportDatesDto reportDatesDto, @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestBody ReportDatesDto reportDatesDto, @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             ReportDatesDto reportDates = validationUtils.validateRequest(reportDatesDto, Mode.REPORT);
@@ -96,15 +97,15 @@ public class ReportController extends BaseController {
     }
 
     /**
-     * Analyzes expenses by category for the currently logged-in user within a specified date range.
+     * Analyzes the user's expenses grouped by category within a specified date range.
      * <p>
-     * This endpoint validates the provided date range and delegates the request to the report service
-     * to analyze expenses. If the operation succeeds, a success response containing the categorized expenses
-     * is returned; otherwise, an error response is returned.
+     * Validates the input and returns a map of categories and total expenses. If no data
+     * is found, responds with a 404 error.
+     * </p>
      *
-     * @param reportDatesDto the request body containing the date range for the analysis
-     * @param currentUser    the currently logged-in user retrieved from the session
-     * @return a success response containing the categorized expenses or an error response if validation fails
+     * @param reportDatesDto the date range for analysis
+     * @param currentUser    the currently authenticated user
+     * @return a {@code ResponseEntity} with the category-expense map or an error message
      */
     @GetMapping("/expenses-by-category")
     @Operation(summary = "Get expenses by category", description = "Analyzes expenses by category for date range")
@@ -116,7 +117,7 @@ public class ReportController extends BaseController {
             examples = @ExampleObject(name = "SuccessResponse", value = EXPENSES_BY_CATEGORY_SUCCESS)))
     public ResponseEntity<Map<String, Object>> analyzeExpensesByCategory(
             @RequestBody ReportDatesDto reportDatesDto,
-            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             ReportDatesDto reportDates =
@@ -137,13 +138,14 @@ public class ReportController extends BaseController {
     }
 
     /**
-     * Generates a general financial report for the currently logged-in user.
+     * Generates a general financial report for the authenticated user.
      * <p>
-     * This endpoint retrieves the user's financial data from the report service. If the data is found,
-     * a success response is returned; otherwise, an error response is returned.
+     * Returns the user's complete financial summary, including total income,
+     * expenses, and balance.
+     * </p>
      *
-     * @param currentUser the currently logged-in user retrieved from the session
-     * @return a success response containing the general report or an error response if no data is found
+     * @param currentUser the currently authenticated user
+     * @return a {@code ResponseEntity} containing the general report or an error message
      */
     @GetMapping("/report")
     @Operation(summary = "Get general report", description = "Generates overall financial report")
@@ -151,7 +153,7 @@ public class ReportController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_REPORT_SUCCESS)))
     public ResponseEntity<Map<String, Object>> generateGeneralReport(
-            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Report report = reportService.generateUserReport(userId);

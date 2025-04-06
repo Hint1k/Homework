@@ -65,12 +65,6 @@ public final class SwaggerExamples {
                     "timestamp": "2025-04-02T05:19:29.720588708Z"
                 }
                 """;
-        public static final String LOGOUT_SUCCESS = """
-                {
-                    "message": "Logged out successfully",
-                    "timestamp": "2025-04-01T13:07:09.194730146Z"
-                }
-                """;
         public static final String UPDATE_ACCOUNT_REQUEST = """
                 {
                   "name": "jay2",

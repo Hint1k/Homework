@@ -15,6 +15,7 @@ logging:
     com.demo.finance.in.filter: INFO
     liquibase: WARN
     org.springframework.web: WARN
+    org.springframework.boot: WARN
     org.springdoc: WARN
     org.springdoc.core: WARN
     org.springdoc.api: WARN
@@ -33,3 +34,6 @@ logging:
       max-history: 5
 logging-aspect:
   slow-method-threshold-ms: 500
+jwt:
+  secret: jwtSecretSuperSecureKeyThatIsAtLeast64CharactersLongForHS512Algorithm
+  expiration: 3600000

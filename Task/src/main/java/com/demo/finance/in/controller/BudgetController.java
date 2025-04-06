@@ -19,10 +19,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 
@@ -32,11 +32,11 @@ import static com.demo.finance.domain.utils.SwaggerExamples.Budget.GET_BUDGET_SU
 import static com.demo.finance.domain.utils.SwaggerExamples.Budget.MISSING_BUDGET_FIELD_RESPONSE;
 
 /**
- * The {@code BudgetController} class is a REST controller that provides endpoints for managing user budgets.
- * It supports setting a monthly budget and retrieving budget-related data for the currently logged-in user.
+ * REST controller for managing budget operations.
  * <p>
- * This controller leverages validation utilities to ensure that incoming requests meet the required constraints
- * and formats. It also uses a service layer to perform business logic related to budgets.
+ * This controller provides endpoints to set a user's monthly budget and retrieve budget data.
+ * It utilizes the {@code BudgetService} for budget operations and {@code ValidationUtils} for request validation.
+ * </p>
  */
 @RestController
 @RequestMapping("/api/budgets")
@@ -47,15 +47,18 @@ public class BudgetController extends BaseController {
     private final ValidationUtils validationUtils;
 
     /**
-     * Sets a monthly budget for the currently logged-in user.
+     * Sets the monthly budget for a user.
      * <p>
-     * This endpoint validates the provided budget data and delegates the request to the budget service
-     * to set the monthly budget. If the operation succeeds, a success response is returned; otherwise,
-     * an error response is returned.
+     * Validates the incoming {@code BudgetDto} request using {@code ValidationUtils}.
+     * If the monthly limit is provided, it delegates to {@code BudgetService} to set the budget and returns
+     * a successful response. Otherwise, it returns an error response indicating the missing monthly limit.
+     * </p>
      *
-     * @param budgetDtoNew the request body containing the new budget data
-     * @param currentUser  the currently logged-in user retrieved from the session
-     * @return a success response if the operation succeeds or an error response if validation fails
+     * @param budgetDtoNew the new budget data provided in the request body
+     * @param currentUser  the current user's data injected via a request attribute
+     * @return a {@code ResponseEntity} containing a map with the operation result and the budget details
+     * or an error message
+     * @throws ValidationException if the validation of the request fails
      */
     @PostMapping
     @Operation(summary = "Set monthly budget", description = "Sets user's monthly budget limit")
@@ -69,7 +72,7 @@ public class BudgetController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "ValidationError",
             value = MISSING_BUDGET_FIELD_RESPONSE)))
     public ResponseEntity<Map<String, Object>> setMonthlyBudget(
-            @RequestBody BudgetDto budgetDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestBody BudgetDto budgetDtoNew, @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             BudgetDto budgetDto = validationUtils.validateRequest(budgetDtoNew, Mode.BUDGET);
@@ -88,13 +91,15 @@ public class BudgetController extends BaseController {
     }
 
     /**
-     * Retrieves budget-related data for the currently logged-in user.
+     * Retrieves the budget data for the current user.
      * <p>
-     * This endpoint retrieves the user's budget data from the budget service. If the data is found,
-     * a success response is returned; otherwise, an error response is returned.
+     * Delegates to {@code BudgetService} to fetch the budget information for the user.
+     * Returns a successful response with the budget data if found, otherwise an error response indicating
+     * that the budget was not found.
+     * </p>
      *
-     * @param currentUser the currently logged-in user retrieved from the session
-     * @return a success response containing the budget data or an error response if the data is not found
+     * @param currentUser the current user's data injected via a request attribute
+     * @return a {@code ResponseEntity} containing a map with the budget data or an error message
      */
     @GetMapping("/budget")
     @Operation(summary = "Get budget data", description = "Returns user's budget information")
@@ -102,7 +107,7 @@ public class BudgetController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Map.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_BUDGET_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getBudgetData(
-            @Parameter(hidden = true) @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Map<String, Object> budgetData = budgetService.getBudgetData(userId);

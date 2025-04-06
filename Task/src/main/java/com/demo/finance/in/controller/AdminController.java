@@ -180,9 +180,9 @@ public class AdminController extends BaseController {
     @ApiResponse(responseCode = "200", description = "User blocked/unblocked successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = BLOCK_USER_SUCCESS)))
-    @ApiResponse(responseCode = "400", description = "Bad request - Default admin can't be changed", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "DefaultAdmin",
-            value = BLOCK_DEFAULT_ADMIN_RESPONSE)))
+    @ApiResponse(responseCode = "400", description = "Bad request - Default admin can't be changed",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(name = "DefaultAdmin", value = BLOCK_DEFAULT_ADMIN_RESPONSE)))
     public ResponseEntity<Map<String, Object>> blockUnblockUser(
             @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
         try {
@@ -218,9 +218,9 @@ public class AdminController extends BaseController {
     @ApiResponse(responseCode = "200", description = "User role updated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_ROLE_SUCCESS)))
-    @ApiResponse(responseCode = "400", description = "Bad request - Default admin can't be changed", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "DefaultAdmin",
-            value = UPDATE_DEFAULT_ADMIN_RESPONSE)))
+    @ApiResponse(responseCode = "400", description = "Bad request - Default admin can't be changed",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(name = "DefaultAdmin", value = UPDATE_DEFAULT_ADMIN_RESPONSE)))
     public ResponseEntity<Map<String, Object>> updateUserRole(
             @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
         try {

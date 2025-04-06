@@ -96,15 +96,18 @@ To run tests with coverage using Jacoco
 ---
 
 ## Code Structure
-
-The project follows Clean Architecture principles with key packages:
+Project module "audit-starter" contains AuditAspect class <br>
+Project module "logging-starter" contains LoggingAspect class <br>
+Project module "Task":
 - `in.controllers` – Rest Controllers.
-- `domain.model` – Contains entities.
-- `domain.utils` – Utility classes for validation and date handling.
+- `domain.model` – Entities.
+- `domain.utils` – Utility classes for validation and data handling.
 - `out.repository` – Manages database storage and retrieval.
 - `out.service` – Implements core business logic and interacts with repositories.
 - `app` - Has main class and application config classes
 - `resources.db.changelog` - Liquibase xml config files
+- `in.filters` - Jwt authentication and Exception handling filters
+- `exception` - Custom exceptions and Global exception handler
 ---
 
 ## Technological Stack
@@ -112,6 +115,7 @@ The project follows Clean Architecture principles with key packages:
 - **Spring (Boot, Web, AOP)**
 - **Gradle**
 - **PostgreSQL**
+- **Jetty**
 - **Swagger**
 - **Docker**
 - **JUnit 5, Mockito, AssertJ, Testcontainers**
