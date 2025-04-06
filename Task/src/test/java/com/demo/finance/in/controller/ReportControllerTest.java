@@ -104,7 +104,7 @@ class ReportControllerTest {
         when(reportService.analyzeExpensesByCategory(eq(1L), any(), any()))
                 .thenReturn(expensesByCategory);
 
-        mockMvc.perform(get("/api/reports/expenses-by-category")
+        mockMvc.perform(post("/api/reports/expenses-by-category")
                         .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"fromDate\":\"2023-10-01\",\"toDate\":\"2023-10-31\"}"))
@@ -165,7 +165,7 @@ class ReportControllerTest {
         when(reportService.analyzeExpensesByCategory(eq(1L), any(), any()))
                 .thenReturn(new HashMap<>());
 
-        mockMvc.perform(get("/api/reports/expenses-by-category")
+        mockMvc.perform(post("/api/reports/expenses-by-category")
                         .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"fromDate\":\"2023-10-01\",\"toDate\":\"2023-10-31\"}"))

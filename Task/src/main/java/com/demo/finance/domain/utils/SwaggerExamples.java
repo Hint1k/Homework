@@ -199,11 +199,7 @@ public final class SwaggerExamples {
                              "userId": 2,
                              "amount": 250.00,
                              "category": "Food",
-                             "date": [
-                                 2025,
-                                 5,
-                                 23
-                             ],
+                             "date": "2025-4-30",
                              "description": "Grocery shopping",
                              "type": "EXPENSE"
                          }
@@ -304,11 +300,7 @@ public final class SwaggerExamples {
                         "userId": 2,
                         "amount": 250.00,
                         "category": "Food",
-                        "date": [
-                            2025,
-                            5,
-                            23
-                        ],
+                        "date": "2025-4-30",
                         "description": "Grocery shopping",
                         "type": "EXPENSE"
                     },
@@ -337,11 +329,7 @@ public final class SwaggerExamples {
                             "userId": 2,
                             "amount": 250.00,
                             "category": "Food",
-                            "date": [
-                                2025,
-                                5,
-                                23
-                            ],
+                            "date": "2025-4-30",
                             "description": "Grocery shopping",
                             "type": "EXPENSE"
                         }
@@ -370,11 +358,7 @@ public final class SwaggerExamples {
                           "userId": 2,
                           "amount": 500.00,
                           "category": "Food",
-                          "date": [
-                              2025,
-                              3,
-                              23
-                          ],
+                          "date": "2025-4-30",
                           "description": "Grocery shopping",
                           "type": "EXPENSE"
                       },
@@ -402,11 +386,7 @@ public final class SwaggerExamples {
                          "userId": 2,
                          "amount": 750.00,
                          "category": "Luxury",
-                         "date": [
-                             2025,
-                             5,
-                             23
-                         ],
+                         "date": "2025-5-30",
                          "description": "Gold shopping",
                          "type": "EXPENSE"
                      },
@@ -444,11 +424,7 @@ public final class SwaggerExamples {
                         "targetAmount": 1500.00,
                         "savedAmount": 0.00,
                         "duration": 3,
-                        "startTime": [
-                            2025,
-                            1,
-                            1
-                        ]
+                        "startTime": "2025-4-30"
                     },
                     "message": "Goal found successfully",
                     "timestamp": "2025-04-01T14:35:09.321050058Z"
@@ -477,11 +453,7 @@ public final class SwaggerExamples {
                             "targetAmount": 1500.00,
                             "savedAmount": 0.00,
                             "duration": 3,
-                            "startTime": [
-                                2025,
-                                1,
-                                1
-                            ]
+                            "startTime": "2025-4-30"
                         }
                     ]
                 }
@@ -509,11 +481,7 @@ public final class SwaggerExamples {
                         "targetAmount": 1500.00,
                         "savedAmount": 0.00,
                         "duration": 3,
-                        "startTime": [
-                            2025,
-                            1,
-                            1
-                        ]
+                        "startTime":  "2025-1-1"
                     },
                     "message": "Goal created successfully",
                     "timestamp": "2025-04-01T14:29:30.345555430Z"
@@ -523,8 +491,7 @@ public final class SwaggerExamples {
                 {
                     "goalName": "My Goal 2",
                     "targetAmount": "1500",
-                    "duration": "3",
-                    "startTime": "2025-03-30"
+                    "duration": "3"
                 }
                 """;
         public static final String UPDATE_GOAL_SUCCESS = """
@@ -536,11 +503,7 @@ public final class SwaggerExamples {
                         "targetAmount": 1500.00,
                         "savedAmount": 0.00,
                         "duration": 3,
-                        "startTime": [
-                            2025,
-                            3,
-                            30
-                        ]
+                        "startTime": "2025-4-30"
                     },
                     "message": "Goal updated successfully",
                     "timestamp": "2025-04-01T14:31:24.355103445Z"

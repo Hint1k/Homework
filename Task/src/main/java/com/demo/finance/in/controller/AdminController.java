@@ -190,6 +190,7 @@ public class AdminController extends BaseController {
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.BLOCK_UNBLOCK);
             boolean success = adminService.blockOrUnblockUser(userIdLong, userDto);
             if (success) {
+                userDto.setUserId(userIdLong);
                 return buildSuccessResponse(HttpStatus.OK,
                         "User blocked/unblocked status changed successfully", UserDto.removePassword(userDto));
             }
@@ -228,6 +229,7 @@ public class AdminController extends BaseController {
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.UPDATE_ROLE);
             boolean success = adminService.updateUserRole(userIdLong, userDto);
             if (success) {
+                userDto.setUserId(userIdLong);
                 return buildSuccessResponse(
                         HttpStatus.OK, "User role updated successfully", UserDto.removePassword(userDto));
             }

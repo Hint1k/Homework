@@ -107,7 +107,7 @@ public class ReportController extends BaseController {
      * @param currentUser    the currently authenticated user
      * @return a {@code ResponseEntity} with the category-expense map or an error message
      */
-    @GetMapping("/expenses-by-category")
+    @PostMapping("/expenses-by-category")
     @Operation(summary = "Get expenses by category", description = "Analyzes expenses by category for date range")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Date range", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReportDatesDto.class),
@@ -116,8 +116,7 @@ public class ReportController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Map.class),
             examples = @ExampleObject(name = "SuccessResponse", value = EXPENSES_BY_CATEGORY_SUCCESS)))
     public ResponseEntity<Map<String, Object>> analyzeExpensesByCategory(
-            @RequestBody ReportDatesDto reportDatesDto,
-            @Parameter(hidden = true) @RequestAttribute("currentUser") UserDto currentUser) {
+            @RequestBody ReportDatesDto reportDatesDto, @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             ReportDatesDto reportDates =

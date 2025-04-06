@@ -278,7 +278,7 @@ GET http://localhost:8080/api/reports/report
 ```json 
 { }
 ```
-GET http://localhost:8080/api/reports/expenses-by-category
+POST http://localhost:8080/api/reports/expenses-by-category
 ```json 
 {
   "fromDate": "2025-01-01",

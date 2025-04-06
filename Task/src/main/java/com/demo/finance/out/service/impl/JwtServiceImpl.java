@@ -86,32 +86,33 @@ public class JwtServiceImpl implements JwtService {
      * Validates the provided JWT token by parsing it and checking the expiration.
      * <p>
      * This method verifies the JWT token's signature and checks if the token is expired. If valid, it extracts
-     * the user's email from the token, retrieves the corresponding user from the database, and returns a
+     * the user's id from the token, retrieves the corresponding user from the database, and returns a
      * {@link UserDto} with the user's details.
      * </p>
      *
      * @param token the JWT token to validate
      * @return a {@link UserDto} representing the authenticated user
      * @throws IllegalArgumentException if the token is invalid or expired
-     * @throws UserNotFoundException    if no user is found with the email in the token
+     * @throws UserNotFoundException    if no user is found with the id in the token
      */
     @Override
     public UserDto validateToken(String token) {
         try {
             JwtParser parser = Jwts.parser().verifyWith(secretKey).build();
             Claims claims = parser.parseSignedClaims(token).getPayload();
-            String email = claims.getSubject();
+            Long userId = claims.get("userId", Long.class);
             if (isTokenExpired(token)) {
-                throw new IllegalArgumentException("JWT Token expired for user: " + email);
+                throw new ExpiredJwtException(null, null, "JWT Token expired for user ID: " + userId);
             }
-            User user = userRepository.findByEmail(email);
+            User user = userRepository.findById(userId);
             if (user == null) {
-                throw new UserNotFoundException("User not found with email: " + email);
+                throw new UserNotFoundException("User not found with ID: " + userId);
             }
             return userMapper.toDto(user);
+        } catch (ExpiredJwtException | UserNotFoundException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
-            throw new IllegalArgumentException("Invalid JWT token", e);
+            throw new IllegalArgumentException("Invalid JWT token: ", e);
         }
     }
 

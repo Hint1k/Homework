@@ -6,6 +6,7 @@ import com.demo.finance.domain.model.User;
 import com.demo.finance.exception.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,10 +21,8 @@ import javax.crypto.SecretKey;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
@@ -87,48 +86,48 @@ class JwtServiceImplTest {
     void validateToken_ShouldReturnUser_WhenTokenIsValid() {
         String email = "test@example.com";
         User user = new User();
+        user.setUserId(1L);
         user.setEmail(email);
+
         UserDto userDto = new UserDto();
+        userDto.setUserId(1L);
         userDto.setEmail(email);
 
         String token = jwtService.generateToken(email, List.of("user"), 1L);
 
-        when(userRepository.findByEmail(email)).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(user);
         when(userMapper.toDto(user)).thenReturn(userDto);
 
         UserDto result = jwtService.validateToken(token);
 
         assertNotNull(result);
-        assertEquals(email, result.getEmail());
+        assertEquals(1L, result.getUserId());
 
-        verify(userRepository, times(1)).findByEmail(email);
+        verify(userRepository, times(1)).findById(1L);
         verify(userMapper, times(1)).toDto(user);
     }
 
     @Test
-    @DisplayName("Validate token should throw when token is expired")
+    @DisplayName("Validate token should throw ExpiredJwtException when token is expired")
     void validateToken_ShouldThrow_WhenTokenIsExpired() {
-        setJwtExpiration(jwtService, -1000);
+        setJwtExpiration(jwtService, -1000); // token already expired
         String token = jwtService.generateToken("test@example.com", List.of("user"), 1L);
 
-        assertThrows(IllegalArgumentException.class, () -> jwtService.validateToken(token));
+        assertThrows(ExpiredJwtException.class, () -> jwtService.validateToken(token));
     }
 
     @Test
     @DisplayName("Validate token should throw when user not found")
     void validateToken_ShouldThrow_WhenUserNotFound() {
-        String email = "nonexistent@example.com";
-        String token = jwtService.generateToken(email, List.of("user"), 1L);
+        String token = jwtService.generateToken("nonexistent@example.com", List.of("user"), 1L);
 
-        when(userRepository.findByEmail(email)).thenReturn(null);
+        when(userRepository.findById(1L)).thenReturn(null);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class,
                 () -> jwtService.validateToken(token));
 
-        assertInstanceOf(UserNotFoundException.class, exception.getCause());
-        assertEquals("User not found with email: " + email, exception.getCause().getMessage());
-
-        verify(userRepository, times(1)).findByEmail(email);
+        assertEquals("User not found with ID: 1", exception.getMessage());
+        verify(userRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -143,15 +142,23 @@ class JwtServiceImplTest {
     void validateToken_ShouldHandleEmptyRoles() {
         String email = "test@example.com";
         String token = jwtService.generateToken(email, List.of(), 1L);
+
         User user = new User();
+        user.setUserId(1L);
         user.setEmail(email);
 
-        when(userRepository.findByEmail(email)).thenReturn(user);
-        when(userMapper.toDto(user)).thenReturn(new UserDto());
+        UserDto dto = new UserDto();
+        dto.setUserId(1L);
+        dto.setEmail(email);
 
-        assertDoesNotThrow(() -> jwtService.validateToken(token));
+        when(userRepository.findById(1L)).thenReturn(user);
+        when(userMapper.toDto(user)).thenReturn(dto);
 
-        verify(userRepository, times(1)).findByEmail(email);
+        UserDto result = jwtService.validateToken(token);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getUserId());
+        verify(userRepository, times(1)).findById(1L);
         verify(userMapper, times(1)).toDto(user);
     }
 }
