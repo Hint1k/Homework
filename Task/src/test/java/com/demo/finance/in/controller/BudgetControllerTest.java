@@ -70,7 +70,7 @@ class BudgetControllerTest {
                 .thenReturn(budget);
 
         mockMvc.perform(post("/api/budgets")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"monthlyLimit\":5000.0}"))
                 .andExpect(status().isOk())
@@ -90,7 +90,7 @@ class BudgetControllerTest {
                 .thenReturn(budgetData);
 
         mockMvc.perform(get("/api/budgets/budget")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Budget retrieved successfully"))
                 .andExpect(jsonPath("$.data.monthlyLimit").value(5000.0))
@@ -109,7 +109,7 @@ class BudgetControllerTest {
                 .thenReturn(null);
 
         mockMvc.perform(post("/api/budgets")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"monthlyLimit\":5000.0}"))
                 .andExpect(status().isInternalServerError())
@@ -128,7 +128,7 @@ class BudgetControllerTest {
                 .thenThrow(new ValidationException("Monthly limit must be a positive number"));
 
         mockMvc.perform(post("/api/budgets")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"monthlyLimit\":\"-1000\"}"))
                 .andExpect(status().isBadRequest())
@@ -146,7 +146,7 @@ class BudgetControllerTest {
                 .thenReturn(null);
 
         mockMvc.perform(get("/api/budgets/budget")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Budget not found for the user."));
 
@@ -162,7 +162,7 @@ class BudgetControllerTest {
                 .thenReturn(emptyBudgetDto);
 
         mockMvc.perform(post("/api/budgets")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"monthlyLimit\":null}"))
                 .andExpect(status().isBadRequest())

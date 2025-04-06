@@ -33,7 +33,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AuthenticationFilter implements Filter {
 
-    private final JwtService jwtTokenService;
+    private final JwtService jwtService;
 
     /**
      * Filters incoming requests to validate authentication and enforce role-based access control.
@@ -66,7 +66,7 @@ public class AuthenticationFilter implements Filter {
         }
         UserDto userDto;
         try {
-            userDto = jwtTokenService.validateToken(token);
+            userDto = jwtService.validateToken(token);
         } catch (Exception e) {
             sendErrorResponse(httpResponse, e.getMessage());
             return;

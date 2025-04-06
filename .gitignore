@@ -4,3 +4,4 @@ build
 out/
 *.iml
 !/Task/src/main/java/com/demo/finance/out/
+!/Task/src/test/java/com/demo/finance/out/

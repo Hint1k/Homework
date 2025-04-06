@@ -25,7 +25,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -247,7 +250,9 @@ class AdminControllerTest {
                 .andExpect(jsonPath("$.message").value("User details"))
                 .andExpect(jsonPath("$.data.email").value("test@example.com"));
 
-        verify(userMapper).toDto(user);
+        verify(validationUtils, times(1)).parseUserId("2", Mode.GET);
+        verify(adminService, times(1)).getUser(userId);
+        verify(userMapper, times(1)).toDto(user);
     }
 
     @Test
@@ -266,6 +271,11 @@ class AdminControllerTest {
                         .content("{\"blocked\":true}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Failed to block/unblock user."));
+
+        verify(validationUtils, times(1)).parseUserId("2", Mode.BLOCK_UNBLOCK);
+        verify(validationUtils, times(1))
+                .validateRequest(any(UserDto.class), eq(Mode.BLOCK_UNBLOCK));
+        verify(adminService, times(1)).blockOrUnblockUser(userId, userDto);
     }
 
     @Test
@@ -283,6 +293,11 @@ class AdminControllerTest {
                         .content("{\"role\":\"ADMIN\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Failed to update role."));
+
+        verify(validationUtils, times(1)).parseUserId("2", Mode.UPDATE_ROLE);
+        verify(validationUtils, times(1))
+                .validateRequest(any(UserDto.class), eq(Mode.UPDATE_ROLE));
+        verify(adminService, times(1)).updateUserRole(userId, userDto);
     }
 
     @Test
@@ -295,6 +310,9 @@ class AdminControllerTest {
         mockMvc.perform(delete("/api/admin/users/2"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("User not found."));
+
+        verify(validationUtils, times(1)).parseUserId("2", Mode.DELETE);
+        verify(adminService, times(1)).deleteUser(userId);
     }
 
     @Test
@@ -308,6 +326,9 @@ class AdminControllerTest {
                         .param("size", "10"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Invalid user ID"));
+
+        verify(validationUtils, times(1)).parseUserId("invalid", Mode.GET);
+        verify(transactionService, never()).getPaginatedTransactionsForUser(anyLong(), anyInt(), anyInt());
     }
 
     @Test
@@ -321,5 +342,9 @@ class AdminControllerTest {
                         .content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Blocked status required"));
+
+        verify(validationUtils, times(1))
+                .validateRequest(any(UserDto.class), eq(Mode.BLOCK_UNBLOCK));
+        verify(adminService, never()).blockOrUnblockUser(anyLong(), any(UserDto.class));
     }
 }

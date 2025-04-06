@@ -21,7 +21,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,7 +81,7 @@ class ReportControllerTest {
                 .thenReturn(reportDto);
 
         mockMvc.perform(post("/api/reports/by-date")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"fromDate\":\"2023-10-01\",\"toDate\":\"2023-10-31\"}"))
                 .andExpect(status().isOk())
@@ -91,6 +93,7 @@ class ReportControllerTest {
                 .validateRequest(any(ReportDatesDto.class), eq(Mode.REPORT));
         verify(reportService, times(1))
                 .generateReportByDate(eq(1L), any(), any());
+        verify(reportMapper, times(1)).toDto(report);
     }
 
     @Test
@@ -102,7 +105,7 @@ class ReportControllerTest {
                 .thenReturn(expensesByCategory);
 
         mockMvc.perform(get("/api/reports/expenses-by-category")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"fromDate\":\"2023-10-01\",\"toDate\":\"2023-10-31\"}"))
                 .andExpect(status().isOk())
@@ -125,7 +128,7 @@ class ReportControllerTest {
                 .thenReturn(reportDto);
 
         mockMvc.perform(get("/api/reports/report")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message")
                         .value("General report generated successfully"))
@@ -133,6 +136,7 @@ class ReportControllerTest {
 
         verify(reportService, times(1))
                 .generateUserReport(1L);
+        verify(reportMapper, times(1)).toDto(report);
     }
 
     @Test
@@ -142,7 +146,7 @@ class ReportControllerTest {
                 .thenThrow(new ValidationException("To date cannot be before from date"));
 
         mockMvc.perform(post("/api/reports/by-date")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"fromDate\":\"2023-10-31\",\"toDate\":\"2023-10-01\"}"))
                 .andExpect(status().isBadRequest())
@@ -150,6 +154,7 @@ class ReportControllerTest {
 
         verify(validationUtils, times(1))
                 .validateRequest(any(ReportDatesDto.class), eq(Mode.REPORT));
+        verify(reportService, never()).generateReportByDate(anyLong(), any(), any());
     }
 
     @Test
@@ -161,7 +166,7 @@ class ReportControllerTest {
                 .thenReturn(new HashMap<>());
 
         mockMvc.perform(get("/api/reports/expenses-by-category")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"fromDate\":\"2023-10-01\",\"toDate\":\"2023-10-31\"}"))
                 .andExpect(status().isNotFound())
@@ -181,11 +186,12 @@ class ReportControllerTest {
                 .thenReturn(null);
 
         mockMvc.perform(get("/api/reports/report")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("No reports found for the user."));
 
         verify(reportService, times(1))
                 .generateUserReport(1L);
+        verify(reportMapper, never()).toDto(any());
     }
 }

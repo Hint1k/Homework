@@ -2,11 +2,11 @@ package com.demo.finance.in.filter;
 
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.Role;
+import com.demo.finance.out.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +33,7 @@ class AuthenticationFilterTest {
     @Mock
     private FilterChain chain;
     @Mock
-    private HttpSession session;
+    private JwtService jwtService;
     @Mock
     private PrintWriter writer;
     @InjectMocks
@@ -47,17 +47,18 @@ class AuthenticationFilterTest {
         filter.doFilter(request, response, chain);
 
         verify(chain).doFilter(request, response);
+        verify(jwtService, never()).validateToken(anyString());
     }
 
     @Test
-    @DisplayName("User-restricted endpoint should allow user access")
-    void userEndpoint_ShouldAllowUser() throws ServletException, IOException {
+    @DisplayName("Valid token with user role should allow access to user endpoint")
+    void validTokenWithUserRole_ShouldAllowUserAccess() throws ServletException, IOException {
         UserDto user = new UserDto();
         user.setRole(new Role("user"));
 
         when(request.getRequestURI()).thenReturn("/api/user/data");
-        when(request.getSession(false)).thenReturn(session);
-        when(session.getAttribute("currentUser")).thenReturn(user);
+        when(request.getHeader("Authorization")).thenReturn("Bearer valid.token.here");
+        when(jwtService.validateToken("valid.token.here")).thenReturn(user);
 
         filter.doFilter(request, response, chain);
 
@@ -66,28 +67,26 @@ class AuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("Admin endpoint should allow admin access without writing to response")
-    void adminEndpoint_ShouldAllowAdmin() throws ServletException, IOException {
+    @DisplayName("Valid token with admin role should allow access to admin endpoint")
+    void validTokenWithAdminRole_ShouldAllowAdminAccess() throws ServletException, IOException {
         UserDto admin = new UserDto();
-        admin.setUserId(1L);
         admin.setRole(new Role("admin"));
 
-        when(request.getRequestURI()).thenReturn("/api/admin/users/*");
-        when(request.getSession(false)).thenReturn(session);
-        when(session.getAttribute("currentUser")).thenReturn(admin);
+        when(request.getRequestURI()).thenReturn("/api/admin/users/123");
+        when(request.getHeader("Authorization")).thenReturn("Bearer valid.token.here");
+        when(jwtService.validateToken("valid.token.here")).thenReturn(admin);
 
         filter.doFilter(request, response, chain);
 
         verify(chain).doFilter(request, response);
         verify(response, never()).setStatus(anyInt());
-        verify(writer, never()).write(anyString());
     }
 
     @Test
-    @DisplayName("Request without session should return 401 Unauthorized")
-    void noSession_ShouldReturn401() throws IOException, ServletException {
+    @DisplayName("Request without token should return 401 Unauthorized")
+    void noToken_ShouldReturn401() throws IOException, ServletException {
         when(request.getRequestURI()).thenReturn("/api/private");
-        when(request.getSession(false)).thenReturn(null);
+        when(request.getHeader("Authorization")).thenReturn(null);
         when(response.getWriter()).thenReturn(writer);
 
         filter.doFilter(request, response, chain);
@@ -95,35 +94,53 @@ class AuthenticationFilterTest {
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verify(response).setContentType("application/json");
         verify(writer).write("{\"error\":\"Authentication required\"}");
+        verify(chain, never()).doFilter(request, response);
     }
 
     @Test
-    @DisplayName("Non-admin user accessing admin endpoint should return 403 Forbidden")
-    void adminEndpoint_NonAdminUser_ShouldReturn403() throws ServletException, IOException {
-        UserDto user = new UserDto();
-        user.setRole(new Role("user"));
-
-        when(request.getRequestURI()).thenReturn("/api/admin/users/123");
-        when(request.getSession(false)).thenReturn(session);
-        when(session.getAttribute("currentUser")).thenReturn(user);
+    @DisplayName("Invalid token should return 401 Unauthorized")
+    void invalidToken_ShouldReturn401() throws IOException, ServletException {
+        when(request.getRequestURI()).thenReturn("/api/private");
+        when(request.getHeader("Authorization")).thenReturn("Bearer invalid.token");
+        when(jwtService.validateToken("invalid.token")).thenThrow(new IllegalArgumentException("Invalid token"));
         when(response.getWriter()).thenReturn(writer);
 
         filter.doFilter(request, response, chain);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Changed from FORBIDDEN
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verify(response).setContentType("application/json");
-        verify(writer).write("{\"error\":\"Access denied. Admin role required\"}");
+        verify(writer).write("{\"error\":\"Invalid token\"}");
+        verify(chain, never()).doFilter(request, response);
     }
 
     @Test
-    @DisplayName("User-restricted endpoint should block admin access")
-    void userEndpoint_ShouldBlockAdmin() throws IOException, ServletException {
+    @DisplayName("Non-admin user accessing admin endpoint should return 401 Unauthorized")
+    void nonAdminAccessingAdminEndpoint_ShouldReturn401() throws ServletException, IOException {
+        UserDto user = new UserDto();
+        user.setRole(new Role("user"));
+
+        when(request.getRequestURI()).thenReturn("/api/admin/users/123");
+        when(request.getHeader("Authorization")).thenReturn("Bearer user.token");
+        when(jwtService.validateToken("user.token")).thenReturn(user);
+        when(response.getWriter()).thenReturn(writer);
+
+        filter.doFilter(request, response, chain);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response).setContentType("application/json");
+        verify(writer).write("{\"error\":\"Access denied. Admin role required\"}");
+        verify(chain, never()).doFilter(request, response);
+    }
+
+    @Test
+    @DisplayName("Admin user accessing user endpoint should return 401 Unauthorized")
+    void adminAccessingUserEndpoint_ShouldReturn401() throws IOException, ServletException {
         UserDto admin = new UserDto();
         admin.setRole(new Role("admin"));
 
         when(request.getRequestURI()).thenReturn("/api/user/data");
-        when(request.getSession(false)).thenReturn(session);
-        when(session.getAttribute("currentUser")).thenReturn(admin);
+        when(request.getHeader("Authorization")).thenReturn("Bearer admin.token");
+        when(jwtService.validateToken("admin.token")).thenReturn(admin);
         when(response.getWriter()).thenReturn(writer);
 
         filter.doFilter(request, response, chain);
@@ -135,10 +152,10 @@ class AuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("User-restricted endpoint should block unauthenticated access")
-    void userEndpoint_ShouldBlockUnauthenticated() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/api/user/data");
-        when(request.getSession(false)).thenReturn(null);
+    @DisplayName("Malformed Authorization header should return 401 Unauthorized")
+    void malformedAuthHeader_ShouldReturn401() throws IOException, ServletException {
+        when(request.getRequestURI()).thenReturn("/api/private");
+        when(request.getHeader("Authorization")).thenReturn("InvalidHeader");
         when(response.getWriter()).thenReturn(writer);
 
         filter.doFilter(request, response, chain);
@@ -150,17 +167,13 @@ class AuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("Admin endpoint should block unauthenticated access")
-    void adminEndpoint_ShouldBlockUnauthenticated() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/api/admin/users");
-        when(request.getSession(false)).thenReturn(null);
-        when(response.getWriter()).thenReturn(writer);
+    @DisplayName("Swagger UI endpoint should bypass authentication")
+    void swaggerEndpoint_ShouldPassThrough() throws ServletException, IOException {
+        when(request.getRequestURI()).thenReturn("/swagger-ui/index.html");
 
         filter.doFilter(request, response, chain);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        verify(response).setContentType("application/json");
-        verify(writer).write("{\"error\":\"Authentication required\"}");
-        verify(chain, never()).doFilter(request, response);
+        verify(chain).doFilter(request, response);
+        verify(jwtService, never()).validateToken(anyString());
     }
 }

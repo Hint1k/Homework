@@ -86,7 +86,7 @@ class GoalControllerTest {
                 .thenReturn(goalDto);
 
         mockMvc.perform(post("/api/goals")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isCreated())
@@ -97,6 +97,8 @@ class GoalControllerTest {
                 .validateRequest(any(GoalDto.class), eq(Mode.GOAL_CREATE));
         verify(goalService, times(1))
                 .createGoal(any(GoalDto.class), eq(1L));
+        verify(goalService, times(1)).getGoal(1L);
+        verify(goalMapper, times(1)).toDto(any(Goal.class));
     }
 
     @Test
@@ -112,7 +114,7 @@ class GoalControllerTest {
                 .thenReturn(response);
 
         mockMvc.perform(get("/api/goals")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .param("page", "1")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -135,7 +137,7 @@ class GoalControllerTest {
                 .thenReturn(goalDto);
 
         mockMvc.perform(get("/api/goals/1")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Goal found successfully"))
                 .andExpect(jsonPath("$.data.goalId").value(1));
@@ -143,6 +145,7 @@ class GoalControllerTest {
         verify(validationUtils, times(1)).parseLong("1");
         verify(goalService, times(1))
                 .getGoalByUserIdAndGoalId(1L, 1L);
+        verify(goalMapper, times(1)).toDto(any(Goal.class));
     }
 
     @Test
@@ -159,7 +162,7 @@ class GoalControllerTest {
                 .thenReturn(goalDto);
 
         mockMvc.perform(put("/api/goals/1")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"goalName\":\"Updated Vacation\",\"targetAmount\":6000.0,\"duration\":12}"))
                 .andExpect(status().isOk())
@@ -171,6 +174,8 @@ class GoalControllerTest {
                 .validateRequest(any(GoalDto.class), eq(Mode.GOAL_UPDATE));
         verify(goalService, times(1))
                 .updateGoal(any(GoalDto.class), eq(1L));
+        verify(goalService, times(1)).getGoal(1L);
+        verify(goalMapper, times(1)).toDto(any(Goal.class));
     }
 
     @Test
@@ -181,7 +186,7 @@ class GoalControllerTest {
                 .thenReturn(true);
 
         mockMvc.perform(delete("/api/goals/1")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Goal deleted successfully"))
                 .andExpect(jsonPath("$.data.goalId").value(1));
@@ -198,7 +203,7 @@ class GoalControllerTest {
                 .thenThrow(new ValidationException("Target amount must be positive"));
 
         mockMvc.perform(post("/api/goals")
-                        .sessionAttr("currentUser", currentUser)
+                        .requestAttr("currentUser", currentUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"goalName\":\"Invalid Goal\",\"targetAmount\":-1000.0,\"duration\":6}"))
                 .andExpect(status().isBadRequest())
@@ -216,7 +221,7 @@ class GoalControllerTest {
                 .thenReturn(null);
 
         mockMvc.perform(get("/api/goals/1")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error")
                         .value("Goal not found or you are not the owner of the goal."));
@@ -233,7 +238,7 @@ class GoalControllerTest {
                 .thenThrow(new ValidationException("Invalid numeric format for id: invalid"));
 
         mockMvc.perform(get("/api/goals/invalid")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error")
                         .value("Invalid numeric format for id: invalid"));
@@ -248,7 +253,7 @@ class GoalControllerTest {
                 .thenThrow(new ValidationException("Id cannot be negative"));
 
         mockMvc.perform(get("/api/goals/-1")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Id cannot be negative"));
 

@@ -43,7 +43,7 @@ class NotificationControllerTest {
         when(notificationService.fetchBudgetNotification(1L)).thenReturn(notificationMessage);
 
         mockMvc.perform(get("/api/notifications/budget")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value(notificationMessage));
 
@@ -56,7 +56,7 @@ class NotificationControllerTest {
         when(notificationService.fetchBudgetNotification(1L)).thenReturn(null);
 
         mockMvc.perform(get("/api/notifications/budget")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error")
                         .value("No budget notification found for the user."));
@@ -71,7 +71,7 @@ class NotificationControllerTest {
         when(notificationService.fetchGoalNotification(1L)).thenReturn(notificationMessage);
 
         mockMvc.perform(get("/api/notifications/goal")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value(notificationMessage));
 
@@ -84,7 +84,7 @@ class NotificationControllerTest {
         when(notificationService.fetchGoalNotification(1L)).thenReturn("");
 
         mockMvc.perform(get("/api/notifications/goal")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error")
                         .value("No goal notification found for the user."));
@@ -99,7 +99,7 @@ class NotificationControllerTest {
                 .thenThrow(new RuntimeException("Service error"));
 
         mockMvc.perform(get("/api/notifications/budget")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.error")
                         .value("Failed to fetch budget notification."));
@@ -114,7 +114,7 @@ class NotificationControllerTest {
                 .thenThrow(new RuntimeException("Service error"));
 
         mockMvc.perform(get("/api/notifications/goal")
-                        .sessionAttr("currentUser", currentUser))
+                        .requestAttr("currentUser", currentUser))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.error").value("Failed to fetch goal notification."));
 
