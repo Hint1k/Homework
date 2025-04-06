@@ -24,8 +24,11 @@ import java.util.Arrays;
 @Slf4j
 public class LoggingAspect {
 
-    @Value("${logging-aspect.slow-method-threshold-ms:500}")
-    private long SLOW_METHOD_THRESHOLD_MS;
+    private final long slowThreshold;
+
+    public LoggingAspect(@Value("${logging-aspect.slow-method-threshold-ms:500}") long slowThreshold) {
+        this.slowThreshold = slowThreshold;
+    }
 
     /**
      * Defines a pointcut that matches all method executions within the com.demo.finance package
@@ -51,7 +54,7 @@ public class LoggingAspect {
         Object[] args = joinPoint.getArgs();
         Object result = joinPoint.proceed();
         long executionTime = System.currentTimeMillis() - startTime;
-        if (executionTime > SLOW_METHOD_THRESHOLD_MS) {
+        if (executionTime > slowThreshold) {
             log.warn("[SLOW METHOD] {} executed in {} ms with arguments: {}",
                     methodName, executionTime, Arrays.toString(args));
         } else {

@@ -10,6 +10,7 @@ import com.demo.finance.in.controller.NotificationController;
 import com.demo.finance.in.controller.ReportController;
 import com.demo.finance.in.controller.TransactionController;
 import com.demo.finance.in.controller.UserController;
+import com.demo.finance.out.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -51,6 +52,8 @@ class GlobalExceptionHandlerTest {
     private DataSource dataSource;
     @MockBean
     private LiquibaseManager liquibaseManager;
+    @MockBean
+    private JwtService jwtService;
 
     @Test
     void testHandleInvalidJson() throws Exception {

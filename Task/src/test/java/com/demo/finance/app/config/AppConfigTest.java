@@ -1,5 +1,6 @@
 package com.demo.finance.app.config;
 
+import com.demo.finance.out.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -21,6 +22,8 @@ class AppConfigTest {
     private DataSource dataSource;
     @MockBean
     private LiquibaseManager liquibaseManager;
+    @MockBean
+    private JwtService jwtService;
 
     @Test
     void testCorsConfiguration() throws Exception {

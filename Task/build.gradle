@@ -65,6 +65,10 @@ dependencies {
     // My modules
     implementation project(':audit-starter')
     implementation project(':logging-starter')
+
+    // Jacoco test reporting
+    jacocoAggregation project(':audit-starter')
+    jacocoAggregation project(':logging-starter')
 }
 
 application {
@@ -138,13 +142,31 @@ tasks.register('integrationTest', Test) {
 }
 
 tasks.named('jacocoTestReport', JacocoReport) {
-    dependsOn tasks.named('test'), tasks.named('integrationTest')
-    executionData.setFrom(fileTree(layout.buildDirectory.dir("jacoco")).include(
-            "test.exec",
-            "integrationTest.exec"
+    dependsOn(
+            tasks.named('test'),
+            tasks.named('integrationTest'),
+            project(":audit-starter").tasks.named("test"),
+            project(":logging-starter").tasks.named("test")
+    )
+
+    executionData.setFrom(files(
+            layout.buildDirectory.file("jacoco/test.exec"),
+            layout.buildDirectory.file("jacoco/integrationTest.exec"),
+            project(":audit-starter").layout.buildDirectory.file("jacoco/test.exec"),
+            project(":logging-starter").layout.buildDirectory.file("jacoco/test.exec")
     ))
-    sourceDirectories.setFrom(files(sourceSets.main.allSource.srcDirs))
-    classDirectories.setFrom(files(sourceSets.main.output))
+
+    def appSources = sourceSets.main.allSource.srcDirs
+    def auditSources = project(":audit-starter").sourceSets.main.allSource.srcDirs
+    def loggingSources = project(":logging-starter").sourceSets.main.allSource.srcDirs
+
+    def appClasses = sourceSets.main.output
+    def auditClasses = project(":audit-starter").sourceSets.main.output
+    def loggingClasses = project(":logging-starter").sourceSets.main.output
+
+    sourceDirectories.setFrom(files(appSources, auditSources, loggingSources))
+    classDirectories.setFrom(files(appClasses, auditClasses, loggingClasses))
+
     reports {
         xml.required.set(true)
         html.required.set(true)

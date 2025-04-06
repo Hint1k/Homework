@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 class LoggingAspectTest {
 
     @InjectMocks
-    private LoggingAspect loggingAspect;
+    private LoggingAspect loggingAspect = new LoggingAspect(500);
     @Mock
     private ProceedingJoinPoint joinPoint;
     @Mock
