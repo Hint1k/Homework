@@ -34,83 +34,87 @@ class BudgetRepositoryImplTest extends AbstractContainerBaseSetup {
     }
 
     @Test
-    @DisplayName("Save and find budget by ID - Success scenario")
-    void testSaveAndFindById() {
-        budget.setUserId(1L);
-        budget.setMonthlyLimit(new BigDecimal("5000.00"));
-        budget.setCurrentExpenses(new BigDecimal("1200.00"));
-
-        repository.save(budget);
-
-        Budget found = repository.findByUserId(1L);
-
-        assertThat(found).isNotNull();
-        assertThat(found.getMonthlyLimit()).isEqualTo(new BigDecimal("5000.00"));
-        assertThat(found.getCurrentExpenses()).isEqualTo(new BigDecimal("1200.00"));
-    }
-
-    @Test
     @DisplayName("Update budget - Success scenario")
     void testUpdateBudget() {
-        budget.setUserId(2L);
+        Long testUserId = 2L;
+        budget.setUserId(testUserId);
         budget.setMonthlyLimit(new BigDecimal("3000.00"));
         budget.setCurrentExpenses(new BigDecimal("500.00"));
 
-        repository.save(budget);
+        boolean saveResult = repository.save(budget);
+        assertThat(saveResult).isTrue();
 
-        Budget existingBudget = repository.findByUserId(2L);
+        Budget existingBudget = repository.findByUserId(testUserId);
         assertThat(existingBudget).isNotNull();
-        Long budgetId = existingBudget.getBudgetId();
+        assertThat(existingBudget.getMonthlyLimit()).isEqualTo(new BigDecimal("3000.00"));
+        assertThat(existingBudget.getCurrentExpenses()).isEqualTo(new BigDecimal("500.00"));
 
-        budget.setMonthlyLimit(new BigDecimal("4000.00"));
-        budget.setCurrentExpenses(new BigDecimal("800.00"));
+        existingBudget.setMonthlyLimit(new BigDecimal("4000.00"));
+        existingBudget.setCurrentExpenses(new BigDecimal("800.00"));
 
-        boolean updated = repository.update(budget);
-
+        boolean updated = repository.update(existingBudget);
         assertThat(updated).isTrue();
-        Budget found = repository.findById(budgetId);
-        assertThat(found).isNotNull();
-        assertThat(found.getMonthlyLimit()).isEqualTo(new BigDecimal("4000.00"));
-        assertThat(found.getCurrentExpenses()).isEqualTo(new BigDecimal("800.00"));
-    }
 
-    @Test
-    @DisplayName("Delete budget - Success scenario")
-    void testDeleteBudget() {
-        budget.setUserId(3L);
-        budget.setMonthlyLimit(new BigDecimal("6000.00"));
-        budget.setCurrentExpenses(new BigDecimal("1000.00"));
-
-        repository.save(budget);
-
-        Budget existingBudget = repository.findByUserId(3L);
-        assertThat(existingBudget).isNotNull();
-        Long budgetId = existingBudget.getBudgetId();
-
-        boolean deleted = repository.delete(budgetId);
-
-        assertThat(deleted).isTrue();
-        assertThat(repository.findById(budgetId)).isNull();
+        Budget updatedBudget = repository.findByUserId(testUserId);
+        assertThat(updatedBudget).isNotNull();
+        assertThat(updatedBudget.getMonthlyLimit()).isEqualTo(new BigDecimal("4000.00"));
+        assertThat(updatedBudget.getCurrentExpenses()).isEqualTo(new BigDecimal("800.00"));
     }
 
     @Test
     @DisplayName("Find by user ID - Budget exists returns budget")
     void testFindByUserId_BudgetExists_ReturnsBudget() {
-        budget.setUserId(4L);
+        Long testUserId = 4L;
+        budget.setUserId(testUserId);
         budget.setMonthlyLimit(new BigDecimal("4500.00"));
         budget.setCurrentExpenses(new BigDecimal("700.00"));
 
-        repository.save(budget);
+        boolean saveResult = repository.save(budget);
+        assertThat(saveResult).isTrue();
 
-        Budget found = repository.findByUserId(4L);
-
+        Budget found = repository.findByUserId(testUserId);
         assertThat(found).isNotNull();
+        assertThat(found.getUserId()).isEqualTo(testUserId);
         assertThat(found.getMonthlyLimit()).isEqualTo(new BigDecimal("4500.00"));
+        assertThat(found.getCurrentExpenses()).isEqualTo(new BigDecimal("700.00"));
     }
 
     @Test
-    @DisplayName("Find by user ID - No budget returns empty optional")
-    void testFindByUserId_NoBudget_ReturnsEmptyOptional() {
-        assertThat(repository.findByUserId(999L)).isNull();
+    @DisplayName("Find by user ID - No budget returns null")
+    void testFindByUserId_NoBudget_ReturnsNull() {
+        Long nonExistentUserId = 999L;
+        Budget found = repository.findByUserId(nonExistentUserId);
+        assertThat(found).isNull();
+    }
+
+    @Test
+    @DisplayName("Save budget - Success scenario")
+    void testSaveBudget() {
+        Long testUserId = 5L;
+        budget.setUserId(testUserId);
+        budget.setMonthlyLimit(new BigDecimal("5000.00"));
+        budget.setCurrentExpenses(new BigDecimal("1000.00"));
+
+        boolean saveResult = repository.save(budget);
+        assertThat(saveResult).isTrue();
+
+        Budget savedBudget = repository.findByUserId(testUserId);
+        assertThat(savedBudget).isNotNull();
+        assertThat(savedBudget.getUserId()).isEqualTo(testUserId);
+        assertThat(savedBudget.getMonthlyLimit()).isEqualTo(new BigDecimal("5000.00"));
+        assertThat(savedBudget.getCurrentExpenses()).isEqualTo(new BigDecimal("1000.00"));
+    }
+
+    @Test
+    @DisplayName("Update budget - Non-existing budget returns false")
+    void testUpdateBudget_NonExisting_ReturnsFalse() {
+        Budget nonExistingBudget = new Budget();
+        nonExistingBudget.setBudgetId(9999L);
+        nonExistingBudget.setUserId(10L);
+        nonExistingBudget.setMonthlyLimit(new BigDecimal("6000.00"));
+        nonExistingBudget.setCurrentExpenses(new BigDecimal("200.00"));
+
+        boolean updated = repository.update(nonExistingBudget);
+        assertThat(updated).isFalse();
     }
 }

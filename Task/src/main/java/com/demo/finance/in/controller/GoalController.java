@@ -136,8 +136,7 @@ public class GoalController extends BaseController {
                     goalService.getPaginatedGoalsForUser(userId, params.page(), params.size());
             return buildPaginatedResponse(userId, paginatedResponse);
         } catch (IllegalArgumentException e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid request parameters",
-                    Map.of("message", e.getMessage()));
+            return buildErrorResponse(Map.of("message", e.getMessage()));
         } catch (ValidationException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
