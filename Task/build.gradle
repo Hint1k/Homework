@@ -69,6 +69,9 @@ dependencies {
     // Jacoco test reporting
     jacocoAggregation project(':audit-starter')
     jacocoAggregation project(':logging-starter')
+
+    // Testing
+    implementation group: 'org.instancio', name: 'instancio-core', version: '5.4.1'
 }
 
 application {

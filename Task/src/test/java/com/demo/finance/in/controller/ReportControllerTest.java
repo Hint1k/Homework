@@ -9,6 +9,7 @@ import com.demo.finance.domain.model.Report;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,13 +59,13 @@ class ReportControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(reportController).build();
-        currentUser = new UserDto();
+        currentUser = Instancio.create(UserDto.class);
         currentUser.setUserId(1L);
-        reportDatesDto = new ReportDatesDto();
+        reportDatesDto = Instancio.create(ReportDatesDto.class);
         reportDatesDto.setFromDate(LocalDate.parse("2023-10-01"));
         reportDatesDto.setToDate(LocalDate.parse("2023-10-31"));
-        report = new Report();
-        reportDto = new ReportDto();
+        report = Instancio.create(Report.class);
+        reportDto = Instancio.create(ReportDto.class);
         expensesByCategory = new HashMap<>();
         expensesByCategory.put("Food", BigDecimal.valueOf(500.0));
         expensesByCategory.put("Transport", BigDecimal.valueOf(200.0));
@@ -73,12 +74,9 @@ class ReportControllerTest {
     @Test
     @DisplayName("Generate report by date - Success scenario")
     void testGenerateReportByDate_Success() throws Exception {
-        when(validationUtils.validateRequest(any(ReportDatesDto.class), eq(Mode.REPORT)))
-                .thenReturn(reportDatesDto);
-        when(reportService.generateReportByDate(eq(1L), any(), any()))
-                .thenReturn(report);
-        when(reportMapper.toDto(report))
-                .thenReturn(reportDto);
+        when(validationUtils.validateRequest(any(ReportDatesDto.class), eq(Mode.REPORT))).thenReturn(reportDatesDto);
+        when(reportService.generateReportByDate(eq(1L), any(), any())).thenReturn(report);
+        when(reportMapper.toDto(report)).thenReturn(reportDto);
 
         mockMvc.perform(post("/api/reports/by-date")
                         .requestAttr("currentUser", currentUser)
@@ -91,18 +89,15 @@ class ReportControllerTest {
 
         verify(validationUtils, times(1))
                 .validateRequest(any(ReportDatesDto.class), eq(Mode.REPORT));
-        verify(reportService, times(1))
-                .generateReportByDate(eq(1L), any(), any());
+        verify(reportService, times(1)).generateReportByDate(eq(1L), any(), any());
         verify(reportMapper, times(1)).toDto(report);
     }
 
     @Test
     @DisplayName("Analyze expenses by category - Success scenario")
     void testAnalyzeExpensesByCategory_Success() throws Exception {
-        when(validationUtils.validateRequest(any(ReportDatesDto.class), eq(Mode.REPORT)))
-                .thenReturn(reportDatesDto);
-        when(reportService.analyzeExpensesByCategory(eq(1L), any(), any()))
-                .thenReturn(expensesByCategory);
+        when(validationUtils.validateRequest(any(ReportDatesDto.class), eq(Mode.REPORT))).thenReturn(reportDatesDto);
+        when(reportService.analyzeExpensesByCategory(eq(1L), any(), any())).thenReturn(expensesByCategory);
 
         mockMvc.perform(post("/api/reports/expenses-by-category")
                         .requestAttr("currentUser", currentUser)
@@ -115,17 +110,14 @@ class ReportControllerTest {
 
         verify(validationUtils, times(1))
                 .validateRequest(any(ReportDatesDto.class), eq(Mode.REPORT));
-        verify(reportService, times(1))
-                .analyzeExpensesByCategory(eq(1L), any(), any());
+        verify(reportService, times(1)).analyzeExpensesByCategory(eq(1L), any(), any());
     }
 
     @Test
     @DisplayName("Generate general report - Success scenario")
     void testGenerateGeneralReport_Success() throws Exception {
-        when(reportService.generateUserReport(1L))
-                .thenReturn(report);
-        when(reportMapper.toDto(report))
-                .thenReturn(reportDto);
+        when(reportService.generateUserReport(1L)).thenReturn(report);
+        when(reportMapper.toDto(report)).thenReturn(reportDto);
 
         mockMvc.perform(get("/api/reports/report")
                         .requestAttr("currentUser", currentUser))
@@ -134,8 +126,7 @@ class ReportControllerTest {
                         .value("General report generated successfully"))
                 .andExpect(jsonPath("$.data").exists());
 
-        verify(reportService, times(1))
-                .generateUserReport(1L);
+        verify(reportService, times(1)).generateUserReport(1L);
         verify(reportMapper, times(1)).toDto(report);
     }
 
@@ -160,10 +151,8 @@ class ReportControllerTest {
     @Test
     @DisplayName("Analyze expenses by category - No expenses found")
     void testAnalyzeExpensesByCategory_NoExpensesFound() throws Exception {
-        when(validationUtils.validateRequest(any(ReportDatesDto.class), eq(Mode.REPORT)))
-                .thenReturn(reportDatesDto);
-        when(reportService.analyzeExpensesByCategory(eq(1L), any(), any()))
-                .thenReturn(new HashMap<>());
+        when(validationUtils.validateRequest(any(ReportDatesDto.class), eq(Mode.REPORT))).thenReturn(reportDatesDto);
+        when(reportService.analyzeExpensesByCategory(eq(1L), any(), any())).thenReturn(new HashMap<>());
 
         mockMvc.perform(post("/api/reports/expenses-by-category")
                         .requestAttr("currentUser", currentUser)
@@ -175,23 +164,20 @@ class ReportControllerTest {
 
         verify(validationUtils, times(1))
                 .validateRequest(any(ReportDatesDto.class), eq(Mode.REPORT));
-        verify(reportService, times(1))
-                .analyzeExpensesByCategory(eq(1L), any(), any());
+        verify(reportService, times(1)).analyzeExpensesByCategory(eq(1L), any(), any());
     }
 
     @Test
     @DisplayName("Generate general report - No reports found")
     void testGenerateGeneralReport_NoReportsFound() throws Exception {
-        when(reportService.generateUserReport(1L))
-                .thenReturn(null);
+        when(reportService.generateUserReport(1L)).thenReturn(null);
 
         mockMvc.perform(get("/api/reports/report")
                         .requestAttr("currentUser", currentUser))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("No reports found for the user."));
 
-        verify(reportService, times(1))
-                .generateUserReport(1L);
+        verify(reportService, times(1)).generateUserReport(1L);
         verify(reportMapper, never()).toDto(any());
     }
 }

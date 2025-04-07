@@ -7,6 +7,8 @@ import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.exception.DuplicateEmailException;
 import com.demo.finance.out.repository.UserRepository;
+import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,21 +35,27 @@ class RegistrationServiceImplTest {
     private UserMapper userMapper;
     @InjectMocks
     private RegistrationServiceImpl registrationService;
+    private User user;
+    private UserDto dto;
+
+    @BeforeEach
+    void setUp() {
+        user = Instancio.create(User.class);
+        dto = Instancio.create(UserDto.class);
+    }
 
     @Test
     @DisplayName("Register user - new email - returns true")
     void testRegisterUser_newEmail_returnsTrue() {
-        UserDto dto = new UserDto();
         dto.setName("Alice");
         dto.setEmail("alice@mail.com");
         dto.setPassword("password123");
 
-        User userEntity = new User();
-        userEntity.setName("Alice");
-        userEntity.setEmail("alice@mail.com");
-        userEntity.setPassword("password123");
+        user.setName("Alice");
+        user.setEmail("alice@mail.com");
+        user.setPassword("hashedPassword");
 
-        when(userMapper.toEntity(dto)).thenReturn(userEntity);
+        when(userMapper.toEntity(dto)).thenReturn(user);
         when(userRepository.findByEmail("alice@mail.com")).thenReturn(null);
         when(passwordUtils.hashPassword("password123")).thenReturn("hashedPassword");
 
@@ -55,30 +63,19 @@ class RegistrationServiceImplTest {
 
         assertThat(result).isTrue();
         verify(userMapper).toEntity(dto);
-        verify(userRepository).save(argThat(user ->
-                user.getName().equals("Alice") &&
-                        user.getEmail().equals("alice@mail.com") &&
-                        user.getPassword().equals("hashedPassword") &&
-                        !user.isBlocked() &&
-                        user.getRole().equals(Role.USER) &&
-                        user.getVersion() == 1L
-        ));
+        verify(userRepository).save(argThat(user -> user.getName().equals("Alice")
+                && user.getEmail().equals("alice@mail.com") && user.getPassword().equals("hashedPassword")
+                && !user.isBlocked() && user.getRole().equals(Role.USER) && user.getVersion() == 1L));
     }
 
     @Test
     @DisplayName("Register user - existing email - throws DuplicateEmailException")
     void testRegisterUser_existingEmail_throwsException() {
-        UserDto dto = new UserDto();
         dto.setEmail("existing@mail.com");
+        user.setEmail("existing@mail.com");
 
-        User existingUser = new User();
-        existingUser.setEmail("existing@mail.com");
-
-        User mappedUser = new User();
-        mappedUser.setEmail("existing@mail.com");
-
-        when(userMapper.toEntity(dto)).thenReturn(mappedUser);
-        when(userRepository.findByEmail("existing@mail.com")).thenReturn(existingUser);
+        when(userMapper.toEntity(dto)).thenReturn(user);
+        when(userRepository.findByEmail("existing@mail.com")).thenReturn(user);
 
         assertThatThrownBy(() -> registrationService.registerUser(dto))
                 .isInstanceOf(DuplicateEmailException.class)
@@ -90,12 +87,10 @@ class RegistrationServiceImplTest {
     @Test
     @DisplayName("Authenticate - valid credentials - returns true")
     void testAuthenticate_validCredentials_returnsTrue() {
-        UserDto dto = new UserDto();
         dto.setEmail("valid@mail.com");
         dto.setPassword("correctPassword");
-
-        User user = new User();
         user.setPassword("hashedPassword");
+
         when(userRepository.findByEmail("valid@mail.com")).thenReturn(user);
         when(passwordUtils.checkPassword("correctPassword", "hashedPassword"))
                 .thenReturn(true);
@@ -108,7 +103,6 @@ class RegistrationServiceImplTest {
     @Test
     @DisplayName("Authenticate - invalid email - returns false")
     void testAuthenticate_invalidEmail_returnsFalse() {
-        UserDto dto = new UserDto();
         dto.setEmail("unknown@mail.com");
 
         when(userRepository.findByEmail("unknown@mail.com")).thenReturn(null);
@@ -122,12 +116,10 @@ class RegistrationServiceImplTest {
     @Test
     @DisplayName("Authenticate - invalid password - returns false")
     void testAuthenticate_invalidPassword_returnsFalse() {
-        UserDto dto = new UserDto();
         dto.setEmail("valid@mail.com");
         dto.setPassword("wrongPassword");
-
-        User user = new User();
         user.setPassword("hashedPassword");
+
         when(userRepository.findByEmail("valid@mail.com")).thenReturn(user);
         when(passwordUtils.checkPassword("wrongPassword", "hashedPassword"))
                 .thenReturn(false);

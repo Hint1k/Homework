@@ -4,6 +4,8 @@ import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.app.config.DatabaseConfig;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
+import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
 
     private TransactionRepositoryImpl repository;
+    private Transaction transaction;
+
+    @BeforeEach
+    void setUp() {
+        transaction = Instancio.create(Transaction.class);
+    }
 
     @BeforeAll
     void setupRepository() {
@@ -31,10 +39,11 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Save and find transaction by ID - Success scenario")
     void testSaveAndFindById() {
-        Transaction transaction = new Transaction(null, 1L, new BigDecimal("500.00"),
-                "Groceries", LocalDate.of(2025, 3, 10), "Supermarket",
-                Type.EXPENSE);
+        transaction.setUserId(1L);
+        transaction.setAmount(new BigDecimal("500.00"));
+        transaction.setCategory("Groceries");
         repository.save(transaction);
+
         List<Transaction> savedTransactions = repository.findByUserId(1L);
         assertThat(savedTransactions).isNotEmpty();
 
@@ -53,9 +62,7 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Update transaction - Success scenario")
     void testUpdateTransaction() {
-        Transaction transaction = new Transaction(null, 2L, new BigDecimal("300.00"),
-                "Transport", LocalDate.of(2025, 3, 15), "Bus fare",
-                Type.EXPENSE);
+        transaction.setUserId(2L);
         repository.save(transaction);
 
         List<Transaction> savedTransactions = repository.findByUserId(2L);
@@ -65,10 +72,10 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
         Long transactionId = savedTransaction.getTransactionId();
         assertThat(transactionId).isNotNull();
 
-        Transaction updatedTransaction = new Transaction(transactionId, 2L,
-                new BigDecimal("400.00"), "Transport", LocalDate.of(2025, 3, 15),
-                "Taxi fare", Type.EXPENSE);
-        boolean updated = repository.update(updatedTransaction);
+        transaction.setTransactionId(transactionId);
+        transaction.setAmount(new BigDecimal("400.00"));
+        transaction.setDescription("Taxi fare");
+        boolean updated = repository.update(transaction);
 
         assertThat(updated).isTrue();
         Transaction found = repository.findById(transactionId);
@@ -80,10 +87,9 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Delete transaction - Success scenario")
     void testDeleteTransaction() {
-        Transaction transaction = new Transaction(null, 3L, new BigDecimal("200.00"),
-                "Bills", LocalDate.of(2025, 3, 20), "Electricity",
-                Type.EXPENSE);
+        transaction.setUserId(3L);
         repository.save(transaction);
+
         List<Transaction> transactions = repository.findByUserId(3L);
         assertThat(transactions).isNotEmpty();
 
@@ -101,10 +107,11 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Find by user ID - Transactions exist returns transactions")
     void testFindByUserId_TransactionsExist_ReturnsTransactions() {
-        repository.save(new Transaction(null, 4L, new BigDecimal("150.00"), "Dining",
-                LocalDate.of(2025, 3, 5), "Restaurant", Type.EXPENSE));
-        repository.save(new Transaction(null, 4L, new BigDecimal("80.00"), "Transport",
-                LocalDate.of(2025, 3, 7), "Bus fare", Type.EXPENSE));
+        transaction.setUserId(4L);
+        repository.save(transaction);
+
+        transaction.setCategory("Food");
+        repository.save(transaction);
 
         List<Transaction> transactions = repository.findByUserId(4L);
 
@@ -121,10 +128,10 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Find by user and transaction ID - Success scenario")
     void testFindByUserIdAndTransactionId() {
-        Transaction transaction = new Transaction(5L, 5L, new BigDecimal("300.00"),
-                "Freelance", LocalDate.of(2025, 3, 10), "Project payment",
-                Type.INCOME);
+        transaction.setUserId(5L);
+        transaction.setCategory("Freelance");
         repository.save(transaction);
+
         List<Transaction> savedTransactions = repository.findByUserId(5L);
         assertThat(savedTransactions).isNotEmpty();
 
@@ -142,10 +149,13 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Find filtered transactions - Success scenario")
     void testFindFilteredTransactions() {
-        repository.save(new Transaction(null, 6L, new BigDecimal("200.00"), "Dining",
-                LocalDate.of(2025, 3, 5), "Restaurant", Type.EXPENSE));
-        repository.save(new Transaction(null, 6L, new BigDecimal("100.00"), "Transport",
-                LocalDate.of(2025, 3, 10), "Taxi", Type.EXPENSE));
+        transaction.setUserId(6L);
+        repository.save(transaction);
+
+        transaction.setCategory("Dining");
+        transaction.setType(Type.EXPENSE);
+        transaction.setDate(LocalDate.of(2025, 3, 15));
+        repository.save(transaction);
 
         LocalDate from = LocalDate.of(2025, 3, 1);
         LocalDate to = LocalDate.of(2025, 3, 31);
@@ -169,12 +179,19 @@ class TransactionRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Find filtered transactions - Cover all filter combinations")
     void testFindFilteredTransactions_AllFilterCombinations() {
-        repository.save(new Transaction(null, 8L, new BigDecimal("150.00"), "Food",
-                LocalDate.of(2025, 3, 5), "Lunch", Type.EXPENSE));
-        repository.save(new Transaction(null, 8L, new BigDecimal("250.00"), "Transport",
-                LocalDate.of(2025, 3, 10), "Uber", Type.EXPENSE));
-        repository.save(new Transaction(null, 8L, new BigDecimal("500.00"), "Freelance",
-                LocalDate.of(2025, 3, 15), "Project", Type.INCOME));
+        transaction.setUserId(8L);
+        transaction.setType(Type.EXPENSE);
+        transaction.setDate(LocalDate.of(2025, 3, 5));
+        repository.save(transaction);
+
+        transaction.setType(Type.EXPENSE);
+        transaction.setDate(LocalDate.of(2025, 3, 6));
+        repository.save(transaction);
+
+        transaction.setCategory("Food");
+        transaction.setType(Type.INCOME);
+        transaction.setDate(LocalDate.of(2025, 3, 15));
+        repository.save(transaction);
 
         // Case 1: Filter by userId only (should return all transactions for user 8)
         List<Transaction> result1 = repository.findFiltered(8L, null, null, null, null);

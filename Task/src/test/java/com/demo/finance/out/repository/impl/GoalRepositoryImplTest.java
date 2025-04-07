@@ -3,13 +3,14 @@ package com.demo.finance.out.repository.impl;
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.app.config.DatabaseConfig;
 import com.demo.finance.domain.model.Goal;
+import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,6 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GoalRepositoryImplTest extends AbstractContainerBaseSetup {
 
     private GoalRepositoryImpl repository;
+    private Goal goal;
+
+    @BeforeEach
+    void setUp() {
+        goal = Instancio.create(Goal.class);
+    }
 
     @BeforeAll
     void setupRepository() {
@@ -30,8 +37,9 @@ class GoalRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Save and find goal by ID - Success scenario")
     void testSaveAndFindById() {
-        Goal goal = new Goal(null, 1L, "Buy a Car", new BigDecimal("10000.00"),
-                new BigDecimal("2000.00"), 12, LocalDate.of(2025, 3, 1));
+        goal.setUserId(1L);
+        goal.setTargetAmount(new BigDecimal("10000.00"));
+        goal.setGoalName("Buy a Car");
         repository.save(goal);
 
         List<Goal> savedGoals = repository.findByUserId(1L);
@@ -52,8 +60,7 @@ class GoalRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Update goal - Success scenario")
     void testUpdateGoal() {
-        Goal goal = new Goal(null, 2L, "Save for Vacation", new BigDecimal("5000.00"),
-                new BigDecimal("500.00"), 6, LocalDate.of(2025, 6, 1));
+        goal.setUserId(2L);
         repository.save(goal);
 
         List<Goal> savedGoals = repository.findByUserId(2L);
@@ -63,9 +70,11 @@ class GoalRepositoryImplTest extends AbstractContainerBaseSetup {
         Long goalId = savedGoal.getGoalId();
         assertThat(goalId).isNotNull();
 
-        Goal updatedGoal = new Goal(goalId, 2L, "Vacation Fund", new BigDecimal("6000.00"),
-                new BigDecimal("1000.00"), 8, LocalDate.of(2025, 6, 1));
-        boolean updated = repository.update(updatedGoal);
+        goal.setGoalId(goalId);
+        goal.setGoalName("Vacation Fund");
+        goal.setTargetAmount(new BigDecimal("6000.00"));
+
+        boolean updated = repository.update(goal);
 
         assertThat(updated).isTrue();
 
@@ -78,8 +87,7 @@ class GoalRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Delete goal - Success scenario")
     void testDeleteGoal() {
-        Goal goal = new Goal(null, 3L, "Emergency Fund", new BigDecimal("5000.00"),
-                new BigDecimal("2500.00"), 10, LocalDate.of(2025, 5, 1));
+        goal.setUserId(3L);
         repository.save(goal);
 
         List<Goal> goals = repository.findByUserId(3L);
@@ -99,10 +107,12 @@ class GoalRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Find by user ID - Goals exist returns goals")
     void testFindByUserId_GoalsExist_ReturnsGoals() {
-        repository.save(new Goal(null, 4L, "Retirement", new BigDecimal("100000.00"),
-                new BigDecimal("50000.00"), 120, LocalDate.of(2025, 1, 1)));
-        repository.save(new Goal(null, 4L, "House Down Payment", new BigDecimal("40000.00"),
-                new BigDecimal("5000.00"), 24, LocalDate.of(2025, 4, 1)));
+        goal.setUserId(4L);
+        goal.setGoalName("Buy a Boat");
+        repository.save(goal);
+
+        goal.setGoalName("Buy a Car");
+        repository.save(goal);
 
         List<Goal> goals = repository.findByUserId(4L);
 
@@ -119,11 +129,11 @@ class GoalRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Find by user and goal ID - Success scenario")
     void testFindByUserIdAndGoalId() {
-        Goal goal = new Goal(5L, 3L, "New Laptop", new BigDecimal("2000.00"),
-                new BigDecimal("500.00"), 6, LocalDate.of(2025, 7, 1));
+        goal.setUserId(5L);
+        goal.setGoalName("New Laptop");
         repository.save(goal);
 
-        List<Goal> savedGoals = repository.findByUserId(3L);
+        List<Goal> savedGoals = repository.findByUserId(5L);
         assertThat(savedGoals).isNotEmpty();
 
         Goal savedGoal = savedGoals.get(0);
@@ -131,7 +141,7 @@ class GoalRepositoryImplTest extends AbstractContainerBaseSetup {
 
         assertThat(goalId).isNotNull();
 
-        Goal found = repository.findByUserIdAndGoalId(3L, goalId);
+        Goal found = repository.findByUserIdAndGoalId(5L, goalId);
 
         assertThat(found).isNotNull();
         assertThat(found.getGoalName()).isEqualTo("New Laptop");

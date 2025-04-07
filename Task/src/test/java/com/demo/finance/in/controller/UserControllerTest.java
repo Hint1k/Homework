@@ -10,6 +10,7 @@ import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.JwtService;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,7 +64,7 @@ class UserControllerTest {
     }
 
     private UserDto createUserDto(Long userId, String email, String name) {
-        UserDto userDto = new UserDto();
+        UserDto userDto = Instancio.create(UserDto.class);
         userDto.setUserId(userId);
         userDto.setEmail(email);
         userDto.setName(name);
@@ -71,7 +72,7 @@ class UserControllerTest {
     }
 
     private User createUser(Long userId, String email, String name) {
-        User user = new User();
+        User user = Instancio.create(User.class);
         user.setUserId(userId);
         user.setEmail(email);
         user.setName(name);
@@ -234,8 +235,7 @@ class UserControllerTest {
         String content = "{\"email\":\"test@example.com\",\"password\":\"password123\",\"name\":\"Test User\"}";
         UserDto userDto = createUserDto(null, "test@example.com", "Test User");
 
-        when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.REGISTER_USER)))
-                .thenReturn(userDto);
+        when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.REGISTER_USER))).thenReturn(userDto);
         when(registrationService.registerUser(any(UserDto.class)))
                 .thenThrow(new DuplicateEmailException("Email already exists"));
 
@@ -353,7 +353,8 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"updated@example.com\",\"name\":\"Updated Name\"}"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.error").value("Failed to retrieve updated user details."));
+                .andExpect(jsonPath("$.error")
+                        .value("Failed to retrieve updated user details."));
 
         verify(validationUtils, times(1))
                 .validateRequest(any(UserDto.class), eq(Mode.UPDATE_USER));

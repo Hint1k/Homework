@@ -10,6 +10,7 @@ import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,47 +50,32 @@ class TransactionControllerTest {
     private TransactionMapper transactionMapper;
     @InjectMocks
     private TransactionController transactionController;
+    private UserDto currentUser;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(transactionController).build();
-        UserDto currentUser = new UserDto();
+        currentUser = Instancio.create(UserDto.class);
         currentUser.setUserId(1L);
-        TransactionDto transactionDto = new TransactionDto();
-        transactionDto.setTransactionId(1L);
-        transactionDto.setAmount(BigDecimal.valueOf(100.0));
-        transactionDto.setCategory("Food");
-        transactionDto.setDescription("Lunch");
-        transactionDto.setType("EXPENSE");
-        Transaction transaction = new Transaction();
-        transaction.setTransactionId(1L);
     }
 
     private TransactionDto createTransactionDto(Long id, String description) {
-        TransactionDto dto = new TransactionDto();
+        TransactionDto dto = Instancio.create(TransactionDto.class);
         dto.setTransactionId(id);
         dto.setDescription(description);
         return dto;
     }
 
     private Transaction createTransaction(String description) {
-        Transaction transaction = new Transaction();
+        Transaction transaction = Instancio.create(Transaction.class);
         transaction.setTransactionId(1L);
         transaction.setDescription(description);
         return transaction;
     }
 
-    private UserDto createCurrentUser() {
-        UserDto user = new UserDto();
-        user.setUserId(1L);
-        user.setEmail("test@example.com");
-        return user;
-    }
-
     @Test
     @DisplayName("Create transaction - Success scenario")
     void testCreateTransaction_Success() throws Exception {
-        UserDto currentUser = createCurrentUser();
         TransactionDto validatedDto = createTransactionDto(null, "Test transaction");
         Transaction createdTransaction = createTransaction("Test transaction");
         TransactionDto responseDto = createTransactionDto(1L, "Test transaction");
@@ -117,7 +102,6 @@ class TransactionControllerTest {
     @Test
     @DisplayName("Get paginated transactions - Success scenario")
     void testGetPaginatedTransactions_Success() throws Exception {
-        UserDto currentUser = createCurrentUser();
         PaginationParams params = new PaginationParams(0, 10);
         PaginatedResponse<TransactionDto> response = new PaginatedResponse<>(List.of(createTransactionDto(
                 1L, "Test")), 0, 10, 1, 1);
@@ -138,7 +122,6 @@ class TransactionControllerTest {
     @Test
     @DisplayName("Get transaction by ID - Success scenario")
     void testGetTransactionById_Success() throws Exception {
-        UserDto currentUser = createCurrentUser();
         Transaction transaction = createTransaction("Test transaction");
         TransactionDto responseDto = createTransactionDto(1L, "Test transaction");
 
@@ -161,7 +144,6 @@ class TransactionControllerTest {
     @Test
     @DisplayName("Update transaction - Success scenario")
     void testUpdateTransaction_Success() throws Exception {
-        UserDto currentUser = createCurrentUser();
         TransactionDto validatedDto = createTransactionDto(1L, "Updated transaction");
         Transaction updatedTransaction = createTransaction("Updated transaction");
         TransactionDto responseDto = createTransactionDto(1L, "Updated transaction");
@@ -189,8 +171,6 @@ class TransactionControllerTest {
     @Test
     @DisplayName("Delete transaction - Success scenario")
     void testDeleteTransaction_Success() throws Exception {
-        UserDto currentUser = createCurrentUser();
-
         when(validationUtils.parseLong("1")).thenReturn(1L);
         when(transactionService.deleteTransaction(1L, 1L)).thenReturn(true);
 
@@ -206,8 +186,6 @@ class TransactionControllerTest {
     @Test
     @DisplayName("Create transaction - Validation failure")
     void testCreateTransaction_ValidationFailure() throws Exception {
-        UserDto currentUser = createCurrentUser();
-
         when(validationUtils.validateRequest(any(), eq(Mode.TRANSACTION_CREATE)))
                 .thenThrow(new ValidationException("Invalid transaction"));
 
@@ -225,8 +203,6 @@ class TransactionControllerTest {
     @Test
     @DisplayName("Get transaction - Not found")
     void testGetTransactionById_NotFound() throws Exception {
-        UserDto currentUser = createCurrentUser();
-
         when(validationUtils.parseLong("1")).thenReturn(1L);
         when(transactionService.getTransactionByUserIdAndTransactionId(1L, 1L)).thenReturn(null);
 
@@ -245,7 +221,6 @@ class TransactionControllerTest {
     @Test
     @DisplayName("Update transaction - Update failed")
     void testUpdateTransaction_Failed() throws Exception {
-        UserDto currentUser = createCurrentUser();
         TransactionDto validatedDto = createTransactionDto(1L, "Updated transaction");
 
         when(validationUtils.parseLong("1")).thenReturn(1L);
@@ -270,8 +245,6 @@ class TransactionControllerTest {
     @Test
     @DisplayName("Delete transaction - Failed")
     void testDeleteTransaction_Failed() throws Exception {
-        UserDto currentUser = createCurrentUser();
-
         when(validationUtils.parseLong("1")).thenReturn(1L);
         when(transactionService.deleteTransaction(1L, 1L)).thenReturn(false);
 

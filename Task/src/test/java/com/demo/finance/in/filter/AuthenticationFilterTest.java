@@ -6,6 +6,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +39,12 @@ class AuthenticationFilterTest {
     private PrintWriter writer;
     @InjectMocks
     private AuthenticationFilter filter;
+    private UserDto user;
+
+    @BeforeEach
+    void setUp() {
+        user = Instancio.create(UserDto.class);
+    }
 
     @Test
     @DisplayName("Public endpoint should bypass authentication checks")
@@ -52,7 +60,6 @@ class AuthenticationFilterTest {
     @Test
     @DisplayName("Valid token with user role should allow access to user endpoint")
     void validTokenWithUserRole_ShouldAllowUserAccess() throws ServletException, IOException {
-        UserDto user = new UserDto();
         user.setRole("USER");
 
         when(request.getRequestURI()).thenReturn("/api/user/data");
@@ -68,12 +75,11 @@ class AuthenticationFilterTest {
     @Test
     @DisplayName("Valid token with admin role should allow access to admin endpoint")
     void validTokenWithAdminRole_ShouldAllowAdminAccess() throws ServletException, IOException {
-        UserDto admin = new UserDto();
-        admin.setRole("ADMIN");
+        user.setRole("ADMIN");
 
         when(request.getRequestURI()).thenReturn("/api/admin/users/123");
         when(request.getHeader("Authorization")).thenReturn("Bearer valid.token.here");
-        when(jwtService.validateToken("valid.token.here")).thenReturn(admin);
+        when(jwtService.validateToken("valid.token.here")).thenReturn(user);
 
         filter.doFilter(request, response, chain);
 
@@ -115,7 +121,6 @@ class AuthenticationFilterTest {
     @Test
     @DisplayName("Non-admin user accessing admin endpoint should return 401 Unauthorized")
     void nonAdminAccessingAdminEndpoint_ShouldReturn401() throws ServletException, IOException {
-        UserDto user = new UserDto();
         user.setRole("USER");
 
         when(request.getRequestURI()).thenReturn("/api/admin/users/123");
@@ -134,12 +139,11 @@ class AuthenticationFilterTest {
     @Test
     @DisplayName("Admin user accessing user endpoint should return 401 Unauthorized")
     void adminAccessingUserEndpoint_ShouldReturn401() throws IOException, ServletException {
-        UserDto admin = new UserDto();
-        admin.setRole("ADMIN");
+        user.setRole("ADMIN");
 
         when(request.getRequestURI()).thenReturn("/api/user/data");
         when(request.getHeader("Authorization")).thenReturn("Bearer admin.token");
-        when(jwtService.validateToken("admin.token")).thenReturn(admin);
+        when(jwtService.validateToken("admin.token")).thenReturn(user);
         when(response.getWriter()).thenReturn(writer);
 
         filter.doFilter(request, response, chain);

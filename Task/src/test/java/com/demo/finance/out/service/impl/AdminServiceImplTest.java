@@ -4,6 +4,8 @@ import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.Role;
 import com.demo.finance.exception.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
+import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,12 +27,22 @@ class AdminServiceImplTest {
     private UserRepository userRepository;
     @InjectMocks
     private AdminServiceImpl adminService;
+    private User user;
+    private UserDto userDto;
+
+    @BeforeEach
+    void setUp() {
+        user = Instancio.create(User.class);
+        user.setUserId(1L);
+        user.setRole(Role.USER);
+        user.setVersion(1L);
+        userDto = Instancio.create(UserDto.class);
+        userDto.setUserId(1L);
+    }
 
     @Test
     @DisplayName("Get user - existing user - returns user")
     void testGetUser_existingUser_returnsUser() {
-        User user = new User(1L, "Alice", "alice@mail.com", "password123",
-                false, Role.USER, 1L);
         when(userRepository.findById(1L)).thenReturn(user);
 
         User result = adminService.getUser(1L);
@@ -41,12 +53,8 @@ class AdminServiceImplTest {
     @Test
     @DisplayName("Update user role - existing user - updates successfully")
     void testUpdateUserRole_existingUser_updatesSuccessfully() {
-        UserDto userDto = new UserDto();
-        userDto.setUserId(1L);
         userDto.setRole("ADMIN");
 
-        User user = new User(1L, "Alice", "alice@mail.com", "password123",
-                false, Role.USER, 1L);
         when(userRepository.findById(1L)).thenReturn(user);
         when(userRepository.update(user)).thenReturn(true);
 
@@ -60,12 +68,8 @@ class AdminServiceImplTest {
     @Test
     @DisplayName("Block or unblock user - existing user - updates successfully")
     void testBlockOrUnblockUser_existingUser_updatesSuccessfully() {
-        UserDto userDto = new UserDto();
-        userDto.setUserId(1L);
         userDto.setBlocked(true);
 
-        User user = new User(1L, "Alice", "alice@mail.com", "password123",
-                false, Role.USER, 1L);
         when(userRepository.findById(1L)).thenReturn(user);
         when(userRepository.update(user)).thenReturn(true);
 
@@ -90,9 +94,6 @@ class AdminServiceImplTest {
     @DisplayName("Update user role - non-existing user - throws UserNotFoundException")
     void testUpdateUserRole_nonExistingUser_throwsException() {
         Long userId = 1L;
-        UserDto userDto = new UserDto();
-        userDto.setUserId(userId);
-
         when(userRepository.findById(userId)).thenReturn(null);
 
         assertThatThrownBy(() -> adminService.updateUserRole(userId, userDto))

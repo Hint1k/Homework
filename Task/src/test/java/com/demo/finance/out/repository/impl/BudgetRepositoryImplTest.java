@@ -3,6 +3,8 @@ package com.demo.finance.out.repository.impl;
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.app.config.DatabaseConfig;
 import com.demo.finance.domain.model.Budget;
+import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BudgetRepositoryImplTest extends AbstractContainerBaseSetup {
 
     private BudgetRepositoryImpl repository;
+    private Budget budget;
+
+    @BeforeEach
+    void setUp() {
+        budget = Instancio.create(Budget.class);
+    }
 
     @BeforeAll
     void setupRepository() {
@@ -28,8 +36,10 @@ class BudgetRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Save and find budget by ID - Success scenario")
     void testSaveAndFindById() {
-        Budget budget = new Budget(null, 1L, new BigDecimal("5000.00"),
-                new BigDecimal("1200.00"));
+        budget.setUserId(1L);
+        budget.setMonthlyLimit(new BigDecimal("5000.00"));
+        budget.setCurrentExpenses(new BigDecimal("1200.00"));
+
         repository.save(budget);
 
         Budget found = repository.findByUserId(1L);
@@ -42,17 +52,20 @@ class BudgetRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Update budget - Success scenario")
     void testUpdateBudget() {
-        Budget budget = new Budget(null, 2L, new BigDecimal("3000.00"),
-                new BigDecimal("500.00"));
+        budget.setUserId(2L);
+        budget.setMonthlyLimit(new BigDecimal("3000.00"));
+        budget.setCurrentExpenses(new BigDecimal("500.00"));
+
         repository.save(budget);
 
         Budget existingBudget = repository.findByUserId(2L);
         assertThat(existingBudget).isNotNull();
         Long budgetId = existingBudget.getBudgetId();
 
-        Budget updatedBudget = new Budget(budgetId, 2L, new BigDecimal("4000.00"),
-                new BigDecimal("800.00"));
-        boolean updated = repository.update(updatedBudget);
+        budget.setMonthlyLimit(new BigDecimal("4000.00"));
+        budget.setCurrentExpenses(new BigDecimal("800.00"));
+
+        boolean updated = repository.update(budget);
 
         assertThat(updated).isTrue();
         Budget found = repository.findById(budgetId);
@@ -64,8 +77,10 @@ class BudgetRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Delete budget - Success scenario")
     void testDeleteBudget() {
-        Budget budget = new Budget(null, 3L, new BigDecimal("6000.00"),
-                new BigDecimal("1000.00"));
+        budget.setUserId(3L);
+        budget.setMonthlyLimit(new BigDecimal("6000.00"));
+        budget.setCurrentExpenses(new BigDecimal("1000.00"));
+
         repository.save(budget);
 
         Budget existingBudget = repository.findByUserId(3L);
@@ -81,8 +96,11 @@ class BudgetRepositoryImplTest extends AbstractContainerBaseSetup {
     @Test
     @DisplayName("Find by user ID - Budget exists returns budget")
     void testFindByUserId_BudgetExists_ReturnsBudget() {
-        repository.save(new Budget(null, 4L, new BigDecimal("4500.00"),
-                new BigDecimal("700.00")));
+        budget.setUserId(4L);
+        budget.setMonthlyLimit(new BigDecimal("4500.00"));
+        budget.setCurrentExpenses(new BigDecimal("700.00"));
+
+        repository.save(budget);
 
         Budget found = repository.findByUserId(4L);
 

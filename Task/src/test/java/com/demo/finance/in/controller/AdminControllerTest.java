@@ -1,7 +1,6 @@
 package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.mapper.UserMapper;
-import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.service.AdminService;
 import com.demo.finance.out.service.TransactionService;
@@ -13,6 +12,7 @@ import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.UserService;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,21 +62,6 @@ class AdminControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(adminController).build();
     }
 
-    private UserDto createUserDto(Long userId, String email, String name) {
-        UserDto userDto = new UserDto();
-        userDto.setUserId(userId);
-        userDto.setEmail(email);
-        userDto.setName(name);
-        return userDto;
-    }
-
-    private TransactionDto createTransactionDto() {
-        TransactionDto dto = new TransactionDto();
-        dto.setTransactionId(1L);
-        dto.setDescription("Test transaction");
-        return dto;
-    }
-
     private PaginationParams createPaginationParams() {
         return new PaginationParams(1, 10);
     }
@@ -86,8 +71,7 @@ class AdminControllerTest {
     void testGetPaginatedUsers_Success() throws Exception {
         PaginationParams params = createPaginationParams();
         PaginatedResponse<UserDto> response = new PaginatedResponse<>(
-                List.of(createUserDto(1L, "user1@example.com", "User One")),
-                10, 1, 1, 10);
+                List.of(Instancio.create(UserDto.class)), 10, 1, 1, 10);
 
         when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE))).thenReturn(params);
         when(userService.getPaginatedUsers(1, 10)).thenReturn(response);
@@ -110,8 +94,7 @@ class AdminControllerTest {
         Long userId = 2L;
         PaginationParams params = createPaginationParams();
         PaginatedResponse<TransactionDto> response = new PaginatedResponse<>(
-                List.of(createTransactionDto()),
-                5, 1, 1, 10);
+                List.of(Instancio.create(TransactionDto.class)), 5, 1, 1, 10);
 
         when(validationUtils.parseUserId("2", Mode.GET)).thenReturn(userId);
         when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE))).thenReturn(params);
@@ -135,7 +118,7 @@ class AdminControllerTest {
     @DisplayName("Block/unblock user - Success scenario")
     void testBlockOrUnblockUser_Success() throws Exception {
         Long userId = 2L;
-        UserDto userDto = createUserDto(userId, "user@example.com", null);
+        UserDto userDto = Instancio.create(UserDto.class);
         userDto.setBlocked(true);
 
         when(validationUtils.parseUserId("2", Mode.BLOCK_UNBLOCK)).thenReturn(userId);
@@ -159,7 +142,7 @@ class AdminControllerTest {
     @DisplayName("Update user role - Success scenario")
     void testUpdateUserRole_Success() throws Exception {
         Long userId = 2L;
-        UserDto userDto = createUserDto(userId, "user@example.com", null);
+        UserDto userDto = Instancio.create(UserDto.class);
 
         when(validationUtils.parseUserId("2", Mode.UPDATE_ROLE)).thenReturn(userId);
         when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.UPDATE_ROLE))).thenReturn(userDto);
@@ -229,17 +212,10 @@ class AdminControllerTest {
     @DisplayName("Get user details - Success scenario")
     void testGetUserDetails_Success() throws Exception {
         Long userId = 2L;
-        User user = new User();
-        user.setUserId(userId);
-        user.setEmail("test@example.com");
-        user.setPassword("password");
-        user.setRole(Role.USER);
-        user.setVersion(1L);
+        User user = Instancio.create(User.class);
 
-        UserDto userDto = new UserDto();
-        userDto.setUserId(userId);
+        UserDto userDto = Instancio.create(UserDto.class);
         userDto.setEmail("test@example.com");
-        userDto.setRole("USER");
 
         when(validationUtils.parseUserId("2", Mode.GET)).thenReturn(userId);
         when(adminService.getUser(userId)).thenReturn(user);
@@ -259,7 +235,7 @@ class AdminControllerTest {
     @DisplayName("Block/unblock user - Service returns false")
     void testBlockOrUnblockUser_Failure() throws Exception {
         Long userId = 2L;
-        UserDto userDto = createUserDto(userId, "user@example.com", null);
+        UserDto userDto = Instancio.create(UserDto.class);
         userDto.setBlocked(true);
 
         when(validationUtils.parseUserId("2", Mode.BLOCK_UNBLOCK)).thenReturn(userId);
@@ -282,7 +258,7 @@ class AdminControllerTest {
     @DisplayName("Update user role - Service returns false")
     void testUpdateUserRole_Failure() throws Exception {
         Long userId = 2L;
-        UserDto userDto = createUserDto(userId, "user@example.com", null);
+        UserDto userDto = Instancio.create(UserDto.class);
 
         when(validationUtils.parseUserId("2", Mode.UPDATE_ROLE)).thenReturn(userId);
         when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.UPDATE_ROLE))).thenReturn(userDto);

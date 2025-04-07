@@ -9,6 +9,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,11 +40,17 @@ class JwtServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private UserMapper userMapper;
+    private User user;
+    private UserDto userDto;
 
     @BeforeEach
     void setUp() {
         jwtService = new JwtServiceImpl(SECRET_KEY, userRepository, userMapper);
         setJwtExpiration(jwtService, JWT_EXPIRATION_IN_MS);
+        user = Instancio.create(User.class);
+        user.setUserId(1L);
+        userDto = Instancio.create(UserDto.class);
+        userDto.setUserId(1L);
     }
 
     private void setJwtExpiration(JwtServiceImpl jwtService, long expiration) {
@@ -85,15 +92,8 @@ class JwtServiceImplTest {
     @DisplayName("Validate token should return user when token is valid")
     void validateToken_ShouldReturnUser_WhenTokenIsValid() {
         String email = "test@example.com";
-        User user = new User();
-        user.setUserId(1L);
-        user.setEmail(email);
 
-        UserDto userDto = new UserDto();
-        userDto.setUserId(1L);
-        userDto.setEmail(email);
-
-        String token = jwtService.generateToken(email, List.of("user"), 1L);
+        String token = jwtService.generateToken(email, List.of("USER"), 1L);
 
         when(userRepository.findById(1L)).thenReturn(user);
         when(userMapper.toDto(user)).thenReturn(userDto);
@@ -111,7 +111,7 @@ class JwtServiceImplTest {
     @DisplayName("Validate token should throw ExpiredJwtException when token is expired")
     void validateToken_ShouldThrow_WhenTokenIsExpired() {
         setJwtExpiration(jwtService, -1000); // token already expired
-        String token = jwtService.generateToken("test@example.com", List.of("user"), 1L);
+        String token = jwtService.generateToken("test@example.com", List.of("USER"), 1L);
 
         assertThrows(ExpiredJwtException.class, () -> jwtService.validateToken(token));
     }
@@ -119,7 +119,7 @@ class JwtServiceImplTest {
     @Test
     @DisplayName("Validate token should throw when user not found")
     void validateToken_ShouldThrow_WhenUserNotFound() {
-        String token = jwtService.generateToken("nonexistent@example.com", List.of("user"), 1L);
+        String token = jwtService.generateToken("nonexistent@example.com", List.of("USER"), 1L);
 
         when(userRepository.findById(1L)).thenReturn(null);
 
@@ -143,16 +143,8 @@ class JwtServiceImplTest {
         String email = "test@example.com";
         String token = jwtService.generateToken(email, List.of(), 1L);
 
-        User user = new User();
-        user.setUserId(1L);
-        user.setEmail(email);
-
-        UserDto dto = new UserDto();
-        dto.setUserId(1L);
-        dto.setEmail(email);
-
         when(userRepository.findById(1L)).thenReturn(user);
-        when(userMapper.toDto(user)).thenReturn(dto);
+        when(userMapper.toDto(user)).thenReturn(userDto);
 
         UserDto result = jwtService.validateToken(token);
 

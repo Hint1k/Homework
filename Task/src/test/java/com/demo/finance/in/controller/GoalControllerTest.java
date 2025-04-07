@@ -10,6 +10,7 @@ import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.GoalService;
+import org.instancio.Instancio;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -56,14 +57,14 @@ class GoalControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(goalController).build();
-        currentUser = new UserDto();
+        currentUser = Instancio.create(UserDto.class);
         currentUser.setUserId(1L);
-        goalDto = new GoalDto();
+        goalDto = Instancio.create(GoalDto.class);
         goalDto.setGoalId(1L);
         goalDto.setGoalName("Save for Vacation");
         goalDto.setTargetAmount(BigDecimal.valueOf(5000.0));
         goalDto.setDuration(12);
-        goal = new Goal();
+        goal = Instancio.create(Goal.class);
         goal.setGoalId(1L);
     }
 
@@ -76,14 +77,10 @@ class GoalControllerTest {
     void testCreateGoal_Success() throws Exception {
         String content = "{\"goalName\":\"Save for Vacation\",\"targetAmount\":5000.0, "
                 + "\"duration\":12,\"startTime\":\"2023-10-01\"}";
-        when(validationUtils.validateRequest(any(GoalDto.class), eq(Mode.GOAL_CREATE)))
-                .thenReturn(goalDto);
-        when(goalService.createGoal(any(GoalDto.class), anyLong()))
-                .thenReturn(1L);
-        when(goalService.getGoal(1L))
-                .thenReturn(goal);
-        when(goalMapper.toDto(any(Goal.class)))
-                .thenReturn(goalDto);
+        when(validationUtils.validateRequest(any(GoalDto.class), eq(Mode.GOAL_CREATE))).thenReturn(goalDto);
+        when(goalService.createGoal(any(GoalDto.class), anyLong())).thenReturn(1L);
+        when(goalService.getGoal(1L)).thenReturn(goal);
+        when(goalMapper.toDto(any(Goal.class))).thenReturn(goalDto);
 
         mockMvc.perform(post("/api/goals")
                         .requestAttr("currentUser", currentUser)
@@ -95,8 +92,7 @@ class GoalControllerTest {
 
         verify(validationUtils, times(1))
                 .validateRequest(any(GoalDto.class), eq(Mode.GOAL_CREATE));
-        verify(goalService, times(1))
-                .createGoal(any(GoalDto.class), eq(1L));
+        verify(goalService, times(1)).createGoal(any(GoalDto.class), eq(1L));
         verify(goalService, times(1)).getGoal(1L);
         verify(goalMapper, times(1)).toDto(any(Goal.class));
     }
@@ -108,10 +104,8 @@ class GoalControllerTest {
         PaginatedResponse<GoalDto> response = new PaginatedResponse<>(
                 List.of(goalDto), 1, 1, 1, 10);
 
-        when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE)))
-                .thenReturn(params);
-        when(goalService.getPaginatedGoalsForUser(1L, 1, 10))
-                .thenReturn(response);
+        when(validationUtils.validateRequest(any(PaginationParams.class), eq(Mode.PAGE))).thenReturn(params);
+        when(goalService.getPaginatedGoalsForUser(1L, 1, 10)).thenReturn(response);
 
         mockMvc.perform(get("/api/goals")
                         .requestAttr("currentUser", currentUser)
@@ -123,18 +117,15 @@ class GoalControllerTest {
 
         verify(validationUtils, times(1))
                 .validateRequest(any(PaginationParams.class), eq(Mode.PAGE));
-        verify(goalService, times(1))
-                .getPaginatedGoalsForUser(1L, 1, 10);
+        verify(goalService, times(1)).getPaginatedGoalsForUser(1L, 1, 10);
     }
 
     @Test
     @DisplayName("Get goal by ID - Success scenario")
     void testGetGoalById_Success() throws Exception {
         when(validationUtils.parseLong("1")).thenReturn(1L);
-        when(goalService.getGoalByUserIdAndGoalId(1L, 1L))
-                .thenReturn(goal);
-        when(goalMapper.toDto(any(Goal.class)))
-                .thenReturn(goalDto);
+        when(goalService.getGoalByUserIdAndGoalId(1L, 1L)).thenReturn(goal);
+        when(goalMapper.toDto(any(Goal.class))).thenReturn(goalDto);
 
         mockMvc.perform(get("/api/goals/1")
                         .requestAttr("currentUser", currentUser))
@@ -143,8 +134,7 @@ class GoalControllerTest {
                 .andExpect(jsonPath("$.data.goalId").value(1));
 
         verify(validationUtils, times(1)).parseLong("1");
-        verify(goalService, times(1))
-                .getGoalByUserIdAndGoalId(1L, 1L);
+        verify(goalService, times(1)).getGoalByUserIdAndGoalId(1L, 1L);
         verify(goalMapper, times(1)).toDto(any(Goal.class));
     }
 
@@ -152,14 +142,10 @@ class GoalControllerTest {
     @DisplayName("Update goal - Success scenario")
     void testUpdateGoal_Success() throws Exception {
         when(validationUtils.parseLong("1")).thenReturn(1L);
-        when(validationUtils.validateRequest(any(GoalDto.class), eq(Mode.GOAL_UPDATE)))
-                .thenReturn(goalDto);
-        when(goalService.updateGoal(any(GoalDto.class), eq(1L)))
-                .thenReturn(true);
-        when(goalService.getGoal(1L))
-                .thenReturn(goal);
-        when(goalMapper.toDto(any(Goal.class)))
-                .thenReturn(goalDto);
+        when(validationUtils.validateRequest(any(GoalDto.class), eq(Mode.GOAL_UPDATE))).thenReturn(goalDto);
+        when(goalService.updateGoal(any(GoalDto.class), eq(1L))).thenReturn(true);
+        when(goalService.getGoal(1L)).thenReturn(goal);
+        when(goalMapper.toDto(any(Goal.class))).thenReturn(goalDto);
 
         mockMvc.perform(put("/api/goals/1")
                         .requestAttr("currentUser", currentUser)
@@ -172,8 +158,7 @@ class GoalControllerTest {
         verify(validationUtils, times(1)).parseLong("1");
         verify(validationUtils, times(1))
                 .validateRequest(any(GoalDto.class), eq(Mode.GOAL_UPDATE));
-        verify(goalService, times(1))
-                .updateGoal(any(GoalDto.class), eq(1L));
+        verify(goalService, times(1)).updateGoal(any(GoalDto.class), eq(1L));
         verify(goalService, times(1)).getGoal(1L);
         verify(goalMapper, times(1)).toDto(any(Goal.class));
     }
@@ -182,8 +167,7 @@ class GoalControllerTest {
     @DisplayName("Delete goal - Success scenario")
     void testDeleteGoal_Success() throws Exception {
         when(validationUtils.parseLong("1")).thenReturn(1L);
-        when(goalService.deleteGoal(1L, 1L))
-                .thenReturn(true);
+        when(goalService.deleteGoal(1L, 1L)).thenReturn(true);
 
         mockMvc.perform(delete("/api/goals/1")
                         .requestAttr("currentUser", currentUser))
@@ -192,8 +176,7 @@ class GoalControllerTest {
                 .andExpect(jsonPath("$.data.goalId").value(1));
 
         verify(validationUtils, times(1)).parseLong("1");
-        verify(goalService, times(1))
-                .deleteGoal(1L, 1L);
+        verify(goalService, times(1)).deleteGoal(1L, 1L);
     }
 
     @Test
@@ -217,8 +200,7 @@ class GoalControllerTest {
     @DisplayName("Get goal by ID - Not found")
     void testGetGoalById_NotFound() throws Exception {
         when(validationUtils.parseLong("1")).thenReturn(1L);
-        when(goalService.getGoalByUserIdAndGoalId(1L, 1L))
-                .thenReturn(null);
+        when(goalService.getGoalByUserIdAndGoalId(1L, 1L)).thenReturn(null);
 
         mockMvc.perform(get("/api/goals/1")
                         .requestAttr("currentUser", currentUser))
@@ -227,8 +209,7 @@ class GoalControllerTest {
                         .value("Goal not found or you are not the owner of the goal."));
 
         verify(validationUtils, times(1)).parseLong("1");
-        verify(goalService, times(1))
-                .getGoalByUserIdAndGoalId(1L, 1L);
+        verify(goalService, times(1)).getGoalByUserIdAndGoalId(1L, 1L);
     }
 
     @Test
@@ -249,8 +230,7 @@ class GoalControllerTest {
     @Test
     @DisplayName("Negative goal ID - ValidationException")
     void testGetGoalById_NegativeId() throws Exception {
-        when(validationUtils.parseLong("-1"))
-                .thenThrow(new ValidationException("Id cannot be negative"));
+        when(validationUtils.parseLong("-1")).thenThrow(new ValidationException("Id cannot be negative"));
 
         mockMvc.perform(get("/api/goals/-1")
                         .requestAttr("currentUser", currentUser))

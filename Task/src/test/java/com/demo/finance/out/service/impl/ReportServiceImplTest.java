@@ -4,6 +4,8 @@ import com.demo.finance.domain.model.Report;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.TransactionRepository;
+import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,17 +28,31 @@ class ReportServiceImplTest {
     private TransactionRepository transactionRepository;
     @InjectMocks
     private ReportServiceImpl reportService;
+    private Transaction transaction1;
+    private Transaction transaction2;
+    private Long userId;
+
+    @BeforeEach
+    void setUp() {
+        userId = 1L;
+        transaction1 = Instancio.create(Transaction.class);
+        transaction1.setType(Type.INCOME);
+        transaction1.setAmount(new BigDecimal("1000"));
+        transaction1.setCategory("Food");
+        transaction1.setUserId(userId);
+        transaction1.setDate(LocalDate.of(2025, 3, 15));
+        transaction2 = Instancio.create(Transaction.class);
+        transaction2.setType(Type.EXPENSE);
+        transaction2.setAmount(new BigDecimal("200"));
+        transaction2.setCategory("Transport");
+        transaction2.setUserId(userId);
+        transaction2.setDate(LocalDate.of(2025, 3, 16));
+    }
 
     @Test
     @DisplayName("Generate user report - transactions exist - returns report")
     void testGenerateUserReport_transactionsExist_returnsReport() {
-        Long userId = 1L;
-        List<Transaction> transactions = List.of(
-                new Transaction(1L, userId, new BigDecimal(1000), "Salary", LocalDate.now(),
-                        "Monthly income", Type.INCOME),
-                new Transaction(2L, userId, new BigDecimal(200), "Shopping",
-                        LocalDate.now(), "Clothes", Type.EXPENSE)
-        );
+        List<Transaction> transactions = List.of(transaction1, transaction2);
 
         when(transactionRepository.findByUserId(userId)).thenReturn(transactions);
 
@@ -51,29 +67,22 @@ class ReportServiceImplTest {
     @Test
     @DisplayName("Analyze expenses by category - valid range - returns expense summary")
     void testAnalyzeExpensesByCategory_validRange_returnsExpenseSummary() {
-        Long userId = 1L;
         LocalDate from = LocalDate.of(2025, 3, 1);
         LocalDate to = LocalDate.of(2025, 3, 31);
-        List<Transaction> transactions = List.of(
-                new Transaction(1L, userId, new BigDecimal(150), "Food",
-                        LocalDate.of(2025, 3, 5), "Groceries", Type.EXPENSE),
-                new Transaction(2L, userId, new BigDecimal(200), "Transport",
-                        LocalDate.of(2025, 3, 10), "Taxi", Type.EXPENSE)
-        );
+        transaction1.setType(Type.EXPENSE);
+        List<Transaction> transactions = List.of(transaction1, transaction2);
 
         when(transactionRepository.findByUserId(userId)).thenReturn(transactions);
 
         Map<String, BigDecimal> result = reportService.analyzeExpensesByCategory(userId, from, to);
 
-        assertThat(result).hasSize(2)
-                .containsEntry("Food", new BigDecimal(150))
+        assertThat(result).hasSize(2).containsEntry("Food", new BigDecimal(1000))
                 .containsEntry("Transport", new BigDecimal(200));
     }
 
     @Test
     @DisplayName("Generate user report - no transactions - returns null")
     void testGenerateUserReport_noTransactions_returnsNull() {
-        Long userId = 1L;
         when(transactionRepository.findByUserId(userId)).thenReturn(List.of());
 
         Report report = reportService.generateUserReport(userId);
@@ -84,36 +93,26 @@ class ReportServiceImplTest {
     @Test
     @DisplayName("Generate report by date - transactions within range - returns report")
     void testGenerateReportByDate_transactionsWithinRange_returnsReport() {
-        Long userId = 1L;
         LocalDate from = LocalDate.of(2025, 3, 1);
         LocalDate to = LocalDate.of(2025, 3, 31);
-        List<Transaction> transactions = List.of(
-                new Transaction(1L, userId, new BigDecimal(500), "Freelance",
-                        LocalDate.of(2025, 3, 5), "Side job", Type.INCOME),
-                new Transaction(2L, userId, new BigDecimal(100), "Entertainment",
-                        LocalDate.of(2025, 3, 20), "Movies", Type.EXPENSE)
-        );
+        List<Transaction> transactions = List.of(transaction1, transaction2);
 
         when(transactionRepository.findByUserId(userId)).thenReturn(transactions);
 
         Report report = reportService.generateReportByDate(userId, from, to);
 
         assertThat(report).isNotNull();
-        assertThat(report.getTotalIncome()).isEqualTo(new BigDecimal(500));
-        assertThat(report.getTotalExpense()).isEqualTo(new BigDecimal(100));
-        assertThat(report.getBalance()).isEqualTo(new BigDecimal(400));
+        assertThat(report.getTotalIncome()).isEqualTo(new BigDecimal(1000));
+        assertThat(report.getTotalExpense()).isEqualTo(new BigDecimal(200));
+        assertThat(report.getBalance()).isEqualTo(new BigDecimal(800));
     }
 
     @Test
     @DisplayName("Analyze expenses by category - no expenses - returns empty map")
     void testAnalyzeExpensesByCategory_noExpenses_returnsEmptyMap() {
-        Long userId = 1L;
         LocalDate from = LocalDate.of(2025, 3, 1);
         LocalDate to = LocalDate.of(2025, 3, 31);
-        List<Transaction> transactions = List.of(
-                new Transaction(1L, userId, new BigDecimal(1000), "Salary",
-                        LocalDate.of(2025, 3, 5), "Monthly pay", Type.INCOME)
-        );
+        List<Transaction> transactions = List.of(transaction1);
 
         when(transactionRepository.findByUserId(userId)).thenReturn(transactions);
 

@@ -7,6 +7,7 @@ import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
 import com.demo.finance.exception.ValidationException;
 import com.demo.finance.out.service.BudgetService;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,11 +51,11 @@ class BudgetControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(budgetController).build();
-        currentUser = new UserDto();
+        currentUser = Instancio.create(UserDto.class);
         currentUser.setUserId(1L);
-        budgetDto = new BudgetDto();
+        budgetDto = Instancio.create(BudgetDto.class);
         budgetDto.setMonthlyLimit(BigDecimal.valueOf(5000.0));
-        budget = new Budget();
+        budget = Instancio.create(Budget.class);
         budget.setMonthlyLimit(BigDecimal.valueOf(5000.0));
         budgetData = new HashMap<>();
         budgetData.put("monthlyLimit", BigDecimal.valueOf(5000.0));
@@ -64,10 +65,8 @@ class BudgetControllerTest {
     @Test
     @DisplayName("Set monthly budget - Success scenario")
     void testSetMonthlyBudget_Success() throws Exception {
-        when(validationUtils.validateRequest(any(BudgetDto.class), eq(Mode.BUDGET)))
-                .thenReturn(budgetDto);
-        when(budgetService.setMonthlyBudget(eq(1L), any(BigDecimal.class)))
-                .thenReturn(budget);
+        when(validationUtils.validateRequest(any(BudgetDto.class), eq(Mode.BUDGET))).thenReturn(budgetDto);
+        when(budgetService.setMonthlyBudget(eq(1L), any(BigDecimal.class))).thenReturn(budget);
 
         mockMvc.perform(post("/api/budgets")
                         .requestAttr("currentUser", currentUser)
@@ -77,17 +76,14 @@ class BudgetControllerTest {
                 .andExpect(jsonPath("$.message").value("Budget generated successfully"))
                 .andExpect(jsonPath("$.data.monthlyLimit").value(5000.0));
 
-        verify(validationUtils, times(1))
-                .validateRequest(any(BudgetDto.class), eq(Mode.BUDGET));
-        verify(budgetService, times(1))
-                .setMonthlyBudget(eq(1L), any(BigDecimal.class));
+        verify(validationUtils, times(1)).validateRequest(any(BudgetDto.class), eq(Mode.BUDGET));
+        verify(budgetService, times(1)).setMonthlyBudget(eq(1L), any(BigDecimal.class));
     }
 
     @Test
     @DisplayName("Get budget data - Success scenario")
     void testGetBudgetData_Success() throws Exception {
-        when(budgetService.getBudgetData(1L))
-                .thenReturn(budgetData);
+        when(budgetService.getBudgetData(1L)).thenReturn(budgetData);
 
         mockMvc.perform(get("/api/budgets/budget")
                         .requestAttr("currentUser", currentUser))
@@ -96,17 +92,14 @@ class BudgetControllerTest {
                 .andExpect(jsonPath("$.data.monthlyLimit").value(5000.0))
                 .andExpect(jsonPath("$.data.totalExpenses").value(3000.0));
 
-        verify(budgetService, times(1))
-                .getBudgetData(1L);
+        verify(budgetService, times(1)).getBudgetData(1L);
     }
 
     @Test
     @DisplayName("Set monthly budget - Service returns null")
     void testSetMonthlyBudget_ServiceReturnsNull() throws Exception {
-        when(validationUtils.validateRequest(any(BudgetDto.class), eq(Mode.BUDGET)))
-                .thenReturn(budgetDto);
-        when(budgetService.setMonthlyBudget(eq(1L), any(BigDecimal.class)))
-                .thenReturn(null);
+        when(validationUtils.validateRequest(any(BudgetDto.class), eq(Mode.BUDGET))).thenReturn(budgetDto);
+        when(budgetService.setMonthlyBudget(eq(1L), any(BigDecimal.class))).thenReturn(null);
 
         mockMvc.perform(post("/api/budgets")
                         .requestAttr("currentUser", currentUser)
@@ -115,10 +108,8 @@ class BudgetControllerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.error").value("Failed to retrieve budget details."));
 
-        verify(validationUtils, times(1))
-                .validateRequest(any(BudgetDto.class), eq(Mode.BUDGET));
-        verify(budgetService, times(1))
-                .setMonthlyBudget(eq(1L), any(BigDecimal.class));
+        verify(validationUtils, times(1)).validateRequest(any(BudgetDto.class), eq(Mode.BUDGET));
+        verify(budgetService, times(1)).setMonthlyBudget(eq(1L), any(BigDecimal.class));
     }
 
     @Test
@@ -135,31 +126,27 @@ class BudgetControllerTest {
                 .andExpect(jsonPath("$.error")
                         .value("Monthly limit must be a positive number"));
 
-        verify(validationUtils, times(1))
-                .validateRequest(any(BudgetDto.class), eq(Mode.BUDGET));
+        verify(validationUtils, times(1)).validateRequest(any(BudgetDto.class), eq(Mode.BUDGET));
     }
 
     @Test
     @DisplayName("Get budget data - Budget not found")
     void testGetBudgetData_BudgetNotFound() throws Exception {
-        when(budgetService.getBudgetData(1L))
-                .thenReturn(null);
+        when(budgetService.getBudgetData(1L)).thenReturn(null);
 
         mockMvc.perform(get("/api/budgets/budget")
                         .requestAttr("currentUser", currentUser))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Budget not found for the user."));
 
-        verify(budgetService, times(1))
-                .getBudgetData(1L);
+        verify(budgetService, times(1)).getBudgetData(1L);
     }
 
     @Test
     @DisplayName("Set monthly budget - Missing monthly limit")
     void testSetMonthlyBudget_MissingMonthlyLimit() throws Exception {
         BudgetDto emptyBudgetDto = new BudgetDto();
-        when(validationUtils.validateRequest(any(BudgetDto.class), eq(Mode.BUDGET)))
-                .thenReturn(emptyBudgetDto);
+        when(validationUtils.validateRequest(any(BudgetDto.class), eq(Mode.BUDGET))).thenReturn(emptyBudgetDto);
 
         mockMvc.perform(post("/api/budgets")
                         .requestAttr("currentUser", currentUser)
@@ -168,7 +155,6 @@ class BudgetControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Monthly limit must be provided."));
 
-        verify(validationUtils, times(1))
-                .validateRequest(any(BudgetDto.class), eq(Mode.BUDGET));
+        verify(validationUtils, times(1)).validateRequest(any(BudgetDto.class), eq(Mode.BUDGET));
     }
 }

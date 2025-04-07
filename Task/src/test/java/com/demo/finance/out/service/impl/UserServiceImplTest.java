@@ -6,6 +6,8 @@ import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.out.repository.UserRepository;
+import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,33 +33,30 @@ class UserServiceImplTest {
     private UserMapper userMapper;
     @InjectMocks
     private UserServiceImpl userService;
+    private User user;
+    private UserDto userDto;
 
-    private User createDefaultUser() {
-        return new User(1L, "John Doe", "john@example.com", "hashedPassword",
-                false, Role.USER, 1L);
-    }
-
-    private UserDto createDefaultUserDto() {
-        UserDto dto = new UserDto();
-        dto.setUserId(1L);
-        dto.setName("John Doe");
-        dto.setEmail("john@example.com");
-        dto.setPassword("newPassword");
-        return dto;
+    @BeforeEach
+    void setUp() {
+        user = Instancio.create(User.class);
+        user.setEmail("john@example.com");
+        user.setPassword("hashedPassword");
+        user.setName("John Doe");
+        userDto = Instancio.create(UserDto.class);
+        userDto.setName("John Doe");
+        userDto.setEmail("john@example.com");
+        userDto.setPassword("newPassword");
     }
 
     @Test
     @DisplayName("Update own account - existing user - updates successfully")
     void testUpdateOwnAccount_existingUser_updatesSuccessfully() {
-        UserDto userDto = createDefaultUserDto();
-        User existingUser = createDefaultUser();
-        User mappedUser = new User();
-        mappedUser.setName(userDto.getName());
-        mappedUser.setEmail(userDto.getEmail());
+        user.setRole(Role.USER);
+        user.setVersion(1L);
 
-        when(userRepository.findById(1L)).thenReturn(existingUser);
+        when(userRepository.findById(1L)).thenReturn(user);
         when(passwordUtils.hashPassword("newPassword")).thenReturn("hashedPassword");
-        when(userMapper.toEntity(userDto)).thenReturn(mappedUser);
+        when(userMapper.toEntity(userDto)).thenReturn(user);
         when(userRepository.update(any(User.class))).thenReturn(true);
 
         boolean result = userService.updateOwnAccount(userDto, 1L);
@@ -67,13 +66,9 @@ class UserServiceImplTest {
         verify(passwordUtils).hashPassword("newPassword");
         verify(userMapper).toEntity(userDto);
         verify(userRepository).update(argThat(user ->
-                user.getUserId().equals(1L) &&
-                        user.getName().equals("John Doe") &&
-                        user.getEmail().equals("john@example.com") &&
-                        user.getPassword().equals("hashedPassword") &&
-                        user.getRole().equals(Role.USER) &&
-                        user.getVersion() == 2L
-        ));
+                user.getUserId().equals(1L) && user.getName().equals("John Doe")
+                        && user.getEmail().equals("john@example.com") && user.getPassword().equals("hashedPassword")
+                        && user.getRole().equals(Role.USER) && user.getVersion() == 2L));
     }
 
     @Test
@@ -91,18 +86,11 @@ class UserServiceImplTest {
     @Test
     @DisplayName("Update own account - password not provided - updates successfully")
     void testUpdateOwnAccount_nullPassword_UpdatesSuccessfully() {
-        UserDto userDto = createDefaultUserDto();
         userDto.setPassword(null);
+        user.setPassword("existingHashedPassword");
 
-        User existingUser = createDefaultUser();
-        existingUser.setPassword("existingHashedPassword");
-
-        User mappedUser = new User();
-        mappedUser.setName(userDto.getName());
-        mappedUser.setEmail(userDto.getEmail());
-
-        when(userRepository.findById(1L)).thenReturn(existingUser);
-        when(userMapper.toEntity(userDto)).thenReturn(mappedUser);
+        when(userRepository.findById(1L)).thenReturn(user);
+        when(userMapper.toEntity(userDto)).thenReturn(user);
         when(userRepository.update(any(User.class))).thenReturn(true);
 
         boolean result = userService.updateOwnAccount(userDto, 1L);
@@ -110,26 +98,19 @@ class UserServiceImplTest {
         assertThat(result).isTrue();
         verify(userRepository).findById(1L);
         verify(userMapper).toEntity(userDto);
-        verify(userRepository).update(argThat(user ->
-                user.getPassword().equals("existingHashedPassword")
-        ));
+        verify(userRepository).update(argThat(user -> user.getPassword().equals("existingHashedPassword")));
         verify(passwordUtils, never()).hashPassword(any());
     }
 
     @Test
     @DisplayName("Update own account - update fails - returns false")
     void testUpdateOwnAccount_updateFails_returnsFalse() {
-        UserDto userDto = createDefaultUserDto();
-        User existingUser = new User(1L, "Old Name", "old@example.com",
-                "oldHashedPassword", false, Role.USER, 1L);
+        user.setRole(Role.USER);
+        user.setVersion(1L);
 
-        User mappedUser = new User();
-        mappedUser.setName(userDto.getName());
-        mappedUser.setEmail(userDto.getEmail());
-
-        when(userRepository.findById(1L)).thenReturn(existingUser);
+        when(userRepository.findById(1L)).thenReturn(user);
         when(passwordUtils.hashPassword("newPassword")).thenReturn("hashedPassword");
-        when(userMapper.toEntity(userDto)).thenReturn(mappedUser);
+        when(userMapper.toEntity(userDto)).thenReturn(user);
         when(userRepository.update(any(User.class))).thenReturn(false);
 
         boolean result = userService.updateOwnAccount(userDto, 1L);
@@ -138,14 +119,10 @@ class UserServiceImplTest {
         verify(userRepository).findById(1L);
         verify(passwordUtils).hashPassword("newPassword");
         verify(userMapper).toEntity(userDto);
-        verify(userRepository).update(argThat(user ->
-                user.getUserId().equals(1L) &&
-                        user.getName().equals("John Doe") &&
-                        user.getEmail().equals("john@example.com") &&
-                        user.getPassword().equals("hashedPassword") &&
-                        user.getRole().equals(Role.USER) &&
-                        user.getVersion() == 2L
-        ));
+        verify(userRepository).update(argThat(user -> user.getUserId().equals(1L)
+                && user.getName().equals("John Doe") && user.getEmail().equals("john@example.com")
+                && user.getPassword().equals("hashedPassword") && user.getRole().equals(Role.USER)
+                && user.getVersion() == 2L));
     }
 
     @Test
