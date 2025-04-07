@@ -3,6 +3,7 @@ package com.demo.finance.out.service.impl;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.exception.DuplicateEmailException;
 import com.demo.finance.out.repository.UserRepository;
@@ -59,7 +60,7 @@ class RegistrationServiceImplTest {
                         user.getEmail().equals("alice@mail.com") &&
                         user.getPassword().equals("hashedPassword") &&
                         !user.isBlocked() &&
-                        user.getRole().getName().equals("user") &&
+                        user.getRole().equals(Role.USER) &&
                         user.getVersion() == 1L
         ));
     }

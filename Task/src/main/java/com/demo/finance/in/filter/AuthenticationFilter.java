@@ -71,14 +71,14 @@ public class AuthenticationFilter implements Filter {
             sendErrorResponse(httpResponse, e.getMessage());
             return;
         }
-        String role = userDto.getRole().getName().toLowerCase();
+        String role = userDto.getRole().toUpperCase();
         if (isAdminEndpoint(requestURI)) {
-            if (!"admin".equals(role)) {
+            if (!"ADMIN".equals(role)) {
                 sendErrorResponse(httpResponse, "Access denied. Admin role required");
                 return;
             }
         } else {
-            if (!"user".equals(role)) {
+            if (!"USER".equals(role)) {
                 sendErrorResponse(httpResponse, "Access denied. User role required");
                 return;
             }

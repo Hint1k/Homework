@@ -1,7 +1,7 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
-import com.demo.finance.domain.model.Role;
+import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.exception.DuplicateEmailException;
@@ -45,7 +45,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         user.setPassword(passwordUtils.hashPassword(userDto.getPassword()));
         user.setBlocked(false);
-        user.setRole(new Role("user"));
+        user.setRole(Role.USER);
         user.setVersion(1L);
         userRepository.save(user);
         return true;

@@ -5,7 +5,6 @@ import com.demo.finance.domain.dto.GoalDto;
 import com.demo.finance.domain.dto.ReportDatesDto;
 import com.demo.finance.domain.dto.TransactionDto;
 import com.demo.finance.domain.dto.UserDto;
-import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.exception.ValidationException;
@@ -31,7 +30,7 @@ class ValidationUtilsImplTest {
     @DisplayName("Validate UserDto - valid input - returns validated object")
     void testValidateUser_ValidInput_Success() {
         UserDto user = new UserDto(1L, "John", "john@test.com", "password123",
-                false, new Role("user"), 1L);
+                false, "USER", 1L);
 
         UserDto result = validationUtils.validateRequest(user, Mode.REGISTER_USER);
         assertThat(result).isEqualTo(user);
@@ -41,7 +40,7 @@ class ValidationUtilsImplTest {
     @DisplayName("Validate UserDto - invalid email - throws ValidationException")
     void testValidateUser_InvalidEmail_ThrowsException() {
         UserDto user = new UserDto(1L, "John", "invalid-email", "password123",
-                false, new Role("user"), 1L);
+                false, "USER", 1L);
 
         assertThatThrownBy(() -> validationUtils.validateRequest(user, Mode.REGISTER_USER))
                 .isInstanceOf(ValidationException.class)
@@ -195,7 +194,7 @@ class ValidationUtilsImplTest {
     @DisplayName("Validate fields - missing required field - throws ValidationException")
     void testValidateFields_MissingRequired_ThrowsException() {
         UserDto user = new UserDto(1L, null, "john@test.com", "password123",
-                false, new Role("user"), 1L);
+                false, "USER", 1L);
 
         assertThatThrownBy(() -> validationUtils.validateRequest(user, Mode.REGISTER_USER))
                 .isInstanceOf(ValidationException.class)
@@ -206,7 +205,7 @@ class ValidationUtilsImplTest {
     @DisplayName("Validate UserDto - empty password - throws ValidationException")
     void testValidateUser_EmptyPassword_ThrowsException() {
         UserDto user = new UserDto(1L, "John", "john@test.com", "",
-                false, new Role("user"), 1L);
+                false, "USER", 1L);
 
         assertThatThrownBy(() -> validationUtils.validateRequest(user, Mode.REGISTER_USER))
                 .isInstanceOf(ValidationException.class)
@@ -217,7 +216,7 @@ class ValidationUtilsImplTest {
     @DisplayName("Validate UserDto - empty name - throws ValidationException")
     void testValidateUser_EmptyName_ThrowsException() {
         UserDto user = new UserDto(1L, "", "john@test.com", "password123",
-                false, new Role("user"), 1L);
+                false, "USER", 1L);
 
         assertThatThrownBy(() -> validationUtils.validateRequest(user, Mode.REGISTER_USER))
                 .isInstanceOf(ValidationException.class)
@@ -287,7 +286,7 @@ class ValidationUtilsImplTest {
     @DisplayName("Validate UserDto - UPDATE_USER mode - validates correctly")
     void testValidateUser_UpdateUserMode_Success() {
         UserDto user = new UserDto(1L, "John", "john@test.com", "newpassword",
-                false, new Role("user"), 1L);
+                false, "USER", 1L);
 
         UserDto result = validationUtils.validateRequest(user, Mode.UPDATE_USER);
         assertThat(result).isEqualTo(user);

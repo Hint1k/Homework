@@ -1,7 +1,6 @@
 package com.demo.finance.in.filter;
 
 import com.demo.finance.domain.dto.UserDto;
-import com.demo.finance.domain.model.Role;
 import com.demo.finance.out.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -54,7 +53,7 @@ class AuthenticationFilterTest {
     @DisplayName("Valid token with user role should allow access to user endpoint")
     void validTokenWithUserRole_ShouldAllowUserAccess() throws ServletException, IOException {
         UserDto user = new UserDto();
-        user.setRole(new Role("user"));
+        user.setRole("USER");
 
         when(request.getRequestURI()).thenReturn("/api/user/data");
         when(request.getHeader("Authorization")).thenReturn("Bearer valid.token.here");
@@ -70,7 +69,7 @@ class AuthenticationFilterTest {
     @DisplayName("Valid token with admin role should allow access to admin endpoint")
     void validTokenWithAdminRole_ShouldAllowAdminAccess() throws ServletException, IOException {
         UserDto admin = new UserDto();
-        admin.setRole(new Role("admin"));
+        admin.setRole("ADMIN");
 
         when(request.getRequestURI()).thenReturn("/api/admin/users/123");
         when(request.getHeader("Authorization")).thenReturn("Bearer valid.token.here");
@@ -117,7 +116,7 @@ class AuthenticationFilterTest {
     @DisplayName("Non-admin user accessing admin endpoint should return 401 Unauthorized")
     void nonAdminAccessingAdminEndpoint_ShouldReturn401() throws ServletException, IOException {
         UserDto user = new UserDto();
-        user.setRole(new Role("user"));
+        user.setRole("USER");
 
         when(request.getRequestURI()).thenReturn("/api/admin/users/123");
         when(request.getHeader("Authorization")).thenReturn("Bearer user.token");
@@ -136,7 +135,7 @@ class AuthenticationFilterTest {
     @DisplayName("Admin user accessing user endpoint should return 401 Unauthorized")
     void adminAccessingUserEndpoint_ShouldReturn401() throws IOException, ServletException {
         UserDto admin = new UserDto();
-        admin.setRole(new Role("admin"));
+        admin.setRole("ADMIN");
 
         when(request.getRequestURI()).thenReturn("/api/user/data");
         when(request.getHeader("Authorization")).thenReturn("Bearer admin.token");

@@ -2,7 +2,7 @@ package com.demo.finance.out.repository.impl;
 
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.app.config.DatabaseConfig;
-import com.demo.finance.domain.model.Role;
+import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,7 +30,7 @@ class UserRepositoryImplTest extends AbstractContainerBaseSetup {
     @DisplayName("Save and find user by user ID - Success scenario")
     void testSaveAndFindUserById() {
         User user = new User(null, "Alice", "alice@mail.com", "password123",
-                false, new Role("user"), 1L);
+                false, Role.USER, 1L);
         repository.save(user);
 
         User found = repository.findByEmail("alice@mail.com");
@@ -42,7 +42,7 @@ class UserRepositoryImplTest extends AbstractContainerBaseSetup {
     @DisplayName("Update user - Success scenario")
     void testUpdateUser() {
         User user = new User(null, "Bob", "bob@mail.com", "securepass",
-                false, new Role("user"), 1L);
+                false, Role.USER, 1L);
         repository.save(user);
 
         User existingUser = repository.findByEmail("bob@mail.com");
@@ -50,7 +50,7 @@ class UserRepositoryImplTest extends AbstractContainerBaseSetup {
         Long userId = existingUser.getUserId();
 
         User updatedUser = new User(userId, "Bob Updated", "bob@mail.com", "newpass",
-                false, new Role("admin"), 2L);
+                false, Role.ADMIN, 2L);
         boolean updated = repository.update(updatedUser);
 
         assertThat(updated).isTrue();
@@ -63,7 +63,7 @@ class UserRepositoryImplTest extends AbstractContainerBaseSetup {
     @DisplayName("Delete user - Success scenario")
     void testDeleteUser() {
         User user = new User(null, "Charlie", "charlie@mail.com", "mypassword",
-                false, new Role("admin"), 1L);
+                false, Role.ADMIN, 1L);
         repository.save(user);
 
         User existingUser = repository.findByEmail("charlie@mail.com");
@@ -86,7 +86,7 @@ class UserRepositoryImplTest extends AbstractContainerBaseSetup {
     @DisplayName("Find by email - User exists returns user")
     void testFindByEmail_UserExists_ReturnsUser() {
         User user = new User(null, "Dave", "dave@mail.com", "password456",
-                false, new Role("user"), 1L);
+                false, Role.USER, 1L);
         repository.save(user);
 
         User found = repository.findByEmail("dave@mail.com");
@@ -106,9 +106,9 @@ class UserRepositoryImplTest extends AbstractContainerBaseSetup {
     void testFindAll_UsersExist_ReturnsAllUsers() {
         repository.findAll(0, 10).forEach(u -> repository.delete(u.getUserId()));
         repository.save(new User(null, "Emma", "emma@mail.com", "pass1",
-                false, new Role("user"), 1L));
+                false, Role.USER, 1L));
         repository.save(new User(null, "Frank", "frank@mail.com", "pass2",
-                false, new Role("admin"), 1L));
+                false, Role.ADMIN, 1L));
 
         List<User> users = repository.findAll(0, 10);
         assertThat(users).hasSize(2);

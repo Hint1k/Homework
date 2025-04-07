@@ -1,7 +1,7 @@
 package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.mapper.UserMapper;
-import com.demo.finance.domain.model.Role;
+import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.service.AdminService;
 import com.demo.finance.out.service.TransactionService;
@@ -233,13 +233,13 @@ class AdminControllerTest {
         user.setUserId(userId);
         user.setEmail("test@example.com");
         user.setPassword("password");
-        user.setRole(new Role("user"));
+        user.setRole(Role.USER);
         user.setVersion(1L);
 
         UserDto userDto = new UserDto();
         userDto.setUserId(userId);
         userDto.setEmail("test@example.com");
-        userDto.setRole(new Role("user"));
+        userDto.setRole("USER");
 
         when(validationUtils.parseUserId("2", Mode.GET)).thenReturn(userId);
         when(adminService.getUser(userId)).thenReturn(user);

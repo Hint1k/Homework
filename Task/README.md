@@ -184,7 +184,7 @@ GET http://localhost:8080/api/admin/users/transactions/2?page=1&size=10
 PATCH http://localhost:8080/api/admin/users/role/2
 ```json 
 {
-"role": "user"
+"role": "USER"
 }
 ```
 PATCH http://localhost:8080/api/admin/users/block/2

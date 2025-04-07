@@ -1,7 +1,7 @@
 package com.demo.finance.out.service.impl;
 
-import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.utils.Role;
 import com.demo.finance.exception.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.DisplayName;
 
+import static com.demo.finance.domain.utils.Role.ADMIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
@@ -29,7 +30,7 @@ class AdminServiceImplTest {
     @DisplayName("Get user - existing user - returns user")
     void testGetUser_existingUser_returnsUser() {
         User user = new User(1L, "Alice", "alice@mail.com", "password123",
-                false, new Role("user"), 1L);
+                false, Role.USER, 1L);
         when(userRepository.findById(1L)).thenReturn(user);
 
         User result = adminService.getUser(1L);
@@ -42,17 +43,17 @@ class AdminServiceImplTest {
     void testUpdateUserRole_existingUser_updatesSuccessfully() {
         UserDto userDto = new UserDto();
         userDto.setUserId(1L);
-        userDto.setRole(new Role("admin"));
+        userDto.setRole("ADMIN");
 
         User user = new User(1L, "Alice", "alice@mail.com", "password123",
-                false, new Role("user"), 1L);
+                false, Role.USER, 1L);
         when(userRepository.findById(1L)).thenReturn(user);
         when(userRepository.update(user)).thenReturn(true);
 
         boolean result = adminService.updateUserRole(1L, userDto);
 
         assertThat(result).isTrue();
-        assertThat(user.getRole().getName()).isEqualTo("admin");
+        assertThat(user.getRole()).isEqualTo(ADMIN);
         assertThat(user.getVersion()).isEqualTo(2L);
     }
 
@@ -64,7 +65,7 @@ class AdminServiceImplTest {
         userDto.setBlocked(true);
 
         User user = new User(1L, "Alice", "alice@mail.com", "password123",
-                false, new Role("user"), 1L);
+                false, Role.USER, 1L);
         when(userRepository.findById(1L)).thenReturn(user);
         when(userRepository.update(user)).thenReturn(true);
 

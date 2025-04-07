@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
  * capabilities to facilitate the transformation of user-related data between the application's
  * persistence layer and its API layer.
  */
-@Mapper(componentModel = "spring", uses = {RoleMapper.class})
+@Mapper(componentModel = "spring")
 public interface UserMapper {
 
     /**

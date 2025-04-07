@@ -225,6 +225,7 @@ public class AdminController extends BaseController {
     public ResponseEntity<Map<String, Object>> updateUserRole(
             @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
         try {
+            userDtoNew.setRole(userDtoNew.getRole().toUpperCase());
             Long userIdLong = validationUtils.parseUserId(userId, Mode.UPDATE_ROLE);
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.UPDATE_ROLE);
             boolean success = adminService.updateUserRole(userIdLong, userDto);

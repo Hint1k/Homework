@@ -1,7 +1,7 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
-import com.demo.finance.domain.model.Role;
+import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.exception.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
@@ -55,7 +55,7 @@ public class AdminServiceImpl implements AdminService {
         if (user == null) {
             throw new UserNotFoundException("User with ID " + userId + " not found");
         }
-        Role newRole = userDto.getRole();
+        Role newRole = Role.valueOf(userDto.getRole());
         user.setRole(newRole);
         user.setVersion(user.getVersion() + 1);
         return userRepository.update(user);

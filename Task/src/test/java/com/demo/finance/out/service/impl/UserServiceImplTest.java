@@ -2,7 +2,7 @@ package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.mapper.UserMapper;
-import com.demo.finance.domain.model.Role;
+import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.out.repository.UserRepository;
@@ -34,7 +34,7 @@ class UserServiceImplTest {
 
     private User createDefaultUser() {
         return new User(1L, "John Doe", "john@example.com", "hashedPassword",
-                false, new Role("user"), 1L);
+                false, Role.USER, 1L);
     }
 
     private UserDto createDefaultUserDto() {
@@ -71,7 +71,7 @@ class UserServiceImplTest {
                         user.getName().equals("John Doe") &&
                         user.getEmail().equals("john@example.com") &&
                         user.getPassword().equals("hashedPassword") &&
-                        user.getRole().equals(new Role("user")) &&
+                        user.getRole().equals(Role.USER) &&
                         user.getVersion() == 2L
         ));
     }
@@ -121,7 +121,7 @@ class UserServiceImplTest {
     void testUpdateOwnAccount_updateFails_returnsFalse() {
         UserDto userDto = createDefaultUserDto();
         User existingUser = new User(1L, "Old Name", "old@example.com",
-                "oldHashedPassword", false, new Role("user"), 1L);
+                "oldHashedPassword", false, Role.USER, 1L);
 
         User mappedUser = new User();
         mappedUser.setName(userDto.getName());
@@ -143,7 +143,7 @@ class UserServiceImplTest {
                         user.getName().equals("John Doe") &&
                         user.getEmail().equals("john@example.com") &&
                         user.getPassword().equals("hashedPassword") &&
-                        user.getRole().equals(new Role("user")) &&
+                        user.getRole().equals(Role.USER) &&
                         user.getVersion() == 2L
         ));
     }

@@ -246,8 +246,11 @@ public class ValidationUtilsImpl implements ValidationUtils {
                 && isBlank(dto.getName())) {
             throw new ValidationException("Name cannot be empty.");
         }
-        if (mode == Mode.UPDATE_ROLE && (dto.getRole() == null || isBlank(dto.getRole().getName()))) {
+        if (mode == Mode.UPDATE_ROLE && (dto.getRole() == null || isBlank(dto.getRole()))) {
             throw new ValidationException("Role cannot be empty.");
+        }
+        if (mode == Mode.UPDATE_ROLE && !isValidRole(dto.getRole())) {
+            throw new ValidationException("Role must be either USER or ADMIN.");
         }
     }
 
@@ -369,5 +372,15 @@ public class ValidationUtilsImpl implements ValidationUtils {
      */
     private boolean isValidType(String type) {
         return "INCOME".equalsIgnoreCase(type) || "EXPENSE".equalsIgnoreCase(type);
+    }
+
+    /**
+     * Validates whether the provided role string is either "USER" or "ADMIN".
+     *
+     * @param role the role string to validate
+     * @return {@code true} if the role is valid, {@code false} otherwise
+     */
+    private boolean isValidRole(String role) {
+        return "USER".equals(role) || "ADMIN".equals(role);
     }
 }

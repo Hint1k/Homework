@@ -2,10 +2,10 @@ package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.domain.model.Goal;
-import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.BalanceUtils;
+import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.BudgetRepository;
 import com.demo.finance.out.repository.GoalRepository;
@@ -82,7 +82,7 @@ class NotificationServiceImplTest {
         Long userId = 1L;
         Budget budget = new Budget(userId, new BigDecimal(500));
         User user = new User("John Doe", "john@example.com", "password",
-                false, new Role(), null);
+                false, Role.USER, null);
 
         when(budgetRepository.findByUserId(userId)).thenReturn(budget);
         when(transactionRepository.findByUserId(userId)).thenReturn(List.of(
@@ -104,7 +104,7 @@ class NotificationServiceImplTest {
         Long userId = 1L;
         Budget budget = new Budget(userId, new BigDecimal(500));
         User user = new User("John Doe", "john@example.com", "password",
-                false, new Role(), null);
+                false,Role.USER, null);
 
         when(budgetRepository.findByUserId(userId)).thenReturn(budget);
         when(transactionRepository.findByUserId(userId)).thenReturn(List.of(
@@ -137,7 +137,7 @@ class NotificationServiceImplTest {
         String userEmail = "user@example.com";
         Goal goal = new Goal(userId, "Vacation", new BigDecimal(3000), 6);
         User user = new User(userId, "John Doe", userEmail, "password", false,
-                new Role("user"), 1L);
+                Role.USER, 1L);
 
         when(goalRepository.findByUserId(userId)).thenReturn(List.of(goal));
         when(balanceUtils.calculateBalance(userId, goal)).thenReturn(new BigDecimal(1500));
@@ -157,7 +157,7 @@ class NotificationServiceImplTest {
         String userEmail = "user@example.com";
         Goal goal = new Goal(userId, "Vacation", new BigDecimal(3000), 6);
         User user = new User(userId, "John Doe", userEmail, "password", false,
-                new Role("user"), 2L);
+                Role.USER, 2L);
 
         when(goalRepository.findByUserId(userId)).thenReturn(List.of(goal));
         when(balanceUtils.calculateBalance(userId, goal)).thenReturn(new BigDecimal(3000));

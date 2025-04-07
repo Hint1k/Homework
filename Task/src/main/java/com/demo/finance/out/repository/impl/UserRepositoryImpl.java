@@ -1,7 +1,7 @@
 package com.demo.finance.out.repository.impl;
 
 import com.demo.finance.app.config.DataSourceManager;
-import com.demo.finance.domain.model.Role;
+import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.out.repository.UserRepository;
 import org.springframework.stereotype.Repository;
@@ -142,7 +142,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
         stmt.setString(2, user.getEmail());
         stmt.setString(3, user.getPassword());
         stmt.setBoolean(4, user.isBlocked());
-        stmt.setString(5, user.getRole().getName());
+        stmt.setString(5, user.getRole().name());
         stmt.setLong(6, user.getVersion());
     }
 
@@ -160,7 +160,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
                 rs.getString("email"),
                 rs.getString("password"),
                 rs.getBoolean("blocked"),
-                new Role(rs.getString("role")),
+                Role.valueOf(rs.getString("role")),
                 rs.getLong("version")
         );
     }

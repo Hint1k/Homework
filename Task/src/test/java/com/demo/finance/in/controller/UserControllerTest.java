@@ -2,7 +2,6 @@ package com.demo.finance.in.controller;
 
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.mapper.UserMapper;
-import com.demo.finance.domain.model.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
@@ -142,7 +141,7 @@ class UserControllerTest {
     @DisplayName("Get current user details - Success scenario")
     void testGetCurrentUser_Success() throws Exception {
         UserDto currentUser = createUserDto(1L, "test@example.com", "Test User");
-        currentUser.setRole(new Role("user"));
+        currentUser.setRole("USER");
 
         mockMvc.perform(get("/api/users/me")
                         .requestAttr("currentUser", currentUser))
@@ -157,7 +156,7 @@ class UserControllerTest {
     @DisplayName("Update user - Success scenario")
     void testUpdateUser_Success() throws Exception {
         UserDto currentUser = createUserDto(1L, "current@example.com", null);
-        currentUser.setRole(new Role("user"));
+        currentUser.setRole("USER");
         UserDto updateDto = createUserDto(null, "updated@example.com", "Updated Name");
         User updatedUser = createUser(1L, "updated@example.com", "Updated Name");
         UserDto responseDto = createUserDto(1L, "updated@example.com", "Updated Name");
@@ -186,7 +185,7 @@ class UserControllerTest {
     @DisplayName("Delete account - Success scenario")
     void testDeleteAccount_Success() throws Exception {
         UserDto currentUser = createUserDto(2L, "test@example.com", null);
-        currentUser.setRole(new Role("user"));
+        currentUser.setRole("USER");
 
         when(userService.deleteOwnAccount(2L)).thenReturn(true);
 
@@ -342,7 +341,7 @@ class UserControllerTest {
     @DisplayName("Update user - Failed to retrieve updated user")
     void testUpdateUser_FailedToRetrieveUpdatedUser() throws Exception {
         UserDto currentUser = createUserDto(1L, "current@example.com", null);
-        currentUser.setRole(new Role("user"));
+        currentUser.setRole("USER");
         UserDto updateDto = createUserDto(null, "updated@example.com", "Updated Name");
 
         when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.UPDATE_USER))).thenReturn(updateDto);
@@ -366,7 +365,7 @@ class UserControllerTest {
     @DisplayName("Update user - Update failed")
     void testUpdateUser_UpdateFailed() throws Exception {
         UserDto currentUser = createUserDto(1L, "current@example.com", null);
-        currentUser.setRole(new Role("user"));
+        currentUser.setRole("USER");
         UserDto updateDto = createUserDto(null, "updated@example.com", "Updated Name");
 
         when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.UPDATE_USER))).thenReturn(updateDto);
@@ -389,7 +388,7 @@ class UserControllerTest {
     @DisplayName("Delete account - Failed to delete")
     void testDeleteAccount_Failed() throws Exception {
         UserDto currentUser = createUserDto(2L, "test@example.com", null);
-        currentUser.setRole(new Role("user"));
+        currentUser.setRole("USER");
 
         when(userService.deleteOwnAccount(2L)).thenReturn(false);
 
