@@ -6,6 +6,7 @@ import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.ReportService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -33,6 +34,7 @@ public class ReportServiceImpl implements ReportService {
      * @return a {@link Report} object containing the user's total income and expenses
      */
     @Override
+    @Cacheable(value = "reports", key = "#userId")
     public Report generateUserReport(Long userId) {
         List<Transaction> transactions = transactionRepository.findByUserId(userId);
         return generateReportFromTransactions(userId, transactions);
@@ -47,6 +49,7 @@ public class ReportServiceImpl implements ReportService {
      * @return a {@link Report} object containing the user's total income and expenses within the specified date range
      */
     @Override
+    @Cacheable(value = "reports", key = "#userId + '-' + #from.toString() + '-' + #to.toString()")
     public Report generateReportByDate(Long userId, LocalDate from, LocalDate to) {
         List<Transaction> transactions = transactionRepository.findByUserId(userId).stream()
                 .filter(t -> t.isWithinDateRange(from, to))
@@ -63,6 +66,7 @@ public class ReportServiceImpl implements ReportService {
      * @return a {@link Map} where the keys represent expense categories and the values represent the total amount spent in each category
      */
     @Override
+    @Cacheable(value = "reports", key = "#userId + '-expenses-' + #from.toString() + '-' + #to.toString()")
     public Map<String, BigDecimal> analyzeExpensesByCategory(Long userId, LocalDate from, LocalDate to) {
         return transactionRepository.findByUserId(userId).stream()
                 .filter(t -> t.getType() == Type.EXPENSE)

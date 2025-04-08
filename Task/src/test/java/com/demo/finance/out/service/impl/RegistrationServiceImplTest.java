@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,10 +63,12 @@ class RegistrationServiceImplTest {
         boolean result = registrationService.registerUser(dto);
 
         assertThat(result).isTrue();
-        verify(userMapper).toEntity(dto);
-        verify(userRepository).save(argThat(user -> user.getName().equals("Alice")
-                && user.getEmail().equals("alice@mail.com") && user.getPassword().equals("hashedPassword")
-                && !user.isBlocked() && user.getRole().equals(Role.USER) && user.getVersion() == 1L));
+        verify(userMapper, times(1)).toEntity(dto);
+        verify(passwordUtils, times(1)).hashPassword("password123");
+        verify(userRepository, times(1)).save(argThat(user ->
+                user.getName().equals("Alice") && user.getEmail().equals("alice@mail.com")
+                        && user.getPassword().equals("hashedPassword") && !user.isBlocked()
+                        && user.getRole().equals(Role.USER) && user.getVersion() == 1L));
     }
 
     @Test
@@ -81,6 +84,7 @@ class RegistrationServiceImplTest {
                 .isInstanceOf(DuplicateEmailException.class)
                 .hasMessage("Email is already registered: existing@mail.com");
 
+        verify(userMapper, times(1)).toEntity(dto);
         verify(userRepository, never()).save(any());
     }
 
@@ -98,6 +102,9 @@ class RegistrationServiceImplTest {
         boolean result = registrationService.authenticate(dto);
 
         assertThat(result).isTrue();
+        verify(passwordUtils, times(1))
+                .checkPassword("correctPassword", "hashedPassword");
+        verify(userRepository, times(1)).findByEmail("valid@mail.com");
     }
 
     @Test
@@ -127,5 +134,7 @@ class RegistrationServiceImplTest {
         boolean result = registrationService.authenticate(dto);
 
         assertThat(result).isFalse();
+        verify(passwordUtils, times(1)).checkPassword(any(), any());
+        verify(userRepository, times(1)).findByEmail("valid@mail.com");
     }
 }

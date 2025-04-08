@@ -7,6 +7,8 @@ import com.demo.finance.out.repository.BudgetRepository;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.BudgetService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -36,6 +38,7 @@ public class BudgetServiceImpl implements BudgetService {
      * @return the updated or newly created {@link Budget} object, or {@code null} if the operation fails
      */
     @Override
+    @CacheEvict(value = "budgets", key = "#userId")
     public Budget setMonthlyBudget(Long userId, BigDecimal limit) {
         Budget existingBudget = budgetRepository.findByUserId(userId);
         boolean success;
@@ -59,6 +62,7 @@ public class BudgetServiceImpl implements BudgetService {
      * @return the {@link Budget} object containing the user's budget details, or {@code null} if no budget exists
      */
     @Override
+    @Cacheable(value = "budgets", key = "#userId")
     public Budget getBudget(Long userId) {
         return budgetRepository.findByUserId(userId);
     }
@@ -90,6 +94,7 @@ public class BudgetServiceImpl implements BudgetService {
      * @throws RuntimeException if no budget is set for the user
      */
     @Override
+    @Cacheable(value = "budgets", key = "#userId + '-data'")
     public Map<String, Object> getBudgetData(Long userId) {
         YearMonth currentMonth = YearMonth.now();
         BigDecimal totalExpenses = calculateExpensesForMonth(userId, currentMonth);

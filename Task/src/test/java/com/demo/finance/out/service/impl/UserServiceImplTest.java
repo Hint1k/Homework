@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.never;
@@ -65,17 +66,13 @@ class UserServiceImplTest {
         boolean result = userService.updateOwnAccount(userDto, 1L);
 
         assertThat(result).isTrue();
-        verify(userRepository).findById(1L);
-        verify(passwordUtils).hashPassword("newPassword");
-        verify(userMapper).toEntity(userDto);
-        verify(userRepository).update(argThat(u ->
-                u.getUserId().equals(1L) &&
-                        u.getName().equals("John Doe") &&
-                        u.getEmail().equals("john@example.com") &&
-                        u.getPassword().equals("hashedPassword") &&
-                        u.getRole().equals(Role.USER) &&
-                        u.getVersion().equals(3L)
-        ));
+        verify(userRepository, times(1)).findById(1L);
+        verify(passwordUtils, times(1)).hashPassword("newPassword");
+        verify(userMapper, times(1)).toEntity(userDto);
+        verify(userRepository, times(1)).update(argThat(u -> u.getUserId().equals(1L)
+                && u.getName().equals("John Doe") && u.getEmail().equals("john@example.com")
+                && u.getPassword().equals("hashedPassword") && u.getRole().equals(Role.USER)
+                && u.getVersion().equals(3L)));
     }
 
     @Test
@@ -87,7 +84,7 @@ class UserServiceImplTest {
         boolean result = userService.deleteOwnAccount(userId);
 
         assertThat(result).isTrue();
-        verify(userRepository).delete(userId);
+        verify(userRepository, times(1)).delete(userId);
     }
 
     @Test
@@ -103,9 +100,10 @@ class UserServiceImplTest {
         boolean result = userService.updateOwnAccount(userDto, 1L);
 
         assertThat(result).isTrue();
-        verify(userRepository).findById(1L);
-        verify(userMapper).toEntity(userDto);
-        verify(userRepository).update(argThat(user -> user.getPassword().equals("existingHashedPassword")));
+        verify(userRepository, times(1)).findById(1L);
+        verify(userMapper, times(1)).toEntity(userDto);
+        verify(userRepository, times(1))
+                .update(argThat(user -> user.getPassword().equals("existingHashedPassword")));
         verify(passwordUtils, never()).hashPassword(any());
     }
 
@@ -125,17 +123,13 @@ class UserServiceImplTest {
                 .isInstanceOf(OptimisticLockException.class)
                 .hasMessageContaining("Your account was modified by another operation.");
 
-        verify(userRepository).findById(1L);
-        verify(passwordUtils).hashPassword("newPassword");
-        verify(userMapper).toEntity(userDto);
-        verify(userRepository).update(argThat(u ->
-                u.getUserId().equals(1L) &&
-                        u.getName().equals("John Doe") &&
-                        u.getEmail().equals("john@example.com") &&
-                        u.getPassword().equals("hashedPassword") &&
-                        u.getRole().equals(Role.USER) &&
-                        u.getVersion().equals(2L)
-        ));
+        verify(userRepository, times(1)).findById(1L);
+        verify(passwordUtils, times(1)).hashPassword("newPassword");
+        verify(userMapper, times(1)).toEntity(userDto);
+        verify(userRepository, times(1)).update(argThat(u -> u.getUserId().equals(1L)
+                && u.getName().equals("John Doe") && u.getEmail().equals("john@example.com")
+                && u.getPassword().equals("hashedPassword") && u.getRole().equals(Role.USER)
+                && u.getVersion().equals(2L)));
     }
 
     @Test
@@ -147,6 +141,6 @@ class UserServiceImplTest {
         boolean result = userService.deleteOwnAccount(userId);
 
         assertThat(result).isFalse();
-        verify(userRepository).delete(userId);
+        verify(userRepository, times(1)).delete(userId);
     }
 }

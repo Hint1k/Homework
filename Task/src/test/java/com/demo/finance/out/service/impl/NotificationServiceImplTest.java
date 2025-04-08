@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -81,7 +82,10 @@ class NotificationServiceImplTest {
         String notification = notificationService.fetchBudgetNotification(userId);
 
         assertThat(notification).isEqualTo("No budget set for user.");
-        verify(emailService).sendEmail(any(), eq("Budget Notification"), eq("No budget set for user."));
+        verify(emailService, times(1))
+                .sendEmail(any(), eq("Budget Notification"), eq("No budget set for user."));
+        verify(budgetRepository, times(1)).findByUserId(userId);
+        verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
@@ -94,6 +98,8 @@ class NotificationServiceImplTest {
 
         assertThat(notification).isEqualTo("No goals set.");
         verify(emailService).sendEmail(any(), eq("Goal Notification"), eq("No goals set."));
+        verify(goalRepository, times(1)).findByUserId(userId);
+        verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
@@ -110,6 +116,9 @@ class NotificationServiceImplTest {
         assertThat(notification).contains("🚨 Budget exceeded!");
         verify(emailService).sendEmail(eq("user@example.com"), eq("Budget Notification"),
                 contains("🚨 Budget exceeded!"));
+        verify(budgetRepository, times(1)).findByUserId(userId);
+        verify(transactionRepository, times(1)).findByUserId(userId);
+        verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
@@ -126,6 +135,9 @@ class NotificationServiceImplTest {
         assertThat(notification).contains("✅ Budget is under control.");
         verify(emailService).sendEmail(eq("user@example.com"), eq("Budget Notification"),
                 contains("✅ Budget is under control."));
+        verify(budgetRepository, times(1)).findByUserId(userId);
+        verify(transactionRepository, times(1)).findByUserId(userId);
+        verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
@@ -135,6 +147,7 @@ class NotificationServiceImplTest {
 
         assertThrows(RuntimeException.class, () -> notificationService.fetchBudgetNotification(userId));
         verify(emailService, never()).sendEmail(any(), any(), any());
+        verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
@@ -149,6 +162,9 @@ class NotificationServiceImplTest {
         assertThat(notification).contains("⏳ Goal 'Vacation' progress: 50.00%");
         verify(emailService).sendEmail(eq("user@example.com"), eq("Goal Notification"),
                 contains("⏳ Goal 'Vacation' progress: 50.00%"));
+        verify(userRepository, times(1)).findById(userId);
+        verify(goalRepository, times(1)).findByUserId(userId);
+        verify(balanceUtils, times(1)).calculateBalance(userId, goal);
     }
 
     @Test
@@ -163,5 +179,8 @@ class NotificationServiceImplTest {
         assertThat(notification).contains("🎉 Goal achieved: 'Vacation'!");
         verify(emailService).sendEmail(eq("user@example.com"), eq("Goal Notification"),
                 contains("🎉 Goal achieved: 'Vacation'!"));
+        verify(goalRepository, times(1)).findByUserId(userId);
+        verify(balanceUtils, times(1)).calculateBalance(userId, goal);
+        verify(userRepository, times(1)).findById(userId);
     }
 }

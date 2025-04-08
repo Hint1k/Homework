@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,10 +61,10 @@ class GoalServiceImplTest {
         Long result = goalService.createGoal(dto, 1L);
 
         assertThat(result).isEqualTo(2L);
-        verify(goalMapper).toEntity(dto);
-        verify(goalRepository).save(argThat(goal -> goal.getGoalName().equals("Car")
-                && goal.getTargetAmount().equals(new BigDecimal(5000))
-                && goal.getSavedAmount().equals(BigDecimal.ZERO) && goal.getUserId().equals(1L)));
+        verify(goalMapper, times(1)).toEntity(dto);
+        verify(goalRepository, times(1)).save(argThat(goal ->
+                goal.getGoalName().equals("Car") && goal.getTargetAmount().equals(new BigDecimal(5000))
+                        && goal.getSavedAmount().equals(BigDecimal.ZERO) && goal.getUserId().equals(1L)));
     }
 
     @Test
@@ -74,6 +75,7 @@ class GoalServiceImplTest {
         Goal result = goalService.getGoal(2L);
 
         assertThat(result).isEqualTo(goal);
+        verify(goalRepository, times(1)).findById(2L);
     }
 
     @Test
@@ -84,6 +86,7 @@ class GoalServiceImplTest {
         Goal result = goalService.getGoalByUserIdAndGoalId(1L, 2L);
 
         assertThat(result).isEqualTo(goal);
+        verify(goalRepository, times(1)).findByUserIdAndGoalId(1L, 2L);
     }
 
     @Test
@@ -98,8 +101,10 @@ class GoalServiceImplTest {
         boolean result = goalService.updateGoal(dto, 1L);
 
         assertThat(result).isTrue();
-        verify(goalRepository).update(argThat(goal -> goal.getGoalName().equals("NewCar")
-                && goal.getTargetAmount().equals(new BigDecimal(7000))));
+        verify(goalRepository, times(1)).findByUserIdAndGoalId(1L, 2L);
+        verify(goalRepository, times(1))
+                .update(argThat(goal -> goal.getGoalName().equals("NewCar")
+                        && goal.getTargetAmount().equals(new BigDecimal(7000))));
     }
 
     @Test
@@ -111,7 +116,8 @@ class GoalServiceImplTest {
         boolean result = goalService.deleteGoal(1L, 2L);
 
         assertThat(result).isTrue();
-        verify(goalRepository).delete(2L);
+        verify(goalRepository, times(1)).findByUserIdAndGoalId(1L, 2L);
+        verify(goalRepository, times(1)).delete(2L);
     }
 
     @Test
@@ -127,6 +133,8 @@ class GoalServiceImplTest {
         assertThat(result.data()).hasSize(2);
         assertThat(result.totalItems()).isEqualTo(2);
         assertThat(result.totalPages()).isEqualTo(1);
+        verify(goalRepository, times(1)).findByUserId(1L, 0, 10);
+        verify(goalRepository, times(1)).getTotalGoalCountForUser(1L);
     }
 
     @Test

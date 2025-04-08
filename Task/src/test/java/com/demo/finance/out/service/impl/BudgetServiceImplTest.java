@@ -58,12 +58,11 @@ class BudgetServiceImplTest {
         when(budgetRepository.save(any(Budget.class))).thenReturn(true);
         Budget result = budgetService.setMonthlyBudget(userId, limit);
 
-        verify(budgetRepository, times(2)).findByUserId(userId);
-        verify(budgetRepository).save(any(Budget.class));
-
         assertThat(result).isNotNull();
         assertThat(result.getUserId()).isEqualTo(userId);
         assertThat(result.getMonthlyLimit()).isEqualTo(limit);
+        verify(budgetRepository, times(2)).findByUserId(userId);
+        verify(budgetRepository, times(1)).save(any(Budget.class));
     }
 
     @Test
@@ -83,7 +82,8 @@ class BudgetServiceImplTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getMonthlyLimit()).isEqualTo(newLimit);
-        verify(budgetRepository).update(budget);
+        verify(budgetRepository, times(1)).update(budget);
+        verify(budgetRepository, times(2)).findByUserId(userId);
     }
 
     @Test
@@ -96,6 +96,7 @@ class BudgetServiceImplTest {
         Budget result = budgetService.getBudget(userId);
 
         assertThat(result).isEqualTo(budget);
+        verify(budgetRepository, times(1)).findByUserId(userId);
     }
 
     @Test
@@ -112,6 +113,8 @@ class BudgetServiceImplTest {
         BigDecimal result = budgetService.calculateExpensesForMonth(userId, month);
 
         assertThat(result).isEqualTo(new BigDecimal(200));
+        verify(transactionRepository, times(1))
+                .findFiltered(userId, month.atDay(1), month.atEndOfMonth(), null, Type.EXPENSE);
     }
 
     @Test
@@ -131,6 +134,9 @@ class BudgetServiceImplTest {
         assertThat(result.get("message")).isEqualTo("Budget is not set");
         assertThat(((Map<?, ?>) result.get("data")).get("monthlyLimit")).isEqualTo(BigDecimal.ZERO);
         assertThat(((Map<?, ?>) result.get("data")).get("currentExpenses")).isEqualTo(new BigDecimal(100));
+        verify(budgetRepository, times(1)).findByUserId(userId);
+        verify(transactionRepository, times(1))
+                .findFiltered(userId, month.atDay(1), month.atEndOfMonth(), null, Type.EXPENSE);
     }
 
     @Test
@@ -151,5 +157,8 @@ class BudgetServiceImplTest {
         assertThat(result.get("formattedBudget")).isEqualTo("Budget: 100.00/1000.00");
         assertThat(((Map<?, ?>) result.get("budgetData")).get("monthlyLimit")).isEqualTo(new BigDecimal(1000));
         assertThat(((Map<?, ?>) result.get("budgetData")).get("currentExpenses")).isEqualTo(new BigDecimal(100));
+        verify(budgetRepository, times(1)).findByUserId(userId);
+        verify(transactionRepository, times(1))
+                .findFiltered(userId, month.atDay(1), month.atEndOfMonth(), null, Type.EXPENSE);
     }
 }

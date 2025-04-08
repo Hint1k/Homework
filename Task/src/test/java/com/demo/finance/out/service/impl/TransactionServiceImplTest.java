@@ -18,6 +18,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,8 +54,8 @@ class TransactionServiceImplTest {
         Long result = transactionService.createTransaction(transactionDto, 1L);
 
         assertThat(result).isEqualTo(transactionId);
-        verify(transactionMapper).toEntity(transactionDto);
-        verify(transactionRepository).save(any(Transaction.class));
+        verify(transactionMapper, times(1)).toEntity(transactionDto);
+        verify(transactionRepository, times(1)).save(any(Transaction.class));
     }
 
     @Test
@@ -65,6 +66,7 @@ class TransactionServiceImplTest {
         Transaction result = transactionService.getTransaction(transactionId);
 
         assertThat(result).isEqualTo(transaction);
+        verify(transactionRepository, times(1)).findById(transactionId);
     }
 
     @Test
@@ -76,7 +78,9 @@ class TransactionServiceImplTest {
         boolean result = transactionService.deleteTransaction(1L, transactionId);
 
         assertThat(result).isTrue();
-        verify(transactionRepository).delete(transactionId);
+        verify(transactionRepository, times(1))
+                .findByUserIdAndTransactionId(1L, transactionId);
+        verify(transactionRepository, times(1)).delete(transactionId);
     }
 
     @Test
@@ -87,6 +91,8 @@ class TransactionServiceImplTest {
         Transaction result = transactionService.getTransactionByUserIdAndTransactionId(1L, transactionId);
 
         assertThat(result).isEqualTo(transaction);
+        verify(transactionRepository, times(1))
+                .findByUserIdAndTransactionId(1L, transactionId);
     }
 
     @Test
@@ -101,7 +107,9 @@ class TransactionServiceImplTest {
         assertThat(transaction.getAmount()).isEqualTo(transactionDto.getAmount());
         assertThat(transaction.getCategory()).isEqualTo(transactionDto.getCategory());
         assertThat(transaction.getDescription()).isEqualTo(transactionDto.getDescription());
-        verify(transactionRepository).update(transaction);
+        verify(transactionRepository, times(1))
+                .findByUserIdAndTransactionId(1L, transactionId);
+        verify(transactionRepository, times(1)).update(transaction);
     }
 
     @Test
@@ -144,5 +152,7 @@ class TransactionServiceImplTest {
         assertThat(result.totalPages()).isEqualTo(1);
         assertThat(result.currentPage()).isEqualTo(1);
         assertThat(result.pageSize()).isEqualTo(10);
+        verify(transactionRepository, times(1)).findByUserId(1L, 0, 10);
+        verify(transactionRepository, times(1)).getTotalTransactionCountForUser(1L);
     }
 }

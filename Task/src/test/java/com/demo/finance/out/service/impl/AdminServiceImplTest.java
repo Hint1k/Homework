@@ -16,6 +16,8 @@ import org.junit.jupiter.api.DisplayName;
 import static com.demo.finance.domain.utils.Role.ADMIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.demo.finance.domain.dto.UserDto;
@@ -49,6 +51,7 @@ class AdminServiceImplTest {
         User result = adminService.getUser(1L);
 
         assertThat(result).isEqualTo(user);
+        verify(userRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -64,6 +67,8 @@ class AdminServiceImplTest {
         assertThat(result).isTrue();
         assertThat(user.getRole()).isEqualTo(ADMIN);
         assertThat(user.getVersion()).isEqualTo(1L);
+        verify(userRepository, times(1)).update(user);
+        verify(userRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -79,6 +84,8 @@ class AdminServiceImplTest {
         assertThat(result).isTrue();
         assertThat(user.isBlocked()).isTrue();
         assertThat(user.getVersion()).isEqualTo(1L);
+        verify(userRepository, times(1)).update(user);
+        verify(userRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -89,6 +96,7 @@ class AdminServiceImplTest {
         boolean result = adminService.deleteUser(1L);
 
         assertThat(result).isTrue();
+        verify(userRepository, times(1)).delete(1L);
     }
 
     @Test
@@ -100,6 +108,7 @@ class AdminServiceImplTest {
         assertThatThrownBy(() -> adminService.updateUserRole(userId, userDto))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("User with ID " + userId + " not found");
+        verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
@@ -111,6 +120,7 @@ class AdminServiceImplTest {
         assertThatThrownBy(() -> adminService.blockOrUnblockUser(userId, new UserDto()))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("User with ID " + userId + " not found");
+        verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
@@ -121,5 +131,6 @@ class AdminServiceImplTest {
         boolean result = adminService.deleteUser(1L);
 
         assertThat(result).isFalse();
+        verify(userRepository, times(1)).delete(1L);
     }
 }

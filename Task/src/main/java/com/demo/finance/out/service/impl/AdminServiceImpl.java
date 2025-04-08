@@ -8,6 +8,8 @@ import com.demo.finance.exception.custom.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.AdminService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,6 +31,7 @@ public class AdminServiceImpl implements AdminService {
      * @return the {@link User} object matching the provided user ID, or {@code null} if not found
      */
     @Override
+    @Cacheable(value = "users", key = "#userId")
     public User getUser(Long userId) {
         return userRepository.findById(userId);
     }
@@ -54,6 +57,7 @@ public class AdminServiceImpl implements AdminService {
      * @throws OptimisticLockException  if the user was modified by another operation, causing a version mismatch.
      */
     @Override
+    @CacheEvict(value = "users", key = "#userId", allEntries = true)
     public boolean updateUserRole(Long userId, UserDto userDto) {
         User user = userRepository.findById(userId);
         if (user == null) {
@@ -89,6 +93,7 @@ public class AdminServiceImpl implements AdminService {
      * @throws OptimisticLockException  if the user was modified by another operation, causing a version mismatch.
      */
     @Override
+    @CacheEvict(value = "users", key = "#userId", allEntries = true)
     public boolean blockOrUnblockUser(Long userId, UserDto userDto) {
         User user = userRepository.findById(userId);
         if (user == null) {
@@ -109,6 +114,7 @@ public class AdminServiceImpl implements AdminService {
      * @return {@code true} if the deletion was successful, {@code false} otherwise
      */
     @Override
+    @CacheEvict(value = "users", key = "#userId", allEntries = true)
     public boolean deleteUser(Long userId) {
         return userRepository.delete(userId);
     }

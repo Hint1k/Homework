@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +64,7 @@ class ReportServiceImplTest {
         assertThat(report.getTotalIncome()).isEqualTo(new BigDecimal(1000));
         assertThat(report.getTotalExpense()).isEqualTo(new BigDecimal(200));
         assertThat(report.getBalance()).isEqualTo(new BigDecimal(800));
+        verify(transactionRepository, times(1)).findByUserId(userId);
     }
 
     @Test
@@ -78,6 +81,7 @@ class ReportServiceImplTest {
 
         assertThat(result).hasSize(2).containsEntry("Food", new BigDecimal(1000))
                 .containsEntry("Transport", new BigDecimal(200));
+        verify(transactionRepository, times(1)).findByUserId(userId);
     }
 
     @Test
@@ -88,6 +92,7 @@ class ReportServiceImplTest {
         Report report = reportService.generateUserReport(userId);
 
         assertThat(report).isNull();
+        verify(transactionRepository, times(1)).findByUserId(userId);
     }
 
     @Test
@@ -105,6 +110,7 @@ class ReportServiceImplTest {
         assertThat(report.getTotalIncome()).isEqualTo(new BigDecimal(1000));
         assertThat(report.getTotalExpense()).isEqualTo(new BigDecimal(200));
         assertThat(report.getBalance()).isEqualTo(new BigDecimal(800));
+        verify(transactionRepository, times(1)).findByUserId(userId);
     }
 
     @Test
@@ -119,5 +125,6 @@ class ReportServiceImplTest {
         Map<String, BigDecimal> result = reportService.analyzeExpensesByCategory(userId, from, to);
 
         assertThat(result).isEmpty();
+        verify(transactionRepository, times(1)).findByUserId(userId);
     }
 }

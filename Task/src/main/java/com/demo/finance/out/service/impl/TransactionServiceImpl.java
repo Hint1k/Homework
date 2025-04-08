@@ -7,6 +7,8 @@ import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,6 +40,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @throws IllegalArgumentException if the provided transaction data is invalid or incomplete
      */
     @Override
+    @CacheEvict(value = {"transactions", "reports"}, allEntries = true)
     public Long createTransaction(TransactionDto dto, Long userId) {
         Transaction transaction = transactionMapper.toEntity(dto);
         transaction.setUserId(userId);
@@ -52,6 +55,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return the {@link Transaction} object matching the provided user ID and transaction ID, or {@code null} if not found
      */
     @Override
+    @Cacheable(value = "transactions", key = "#transactionId")
     public Transaction getTransactionByUserIdAndTransactionId(Long userId, Long transactionId) {
         return transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
     }
@@ -63,6 +67,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return the {@link Transaction} object matching the provided transaction ID, or {@code null} if not found
      */
     @Override
+    @Cacheable(value = "transactions", key = "#transactionId")
     public Transaction getTransaction(Long transactionId) {
         return transactionRepository.findById(transactionId);
     }
@@ -75,6 +80,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return {@code true} if the update was successful, {@code false} otherwise
      */
     @Override
+    @CacheEvict(value = {"transactions", "reports"}, allEntries = true)
     public boolean updateTransaction(TransactionDto dto, Long userId) {
         Long transactionId = dto.getTransactionId();
         Transaction transaction = transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
@@ -96,6 +102,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return {@code true} if the deletion was successful, {@code false} otherwise
      */
     @Override
+    @CacheEvict(value = {"transactions", "reports"}, allEntries = true)
     public boolean deleteTransaction(Long userId, Long transactionId) {
         Transaction transaction = transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
         if (transaction != null) {

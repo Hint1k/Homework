@@ -3,6 +3,7 @@ package com.demo.finance.app;
 import com.demo.finance.starter.logging.EnableLogging;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.SpringApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
 /**
  * The {@code TaskMain} class serves as the entry point for the Personal Finance Tracker Application.
@@ -10,6 +11,7 @@ import org.springframework.boot.SpringApplication;
  */
 @SpringBootApplication(scanBasePackages = "com.demo.finance")
 @EnableLogging
+@EnableCaching
 public class TaskMain {
 
     /**

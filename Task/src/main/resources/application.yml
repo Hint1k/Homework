@@ -37,3 +37,14 @@ logging-aspect:
 jwt:
   secret: jwtSecretSuperSecureKeyThatIsAtLeast64CharactersLongForHS512Algorithm
   expiration: 3600000
+spring:
+  cache:
+    type: caffeine
+    cache-names:
+      - users
+      - transactions
+      - goals
+      - budgets
+      - reports
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=30m
