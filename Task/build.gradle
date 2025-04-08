@@ -63,6 +63,9 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
+    // Caching
+    implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.2.0'
+
     // My modules
     implementation project(':audit-starter')
     implementation project(':logging-starter')
