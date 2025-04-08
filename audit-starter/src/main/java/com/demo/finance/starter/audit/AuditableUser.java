@@ -9,5 +9,10 @@ package com.demo.finance.starter.audit;
  */
 public interface AuditableUser {
 
+    /**
+     * Retrieves the unique identifier of the user.
+     *
+     * @return the unique identifier of the user
+     */
     Long getUserId();
 }

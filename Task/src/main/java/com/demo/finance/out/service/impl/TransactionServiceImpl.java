@@ -32,7 +32,6 @@ public class TransactionServiceImpl implements TransactionService {
      * This method maps the provided {@link TransactionDto} to a {@link Transaction} entity,
      * associates the transaction with the specified user ID, and saves it to the database.
      * The transaction details include the amount, category, date, description, and type.
-     * <p>
      *
      * @param dto    the {@link TransactionDto} object containing the details of the transaction to create
      * @param userId the unique identifier of the user associated with the transaction
@@ -52,7 +51,8 @@ public class TransactionServiceImpl implements TransactionService {
      *
      * @param userId        the unique identifier of the user
      * @param transactionId the unique identifier of the transaction
-     * @return the {@link Transaction} object matching the provided user ID and transaction ID, or {@code null} if not found
+     * @return the {@link Transaction} object matching the provided user ID and transaction ID,
+     * or {@code null} if not found
      */
     @Override
     @Cacheable(value = "transactions", key = "#transactionId")

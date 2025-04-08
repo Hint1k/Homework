@@ -29,12 +29,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public abstract class BaseRepository {
 
-    private static final Map<Class<?>, Method> SETTER_METHOD_CACHE = new HashMap<>();
+    /**
+     * The {@link DataSourceManager} for obtaining database connections.
+     */
     protected final DataSourceManager dataSourceManager;
+    private static final Map<Class<?>, Method> SETTER_METHOD_CACHE = new HashMap<>();
 
     /**
      * Persists a new entity to the database by executing the provided SQL insert query.
      *
+     * @param <T>       the type of the entity to be persisted
      * @param entity    the entity object to be persisted
      * @param insertSql the SQL insert query to execute
      * @param setter    the callback interface to set parameters on the prepared statement
@@ -174,6 +178,7 @@ public abstract class BaseRepository {
     /**
      * Sets the generated key on an entity by invoking the appropriate setter method.
      *
+     * @param <T>         the type of the entity
      * @param entity      the entity object to set the generated key on
      * @param generatedId the generated key value to set
      */

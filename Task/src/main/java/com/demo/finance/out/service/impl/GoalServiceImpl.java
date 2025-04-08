@@ -33,7 +33,6 @@ public class GoalServiceImpl implements GoalService {
      * This method maps the provided {@link GoalDto} to a {@link Goal} entity, associates the goal
      * with the specified user ID, initializes the saved amount to zero, and saves it to the database.
      * The goal details include the target amount, duration, start time, and goal name.
-     * <p>
      *
      * @param goalDto the {@link GoalDto} object containing the details of the goal to create
      * @param userId  the unique identifier of the user associated with the goal
