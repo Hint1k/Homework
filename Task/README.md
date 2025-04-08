@@ -88,9 +88,18 @@ To run tests using Gradle:
 ```bash
 ./gradlew test
 ```
-To run tests with coverage using Jacoco 
+To run tests with coverage using Jacoco: 
 ```bash
 ./gradlew jacocoTestReport  
+```
+
+---
+
+## Generating Javadocs
+
+To generate project documentation: 
+```bash
+./gradlew javadoc  
 ```
 
 ---

@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,7 +54,7 @@ class AuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        verify(chain).doFilter(request, response);
+        verify(chain, times(1)).doFilter(request, response);
         verify(jwtService, never()).validateToken(anyString());
     }
 
@@ -68,7 +69,7 @@ class AuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        verify(chain).doFilter(request, response);
+        verify(chain, times(1)).doFilter(request, response);
         verify(response, never()).setStatus(anyInt());
     }
 
@@ -83,7 +84,7 @@ class AuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        verify(chain).doFilter(request, response);
+        verify(chain, times(1)).doFilter(request, response);
         verify(response, never()).setStatus(anyInt());
     }
 
@@ -96,9 +97,9 @@ class AuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        verify(response).setContentType("application/json");
-        verify(writer).write("{\"error\":\"Authentication required\"}");
+        verify(response, times(1)).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response, times(1)).setContentType("application/json");
+        verify(writer, times(1)).write("{\"error\":\"Authentication required\"}");
         verify(chain, never()).doFilter(request, response);
     }
 
@@ -112,9 +113,9 @@ class AuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        verify(response).setContentType("application/json");
-        verify(writer).write("{\"error\":\"Invalid token\"}");
+        verify(response, times(1)).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response, times(1)).setContentType("application/json");
+        verify(writer, times(1)).write("{\"error\":\"Invalid token\"}");
         verify(chain, never()).doFilter(request, response);
     }
 
@@ -130,9 +131,9 @@ class AuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        verify(response).setContentType("application/json");
-        verify(writer).write("{\"error\":\"Access denied. Admin role required\"}");
+        verify(response, times(1)).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response, times(1)).setContentType("application/json");
+        verify(writer, times(1)).write("{\"error\":\"Access denied. Admin role required\"}");
         verify(chain, never()).doFilter(request, response);
     }
 
@@ -148,9 +149,9 @@ class AuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        verify(response).setContentType("application/json");
-        verify(writer).write("{\"error\":\"Access denied. User role required\"}");
+        verify(response, times(1)).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response, times(1)).setContentType("application/json");
+        verify(writer, times(1)).write("{\"error\":\"Access denied. User role required\"}");
         verify(chain, never()).doFilter(request, response);
     }
 
@@ -163,9 +164,9 @@ class AuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        verify(response).setContentType("application/json");
-        verify(writer).write("{\"error\":\"Authentication required\"}");
+        verify(response, times(1)).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response, times(1)).setContentType("application/json");
+        verify(writer, times(1)).write("{\"error\":\"Authentication required\"}");
         verify(chain, never()).doFilter(request, response);
     }
 
@@ -176,7 +177,7 @@ class AuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        verify(chain).doFilter(request, response);
+        verify(chain, times(1)).doFilter(request, response);
         verify(jwtService, never()).validateToken(anyString());
     }
 }

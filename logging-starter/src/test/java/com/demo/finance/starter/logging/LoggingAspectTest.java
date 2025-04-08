@@ -13,6 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +38,8 @@ class LoggingAspectTest {
 
             assertThat(logCaptor.getInfoLogs())
                     .anyMatch(log -> log.matches("\\[METHOD].*executed in \\d+ ms"));
+            verify(joinPoint, times(1)).getSignature();
+            verify(joinPoint, times(1)).proceed();
         }
     }
 
@@ -57,6 +61,9 @@ class LoggingAspectTest {
 
             assertThat(logCaptor.getWarnLogs())
                     .anyMatch(log -> log.contains("[SLOW METHOD] TestClass.testMethod()"));
+            verify(joinPoint, times(1)).getSignature();
+            verify(joinPoint, times(1)).getArgs();
+            verify(joinPoint, times(1)).proceed();
         }
     }
 
@@ -75,6 +82,9 @@ class LoggingAspectTest {
 
             assertThat(logCaptor.getInfoLogs()).anyMatch(log -> log.contains("TestClass.fastMethod()"));
             assertThat(logCaptor.getWarnLogs()).isEmpty();
+            verify(joinPoint, times(1)).getSignature();
+            verify(joinPoint, times(1)).getArgs();
+            verify(joinPoint, times(1)).proceed();
         }
     }
 
@@ -91,6 +101,7 @@ class LoggingAspectTest {
 
             assertThat(logCaptor.getErrorLogs())
                     .anyMatch(log -> log.contains("[ERROR] Exception in method TestClass.method(): test error"));
+            verify(joinPointForException, times(1)).getSignature();
         }
     }
 }

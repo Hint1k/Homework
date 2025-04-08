@@ -26,6 +26,12 @@ public class LoggingAspect {
 
     private final long slowThreshold;
 
+    /**
+     * Constructor for LoggingAspect that initializes the slow method threshold.
+     * The threshold value is injected from the application properties with a default value of 500 ms if not provided.
+     *
+     * @param slowThreshold the threshold (in milliseconds) for considering a method as slow
+     */
     public LoggingAspect(@Value("${logging-aspect.slow-method-threshold-ms:500}") long slowThreshold) {
         this.slowThreshold = slowThreshold;
     }
