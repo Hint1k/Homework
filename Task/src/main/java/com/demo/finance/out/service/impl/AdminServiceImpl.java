@@ -1,6 +1,7 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
+import com.demo.finance.domain.utils.FlagUtils;
 import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.exception.custom.OptimisticLockException;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
+    private final FlagUtils flagUtils;
 
     /**
      * Retrieves a specific user by their unique user ID.
@@ -37,24 +39,25 @@ public class AdminServiceImpl implements AdminService {
     }
 
     /**
-     * Updates the role for a specified user.
+     * Updates the role of a specified user.
      * <p>
-     * This method performs the following operations:
+     * This method performs the following steps:
      * <ol>
      *   <li>Retrieves the user by ID from the repository.</li>
-     *   <li>Updates the user's role with the value from the provided {@link UserDto}.</li>
-     *   <li>Increments the version field to ensure optimistic locking integrity.</li>
-     *   <li>Persists the updated user back to the repository.</li>
+     *   <li>Updates the user's role using the value from the provided {@link UserDto}.</li>
+     *   <li>Sets the version field to support optimistic locking.</li>
+     *   <li>Persists the updated user entity back to the repository.</li>
      * </ol>
-     * If the update fails due to a version mismatch (indicating that the user was modified by another operation),
-     * an {@link OptimisticLockException} is thrown to handle the concurrency conflict.
+     * If the update fails due to a version mismatch (indicating concurrent modification),
+     * an {@link OptimisticLockException} is thrown to handle the conflict.
+     * The method also sets a request-scoped flag to ensure subsequent operations validate against the database.
      *
      * @param userId  the ID of the user to update (must not be null).
-     * @param userDto the DTO containing the new role information (must contain a valid role).
-     * @return true if the update was successful.
+     * @param userDto the DTO containing the new role and version information.
+     * @return {@code true} if the update was successful.
      * @throws UserNotFoundException    if no user exists with the specified ID.
-     * @throws IllegalArgumentException if either parameter is null or contains invalid data.
-     * @throws OptimisticLockException  if the user was modified by another operation, causing a version mismatch.
+     * @throws IllegalArgumentException if input parameters are null or invalid.
+     * @throws OptimisticLockException  if a version conflict is detected during update.
      */
     @Override
     @CacheEvict(value = "users", key = "#userId", allEntries = true)
@@ -69,28 +72,30 @@ public class AdminServiceImpl implements AdminService {
         if (!userRepository.update(user)) {
             throw new OptimisticLockException("User with ID " + userId + " was modified by another operation.");
         }
+        flagUtils.setValidateWithDatabase(true);
         return true;
     }
 
     /**
-     * Updates the blocked status for a specified user.
+     * Updates the blocked status of a specified user.
      * <p>
-     * This method performs the following operations:
+     * This method performs the following steps:
      * <ol>
      *   <li>Retrieves the user by ID from the repository.</li>
-     *   <li>Updates the user's blocked status with the value from the provided {@link UserDto}.</li>
-     *   <li>Increments the version field to ensure optimistic locking integrity.</li>
-     *   <li>Persists the updated user back to the repository.</li>
+     *   <li>Updates the user's blocked status using the value from the provided {@link UserDto}.</li>
+     *   <li>Sets the version field to support optimistic locking.</li>
+     *   <li>Persists the updated user entity back to the repository.</li>
      * </ol>
-     * If the update fails due to a version mismatch (indicating that the user was modified by another operation),
-     * an {@link OptimisticLockException} is thrown to handle the concurrency conflict.
+     * If the update fails due to a version mismatch (indicating concurrent modification),
+     * an {@link OptimisticLockException} is thrown to handle the conflict.
+     * The method also sets a request-scoped flag to ensure subsequent operations validate against the database.
      *
      * @param userId  the ID of the user to update (must not be null).
-     * @param userDto the DTO containing the new blocked status (must contain a valid status).
-     * @return true if the update was successful.
+     * @param userDto the DTO containing the new blocked status and version information.
+     * @return {@code true} if the update was successful.
      * @throws UserNotFoundException    if no user exists with the specified ID.
-     * @throws IllegalArgumentException if either parameter is null or contains invalid data.
-     * @throws OptimisticLockException  if the user was modified by another operation, causing a version mismatch.
+     * @throws IllegalArgumentException if input parameters are null or invalid.
+     * @throws OptimisticLockException  if a version conflict is detected during update.
      */
     @Override
     @CacheEvict(value = "users", key = "#userId", allEntries = true)
@@ -104,6 +109,7 @@ public class AdminServiceImpl implements AdminService {
         if (!userRepository.update(user)) {
             throw new OptimisticLockException("User with ID " + userId + " was modified by another operation.");
         }
+        flagUtils.setValidateWithDatabase(true);
         return true;
     }
 
@@ -116,6 +122,10 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @CacheEvict(value = "users", key = "#userId", allEntries = true)
     public boolean deleteUser(Long userId) {
-        return userRepository.delete(userId);
+        boolean deleted = userRepository.delete(userId);
+        if (deleted) {
+            flagUtils.setValidateWithDatabase(true);
+        }
+        return deleted;
     }
 }

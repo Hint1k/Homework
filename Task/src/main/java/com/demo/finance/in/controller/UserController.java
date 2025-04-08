@@ -142,7 +142,7 @@ public class UserController extends BaseController {
                 if (user != null) {
                     UserDto authUserDto = UserDto.removePassword(userMapper.toDto(user));
                     String token = jwtService
-                            .generateToken(authUserDto.getEmail(), List.of("user"), user.getUserId());
+                            .generateToken(authUserDto.getEmail(), List.of(authUserDto.getRole()), user.getUserId());
                     response.setHeader("Authorization", "Bearer " + token);
                     return buildSuccessResponse(HttpStatus.OK, "Authentication successful", authUserDto);
                 }

@@ -2,6 +2,7 @@ package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.mapper.UserMapper;
+import com.demo.finance.domain.utils.FlagUtils;
 import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
@@ -34,6 +35,8 @@ class UserServiceImplTest {
     private PasswordUtilsImpl passwordUtils;
     @Mock
     private UserMapper userMapper;
+    @Mock
+    private FlagUtils flagUtils;
     @InjectMocks
     private UserServiceImpl userService;
     private User user;
@@ -69,6 +72,7 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).findById(1L);
         verify(passwordUtils, times(1)).hashPassword("newPassword");
         verify(userMapper, times(1)).toEntity(userDto);
+        verify(flagUtils, times(1)).setValidateWithDatabase(true);
         verify(userRepository, times(1)).update(argThat(u -> u.getUserId().equals(1L)
                 && u.getName().equals("John Doe") && u.getEmail().equals("john@example.com")
                 && u.getPassword().equals("hashedPassword") && u.getRole().equals(Role.USER)
@@ -85,6 +89,7 @@ class UserServiceImplTest {
 
         assertThat(result).isTrue();
         verify(userRepository, times(1)).delete(userId);
+        verify(flagUtils, times(1)).setValidateWithDatabase(true);
     }
 
     @Test
@@ -105,6 +110,7 @@ class UserServiceImplTest {
         verify(userRepository, times(1))
                 .update(argThat(user -> user.getPassword().equals("existingHashedPassword")));
         verify(passwordUtils, never()).hashPassword(any());
+        verify(flagUtils, times(1)).setValidateWithDatabase(true);
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.demo.finance.out.service.impl;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.utils.FlagUtils;
 import com.demo.finance.exception.custom.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.JwtService;
@@ -23,7 +24,7 @@ import java.util.function.Function;
 /**
  * Implementation of the JwtService interface for managing JWT token generation and validation.
  * <p>
- * This service is responsible for generating JWT tokens for authenticated users, as well as validating incoming
+ * This service is responsible for generating JWT tokens for authenticated users and validating incoming
  * tokens by extracting user details and roles from the token's claims. The service uses a secret key to sign and
  * verify JWTs and checks for token expiration.
  * </p>
@@ -39,28 +40,33 @@ public class JwtServiceImpl implements JwtService {
     private final SecretKey secretKey;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final FlagUtils flagUtils;
 
     @Value("${jwt.expiration}")
     private long jwtExpirationInMs;
 
     /**
-     * Constructs a JwtServiceImpl instance with the specified secret key, user repository, and user mapper.
+     * Constructs a JwtServiceImpl instance with the specified secret key, user repository, user mapper,
+     * and flag utility.
      * <p>
      * This constructor initializes the JwtServiceImpl class by generating a {@link SecretKey} instance from the
-     * provided secret key string, and assigns the provided {@link UserRepository} and {@link UserMapper}.
+     * provided secret key string, and assigns the provided {@link UserRepository}, {@link UserMapper},
+     * and {@link FlagUtils}.
      * </p>
      *
      * @param secretKey      the secret key used for signing and verifying JWT tokens, retrieved from
      *                       the application configuration
      * @param userRepository the repository used to fetch user data from the database
      * @param userMapper     the mapper used to convert user entities to DTOs
+     * @param flagUtils      utility used to determine if token validation should be performed against the database
      */
     public JwtServiceImpl(@Value("${jwt.secret}") String secretKey,
-                          UserRepository userRepository, UserMapper userMapper) {
+                          UserRepository userRepository, UserMapper userMapper, FlagUtils flagUtils) {
         // Generate a SecretKey instance from the provided string
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes());
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.flagUtils = flagUtils;
     }
 
     /**
@@ -71,7 +77,7 @@ public class JwtServiceImpl implements JwtService {
      * </p>
      *
      * @param email  the email of the user
-     * @param roles  the roles assigned to the user
+     * @param roles  the roles assigned to the user (must be non-null and correspond to valid enum values)
      * @param userId the ID of the user
      * @return a JWT token string
      */
@@ -86,14 +92,14 @@ public class JwtServiceImpl implements JwtService {
      * Validates the provided JWT token by parsing it and checking the expiration.
      * <p>
      * This method verifies the JWT token's signature and checks if the token is expired. If valid, it extracts
-     * the user's id from the token, retrieves the corresponding user from the database, and returns a
+     * the user's ID from the token, retrieves the corresponding user from the database, and returns a
      * {@link UserDto} with the user's details.
      * </p>
      *
      * @param token the JWT token to validate
      * @return a {@link UserDto} representing the authenticated user
      * @throws IllegalArgumentException if the token is invalid or expired
-     * @throws UserNotFoundException    if no user is found with the id in the token
+     * @throws UserNotFoundException    if no user is found with the ID in the token
      */
     @Override
     public UserDto validateToken(String token) {
@@ -104,11 +110,19 @@ public class JwtServiceImpl implements JwtService {
             if (isTokenExpired(token)) {
                 throw new ExpiredJwtException(null, null, "JWT Token expired for user ID: " + userId);
             }
-            User user = userRepository.findById(userId);
-            if (user == null) {
-                throw new UserNotFoundException("User not found with ID: " + userId);
+            if (flagUtils.shouldValidateWithDatabase()) {
+                User user = userRepository.findById(userId);
+                if (user == null) {
+                    throw new UserNotFoundException("User not found with ID: " + userId);
+                }
+                return userMapper.toDto(user);
+            } else {
+                UserDto userDto = new UserDto();
+                userDto.setUserId(userId);
+                userDto.setEmail(claims.getSubject());
+                userDto.setRole((String) claims.get("roles", List.class).get(0));
+                return userDto;
             }
-            return userMapper.toDto(user);
         } catch (ExpiredJwtException | UserNotFoundException e) {
             throw e;
         } catch (Exception e) {

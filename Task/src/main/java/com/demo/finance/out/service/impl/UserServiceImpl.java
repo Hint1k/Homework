@@ -2,6 +2,7 @@ package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.utils.FlagUtils;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.exception.custom.OptimisticLockException;
@@ -28,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordUtilsImpl passwordUtils;
     private final UserMapper userMapper;
+    private final FlagUtils flagUtils;
 
     /**
      * Retrieves a user from the database by their email address.
@@ -82,6 +84,7 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.update(user)) {
             throw new OptimisticLockException("Your account was modified by another operation.");
         }
+        flagUtils.setValidateWithDatabase(true);
         return true;
     }
 
@@ -94,7 +97,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @CacheEvict(value = "users", key = "#userId", allEntries = true)
     public boolean deleteOwnAccount(Long userId) {
-        return userRepository.delete(userId);
+        boolean deleted = userRepository.delete(userId);
+        if (deleted) {
+            flagUtils.setValidateWithDatabase(true);
+        }
+        return deleted;
     }
 
     /**

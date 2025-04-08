@@ -23,6 +23,7 @@ logging:
     org.eclipse.jetty: WARN
     org.eclipse.jetty.server: WARN
     org.eclipse.jetty.client: WARN
+    org.springframework.cache.interceptor.CacheInterceptor: TRACE
   file:
     name: /app/logs/app.log
   pattern:

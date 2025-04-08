@@ -118,7 +118,7 @@ class UserControllerTest {
         when(registrationService.authenticate(validatedDto)).thenReturn(true);
         when(userService.getUserByEmail("test@example.com")).thenReturn(user);
         when(userMapper.toDto(user)).thenReturn(responseDto);
-        when(jwtService.generateToken("test@example.com", List.of("user"), 1L))
+        when(jwtService.generateToken("test@example.com", List.of(responseDto.getRole()), 1L))
                 .thenReturn(expectedToken);
 
         mockMvc.perform(post("/api/users/authenticate")
@@ -135,7 +135,7 @@ class UserControllerTest {
         verify(userService, times(1)).getUserByEmail("test@example.com");
         verify(userMapper, times(1)).toDto(user);
         verify(jwtService, times(1))
-                .generateToken("test@example.com", List.of("user"), 1L);
+                .generateToken("test@example.com", List.of(responseDto.getRole()), 1L);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.User;
+import com.demo.finance.domain.utils.FlagUtils;
 import com.demo.finance.domain.utils.Role;
 import com.demo.finance.exception.custom.OptimisticLockException;
 import com.demo.finance.exception.custom.UserNotFoundException;
@@ -28,6 +29,8 @@ class AdminServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private FlagUtils flagUtils;
     @InjectMocks
     private AdminServiceImpl adminService;
     private User user;
@@ -70,6 +73,7 @@ class AdminServiceImplTest {
         assertThat(user.getVersion()).isEqualTo(1L);
         verify(userRepository, times(1)).update(user);
         verify(userRepository, times(1)).findById(1L);
+        verify(flagUtils, times(1)).setValidateWithDatabase(true);
     }
 
     @Test
@@ -87,6 +91,7 @@ class AdminServiceImplTest {
         assertThat(user.getVersion()).isEqualTo(1L);
         verify(userRepository, times(1)).update(user);
         verify(userRepository, times(1)).findById(1L);
+        verify(flagUtils, times(1)).setValidateWithDatabase(true);
     }
 
     @Test
@@ -98,6 +103,7 @@ class AdminServiceImplTest {
 
         assertThat(result).isTrue();
         verify(userRepository, times(1)).delete(1L);
+        verify(flagUtils, times(1)).setValidateWithDatabase(true);
     }
 
     @Test
