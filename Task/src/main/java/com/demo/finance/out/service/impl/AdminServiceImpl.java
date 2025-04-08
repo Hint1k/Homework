@@ -100,7 +100,7 @@ public class AdminServiceImpl implements AdminService {
             throw new UserNotFoundException("User with ID " + userId + " not found");
         }
         user.setBlocked(userDto.isBlocked());
-        user.setVersion(user.getVersion());
+        user.setVersion(userDto.getVersion());
         if (!userRepository.update(user)) {
             throw new OptimisticLockException("User with ID " + userId + " was modified by another operation.");
         }

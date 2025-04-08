@@ -2,6 +2,7 @@ package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.Role;
+import com.demo.finance.exception.custom.OptimisticLockException;
 import com.demo.finance.exception.custom.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
 import org.instancio.Instancio;
@@ -132,5 +133,39 @@ class AdminServiceImplTest {
 
         assertThat(result).isFalse();
         verify(userRepository, times(1)).delete(1L);
+    }
+
+    @Test
+    @DisplayName("Update user role - version mismatch - throws OptimisticLockException")
+    void testUpdateUserRole_versionMismatch_throwsOptimisticLockException() {
+        userDto.setRole("ADMIN");
+        userDto.setVersion(1L);
+        user.setVersion(2L);
+
+        when(userRepository.findById(1L)).thenReturn(user);
+        when(userRepository.update(user)).thenReturn(false);
+
+        assertThatThrownBy(() -> adminService.updateUserRole(1L, userDto))
+                .isInstanceOf(OptimisticLockException.class)
+                .hasMessageContaining("User with ID 1 was modified by another operation.");
+        verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).update(user);
+    }
+
+    @Test
+    @DisplayName("Block or unblock user - version mismatch - throws OptimisticLockException")
+    void testBlockOrUnblockUser_versionMismatch_throwsOptimisticLockException() {
+        userDto.setBlocked(true);
+        userDto.setVersion(1L);
+        user.setVersion(2L);
+
+        when(userRepository.findById(1L)).thenReturn(user);
+        when(userRepository.update(user)).thenReturn(false);
+
+        assertThatThrownBy(() -> adminService.blockOrUnblockUser(1L, userDto))
+                .isInstanceOf(OptimisticLockException.class)
+                .hasMessageContaining("User with ID 1 was modified by another operation.");
+        verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).update(user);
     }
 }
