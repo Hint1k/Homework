@@ -37,22 +37,6 @@
         <dropSequence sequenceName="transactions_user_id_seq" schemaName="finance"/>
     </changeSet>
 
-    <!-- Drop reports table if it exists -->
-    <changeSet id="drop-reports-table" author="hint1k">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="reports" schemaName="finance"/>
-        </preConditions>
-        <dropTable tableName="reports" schemaName="finance"/>
-    </changeSet>
-
-    <!-- Drop reports_user_id_seq sequence if it exists -->
-    <changeSet id="drop-reports-sequence" author="hint1k">
-        <preConditions onFail="MARK_RAN">
-            <sequenceExists sequenceName="reports_user_id_seq" schemaName="finance"/>
-        </preConditions>
-        <dropSequence sequenceName="reports_user_id_seq" schemaName="finance"/>
-    </changeSet>
-
     <!-- Drop goals table if it exists -->
     <changeSet id="drop-goals-table" author="hint1k">
         <preConditions onFail="MARK_RAN">

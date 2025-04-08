@@ -9,7 +9,6 @@
         <createSequence sequenceName="users_user_id_seq" schemaName="finance" startValue="1" incrementBy="1"/>
         <createSequence sequenceName="transactions_transaction_id_seq" schemaName="finance" startValue="1"
                         incrementBy="1"/>
-        <createSequence sequenceName="reports_report_id_seq" schemaName="finance" startValue="1" incrementBy="1"/>
         <createSequence sequenceName="goals_goal_id_seq" schemaName="finance" startValue="1" incrementBy="1"/>
         <createSequence sequenceName="budgets_budget_id_seq" schemaName="finance" startValue="1" incrementBy="1"/>
     </changeSet>

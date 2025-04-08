@@ -75,7 +75,7 @@ Database username = user
 Database password = 123
 Database name = financedb
 Database schema = finance
-Table names: users, transactions, goals, reports, budgets
+Table names: users, transactions, goals, budgets
 ```
 
 ---
