@@ -8,7 +8,7 @@ import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.dto.TransactionDto;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
-import com.demo.finance.exception.ValidationException;
+import com.demo.finance.exception.custom.ValidationException;
 import com.demo.finance.out.service.UserService;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
@@ -120,22 +120,29 @@ class AdminControllerTest {
         Long userId = 2L;
         UserDto userDto = Instancio.create(UserDto.class);
         userDto.setBlocked(true);
+        User updatedUser = Instancio.create(User.class);
+        UserDto updatedUserDto = Instancio.create(UserDto.class);
 
         when(validationUtils.parseUserId("2", Mode.BLOCK_UNBLOCK)).thenReturn(userId);
         when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.BLOCK_UNBLOCK))).thenReturn(userDto);
         when(adminService.blockOrUnblockUser(userId, userDto)).thenReturn(true);
+        when(userService.getUserById(userId)).thenReturn(updatedUser);
+        when(userMapper.toDto(updatedUser)).thenReturn(updatedUserDto);
 
         mockMvc.perform(patch("/api/admin/users/block/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"blocked\":true}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message")
-                        .value("User blocked/unblocked status changed successfully"));
+                        .value("User blocked/unblocked status changed successfully"))
+                .andExpect(jsonPath("$.data").exists());
 
         verify(validationUtils, times(1)).parseUserId("2", Mode.BLOCK_UNBLOCK);
         verify(validationUtils, times(1))
                 .validateRequest(any(UserDto.class), eq(Mode.BLOCK_UNBLOCK));
         verify(adminService, times(1)).blockOrUnblockUser(userId, userDto);
+        verify(userService, times(1)).getUserById(userId);
+        verify(userMapper, times(1)).toDto(updatedUser);
     }
 
     @Test
@@ -143,21 +150,28 @@ class AdminControllerTest {
     void testUpdateUserRole_Success() throws Exception {
         Long userId = 2L;
         UserDto userDto = Instancio.create(UserDto.class);
+        User updatedUser = Instancio.create(User.class);
+        UserDto updatedUserDto = Instancio.create(UserDto.class);
 
         when(validationUtils.parseUserId("2", Mode.UPDATE_ROLE)).thenReturn(userId);
         when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.UPDATE_ROLE))).thenReturn(userDto);
         when(adminService.updateUserRole(userId, userDto)).thenReturn(true);
+        when(userService.getUserById(userId)).thenReturn(updatedUser);
+        when(userMapper.toDto(updatedUser)).thenReturn(updatedUserDto);
 
         mockMvc.perform(patch("/api/admin/users/role/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"role\":\"ADMIN\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("User role updated successfully"));
+                .andExpect(jsonPath("$.message").value("User role updated successfully"))
+                .andExpect(jsonPath("$.data").exists());
 
         verify(validationUtils, times(1)).parseUserId("2", Mode.UPDATE_ROLE);
         verify(validationUtils, times(1))
                 .validateRequest(any(UserDto.class), eq(Mode.UPDATE_ROLE));
         verify(adminService, times(1)).updateUserRole(userId, userDto);
+        verify(userService, times(1)).getUserById(userId);
+        verify(userMapper, times(1)).toDto(updatedUser);
     }
 
     @Test

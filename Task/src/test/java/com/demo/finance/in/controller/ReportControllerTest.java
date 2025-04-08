@@ -8,7 +8,7 @@ import com.demo.finance.domain.mapper.ReportMapper;
 import com.demo.finance.domain.model.Report;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
-import com.demo.finance.exception.ValidationException;
+import com.demo.finance.exception.custom.ValidationException;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

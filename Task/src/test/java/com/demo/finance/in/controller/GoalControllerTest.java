@@ -8,7 +8,7 @@ import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
-import com.demo.finance.exception.ValidationException;
+import com.demo.finance.exception.custom.ValidationException;
 import com.demo.finance.out.service.GoalService;
 import org.instancio.Instancio;
 import org.springframework.http.MediaType;

@@ -1,4 +1,4 @@
-package com.demo.finance.exception;
+package com.demo.finance.exception.custom;
 
 /**
  * Custom exception class for database connection-related errors.

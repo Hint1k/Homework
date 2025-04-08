@@ -5,7 +5,7 @@ import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
-import com.demo.finance.exception.ValidationException;
+import com.demo.finance.exception.custom.ValidationException;
 import com.demo.finance.out.service.BudgetService;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;

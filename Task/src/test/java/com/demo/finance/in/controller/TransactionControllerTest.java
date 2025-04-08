@@ -7,7 +7,7 @@ import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.dto.TransactionDto;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
-import com.demo.finance.exception.ValidationException;
+import com.demo.finance.exception.custom.ValidationException;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
 import org.instancio.Instancio;

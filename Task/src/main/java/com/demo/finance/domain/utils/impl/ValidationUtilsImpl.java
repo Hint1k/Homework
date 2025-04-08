@@ -4,7 +4,7 @@ import com.demo.finance.domain.dto.*;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
-import com.demo.finance.exception.ValidationException;
+import com.demo.finance.exception.custom.ValidationException;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -38,10 +38,10 @@ public class ValidationUtilsImpl implements ValidationUtils {
         REQUIRED_FIELDS_MAP.put(Mode.GOAL_CREATE, List.of("goalName", "targetAmount", "duration", "startTime"));
         REQUIRED_FIELDS_MAP.put(Mode.GOAL_UPDATE, List.of("goalName", "targetAmount", "duration"));
         REQUIRED_FIELDS_MAP.put(Mode.REGISTER_USER, List.of("name", "email", "password"));
-        REQUIRED_FIELDS_MAP.put(Mode.UPDATE_USER, List.of("name", "email", "password"));
+        REQUIRED_FIELDS_MAP.put(Mode.UPDATE_USER, List.of("name", "email", "password", "version"));
         REQUIRED_FIELDS_MAP.put(Mode.AUTHENTICATE, List.of("email", "password"));
-        REQUIRED_FIELDS_MAP.put(Mode.UPDATE_ROLE, List.of("role"));
-        REQUIRED_FIELDS_MAP.put(Mode.BLOCK_UNBLOCK, List.of("blocked"));
+        REQUIRED_FIELDS_MAP.put(Mode.UPDATE_ROLE, List.of("role", "version"));
+        REQUIRED_FIELDS_MAP.put(Mode.BLOCK_UNBLOCK, List.of("blocked", "version"));
         REQUIRED_FIELDS_MAP.put(Mode.REPORT, List.of("fromDate", "toDate"));
         REQUIRED_FIELDS_MAP.put(Mode.BUDGET, List.of("monthlyLimit"));
         REQUIRED_FIELDS_MAP.put(Mode.PAGE, List.of("page", "size"));
@@ -229,11 +229,22 @@ public class ValidationUtilsImpl implements ValidationUtils {
      * Validates user-related fields based on the specified mode.
      * <p>
      * This method ensures that email, password, and name fields are valid and non-empty where applicable.
-     * Additional constraints are applied for role updates and authentication modes.
+     * Additional constraints are applied for role updates, blocked status changes, and version validation.
+     * <p>
+     * The validation rules vary depending on the mode:
+     * <ul>
+     *   <li>For modes other than {@code UPDATE_ROLE} and {@code BLOCK_UNBLOCK}, email
+     *   and password must be valid and non-empty.</li>
+     *   <li>For modes other than {@code AUTHENTICATE}, {@code UPDATE_ROLE}, and {@code BLOCK_UNBLOCK},
+     *   the name field must be non-empty.</li>
+     *   <li>For {@code UPDATE_ROLE}, the role field must be valid and non-empty,
+     *   and the version must be validated.</li>
+     *   <li>For {@code BLOCK_UNBLOCK} and {@code UPDATE_USER}, the version must be validated.</li>
+     * </ul>
      *
      * @param dto  the user DTO to validate
      * @param mode the mode specifying the validation rules
-     * @throws ValidationException if any user-related field is invalid
+     * @throws ValidationException if any user-related field or version is invalid
      */
     private void validateUserFields(UserDto dto, Mode mode) {
         if (mode != Mode.UPDATE_ROLE && mode != Mode.BLOCK_UNBLOCK && !isValidEmail(dto.getEmail())) {
@@ -246,11 +257,17 @@ public class ValidationUtilsImpl implements ValidationUtils {
                 && isBlank(dto.getName())) {
             throw new ValidationException("Name cannot be empty.");
         }
-        if (mode == Mode.UPDATE_ROLE && (dto.getRole() == null || isBlank(dto.getRole()))) {
-            throw new ValidationException("Role cannot be empty.");
+        if (mode == Mode.UPDATE_ROLE) {
+            if (dto.getRole() == null || isBlank(dto.getRole())) {
+                throw new ValidationException("Role cannot be empty.");
+            }
+            if (!isValidRole(dto.getRole())) {
+                throw new ValidationException("Role must be either USER or ADMIN.");
+            }
+            validateVersion(dto.getVersion());
         }
-        if (mode == Mode.UPDATE_ROLE && !isValidRole(dto.getRole())) {
-            throw new ValidationException("Role must be either USER or ADMIN.");
+        if (mode == Mode.BLOCK_UNBLOCK || mode == Mode.UPDATE_USER) {
+            validateVersion(dto.getVersion());
         }
     }
 
@@ -382,5 +399,20 @@ public class ValidationUtilsImpl implements ValidationUtils {
      */
     private boolean isValidRole(String role) {
         return "USER".equals(role) || "ADMIN".equals(role);
+    }
+
+    /**
+     * Validates the version field to ensure it is a positive number greater than zero.
+     * <p>
+     * This method is used to enforce optimistic locking constraints by ensuring the version
+     * value is valid before performing update operations.
+     *
+     * @param version the version value to validate
+     * @throws ValidationException if the version is null or less than or equal to zero
+     */
+    private void validateVersion(Long version) {
+        if (version == null || version <= 0) {
+            throw new ValidationException("Version must be a positive number greater than 0.");
+        }
     }
 }

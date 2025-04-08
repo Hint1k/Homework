@@ -1,6 +1,6 @@
 package com.demo.finance.app.config;
 
-import com.demo.finance.exception.DatabaseConnectionException;
+import com.demo.finance.exception.custom.DatabaseConnectionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

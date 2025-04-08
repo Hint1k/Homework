@@ -2,7 +2,7 @@ package com.demo.finance.out.repository.impl;
 
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.utils.GeneratedKey;
-import com.demo.finance.exception.DatabaseException;
+import com.demo.finance.exception.custom.DatabaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

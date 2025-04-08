@@ -8,8 +8,9 @@ import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
-import com.demo.finance.exception.UserNotFoundException;
-import com.demo.finance.exception.ValidationException;
+import com.demo.finance.exception.custom.OptimisticLockException;
+import com.demo.finance.exception.custom.UserNotFoundException;
+import com.demo.finance.exception.custom.ValidationException;
 import com.demo.finance.out.service.AdminService;
 import com.demo.finance.out.service.TransactionService;
 import com.demo.finance.out.service.UserService;
@@ -167,10 +168,15 @@ public class AdminController extends BaseController {
      * This endpoint validates the user ID and the request body containing the block status. It then delegates
      * the request to the admin service to update the user's blocked status. If the operation succeeds, a success
      * response is returned; otherwise, an error response is returned.
+     * <p>
+     * If the update fails due to a version mismatch (indicating that the user was modified by another operation),
+     * an {@link OptimisticLockException} is caught, and a 409 Conflict response is returned
+     * to handle the concurrency conflict.
      *
      * @param userId     the ID of the user to block or unblock
      * @param userDtoNew the request body containing the updated block status
      * @return a success response if the operation succeeds or an error response if validation fails
+     * or a concurrency conflict occurs
      */
     @PatchMapping("/block/{userId}")
     @Operation(summary = "Block/unblock user", description = "Updates user's blocked status")
@@ -190,13 +196,20 @@ public class AdminController extends BaseController {
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.BLOCK_UNBLOCK);
             boolean success = adminService.blockOrUnblockUser(userIdLong, userDto);
             if (success) {
-                userDto.setUserId(userIdLong);
-                return buildSuccessResponse(HttpStatus.OK,
-                        "User blocked/unblocked status changed successfully", UserDto.removePassword(userDto));
+                User updatedUser = userService.getUserById(userIdLong);
+                if (updatedUser != null) {
+                    UserDto updatedUserDto = UserDto.removePassword(userMapper.toDto(updatedUser));
+                    return buildSuccessResponse(HttpStatus.OK,
+                            "User blocked/unblocked status changed successfully", updatedUserDto);
+                }
+                return buildErrorResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve updated user details.");
             }
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Failed to block/unblock user.");
         } catch (ValidationException | UserNotFoundException | IllegalArgumentException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (OptimisticLockException e) {
+            return buildErrorResponse(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 
@@ -206,10 +219,15 @@ public class AdminController extends BaseController {
      * This endpoint validates the user ID and the request body containing the updated role. It then delegates
      * the request to the admin service to update the user's role. If the operation succeeds, a success response
      * is returned; otherwise, an error response is returned.
+     * <p>
+     * If the update fails due to a version mismatch (indicating that the user was modified by another operation),
+     * an {@link OptimisticLockException} is caught, and a 409 Conflict response is returned
+     * to handle the concurrency conflict.
      *
      * @param userId     the ID of the user whose role is being updated
      * @param userDtoNew the request body containing the updated role
      * @return a success response if the operation succeeds or an error response if validation fails
+     * or a concurrency conflict occurs
      */
     @PatchMapping("/role/{userId}")
     @Operation(summary = "Update user role", description = "Updates user's role")
@@ -230,13 +248,20 @@ public class AdminController extends BaseController {
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.UPDATE_ROLE);
             boolean success = adminService.updateUserRole(userIdLong, userDto);
             if (success) {
-                userDto.setUserId(userIdLong);
-                return buildSuccessResponse(
-                        HttpStatus.OK, "User role updated successfully", UserDto.removePassword(userDto));
+                User updatedUser = userService.getUserById(userIdLong);
+                if (updatedUser != null) {
+                    UserDto updatedUserDto = UserDto.removePassword(userMapper.toDto(updatedUser));
+                    return buildSuccessResponse(
+                            HttpStatus.OK, "User role updated successfully", updatedUserDto);
+                }
+                return buildErrorResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve updated user details.");
             }
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Failed to update role.");
         } catch (ValidationException | UserNotFoundException | IllegalArgumentException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (OptimisticLockException e) {
+            return buildErrorResponse(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 

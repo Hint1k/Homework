@@ -2,7 +2,7 @@ package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.Role;
-import com.demo.finance.exception.UserNotFoundException;
+import com.demo.finance.exception.custom.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +38,7 @@ class AdminServiceImplTest {
         user.setVersion(1L);
         userDto = Instancio.create(UserDto.class);
         userDto.setUserId(1L);
+        userDto.setVersion(1L);
     }
 
     @Test
@@ -62,7 +63,7 @@ class AdminServiceImplTest {
 
         assertThat(result).isTrue();
         assertThat(user.getRole()).isEqualTo(ADMIN);
-        assertThat(user.getVersion()).isEqualTo(2L);
+        assertThat(user.getVersion()).isEqualTo(1L);
     }
 
     @Test
@@ -77,7 +78,7 @@ class AdminServiceImplTest {
 
         assertThat(result).isTrue();
         assertThat(user.isBlocked()).isTrue();
-        assertThat(user.getVersion()).isEqualTo(2L);
+        assertThat(user.getVersion()).isEqualTo(1L);
     }
 
     @Test

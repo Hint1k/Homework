@@ -69,7 +69,8 @@ public final class SwaggerExamples {
                 {
                   "name": "jay2",
                   "email": "jay2@demo.com",
-                  "password": "123"
+                  "password": "123",
+                  "version": 1
                 }
                 """;
         public static final String UPDATE_ACCOUNT_SUCCESS = """
@@ -220,7 +221,8 @@ public final class SwaggerExamples {
                 """;
         public static final String UPDATE_ROLE_REQUEST = """
                 {
-                  "role": "USER"
+                  "role": "USER",
+                  "version": 1
                 }
                 """;
         public static final String UPDATE_ROLE_SUCCESS = """
@@ -248,7 +250,8 @@ public final class SwaggerExamples {
                 """;
         public static final String BLOCK_USER_REQUEST = """
                 {
-                  "blocked": false
+                  "blocked": false,
+                  "version": 1
                 }
                 """;
         public static final String BLOCK_USER_SUCCESS = """

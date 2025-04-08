@@ -5,7 +5,7 @@ import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
-import com.demo.finance.exception.DuplicateEmailException;
+import com.demo.finance.exception.custom.DuplicateEmailException;
 import com.demo.finance.out.repository.UserRepository;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;

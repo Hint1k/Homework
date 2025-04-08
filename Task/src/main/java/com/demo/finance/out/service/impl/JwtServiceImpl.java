@@ -3,7 +3,7 @@ package com.demo.finance.out.service.impl;
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.exception.UserNotFoundException;
+import com.demo.finance.exception.custom.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;

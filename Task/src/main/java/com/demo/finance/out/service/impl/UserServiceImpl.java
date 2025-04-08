@@ -4,6 +4,7 @@ import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
+import com.demo.finance.exception.custom.OptimisticLockException;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.UserService;
 import com.demo.finance.domain.mapper.UserMapper;
@@ -38,6 +39,17 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * Retrieves a user from the database by their unique identifier.
+     *
+     * @param userId the unique identifier of the user to retrieve
+     * @return the {@link User} object associated with the provided user ID, or {@code null} if not found
+     */
+    @Override
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId);
+    }
+
+    /**
      * Updates the account details of the user with the specified user ID.
      * This method maps the provided {@link UserDto} to a {@link User} entity,
      * preserves the existing role and increments the version, and updates the password
@@ -61,8 +73,11 @@ public class UserServiceImpl implements UserService {
         }
         user.setUserId(userId);
         user.setRole(existingUser.getRole());
-        user.setVersion(existingUser.getVersion() + 1);
-        return userRepository.update(user);
+        user.setVersion(userDto.getVersion());
+        if (!userRepository.update(user)) {
+            throw new OptimisticLockException("Your account was modified by another operation.");
+        }
+        return true;
     }
 
     /**
@@ -91,7 +106,6 @@ public class UserServiceImpl implements UserService {
         int totalUsers = userRepository.getTotalUserCount();
         List<UserDto> dtoList = users.stream().map(user ->
                 UserDto.removePassword(userMapper.toDto(user))).toList();
-
         return new PaginatedResponse<>(dtoList, totalUsers, (int) Math.ceil((double) totalUsers / size), page, size);
     }
 }

@@ -5,8 +5,9 @@ import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.ValidationUtils;
-import com.demo.finance.exception.DuplicateEmailException;
-import com.demo.finance.exception.ValidationException;
+import com.demo.finance.exception.custom.DuplicateEmailException;
+import com.demo.finance.exception.custom.OptimisticLockException;
+import com.demo.finance.exception.custom.ValidationException;
 import com.demo.finance.out.service.JwtService;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.out.service.UserService;
@@ -179,7 +180,10 @@ public class UserController extends BaseController {
      * <p>
      * This endpoint validates the provided user data, updates the user's details, and returns the updated user
      * information. If the update fails, a 400 Bad Request error is returned.
-     * </p>
+     * <p>
+     * If the update fails due to a version mismatch (indicating that the user was modified by another operation),
+     * an {@link OptimisticLockException} is caught, and a 409 Conflict response is returned
+     * to handle the concurrency conflict.
      *
      * @param userDtoNew     the updated user data
      * @param currentUserDto the currently authenticated user
@@ -213,6 +217,8 @@ public class UserController extends BaseController {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Failed to update account.");
         } catch (ValidationException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (OptimisticLockException e) {
+            return buildErrorResponse(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 

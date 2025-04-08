@@ -1,6 +1,6 @@
 package com.demo.finance.app.config;
 
-import com.demo.finance.exception.DatabaseConnectionException;
+import com.demo.finance.exception.custom.DatabaseConnectionException;
 import com.demo.finance.out.repository.impl.AbstractContainerBaseSetup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

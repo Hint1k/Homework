@@ -135,16 +135,16 @@ http://localhost:8080/v3/api-docs
 POST http://localhost:8080/api/users/registration 
 ```json 
 {
-"name": "jay",
-"email": "jay@demo.com",
-"password": "123"
+  "name": "jay",
+  "email": "jay@demo.com",
+  "password": "123"
 }
 ```
 POST http://localhost:8080/api/users/authenticate
 ```json 
 {
-"email": "jay@demo.com",
-"password": "123"
+  "email": "jay@demo.com",
+  "password": "123"
 }
 ```
 POST http://localhost:8080/api/users/logout
@@ -156,7 +156,8 @@ PUT http://localhost:8080/api/users
 {
   "name": "jay2",
   "email": "jay2@demo.com",
-  "password": "123"
+  "password": "123",
+  "version": 1
 }
 ```
 GET http://localhost:8080/api/users/me
@@ -184,13 +185,15 @@ GET http://localhost:8080/api/admin/users/transactions/2?page=1&size=10
 PATCH http://localhost:8080/api/admin/users/role/2
 ```json 
 {
-"role": "USER"
+  "role": "USER", 
+  "version": 1
 }
 ```
 PATCH http://localhost:8080/api/admin/users/block/2
 ```json 
 {
-  "blocked": true
+  "blocked": true,
+  "version": 1
 }
 ```
 DELETE http://localhost:8080/api/admin/users/2

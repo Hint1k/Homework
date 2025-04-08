@@ -8,7 +8,7 @@ import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.Type;
-import com.demo.finance.exception.ValidationException;
+import com.demo.finance.exception.custom.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;

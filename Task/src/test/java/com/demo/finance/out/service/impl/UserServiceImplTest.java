@@ -5,6 +5,7 @@ import com.demo.finance.domain.mapper.UserMapper;
 import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
+import com.demo.finance.exception.custom.OptimisticLockException;
 import com.demo.finance.out.repository.UserRepository;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,7 +54,8 @@ class UserServiceImplTest {
     @DisplayName("Update own account - existing user - updates successfully")
     void testUpdateOwnAccount_existingUser_updatesSuccessfully() {
         user.setRole(Role.USER);
-        user.setVersion(1L);
+        user.setVersion(3L);
+        userDto.setVersion(3L);
 
         when(userRepository.findById(1L)).thenReturn(user);
         when(passwordUtils.hashPassword("newPassword")).thenReturn("hashedPassword");
@@ -65,10 +68,14 @@ class UserServiceImplTest {
         verify(userRepository).findById(1L);
         verify(passwordUtils).hashPassword("newPassword");
         verify(userMapper).toEntity(userDto);
-        verify(userRepository).update(argThat(user ->
-                user.getUserId().equals(1L) && user.getName().equals("John Doe")
-                        && user.getEmail().equals("john@example.com") && user.getPassword().equals("hashedPassword")
-                        && user.getRole().equals(Role.USER) && user.getVersion() == 2L));
+        verify(userRepository).update(argThat(u ->
+                u.getUserId().equals(1L) &&
+                        u.getName().equals("John Doe") &&
+                        u.getEmail().equals("john@example.com") &&
+                        u.getPassword().equals("hashedPassword") &&
+                        u.getRole().equals(Role.USER) &&
+                        u.getVersion().equals(3L)
+        ));
     }
 
     @Test
@@ -103,26 +110,32 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Update own account - update fails - returns false")
-    void testUpdateOwnAccount_updateFails_returnsFalse() {
+    @DisplayName("Update own account - update fails - throws OptimisticLockException")
+    void testUpdateOwnAccount_updateFails_throwsOptimisticLockException() {
         user.setRole(Role.USER);
-        user.setVersion(1L);
+        user.setVersion(2L);
+        userDto.setVersion(2L);
 
         when(userRepository.findById(1L)).thenReturn(user);
         when(passwordUtils.hashPassword("newPassword")).thenReturn("hashedPassword");
         when(userMapper.toEntity(userDto)).thenReturn(user);
         when(userRepository.update(any(User.class))).thenReturn(false);
 
-        boolean result = userService.updateOwnAccount(userDto, 1L);
+        assertThatThrownBy(() -> userService.updateOwnAccount(userDto, 1L))
+                .isInstanceOf(OptimisticLockException.class)
+                .hasMessageContaining("Your account was modified by another operation.");
 
-        assertThat(result).isFalse();
         verify(userRepository).findById(1L);
         verify(passwordUtils).hashPassword("newPassword");
         verify(userMapper).toEntity(userDto);
-        verify(userRepository).update(argThat(user -> user.getUserId().equals(1L)
-                && user.getName().equals("John Doe") && user.getEmail().equals("john@example.com")
-                && user.getPassword().equals("hashedPassword") && user.getRole().equals(Role.USER)
-                && user.getVersion() == 2L));
+        verify(userRepository).update(argThat(u ->
+                u.getUserId().equals(1L) &&
+                        u.getName().equals("John Doe") &&
+                        u.getEmail().equals("john@example.com") &&
+                        u.getPassword().equals("hashedPassword") &&
+                        u.getRole().equals(Role.USER) &&
+                        u.getVersion().equals(2L)
+        ));
     }
 
     @Test

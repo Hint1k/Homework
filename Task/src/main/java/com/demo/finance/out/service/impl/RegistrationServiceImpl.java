@@ -4,7 +4,7 @@ import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
-import com.demo.finance.exception.DuplicateEmailException;
+import com.demo.finance.exception.custom.DuplicateEmailException;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.RegistrationService;
 import com.demo.finance.domain.mapper.UserMapper;

@@ -23,7 +23,7 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
     private static final String INSERT_SQL = "INSERT INTO finance.users "
             + "(name, email, password, blocked, role, version) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String UPDATE_SQL = "UPDATE finance.users SET name = ?, email = ?, password = ?, "
-            + "blocked = ?, role = ?, version = ? WHERE user_id = ?";
+            + "blocked = ?, role = ?, version = ? WHERE user_id = ? AND version = ?";
     private static final String DELETE_SQL = "DELETE FROM finance.users WHERE user_id = ?";
     private static final String FIND_ALL_SQL_PAGINATED = "SELECT * FROM finance.users LIMIT ? OFFSET ?";
     private static final String FIND_BY_ID_SQL = "SELECT * FROM finance.users WHERE user_id = ?";
@@ -52,16 +52,29 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
 
     /**
      * Updates an existing user in the database by executing the corresponding SQL update query.
+     * <p>
+     * This method ensures optimistic locking by comparing the current version of the user with the version
+     * stored in the database. If the versions match, the update proceeds, and the version is incremented.
+     * If the versions do not match, the update fails, and the user's version is reverted to its original value.
      *
      * @param user the {@link User} object containing updated information
      * @return {@code true} if the update was successful, {@code false} otherwise
      */
     @Override
     public boolean update(User user) {
-        return updateRecord(UPDATE_SQL, stmt -> {
+        Long originalVersion = user.getVersion();
+        user.setVersion(originalVersion + 1);
+        boolean updated = updateRecord(UPDATE_SQL, stmt -> {
             setUserParameters(stmt, user);
             stmt.setLong(7, user.getUserId());
+            stmt.setLong(8, originalVersion);
         });
+        if (updated) {
+            user.setVersion(originalVersion + 1);
+        } else {
+            user.setVersion(originalVersion);
+        }
+        return updated;
     }
 
     /**
