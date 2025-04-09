@@ -102,7 +102,7 @@ public class TransactionController extends BaseController {
                     validationUtils.validateRequest(transactionDtoNew, Mode.TRANSACTION_CREATE);
             Long transactionId = transactionService.createTransaction(transactionDto, userId);
             if (transactionId != null) {
-                Transaction transaction = transactionService.getTransaction(transactionId);
+                Transaction transaction = transactionService.getTransaction(transactionId, userId);
                 if (transaction != null) {
                     TransactionDto transactionDtoCreated = transactionMapper.toDto(transaction);
                     return buildSuccessResponse(
@@ -226,7 +226,7 @@ public class TransactionController extends BaseController {
             transactionDto.setTransactionId(transactionIdLong);
             boolean success = transactionService.updateTransaction(transactionDto, userId);
             if (success) {
-                Transaction transaction = transactionService.getTransaction(transactionDto.getTransactionId());
+                Transaction transaction = transactionService.getTransaction(transactionDto.getTransactionId(), userId);
                 if (transaction != null) {
                     TransactionDto transactionDtoUpdated = transactionMapper.toDto(transaction);
                     return buildSuccessResponse(

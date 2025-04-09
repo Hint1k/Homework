@@ -63,7 +63,7 @@ class TransactionServiceImplTest {
     void testGetTransaction_existingTransaction_returnsTransaction() {
         when(transactionRepository.findById(transactionId)).thenReturn(transaction);
 
-        Transaction result = transactionService.getTransaction(transactionId);
+        Transaction result = transactionService.getTransaction(transactionId, transaction.getUserId());
 
         assertThat(result).isEqualTo(transaction);
         verify(transactionRepository, times(1)).findById(transactionId);

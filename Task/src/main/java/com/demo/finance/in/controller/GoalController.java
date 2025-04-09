@@ -93,7 +93,7 @@ public class GoalController extends BaseController {
             GoalDto goalDto = validationUtils.validateRequest(goalDtoNew, Mode.GOAL_CREATE);
             Long goalId = goalService.createGoal(goalDto, userId);
             if (goalId != null) {
-                Goal goal = goalService.getGoal(goalId);
+                Goal goal = goalService.getGoal(goalId, userId);
                 if (goal != null) {
                     GoalDto goalDtoCreated = goalMapper.toDto(goal);
                     return buildSuccessResponse(
@@ -211,7 +211,7 @@ public class GoalController extends BaseController {
             goalDto.setGoalId(goalIdLong);
             boolean success = goalService.updateGoal(goalDto, userId);
             if (success) {
-                Goal goal = goalService.getGoal(goalDto.getGoalId());
+                Goal goal = goalService.getGoal(goalDto.getGoalId(), userId);
                 if (goal != null) {
                     GoalDto goalDtoUpdated = goalMapper.toDto(goal);
                     return buildSuccessResponse(HttpStatus.OK, "Goal updated successfully", goalDtoUpdated);

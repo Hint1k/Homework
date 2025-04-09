@@ -39,7 +39,6 @@ public class UserServiceImpl implements UserService {
      * @return the {@link User} object associated with the provided email, or {@code null} if not found
      */
     @Override
-    @Cacheable(value = "users", key = "#email")
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -69,7 +68,7 @@ public class UserServiceImpl implements UserService {
      * @return true if the account is successfully updated, false otherwise
      */
     @Override
-    @CacheEvict(value = "users", key = "#userId", allEntries = true)
+    @CacheEvict(value = "users", key = "#userId")
     public boolean updateOwnAccount(UserDto userDto, Long userId) {
         User user = userMapper.toEntity(userDto);
         User existingUser = userRepository.findById(userId);
@@ -99,7 +98,7 @@ public class UserServiceImpl implements UserService {
      * @return {@code true} if the deletion was successful, {@code false} otherwise
      */
     @Override
-    @CacheEvict(value = "users", key = "#userId", allEntries = true)
+    @CacheEvict(value = "users", key = "#userId")
     public boolean deleteOwnAccount(Long userId) {
         boolean deleted = userRepository.delete(userId);
         if (deleted) {

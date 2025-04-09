@@ -32,7 +32,7 @@ public interface GoalService {
      * @param goalId the unique identifier of the goal
      * @return the {@link Goal} object matching the provided goal ID
      */
-    Goal getGoal(Long goalId);
+    Goal getGoal(Long goalId, Long userId);
 
     /**
      * Retrieves a specific goal associated with a user by their user ID and goal ID.

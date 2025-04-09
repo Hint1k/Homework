@@ -72,7 +72,7 @@ class GoalServiceImplTest {
     void testGetGoal_existingGoal_returnsGoal() {
         when(goalRepository.findById(2L)).thenReturn(goal);
 
-        Goal result = goalService.getGoal(2L);
+        Goal result = goalService.getGoal(2L, 1L);
 
         assertThat(result).isEqualTo(goal);
         verify(goalRepository, times(1)).findById(2L);

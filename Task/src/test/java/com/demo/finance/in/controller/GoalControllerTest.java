@@ -79,7 +79,7 @@ class GoalControllerTest {
                 + "\"duration\":12,\"startTime\":\"2023-10-01\"}";
         when(validationUtils.validateRequest(any(GoalDto.class), eq(Mode.GOAL_CREATE))).thenReturn(goalDto);
         when(goalService.createGoal(any(GoalDto.class), anyLong())).thenReturn(1L);
-        when(goalService.getGoal(1L)).thenReturn(goal);
+        when(goalService.getGoal(1L, 1L)).thenReturn(goal);
         when(goalMapper.toDto(any(Goal.class))).thenReturn(goalDto);
 
         mockMvc.perform(post("/api/goals")
@@ -93,7 +93,7 @@ class GoalControllerTest {
         verify(validationUtils, times(1))
                 .validateRequest(any(GoalDto.class), eq(Mode.GOAL_CREATE));
         verify(goalService, times(1)).createGoal(any(GoalDto.class), eq(1L));
-        verify(goalService, times(1)).getGoal(1L);
+        verify(goalService, times(1)).getGoal(1L, 1L);
         verify(goalMapper, times(1)).toDto(any(Goal.class));
     }
 
@@ -144,7 +144,7 @@ class GoalControllerTest {
         when(validationUtils.parseLong("1")).thenReturn(1L);
         when(validationUtils.validateRequest(any(GoalDto.class), eq(Mode.GOAL_UPDATE))).thenReturn(goalDto);
         when(goalService.updateGoal(any(GoalDto.class), eq(1L))).thenReturn(true);
-        when(goalService.getGoal(1L)).thenReturn(goal);
+        when(goalService.getGoal(1L, 1L)).thenReturn(goal);
         when(goalMapper.toDto(any(Goal.class))).thenReturn(goalDto);
 
         mockMvc.perform(put("/api/goals/1")
@@ -159,7 +159,7 @@ class GoalControllerTest {
         verify(validationUtils, times(1))
                 .validateRequest(any(GoalDto.class), eq(Mode.GOAL_UPDATE));
         verify(goalService, times(1)).updateGoal(any(GoalDto.class), eq(1L));
-        verify(goalService, times(1)).getGoal(1L);
+        verify(goalService, times(1)).getGoal(1L, 1L);
         verify(goalMapper, times(1)).toDto(any(Goal.class));
     }
 

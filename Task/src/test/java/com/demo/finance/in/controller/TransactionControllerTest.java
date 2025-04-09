@@ -82,7 +82,7 @@ class TransactionControllerTest {
 
         when(validationUtils.validateRequest(any(), eq(Mode.TRANSACTION_CREATE))).thenReturn(validatedDto);
         when(transactionService.createTransaction(validatedDto, 1L)).thenReturn(1L);
-        when(transactionService.getTransaction(1L)).thenReturn(createdTransaction);
+        when(transactionService.getTransaction(1L, 1L)).thenReturn(createdTransaction);
         when(transactionMapper.toDto(createdTransaction)).thenReturn(responseDto);
 
         mockMvc.perform(post("/api/transactions")
@@ -95,7 +95,7 @@ class TransactionControllerTest {
 
         verify(validationUtils, times(1)).validateRequest(any(), eq(Mode.TRANSACTION_CREATE));
         verify(transactionService, times(1)).createTransaction(validatedDto, 1L);
-        verify(transactionService, times(1)).getTransaction(1L);
+        verify(transactionService, times(1)).getTransaction(1L, 1L);
         verify(transactionMapper, times(1)).toDto(createdTransaction);
     }
 
@@ -151,7 +151,7 @@ class TransactionControllerTest {
         when(validationUtils.parseLong("1")).thenReturn(1L);
         when(validationUtils.validateRequest(any(), eq(Mode.TRANSACTION_UPDATE))).thenReturn(validatedDto);
         when(transactionService.updateTransaction(validatedDto, 1L)).thenReturn(true);
-        when(transactionService.getTransaction(1L)).thenReturn(updatedTransaction);
+        when(transactionService.getTransaction(1L, 1L)).thenReturn(updatedTransaction);
         when(transactionMapper.toDto(updatedTransaction)).thenReturn(responseDto);
 
         mockMvc.perform(put("/api/transactions/1")
@@ -164,7 +164,7 @@ class TransactionControllerTest {
         verify(validationUtils, times(1)).parseLong("1");
         verify(validationUtils, times(1)).validateRequest(any(), eq(Mode.TRANSACTION_UPDATE));
         verify(transactionService, times(1)).updateTransaction(validatedDto, 1L);
-        verify(transactionService, times(1)).getTransaction(1L);
+        verify(transactionService, times(1)).getTransaction(1L, 1L);
         verify(transactionMapper, times(1)).toDto(updatedTransaction);
     }
 
@@ -238,7 +238,7 @@ class TransactionControllerTest {
         verify(validationUtils, times(1)).parseLong("1");
         verify(validationUtils, times(1)).validateRequest(any(), eq(Mode.TRANSACTION_UPDATE));
         verify(transactionService, times(1)).updateTransaction(validatedDto, 1L);
-        verify(transactionService, never()).getTransaction(anyLong());
+        verify(transactionService, never()).getTransaction(anyLong(), anyLong());
         verify(transactionMapper, never()).toDto(any());
     }
 

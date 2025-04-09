@@ -9,6 +9,7 @@ import com.demo.finance.out.service.BudgetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -38,7 +39,8 @@ public class BudgetServiceImpl implements BudgetService {
      * @return the updated or newly created {@link Budget} object, or {@code null} if the operation fails
      */
     @Override
-    @CacheEvict(value = "budgets", key = "#userId")
+    @Caching(evict = {@CacheEvict(value = "budgets", key = "#userId"),
+            @CacheEvict(value = "budgets", key = "#userId + '-data'")})
     public Budget setMonthlyBudget(Long userId, BigDecimal limit) {
         Budget existingBudget = budgetRepository.findByUserId(userId);
         boolean success;

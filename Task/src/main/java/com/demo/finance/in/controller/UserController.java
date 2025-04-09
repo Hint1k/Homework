@@ -208,7 +208,7 @@ public class UserController extends BaseController {
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.UPDATE_USER);
             boolean success = userService.updateOwnAccount(userDto, currentUserDto.getUserId());
             if (success) {
-                User updatedUser = userService.getUserByEmail(userDto.getEmail());
+                User updatedUser = userService.getUserById(userDto.getUserId());
                 if (updatedUser != null) {
                     UserDto updatedUserDto = UserDto.removePassword(userMapper.toDto(updatedUser));
                     return buildSuccessResponse(HttpStatus.OK, "User updated successfully", updatedUserDto);

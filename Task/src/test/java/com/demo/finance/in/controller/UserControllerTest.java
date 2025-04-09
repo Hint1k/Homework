@@ -166,14 +166,14 @@ class UserControllerTest {
     void testUpdateUser_Success() throws Exception {
         UserDto currentUser = createUserDto(1L, "current@example.com", null);
         currentUser.setRole("USER");
-        UserDto updateDto = createUserDto(null, "updated@example.com", "Updated Name");
+        UserDto updateDto = createUserDto(1L, "updated@example.com", "Updated Name");
         User updatedUser = createUser(1L, "updated@example.com", "Updated Name");
         UserDto responseDto = createUserDto(1L, "updated@example.com", "Updated Name");
 
         when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.UPDATE_USER))).thenReturn(updateDto);
         when(userService.updateOwnAccount(any(UserDto.class), eq(1L))).thenReturn(true);
         when(userMapper.toDto(updatedUser)).thenReturn(responseDto);
-        when(userService.getUserByEmail("updated@example.com")).thenReturn(updatedUser);
+        when(userService.getUserById(1L)).thenReturn(updatedUser);
 
         mockMvc.perform(put("/api/users")
                         .requestAttr("currentUser", currentUser)
@@ -186,7 +186,7 @@ class UserControllerTest {
         verify(validationUtils, times(1))
                 .validateRequest(any(UserDto.class), eq(Mode.UPDATE_USER));
         verify(userService, times(1)).updateOwnAccount(any(UserDto.class), eq(1L));
-        verify(userService, times(1)).getUserByEmail("updated@example.com");
+        verify(userService, times(1)).getUserById(1L);
         verify(userMapper, times(1)).toDto(updatedUser);
     }
 
@@ -350,11 +350,11 @@ class UserControllerTest {
     void testUpdateUser_FailedToRetrieveUpdatedUser() throws Exception {
         UserDto currentUser = createUserDto(1L, "current@example.com", null);
         currentUser.setRole("USER");
-        UserDto updateDto = createUserDto(null, "updated@example.com", "Updated Name");
+        UserDto updateDto = createUserDto(1L, "updated@example.com", "Updated Name");
 
         when(validationUtils.validateRequest(any(UserDto.class), eq(Mode.UPDATE_USER))).thenReturn(updateDto);
         when(userService.updateOwnAccount(any(UserDto.class), eq(1L))).thenReturn(true);
-        when(userService.getUserByEmail("updated@example.com")).thenReturn(null);
+        when(userService.getUserById(1L)).thenReturn(null);
 
         mockMvc.perform(put("/api/users")
                         .requestAttr("currentUser", currentUser)
@@ -367,7 +367,7 @@ class UserControllerTest {
         verify(validationUtils, times(1))
                 .validateRequest(any(UserDto.class), eq(Mode.UPDATE_USER));
         verify(userService, times(1)).updateOwnAccount(any(UserDto.class), eq(1L));
-        verify(userService, times(1)).getUserByEmail("updated@example.com");
+        verify(userService, times(1)).getUserById(1L);
     }
 
     @Test

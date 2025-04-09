@@ -41,7 +41,7 @@ public interface TransactionService {
      * @param transactionId the unique identifier of the transaction
      * @return the {@link Transaction} object matching the provided transaction ID
      */
-    Transaction getTransaction(Long transactionId);
+    Transaction getTransaction(Long transactionId, Long userId);
 
     /**
      * Updates an existing transaction in the system based on the provided transaction data.

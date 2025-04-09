@@ -40,7 +40,7 @@ public class GoalServiceImpl implements GoalService {
      * @throws IllegalArgumentException if the provided goal data is invalid or incomplete
      */
     @Override
-    @CacheEvict(value = "goals", key = "#goalDto.goalId")
+    @CacheEvict(value = "goals", key = "#userId")
     public Long createGoal(GoalDto goalDto, Long userId) {
         Goal goal = goalMapper.toEntity(goalDto);
         goal.setUserId(userId);
@@ -55,8 +55,8 @@ public class GoalServiceImpl implements GoalService {
      * @return the {@link Goal} object matching the provided goal ID
      */
     @Override
-    @Cacheable(value = "goals", key = "#goalId")
-    public Goal getGoal(Long goalId) {
+    @Cacheable(value = "goals", key = "#userId")
+    public Goal getGoal(Long goalId, Long userId) {
         return goalRepository.findById(goalId);
     }
 
@@ -68,7 +68,7 @@ public class GoalServiceImpl implements GoalService {
      * @return the {@link Goal} object matching the provided user ID and goal ID
      */
     @Override
-    @Cacheable(value = "goals", key = "#goalId")
+    @Cacheable(value = "goals", key = "#userId")
     public Goal getGoalByUserIdAndGoalId(Long userId, Long goalId) {
         return goalRepository.findByUserIdAndGoalId(userId, goalId);
     }
@@ -81,7 +81,7 @@ public class GoalServiceImpl implements GoalService {
      * @return {@code true} if the update was successful, {@code false} otherwise
      */
     @Override
-    @CacheEvict(value = "goals", key = "#goalDto.goalId")
+    @CacheEvict(value = "goals", key = "#userId")
     public boolean updateGoal(GoalDto goalDto, Long userId) {
         Long goalId = goalDto.getGoalId();
         Goal goal = goalRepository.findByUserIdAndGoalId(userId, goalId);
@@ -103,7 +103,7 @@ public class GoalServiceImpl implements GoalService {
      * @return {@code true} if the deletion was successful, {@code false} otherwise
      */
     @Override
-    @CacheEvict(value = "goals", key = "#goalId")
+    @CacheEvict(value = "goals", key = "#userId")
     public boolean deleteGoal(Long userId, Long goalId) {
         Goal goal = goalRepository.findByUserIdAndGoalId(userId, goalId);
         if (goal != null) {
