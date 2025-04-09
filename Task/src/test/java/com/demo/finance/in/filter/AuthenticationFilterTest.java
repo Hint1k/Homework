@@ -2,6 +2,7 @@ package com.demo.finance.in.filter;
 
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.out.service.JwtService;
+import com.demo.finance.out.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +37,8 @@ class AuthenticationFilterTest {
     private FilterChain chain;
     @Mock
     private JwtService jwtService;
+    @Mock
+    private TokenService tokenService;
     @Mock
     private PrintWriter writer;
     @InjectMocks
@@ -179,5 +182,36 @@ class AuthenticationFilterTest {
 
         verify(chain, times(1)).doFilter(request, response);
         verify(jwtService, never()).validateToken(anyString());
+    }
+
+    @Test
+    @DisplayName("Access to private endpoints with invalid token should return 401 Unauthorized")
+    void invalidTokenAccessingPrivateEndpoint_ShouldReturn401() throws ServletException, IOException {
+        when(request.getRequestURI()).thenReturn("/api/private");
+        when(request.getHeader("Authorization")).thenReturn("Bearer invalid.token");
+        when(jwtService.validateToken("invalid.token")).thenThrow(new IllegalArgumentException("Invalid token"));
+        when(response.getWriter()).thenReturn(writer);
+
+        filter.doFilter(request, response, chain);
+
+        verify(response, times(1)).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(response, times(1)).setContentType("application/json");
+        verify(writer, times(1)).write("{\"error\":\"Invalid token\"}");
+        verify(chain, never()).doFilter(request, response);
+    }
+
+    @Test
+    @DisplayName("Valid token should set current token in tokenService")
+    void validToken_ShouldSetCurrentTokenInTokenService() throws ServletException, IOException {
+        when(request.getRequestURI()).thenReturn("/api/private");
+        when(request.getHeader("Authorization")).thenReturn("Bearer valid.token.here");
+        when(jwtService.validateToken("valid.token.here")).thenReturn(user);
+        when(response.getWriter()).thenReturn(writer);
+
+        filter.doFilter(request, response, chain);
+
+        verify(tokenService, times(1)).setCurrentToken("valid.token.here");
+        verify(tokenService, times(1)).clearCurrentToken();
+        verify(response, times(1)).setContentType("application/json");
     }
 }

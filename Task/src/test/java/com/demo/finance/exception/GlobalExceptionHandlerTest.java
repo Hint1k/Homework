@@ -12,6 +12,7 @@ import com.demo.finance.in.controller.ReportController;
 import com.demo.finance.in.controller.TransactionController;
 import com.demo.finance.in.controller.UserController;
 import com.demo.finance.out.service.JwtService;
+import com.demo.finance.out.service.TokenService;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,6 +61,8 @@ class GlobalExceptionHandlerTest {
     private LiquibaseManager liquibaseManager;
     @MockBean
     private JwtService jwtService;
+    @MockBean
+    private TokenService tokenService;
 
     @BeforeEach
     void setUp() {

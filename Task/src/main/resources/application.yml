@@ -47,5 +47,7 @@ spring:
       - goals
       - budgets
       - reports
+      - tokens
+      - invalidTokens
     caffeine:
-      spec: maximumSize=500,expireAfterWrite=30m
+      spec: maximumSize=500,expireAfterWrite=60m

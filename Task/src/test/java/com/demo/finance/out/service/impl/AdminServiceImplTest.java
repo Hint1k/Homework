@@ -1,11 +1,11 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.utils.FlagUtils;
 import com.demo.finance.domain.utils.Role;
 import com.demo.finance.exception.custom.OptimisticLockException;
 import com.demo.finance.exception.custom.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
+import com.demo.finance.out.service.TokenService;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import static com.demo.finance.domain.utils.Role.ADMIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,7 +31,7 @@ class AdminServiceImplTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private FlagUtils flagUtils;
+    private TokenService tokenService;
     @InjectMocks
     private AdminServiceImpl adminService;
     private User user;
@@ -73,7 +74,7 @@ class AdminServiceImplTest {
         assertThat(user.getVersion()).isEqualTo(1L);
         verify(userRepository, times(1)).update(user);
         verify(userRepository, times(1)).findById(1L);
-        verify(flagUtils, times(1)).setValidateWithDatabase(true);
+        verify(tokenService, times(1)).invalidateUserToken(user.getUserId());
     }
 
     @Test
@@ -91,7 +92,7 @@ class AdminServiceImplTest {
         assertThat(user.getVersion()).isEqualTo(1L);
         verify(userRepository, times(1)).update(user);
         verify(userRepository, times(1)).findById(1L);
-        verify(flagUtils, times(1)).setValidateWithDatabase(true);
+        verify(tokenService, times(1)).invalidateUserToken(user.getUserId());
     }
 
     @Test
@@ -103,7 +104,7 @@ class AdminServiceImplTest {
 
         assertThat(result).isTrue();
         verify(userRepository, times(1)).delete(1L);
-        verify(flagUtils, times(1)).setValidateWithDatabase(true);
+        verify(tokenService, times(1)).invalidateUserToken(user.getUserId());
     }
 
     @Test
@@ -116,6 +117,7 @@ class AdminServiceImplTest {
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("User with ID " + userId + " not found");
         verify(userRepository, times(1)).findById(userId);
+        verify(tokenService, never()).invalidateUserToken(user.getUserId());
     }
 
     @Test
@@ -128,6 +130,7 @@ class AdminServiceImplTest {
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("User with ID " + userId + " not found");
         verify(userRepository, times(1)).findById(userId);
+        verify(tokenService, never()).invalidateUserToken(user.getUserId());
     }
 
     @Test
@@ -139,6 +142,7 @@ class AdminServiceImplTest {
 
         assertThat(result).isFalse();
         verify(userRepository, times(1)).delete(1L);
+        verify(tokenService, never()).invalidateUserToken(user.getUserId());
     }
 
     @Test
@@ -153,9 +157,10 @@ class AdminServiceImplTest {
 
         assertThatThrownBy(() -> adminService.updateUserRole(1L, userDto))
                 .isInstanceOf(OptimisticLockException.class)
-                .hasMessageContaining("User with ID 1 was modified by another operation.");
+                .hasMessageContaining("User with ID 1 was modified. Check version number.");
         verify(userRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).update(user);
+        verify(tokenService, never()).invalidateUserToken(user.getUserId());
     }
 
     @Test
@@ -170,8 +175,9 @@ class AdminServiceImplTest {
 
         assertThatThrownBy(() -> adminService.blockOrUnblockUser(1L, userDto))
                 .isInstanceOf(OptimisticLockException.class)
-                .hasMessageContaining("User with ID 1 was modified by another operation.");
+                .hasMessageContaining("User with ID 1 was modified. Check version number.");
         verify(userRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).update(user);
+        verify(tokenService, never()).invalidateUserToken(user.getUserId());
     }
 }

@@ -2,12 +2,12 @@ package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.mapper.UserMapper;
-import com.demo.finance.domain.utils.FlagUtils;
 import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.exception.custom.OptimisticLockException;
 import com.demo.finance.out.repository.UserRepository;
+import com.demo.finance.out.service.TokenService;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +36,7 @@ class UserServiceImplTest {
     @Mock
     private UserMapper userMapper;
     @Mock
-    private FlagUtils flagUtils;
+    private TokenService tokenService;
     @InjectMocks
     private UserServiceImpl userService;
     private User user;
@@ -72,7 +72,7 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).findById(1L);
         verify(passwordUtils, times(1)).hashPassword("newPassword");
         verify(userMapper, times(1)).toEntity(userDto);
-        verify(flagUtils, times(1)).setValidateWithDatabase(true);
+        verify(tokenService, times(1)).invalidateCurrentToken(1L);
         verify(userRepository, times(1)).update(argThat(u -> u.getUserId().equals(1L)
                 && u.getName().equals("John Doe") && u.getEmail().equals("john@example.com")
                 && u.getPassword().equals("hashedPassword") && u.getRole().equals(Role.USER)
@@ -89,7 +89,7 @@ class UserServiceImplTest {
 
         assertThat(result).isTrue();
         verify(userRepository, times(1)).delete(userId);
-        verify(flagUtils, times(1)).setValidateWithDatabase(true);
+        verify(tokenService, times(1)).invalidateCurrentToken(userId);
     }
 
     @Test
@@ -110,7 +110,7 @@ class UserServiceImplTest {
         verify(userRepository, times(1))
                 .update(argThat(user -> user.getPassword().equals("existingHashedPassword")));
         verify(passwordUtils, never()).hashPassword(any());
-        verify(flagUtils, times(1)).setValidateWithDatabase(true);
+        verify(tokenService, times(1)).invalidateCurrentToken(1L);
     }
 
     @Test
@@ -127,8 +127,9 @@ class UserServiceImplTest {
 
         assertThatThrownBy(() -> userService.updateOwnAccount(userDto, 1L))
                 .isInstanceOf(OptimisticLockException.class)
-                .hasMessageContaining("Your account was modified by another operation.");
+                .hasMessageContaining("Your account was modified. Check version number.");
 
+        verify(tokenService, never()).invalidateUserToken(user.getUserId());
         verify(userRepository, times(1)).findById(1L);
         verify(passwordUtils, times(1)).hashPassword("newPassword");
         verify(userMapper, times(1)).toEntity(userDto);
@@ -148,5 +149,31 @@ class UserServiceImplTest {
 
         assertThat(result).isFalse();
         verify(userRepository, times(1)).delete(userId);
+        verify(tokenService, never()).invalidateUserToken(user.getUserId());
+    }
+
+    @Test
+    @DisplayName("Update own account - version mismatch - throws OptimisticLockException")
+    void testUpdateOwnAccount_versionMismatch_throwsOptimisticLockException() {
+        user.setRole(Role.USER);
+        user.setVersion(2L);
+        userDto.setVersion(2L);
+
+        when(userRepository.findById(1L)).thenReturn(user);
+        when(passwordUtils.hashPassword("newPassword")).thenReturn("hashedPassword");
+        when(userMapper.toEntity(userDto)).thenReturn(user);
+        when(userRepository.update(any(User.class))).thenReturn(false);
+
+        assertThatThrownBy(() -> userService.updateOwnAccount(userDto, 1L))
+                .isInstanceOf(OptimisticLockException.class)
+                .hasMessageContaining("Your account was modified. Check version number.");
+        verify(tokenService, never()).invalidateCurrentToken(user.getUserId());
+        verify(userRepository, times(1)).findById(1L);
+        verify(passwordUtils, times(1)).hashPassword("newPassword");
+        verify(userMapper, times(1)).toEntity(userDto);
+        verify(userRepository, times(1)).update(argThat(u -> u.getUserId().equals(1L)
+                && u.getName().equals("John Doe") && u.getEmail().equals("john@example.com")
+                && u.getPassword().equals("hashedPassword") && u.getRole().equals(Role.USER)
+                && u.getVersion().equals(2L)));
     }
 }

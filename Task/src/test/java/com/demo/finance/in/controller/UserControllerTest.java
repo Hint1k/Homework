@@ -143,13 +143,21 @@ class UserControllerTest {
     void testGetCurrentUser_Success() throws Exception {
         UserDto currentUser = createUserDto(1L, "test@example.com", "Test User");
         currentUser.setRole("USER");
+        User user = createUser(1L, "test@example.com", "Test User");
+        UserDto responseDto = createUserDto(1L, "test@example.com", "Test User");
+
+        when(userService.getUserById(1L)).thenReturn(user);
+        when(userMapper.toDto(user)).thenReturn(responseDto);
 
         mockMvc.perform(get("/api/users/me")
                         .requestAttr("currentUser", currentUser))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Authenticated user details"))
-                .andExpect(jsonPath("$.data.email").value("test@example.com"));
+                .andExpect(jsonPath("$.data.email").value("test@example.com"))
+                .andExpect(jsonPath("$.data.name").value("Test User"));
 
+        verify(userService, times(1)).getUserById(1L);
+        verify(userMapper, times(1)).toDto(user);
         verify(jwtService, never()).validateToken(any());
     }
 

@@ -1,16 +1,12 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
-import com.demo.finance.domain.mapper.UserMapper;
-import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.utils.FlagUtils;
 import com.demo.finance.exception.custom.UserNotFoundException;
-import com.demo.finance.out.repository.UserRepository;
+import com.demo.finance.out.service.TokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,22 +35,12 @@ class JwtServiceImplTest {
     private static final long JWT_EXPIRATION_IN_MS = 60000;
     private JwtServiceImpl jwtService;
     @Mock
-    private UserRepository userRepository;
-    @Mock
-    private UserMapper userMapper;
-    @Mock
-    private FlagUtils flagUtils;
-    private User user;
-    private UserDto userDto;
+    private TokenService tokenService;
 
     @BeforeEach
     void setUp() {
-        jwtService = new JwtServiceImpl(SECRET_KEY, userRepository, userMapper, flagUtils);
+        jwtService = new JwtServiceImpl(SECRET_KEY, tokenService);
         setJwtExpiration(jwtService, JWT_EXPIRATION_IN_MS);
-        user = Instancio.create(User.class);
-        user.setUserId(1L);
-        userDto = Instancio.create(UserDto.class);
-        userDto.setUserId(1L);
     }
 
     private void setJwtExpiration(JwtServiceImpl jwtService, long expiration) {
@@ -92,47 +77,7 @@ class JwtServiceImplTest {
             assertEquals(userId, userIdClaim);
         }
 
-        verify(flagUtils, times(0)).shouldValidateWithDatabase();
-        verify(userRepository, times(0)).findById(anyLong());
-        verify(userMapper, times(0)).toDto(any());
-    }
-
-    @Test
-    @DisplayName("Validate token with flag true should return user from DB")
-    void validateToken_ShouldReturnUser_FromDatabase_WhenFlagTrue() {
-        String token = jwtService.generateToken("test@example.com", List.of("USER"), 1L);
-
-        when(flagUtils.shouldValidateWithDatabase()).thenReturn(true);
-        when(userRepository.findById(1L)).thenReturn(user);
-        when(userMapper.toDto(user)).thenReturn(userDto);
-
-        UserDto result = jwtService.validateToken(token);
-
-        assertNotNull(result);
-        assertEquals(1L, result.getUserId());
-
-        verify(flagUtils, times(1)).shouldValidateWithDatabase();
-        verify(userRepository, times(1)).findById(1L);
-        verify(userMapper, times(1)).toDto(user);
-    }
-
-    @Test
-    @DisplayName("Validate token with flag false should return userDto from claims")
-    void validateToken_ShouldReturnUserDto_FromClaims_WhenFlagFalse() {
-        String token = jwtService.generateToken("test@example.com", List.of("USER"), 1L);
-
-        when(flagUtils.shouldValidateWithDatabase()).thenReturn(false);
-
-        UserDto result = jwtService.validateToken(token);
-
-        assertNotNull(result);
-        assertEquals(1L, result.getUserId());
-        assertEquals("test@example.com", result.getEmail());
-        assertEquals("USER", result.getRole());
-
-        verify(flagUtils, times(1)).shouldValidateWithDatabase();
-        verify(userRepository, times(0)).findById(1L);
-        verify(userMapper, times(0)).toDto(user);
+        verify(tokenService, times(1)).storeTokenForUser(userId, token);
     }
 
     @Test
@@ -143,9 +88,7 @@ class JwtServiceImplTest {
 
         assertThrows(ExpiredJwtException.class, () -> jwtService.validateToken(token));
 
-        verify(flagUtils, times(0)).shouldValidateWithDatabase();
-        verify(userRepository, times(0)).findById(anyLong());
-        verify(userMapper, times(0)).toDto(any());
+        verify(tokenService, times(0)).isTokenValid(any());
     }
 
     @Test
@@ -153,17 +96,12 @@ class JwtServiceImplTest {
     void validateToken_ShouldThrow_WhenUserNotFound() {
         String token = jwtService.generateToken("nonexistent@example.com", List.of("USER"), 1L);
 
-        when(flagUtils.shouldValidateWithDatabase()).thenReturn(true);
-        when(userRepository.findById(1L)).thenReturn(null);
+        UserNotFoundException exception =
+                assertThrows(UserNotFoundException.class, () -> jwtService.validateToken(token));
 
-        UserNotFoundException exception = assertThrows(UserNotFoundException.class,
-                () -> jwtService.validateToken(token));
+        assertEquals("Your account was modified. You have to authenticate again.", exception.getMessage());
 
-        assertEquals("User not found with ID: 1", exception.getMessage());
-
-        verify(flagUtils, times(1)).shouldValidateWithDatabase();
-        verify(userRepository, times(1)).findById(1L);
-        verify(userMapper, times(0)).toDto(any());
+        verify(tokenService, times(1)).isTokenValid(token);
     }
 
     @Test
@@ -171,27 +109,38 @@ class JwtServiceImplTest {
     void validateToken_ShouldThrow_WhenTokenIsInvalid() {
         assertThrows(IllegalArgumentException.class, () -> jwtService.validateToken("invalid.token.here"));
 
-        verify(flagUtils, times(0)).shouldValidateWithDatabase();
-        verify(userRepository, times(0)).findById(anyLong());
-        verify(userMapper, times(0)).toDto(any());
+        verify(tokenService, times(0)).isTokenValid(any());
     }
 
     @Test
-    @DisplayName("Token with empty roles should still work")
-    void validateToken_ShouldHandleEmptyRoles() {
-        String token = jwtService.generateToken("test@example.com", List.of(), 1L);
+    @DisplayName("Validate token with flag true should return user from DB")
+    void validateToken_ShouldReturnUser_FromDatabase_WhenFlagTrue() {
+        String token = jwtService.generateToken("test@example.com", List.of("USER"), 1L);
 
-        when(flagUtils.shouldValidateWithDatabase()).thenReturn(true);
-        when(userRepository.findById(1L)).thenReturn(user);
-        when(userMapper.toDto(user)).thenReturn(userDto);
+        when(tokenService.isTokenValid(token)).thenReturn(true);
 
         UserDto result = jwtService.validateToken(token);
 
         assertNotNull(result);
         assertEquals(1L, result.getUserId());
 
-        verify(flagUtils, times(1)).shouldValidateWithDatabase();
-        verify(userRepository, times(1)).findById(1L);
-        verify(userMapper, times(1)).toDto(user);
+        verify(tokenService, times(1)).isTokenValid(token);
+    }
+
+    @Test
+    @DisplayName("Validate token with flag false should return userDto from claims")
+    void validateToken_ShouldReturnUserDto_FromClaims_WhenFlagFalse() {
+        String token = jwtService.generateToken("test@example.com", List.of("USER"), 1L);
+
+        when(tokenService.isTokenValid(token)).thenReturn(true);
+
+        UserDto result = jwtService.validateToken(token);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getUserId());
+        assertEquals("test@example.com", result.getEmail());
+        assertEquals("USER", result.getRole());
+
+        verify(tokenService, times(1)).isTokenValid(token);
     }
 }

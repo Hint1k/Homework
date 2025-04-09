@@ -1,13 +1,13 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
-import com.demo.finance.domain.utils.FlagUtils;
 import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.exception.custom.OptimisticLockException;
 import com.demo.finance.exception.custom.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.AdminService;
+import com.demo.finance.out.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
-    private final FlagUtils flagUtils;
+    private final TokenService tokenService;
 
     /**
      * Retrieves a specific user by their unique user ID.
@@ -47,10 +47,10 @@ public class AdminServiceImpl implements AdminService {
      *   <li>Updates the user's role using the value from the provided {@link UserDto}.</li>
      *   <li>Sets the version field to support optimistic locking.</li>
      *   <li>Persists the updated user entity back to the repository.</li>
+     *   <li>Invalidates the user's existing JWT token to ensure the new role takes effect immediately.</li>
      * </ol>
      * If the update fails due to a version mismatch (indicating concurrent modification),
      * an {@link OptimisticLockException} is thrown to handle the conflict.
-     * The method also sets a request-scoped flag to ensure subsequent operations validate against the database.
      *
      * @param userId  the ID of the user to update (must not be null).
      * @param userDto the DTO containing the new role and version information.
@@ -70,9 +70,9 @@ public class AdminServiceImpl implements AdminService {
         user.setRole(newRole);
         user.setVersion(userDto.getVersion());
         if (!userRepository.update(user)) {
-            throw new OptimisticLockException("User with ID " + userId + " was modified by another operation.");
+            throw new OptimisticLockException("User with ID " + userId + " was modified. Check version number.");
         }
-        flagUtils.setValidateWithDatabase(true);
+        tokenService.invalidateUserToken(userId);
         return true;
     }
 
@@ -85,10 +85,10 @@ public class AdminServiceImpl implements AdminService {
      *   <li>Updates the user's blocked status using the value from the provided {@link UserDto}.</li>
      *   <li>Sets the version field to support optimistic locking.</li>
      *   <li>Persists the updated user entity back to the repository.</li>
+     *   <li>Invalidates the user's JWT token to prevent access if the account was blocked.</li>
      * </ol>
      * If the update fails due to a version mismatch (indicating concurrent modification),
      * an {@link OptimisticLockException} is thrown to handle the conflict.
-     * The method also sets a request-scoped flag to ensure subsequent operations validate against the database.
      *
      * @param userId  the ID of the user to update (must not be null).
      * @param userDto the DTO containing the new blocked status and version information.
@@ -107,14 +107,15 @@ public class AdminServiceImpl implements AdminService {
         user.setBlocked(userDto.isBlocked());
         user.setVersion(userDto.getVersion());
         if (!userRepository.update(user)) {
-            throw new OptimisticLockException("User with ID " + userId + " was modified by another operation.");
+            throw new OptimisticLockException("User with ID " + userId + " was modified. Check version number.");
         }
-        flagUtils.setValidateWithDatabase(true);
+        tokenService.invalidateUserToken(userId);
         return true;
     }
 
     /**
      * Deletes a specific user from the system based on their unique user ID.
+     * If deletion is successful, the user's JWT token is also invalidated to revoke access immediately.
      *
      * @param userId the unique identifier of the user to delete
      * @return {@code true} if the deletion was successful, {@code false} otherwise
@@ -124,7 +125,7 @@ public class AdminServiceImpl implements AdminService {
     public boolean deleteUser(Long userId) {
         boolean deleted = userRepository.delete(userId);
         if (deleted) {
-            flagUtils.setValidateWithDatabase(true);
+            tokenService.invalidateUserToken(userId);
         }
         return deleted;
     }

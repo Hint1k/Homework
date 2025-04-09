@@ -1,6 +1,7 @@
 package com.demo.finance.in.filter;
 
 import com.demo.finance.domain.dto.UserDto;
+import com.demo.finance.out.service.TokenService;
 import jakarta.servlet.Filter;
 import com.demo.finance.out.service.JwtService;
 import jakarta.servlet.FilterChain;
@@ -34,20 +35,22 @@ import java.io.IOException;
 public class AuthenticationFilter implements Filter {
 
     private final JwtService jwtService;
+    private final TokenService tokenService;
 
     /**
-     * Filters incoming requests to validate authentication and enforce role-based access control.
+     * Filters incoming HTTP requests to authenticate users based on their JWT token and manage access control.
      * <p>
-     * This method checks if the request targets a public endpoint (no authentication required), extracts the JWT token
-     * from the request, validates it, and ensures the user has the appropriate role to access the requested endpoint.
-     * If any validation fails, an error response is returned. Otherwise, the request proceeds in the filter chain.
+     * This method intercepts the request, validates the JWT token from the "Authorization" header, checks the
+     * user's role, and grants or denies access to the requested endpoint based on the role. It also handles public
+     * endpoints that do not require authentication. If authentication fails or the user lacks the required role,
+     * an error response is sent.
      * </p>
      *
-     * @param request  the {@link ServletRequest} representing the incoming request
-     * @param response the {@link ServletResponse} representing the outgoing response
-     * @param chain    the {@link FilterChain} allowing the request to proceed if validated
-     * @throws IOException      if an I/O error occurs during filtering
-     * @throws ServletException if a general servlet exception occurs
+     * @param request  the {@link ServletRequest} representing the incoming HTTP request
+     * @param response the {@link ServletResponse} representing the outgoing HTTP response
+     * @param chain    the {@link FilterChain} used to pass the request and response along the filter chain
+     * @throws IOException      if an I/O error occurs during request processing
+     * @throws ServletException if a servlet-related error occurs during request processing
      */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -64,27 +67,29 @@ public class AuthenticationFilter implements Filter {
             sendErrorResponse(httpResponse, "Authentication required");
             return;
         }
+        tokenService.setCurrentToken(token);
         UserDto userDto;
         try {
             userDto = jwtService.validateToken(token);
+            String role = userDto.getRole().toUpperCase();
+            if (isAdminEndpoint(requestURI)) {
+                if (!"ADMIN".equals(role)) {
+                    sendErrorResponse(httpResponse, "Access denied. Admin role required");
+                    return;
+                }
+            } else {
+                if (!"USER".equals(role)) {
+                    sendErrorResponse(httpResponse, "Access denied. User role required");
+                    return;
+                }
+            }
+            httpRequest.setAttribute("currentUser", userDto);
+            chain.doFilter(request, response);
         } catch (Exception e) {
             sendErrorResponse(httpResponse, e.getMessage());
-            return;
+        } finally {
+            tokenService.clearCurrentToken();
         }
-        String role = userDto.getRole().toUpperCase();
-        if (isAdminEndpoint(requestURI)) {
-            if (!"ADMIN".equals(role)) {
-                sendErrorResponse(httpResponse, "Access denied. Admin role required");
-                return;
-            }
-        } else {
-            if (!"USER".equals(role)) {
-                sendErrorResponse(httpResponse, "Access denied. User role required");
-                return;
-            }
-        }
-        httpRequest.setAttribute("currentUser", userDto);
-        chain.doFilter(request, response);
     }
 
     /**

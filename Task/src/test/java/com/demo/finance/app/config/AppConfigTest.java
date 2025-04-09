@@ -1,12 +1,15 @@
 package com.demo.finance.app.config;
 
 import com.demo.finance.out.service.JwtService;
+import com.demo.finance.out.service.TokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+
 import javax.sql.DataSource;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -24,6 +27,8 @@ class AppConfigTest {
     private LiquibaseManager liquibaseManager;
     @MockBean
     private JwtService jwtService;
+    @MockBean
+    private TokenService tokenService;
 
     @Test
     void testCorsConfiguration() throws Exception {

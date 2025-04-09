@@ -156,14 +156,14 @@ public class UserController extends BaseController {
     }
 
     /**
-     * Retrieves details of the currently authenticated user.
+     * Retrieves the details of the currently authenticated user.
      * <p>
-     * This endpoint returns the user details for the currently authenticated user. Sensitive fields such as
-     * the password are excluded from the response.
+     * This endpoint fetches the authenticated user's details from the system based on the user ID
+     * and returns the user information excluding sensitive fields such as the password.
      * </p>
      *
-     * @param userDto the currently authenticated user
-     * @return a {@link ResponseEntity} containing the user details
+     * @param userDto the currently authenticated user's data, passed as a request attribute
+     * @return a {@link ResponseEntity} containing the authenticated user's details
      */
     @GetMapping("/me")
     @Operation(summary = "Get current user", description = "Returns authenticated user details")
@@ -171,8 +171,10 @@ public class UserController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_DETAILS_SUCCESS)))
     public ResponseEntity<Map<String, Object>> getCurrentUser(@RequestAttribute("currentUser") UserDto userDto) {
-        UserDto.removePassword(userDto);
-        return buildSuccessResponse(HttpStatus.OK, "Authenticated user details", userDto);
+        User user = userService.getUserById(userDto.getUserId());
+        UserDto dto = userMapper.toDto(user);
+        UserDto.removePassword(dto);
+        return buildSuccessResponse(HttpStatus.OK, "Authenticated user details", dto);
     }
 
     /**

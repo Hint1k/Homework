@@ -2,11 +2,11 @@ package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.domain.utils.FlagUtils;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
 import com.demo.finance.exception.custom.OptimisticLockException;
 import com.demo.finance.out.repository.UserRepository;
+import com.demo.finance.out.service.TokenService;
 import com.demo.finance.out.service.UserService;
 import com.demo.finance.domain.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +29,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordUtilsImpl passwordUtils;
     private final UserMapper userMapper;
-    private final FlagUtils flagUtils;
+    private final TokenService tokenService;
 
     /**
      * Retrieves a user from the database by their email address.
+     * The result is cached using the email as the key.
      *
      * @param email the email address of the user to retrieve
      * @return the {@link User} object associated with the provided email, or {@code null} if not found
@@ -45,6 +46,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Retrieves a user from the database by their unique identifier.
+     * The result is cached using the user ID as the key.
      *
      * @param userId the unique identifier of the user to retrieve
      * @return the {@link User} object associated with the provided user ID, or {@code null} if not found
@@ -59,7 +61,8 @@ public class UserServiceImpl implements UserService {
      * Updates the account details of the user with the specified user ID.
      * This method maps the provided {@link UserDto} to a {@link User} entity,
      * preserves the existing role and increments the version, and updates the password
-     * only if a new one is provided. Returns true if the update is successful.
+     * only if a new one is provided. Upon successful update, the current user's JWT token
+     * is invalidated to prevent continued use of the old token.
      *
      * @param userDto the {@link UserDto} containing updated user details
      * @param userId  the unique identifier of the user whose account is being updated
@@ -82,14 +85,15 @@ public class UserServiceImpl implements UserService {
         user.setRole(existingUser.getRole());
         user.setVersion(userDto.getVersion());
         if (!userRepository.update(user)) {
-            throw new OptimisticLockException("Your account was modified by another operation.");
+            throw new OptimisticLockException("Your account was modified. Check version number.");
         }
-        flagUtils.setValidateWithDatabase(true);
+        tokenService.invalidateCurrentToken(userId);
         return true;
     }
 
     /**
      * Deletes the account of the currently authenticated user from the database.
+     * If deletion is successful, the current user's JWT token is invalidated.
      *
      * @param userId the unique identifier of the user to delete
      * @return {@code true} if the deletion was successful, {@code false} otherwise
@@ -99,7 +103,7 @@ public class UserServiceImpl implements UserService {
     public boolean deleteOwnAccount(Long userId) {
         boolean deleted = userRepository.delete(userId);
         if (deleted) {
-            flagUtils.setValidateWithDatabase(true);
+            tokenService.invalidateCurrentToken(userId);
         }
         return deleted;
     }
