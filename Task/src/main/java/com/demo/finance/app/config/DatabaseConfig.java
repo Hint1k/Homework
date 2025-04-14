@@ -2,10 +2,11 @@ package com.demo.finance.app.config;
 
 import com.demo.finance.domain.utils.SystemPropLoader;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * The {@code DatabaseConfig} class is responsible for managing database-related configuration properties.
@@ -17,14 +18,16 @@ import java.util.logging.Logger;
  * exceptions to prevent misconfiguration.
  */
 @Component
+@Slf4j
 public class DatabaseConfig {
 
-    private static final Logger log = Logger.getLogger(DatabaseConfig.class.getName());
     private static final String DB_URL = "DB_URL";
     private static final String DB_USERNAME = "DB_USERNAME";
     private static final String DB_PASSWORD = "DB_PASSWORD";
     private static final String DEFAULT_ENV_FILE = "/app/.env";
-    private static final String DEFAULT_YML_FILE = "/app/application.yml";
+
+    @Value("${app.db.url}")
+    private String injectedUrl;
 
     /**
      * Initializes the database configuration by loading and validating required properties.
@@ -83,29 +86,35 @@ public class DatabaseConfig {
     }
 
     /**
-     * Loads and validates database-related properties from environment and YAML configuration files.
+     * Loads and validates database-related properties required by the application.
      * <p>
-     * This method determines the paths to the `.env` and `application.yml` files based on system properties
-     * or default values. It then uses the {@link SystemPropLoader} utility to load the properties into
-     * the system properties.
-     * <p>
-     * After loading, it validates the presence and correctness of the required database properties:
-     * {@code DB_URL}, {@code DB_USERNAME}, and {@code DB_PASSWORD}.
+     * This method performs the following steps:
+     * <ul>
+     *   <li>Determines the path to the {@code .env} file using the {@code ENV_PATH} system property
+     *   or a default path.</li>
+     *   <li>Loads the {@code DB_USERNAME} and {@code DB_PASSWORD} properties from the environment file
+     *       using the {@link SystemPropLoader} utility.</li>
+     *   <li>Validates that the injected value of {@code app.db.url} from {@code application.yml}
+     *   is not null or empty.</li>
+     *   <li>Sets the injected database URL as the {@code DB_URL} system property to ensure compatibility
+     *       with components relying on system properties.</li>
+     *   <li>Validates that all required database properties ({@code DB_URL}, {@code DB_USERNAME}, {@code DB_PASSWORD})
+     *       are present and non-empty in the system properties.</li>
+     * </ul>
      *
-     * @see SystemPropLoader#loadAndSetProperties(String, String, Set, Set)
-     * @see #validateProperty(String)
+     * @throws RuntimeException if any required property is missing or empty
      */
     private void loadAndValidateProperties() {
         String envFilePath = System.getProperty("ENV_PATH", DEFAULT_ENV_FILE);
-        String ymlFilePath = System.getProperty("YML_PATH", DEFAULT_YML_FILE);
         Set<String> envProperties = Set.of(DB_USERNAME, DB_PASSWORD);
-        Set<String> ymlProperties = Set.of(DB_URL);
-
-        SystemPropLoader.loadAndSetProperties(envFilePath, ymlFilePath, envProperties, ymlProperties);
-
-        validateProperty(DB_URL);
+        SystemPropLoader.loadAndSetProperties(envFilePath, envProperties);
+        if (injectedUrl != null) {
+            validateInjectedValue(injectedUrl);
+            System.setProperty(DB_URL, injectedUrl);
+        }
         validateProperty(DB_USERNAME);
         validateProperty(DB_PASSWORD);
+        validateProperty(DB_URL);
     }
 
     /**
@@ -119,8 +128,24 @@ public class DatabaseConfig {
     private void validateProperty(String propertyKey) {
         String propertyValue = System.getProperty(propertyKey);
         if (propertyValue == null || propertyValue.isEmpty()) {
-            log.severe(propertyKey + " is missing or empty in the system properties.");
+            log.error("{} is missing or empty in the system properties.", propertyKey);
             throw new RuntimeException(propertyKey + " is not configured.");
+        }
+    }
+
+    /**
+     * Validates that the injected value for {@code app.db.url} from {@code application.yml} is not null or empty.
+     * <p>
+     * This method is used to ensure that a meaningful and valid database URL is provided via configuration.
+     * If the value is {@code null}, empty, or only whitespace, it logs an error and throws a {@link RuntimeException}.
+     *
+     * @param value the injected value of {@code app.db.url} to validate
+     * @throws RuntimeException if the value is {@code null}, empty, or blank
+     */
+    private void validateInjectedValue(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            log.error("app.db.url is missing or empty in application.yml.");
+            throw new RuntimeException("app.db.url is missing or empty in application.yml.");
         }
     }
 }

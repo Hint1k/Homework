@@ -75,7 +75,7 @@ Database username = user
 Database password = 123
 Database name = financedb
 Database schema = finance
-Table names: users, transactions, goals, reports, budgets
+Table names: users, transactions, goals, budgets
 ```
 
 ---
@@ -88,30 +88,43 @@ To run tests using Gradle:
 ```bash
 ./gradlew test
 ```
-To run tests with coverage using Jacoco 
+To run tests with coverage using Jacoco: 
 ```bash
 ./gradlew jacocoTestReport  
 ```
 
 ---
 
-## Code Structure
+## Generating Javadocs
 
-The project follows Clean Architecture principles with key packages:
+To generate project documentation: 
+```bash
+./gradlew javadoc  
+```
+
+---
+
+## Code Structure
+Project module "audit-starter" contains AuditAspect class <br>
+Project module "logging-starter" contains LoggingAspect class <br>
+Project module "Task":
 - `in.controllers` – Rest Controllers.
-- `domain.model` – Contains entities.
-- `domain.utils` – Utility classes for validation and date handling.
+- `domain.model` – Entities.
+- `domain.utils` – Utility classes for validation and data handling.
 - `out.repository` – Manages database storage and retrieval.
 - `out.service` – Implements core business logic and interacts with repositories.
-- `app` - Has main class and application configs
+- `app` - Has main class and application config classes
 - `resources.db.changelog` - Liquibase xml config files
+- `in.filters` - Jwt authentication and Exception handling filters
+- `exception` - Custom exceptions and Global exception handler
 ---
 
 ## Technological Stack
 - **Java**
-- **Spring (Core, Web, MVC)**
+- **Spring (Boot, Web, AOP)**
 - **Gradle**
 - **PostgreSQL**
+- **Jetty**
 - **Swagger**
 - **Docker**
 - **JUnit 5, Mockito, AssertJ, Testcontainers**
@@ -131,16 +144,16 @@ http://localhost:8080/v3/api-docs
 POST http://localhost:8080/api/users/registration 
 ```json 
 {
-"name": "jay",
-"email": "jay@demo.com",
-"password": "123"
+  "name": "jay",
+  "email": "jay@demo.com",
+  "password": "123"
 }
 ```
 POST http://localhost:8080/api/users/authenticate
 ```json 
 {
-"email": "jay@demo.com",
-"password": "123"
+  "email": "jay@demo.com",
+  "password": "123"
 }
 ```
 POST http://localhost:8080/api/users/logout
@@ -152,7 +165,8 @@ PUT http://localhost:8080/api/users
 {
   "name": "jay2",
   "email": "jay2@demo.com",
-  "password": "123"
+  "password": "123",
+  "version": 1
 }
 ```
 GET http://localhost:8080/api/users/me
@@ -180,13 +194,15 @@ GET http://localhost:8080/api/admin/users/transactions/2?page=1&size=10
 PATCH http://localhost:8080/api/admin/users/role/2
 ```json 
 {
-"role": "user"
+  "role": "USER", 
+  "version": 1
 }
 ```
 PATCH http://localhost:8080/api/admin/users/block/2
 ```json 
 {
-  "blocked": true
+  "blocked": true,
+  "version": 1
 }
 ```
 DELETE http://localhost:8080/api/admin/users/2
@@ -274,7 +290,7 @@ GET http://localhost:8080/api/reports/report
 ```json 
 { }
 ```
-GET http://localhost:8080/api/reports/expenses-by-category
+POST http://localhost:8080/api/reports/expenses-by-category
 ```json 
 {
   "fromDate": "2025-01-01",

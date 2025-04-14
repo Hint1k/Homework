@@ -1,4 +1,4 @@
-package com.demo.finance.exception;
+package com.demo.finance.exception.custom;
 
 /**
  * Exception indicating that a user registration attempt failed because the email address

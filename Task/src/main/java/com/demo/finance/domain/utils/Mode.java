@@ -12,11 +12,6 @@ public enum Mode {
     REGISTER_USER,
 
     /**
-     * Represents the mode for creating a generic entity.
-     */
-    CREATE,
-
-    /**
      * Represents the mode for creating a goal.
      */
     GOAL_CREATE,
@@ -45,16 +40,6 @@ public enum Mode {
      * Represents the mode for deleting a generic entity.
      */
     DELETE,
-
-    /**
-     * Represents the mode for deleting a goal.
-     */
-    GOAL_DELETE,
-
-    /**
-     * Represents the mode for deleting a transaction.
-     */
-    TRANSACTION_DELETE,
 
     /**
      * Represents the mode for retrieving data.

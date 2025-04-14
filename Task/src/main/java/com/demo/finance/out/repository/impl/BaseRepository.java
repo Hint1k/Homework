@@ -2,8 +2,9 @@ package com.demo.finance.out.repository.impl;
 
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.utils.GeneratedKey;
-import com.demo.finance.exception.DatabaseException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.demo.finance.exception.custom.DatabaseException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -17,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The {@code BaseRepository} class serves as an abstract base class for all repository implementations.
@@ -26,25 +25,20 @@ import java.util.logging.Logger;
  * leveraging JDBC to interact with the database. This class also includes utility methods for parameter binding,
  * result set mapping, and exception handling.
  */
+@Slf4j
+@RequiredArgsConstructor
 public abstract class BaseRepository {
 
-    protected static final Logger log = Logger.getLogger(BaseRepository.class.getName());
-    private static final Map<Class<?>, Method> SETTER_METHOD_CACHE = new HashMap<>();
-    protected final DataSourceManager dataSourceManager;
-
     /**
-     * Constructs a new {@code BaseRepository} instance with the required dependency for managing database connections.
-     *
-     * @param dataSourceManager the manager responsible for providing database connections
+     * The {@link DataSourceManager} for obtaining database connections.
      */
-    @Autowired
-    protected BaseRepository(DataSourceManager dataSourceManager) {
-        this.dataSourceManager = dataSourceManager;
-    }
+    protected final DataSourceManager dataSourceManager;
+    private static final Map<Class<?>, Method> SETTER_METHOD_CACHE = new HashMap<>();
 
     /**
      * Persists a new entity to the database by executing the provided SQL insert query.
      *
+     * @param <T>       the type of the entity to be persisted
      * @param entity    the entity object to be persisted
      * @param insertSql the SQL insert query to execute
      * @param setter    the callback interface to set parameters on the prepared statement
@@ -184,6 +178,7 @@ public abstract class BaseRepository {
     /**
      * Sets the generated key on an entity by invoking the appropriate setter method.
      *
+     * @param <T>         the type of the entity
      * @param entity      the entity object to set the generated key on
      * @param generatedId the generated key value to set
      */
@@ -232,7 +227,7 @@ public abstract class BaseRepository {
      * @param e       the exception that caused the error
      */
     protected void logError(String message, Exception e) {
-        log.log(Level.SEVERE, message + ": " + e.getMessage(), e);
+        log.error("{}: {}", message, e.getMessage(), e);
         throw new DatabaseException(message, e);
     }
 

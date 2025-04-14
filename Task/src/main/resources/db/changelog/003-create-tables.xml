@@ -53,25 +53,6 @@
             </column>
         </createTable>
 
-        <!-- Reports Table -->
-        <createTable tableName="reports" schemaName="finance">
-            <column name="report_id" type="BIGINT" defaultValueComputed="nextval('finance.reports_report_id_seq')">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="user_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="total_income" type="DECIMAL(19,2)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="total_expense" type="DECIMAL(19,2)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="balance" type="DECIMAL(19,2)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
         <!-- Goals Table -->
         <createTable tableName="goals" schemaName="finance">
             <column name="goal_id" type="BIGINT" defaultValueComputed="nextval('finance.goals_goal_id_seq')">

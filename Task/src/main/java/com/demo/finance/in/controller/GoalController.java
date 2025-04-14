@@ -8,13 +8,15 @@ import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
-import com.demo.finance.exception.ValidationException;
+import com.demo.finance.exception.custom.ValidationException;
 import com.demo.finance.out.service.GoalService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,11 +27,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.Map;
 
@@ -47,15 +48,16 @@ import static com.demo.finance.domain.utils.SwaggerExamples.Goal.UPDATE_GOAL_REQ
 import static com.demo.finance.domain.utils.SwaggerExamples.Goal.UPDATE_GOAL_SUCCESS;
 
 /**
- * The {@code GoalController} class is a REST controller that provides endpoints for managing user goals.
- * It supports creating, retrieving, updating, and deleting goals for the currently logged-in user.
+ * REST controller for managing user financial goals.
  * <p>
- * This controller leverages validation utilities to ensure that incoming requests meet the required constraints
- * and formats. It also uses a service layer to perform business logic related to goals and a mapper to convert
- * between entities and DTOs.
+ * Provides endpoints to create, retrieve, update, and delete goals. Supports pagination
+ * for goal listings. Uses {@code GoalService} for business logic and {@code ValidationUtils}
+ * for validating input requests. {@code GoalMapper} is used to map between domain models and DTOs.
+ * </p>
  */
 @RestController
 @RequestMapping("/api/goals")
+@RequiredArgsConstructor
 public class GoalController extends BaseController {
 
     private final GoalService goalService;
@@ -63,36 +65,21 @@ public class GoalController extends BaseController {
     private final GoalMapper goalMapper;
 
     /**
-     * Constructs a new {@code GoalController} instance with the required dependencies.
-     *
-     * @param goalService     the service responsible for goal-related operations
-     * @param validationUtils the utility for validating request parameters and DTOs
-     * @param goalMapper      the mapper for converting between goal entities and DTOs
-     */
-    @Autowired
-    public GoalController(GoalService goalService, ValidationUtils validationUtils, GoalMapper goalMapper) {
-        this.goalService = goalService;
-        this.validationUtils = validationUtils;
-        this.goalMapper = goalMapper;
-    }
-
-    /**
-     * Creates a new goal for the currently logged-in user.
+     * Creates a new financial goal for the current user.
      * <p>
-     * This endpoint validates the provided goal data and delegates the request to the goal service
-     * to create the goal. If the operation succeeds, a success response containing the created goal
-     * is returned; otherwise, an error response is returned.
+     * Validates the request body, creates the goal, retrieves the created goal, maps it to a DTO,
+     * and returns a success response with the goal data.
+     * </p>
      *
-     * @param goalDtoNew  the request body containing the new goal data
-     * @param currentUser the currently logged-in user retrieved from the session
-     * @return a success response if the operation succeeds or an error response if validation fails
+     * @param goalDtoNew  the incoming goal data
+     * @param currentUser the currently authenticated user
+     * @return a {@code ResponseEntity} with the created goal or an error message
      */
     @PostMapping
     @Operation(summary = "Create goal", description = "Creates a new financial goal")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Goal data", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class,
-            requiredProperties = {"goalName", "targetAmount", "duration", "startTime"},
-            example = CREATE_GOAL_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = CREATE_GOAL_REQUEST)))
     @ApiResponse(responseCode = "201", description = "Goal created successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = CREATE_GOAL_SUCCESS)))
@@ -100,13 +87,13 @@ public class GoalController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidJsonFormat",
             value = INVALID_JSON_RESPONSE)))
     public ResponseEntity<Map<String, Object>> createGoal(
-            @RequestBody GoalDto goalDtoNew, @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestBody GoalDto goalDtoNew, @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             GoalDto goalDto = validationUtils.validateRequest(goalDtoNew, Mode.GOAL_CREATE);
             Long goalId = goalService.createGoal(goalDto, userId);
             if (goalId != null) {
-                Goal goal = goalService.getGoal(goalId);
+                Goal goal = goalService.getGoal(goalId, userId);
                 if (goal != null) {
                     GoalDto goalDtoCreated = goalMapper.toDto(goal);
                     return buildSuccessResponse(
@@ -122,14 +109,14 @@ public class GoalController extends BaseController {
     }
 
     /**
-     * Retrieves a paginated list of goals for the currently logged-in user.
+     * Retrieves a paginated list of goals for the current user.
      * <p>
-     * This endpoint validates the pagination parameters and delegates the request to the goal service
-     * to fetch the paginated response. If the parameters are invalid, an error response is returned.
+     * Validates pagination parameters and returns the paginated goal list using {@code GoalService}.
+     * </p>
      *
-     * @param paramsNew   the pagination parameters provided in the request
-     * @param currentUser the currently logged-in user retrieved from the session
-     * @return a paginated response containing goal data or an error response if validation fails
+     * @param paramsNew   the pagination parameters (page and size)
+     * @param currentUser the currently authenticated user
+     * @return a {@code ResponseEntity} with paginated goal results or an error message
      */
     @GetMapping
     @Operation(summary = "Get goals", description = "Returns paginated list of goals")
@@ -141,7 +128,7 @@ public class GoalController extends BaseController {
             value = INVALID_PAGE_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getPaginatedGoals(
             @ParameterObject @ModelAttribute PaginationParams paramsNew,
-            @SessionAttribute("currentUser") UserDto currentUser) {
+            @Parameter(hidden = true) @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             PaginationParams params = validationUtils.validateRequest(paramsNew, Mode.PAGE);
@@ -149,26 +136,24 @@ public class GoalController extends BaseController {
                     goalService.getPaginatedGoalsForUser(userId, params.page(), params.size());
             return buildPaginatedResponse(userId, paginatedResponse);
         } catch (IllegalArgumentException e) {
-            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid request parameters",
-                    Map.of("message", e.getMessage()));
+            return buildErrorResponse(Map.of("message", e.getMessage()));
         } catch (ValidationException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
     /**
-     * Retrieves a specific goal by its ID for the currently logged-in user.
+     * Retrieves details of a specific goal by ID for the current user.
      * <p>
-     * This endpoint validates the goal ID and ensures that the user owns the goal before retrieving it.
-     * If the goal is found, a success response is returned; otherwise, an error response is returned.
+     * Validates the goal ID and ensures the goal belongs to the user. If found, maps and returns the goal.
+     * </p>
      *
      * @param goalId      the ID of the goal to retrieve
-     * @param currentUser the currently logged-in user retrieved from the session
-     * @return a success response containing the goal data or an error response if validation fails
+     * @param currentUser the currently authenticated user
+     * @return a {@code ResponseEntity} with goal details or an error message
      */
     @GetMapping("/{goalId}")
     @Operation(summary = "Get goal", description = "Returns goal details by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Goal retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_GOAL_SUCCESS)))
@@ -176,7 +161,8 @@ public class GoalController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "GoalNotFound",
             value = GOAL_NOT_FOUND_RESPONSE)))
     public ResponseEntity<Map<String, Object>> getGoalById(
-            @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
+            @PathVariable("goalId") String goalId,
+            @Parameter(hidden = true) @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long goalIdLong = validationUtils.parseLong(goalId);
@@ -193,22 +179,22 @@ public class GoalController extends BaseController {
     }
 
     /**
-     * Updates a specific goal for the currently logged-in user.
+     * Updates an existing goal for the current user.
      * <p>
-     * This endpoint validates the goal ID and the updated goal data before delegating the request to the goal
-     * service. If the operation succeeds, a success response containing the updated goal is returned; otherwise,
-     * an error response is returned.
+     * Validates the goal ID and incoming goal data, updates the goal, retrieves updated details,
+     * and returns a response with updated goal data.
+     * </p>
      *
      * @param goalId      the ID of the goal to update
-     * @param goalDtoNew  the request body containing the updated goal data
-     * @param currentUser the currently logged-in user retrieved from the session
-     * @return a success response if the operation succeeds or an error response if validation fails
+     * @param goalDtoNew  the updated goal data
+     * @param currentUser the currently authenticated user
+     * @return a {@code ResponseEntity} with the updated goal or an error message
      */
     @PutMapping("/{goalId}")
     @Operation(summary = "Update goal", description = "Updates existing goal")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated goal data", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class,
-            requiredProperties = {"goalName", "targetAmount", "duration"}, example = UPDATE_GOAL_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_GOAL_REQUEST)))
     @ApiResponse(responseCode = "200", description = "Goal updated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoalDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_GOAL_SUCCESS)))
@@ -217,7 +203,7 @@ public class GoalController extends BaseController {
             value = MISSING_GOAL_FIELD_RESPONSE)))
     public ResponseEntity<Map<String, Object>> updateGoal(
             @PathVariable("goalId") String goalId, @RequestBody GoalDto goalDtoNew,
-            @SessionAttribute("currentUser") UserDto currentUser) {
+            @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long goalIdLong = validationUtils.parseLong(goalId);
@@ -225,7 +211,7 @@ public class GoalController extends BaseController {
             goalDto.setGoalId(goalIdLong);
             boolean success = goalService.updateGoal(goalDto, userId);
             if (success) {
-                Goal goal = goalService.getGoal(goalDto.getGoalId());
+                Goal goal = goalService.getGoal(goalDto.getGoalId(), userId);
                 if (goal != null) {
                     GoalDto goalDtoUpdated = goalMapper.toDto(goal);
                     return buildSuccessResponse(HttpStatus.OK, "Goal updated successfully", goalDtoUpdated);
@@ -241,19 +227,17 @@ public class GoalController extends BaseController {
     }
 
     /**
-     * Deletes a specific goal for the currently logged-in user.
+     * Deletes a specific goal by ID for the current user.
      * <p>
-     * This endpoint validates the goal ID and ensures that the user owns the goal before delegating the request
-     * to the goal service. If the operation succeeds, a success response is returned; otherwise, an error
-     * response is returned.
+     * Validates the goal ID and ensures the user owns the goal before deletion.
+     * </p>
      *
      * @param goalId      the ID of the goal to delete
-     * @param currentUser the currently logged-in user retrieved from the session
-     * @return a success response if the operation succeeds or an error response if validation fails
+     * @param currentUser the currently authenticated user
+     * @return a {@code ResponseEntity} confirming the deletion or an error message
      */
     @DeleteMapping("/{goalId}")
     @Operation(summary = "Delete goal", description = "Deletes goal by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "Goal deleted successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_GOAL_SUCCESS)))
@@ -261,7 +245,8 @@ public class GoalController extends BaseController {
             mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "InvalidGoalId",
             value = INVALID_GOAL_ID_RESPONSE)))
     public ResponseEntity<Map<String, Object>> deleteGoal(
-            @PathVariable("goalId") String goalId, @SessionAttribute("currentUser") UserDto currentUser) {
+            @PathVariable("goalId") String goalId,
+            @Parameter(hidden = true) @RequestAttribute("currentUser") UserDto currentUser) {
         try {
             Long userId = currentUser.getUserId();
             Long goalIdLong = validationUtils.parseLong(goalId);

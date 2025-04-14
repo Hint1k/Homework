@@ -1,12 +1,16 @@
 package com.demo.finance.out.service.impl;
 
 import com.demo.finance.domain.dto.UserDto;
-import com.demo.finance.domain.model.Role;
+import com.demo.finance.domain.utils.Role;
 import com.demo.finance.domain.model.User;
-import com.demo.finance.exception.UserNotFoundException;
+import com.demo.finance.exception.custom.OptimisticLockException;
+import com.demo.finance.exception.custom.UserNotFoundException;
 import com.demo.finance.out.repository.UserRepository;
 import com.demo.finance.out.service.AdminService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.demo.finance.out.service.TokenService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,19 +20,11 @@ import org.springframework.stereotype.Service;
  * updating, blocking/unblocking, and deleting users.
  */
 @Service
+@RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
-
-    /**
-     * Constructs a new instance of {@code AdminServiceImpl} with the provided repository.
-     *
-     * @param userRepository the repository used to interact with user data in the database
-     */
-    @Autowired
-    public AdminServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final TokenService tokenService;
 
     /**
      * Retrieves a specific user by their unique user ID.
@@ -37,76 +33,100 @@ public class AdminServiceImpl implements AdminService {
      * @return the {@link User} object matching the provided user ID, or {@code null} if not found
      */
     @Override
+    @Cacheable(value = "users", key = "#userId")
     public User getUser(Long userId) {
         return userRepository.findById(userId);
     }
 
     /**
-     * Updates the role for a specified user.
+     * Updates the role of a specified user.
      * <p>
-     * This method performs the following operations:
+     * This method performs the following steps:
      * <ol>
-     *   <li>Retrieves the user by ID from the repository</li>
-     *   <li>Updates the user's role with the value from the provided {@link UserDto}</li>
-     *   <li>Increments the version for optimistic locking</li>
-     *   <li>Persists the updated user</li>
+     *   <li>Retrieves the user by ID from the repository.</li>
+     *   <li>Updates the user's role using the value from the provided {@link UserDto}.</li>
+     *   <li>Sets the version field to support optimistic locking.</li>
+     *   <li>Persists the updated user entity back to the repository.</li>
+     *   <li>Invalidates the user's existing JWT token to ensure the new role takes effect immediately.</li>
      * </ol>
+     * If the update fails due to a version mismatch (indicating concurrent modification),
+     * an {@link OptimisticLockException} is thrown to handle the conflict.
      *
-     * @param userId  the ID of the user to update (must not be null)
-     * @param userDto the DTO containing the new role information (must contain a valid role)
-     * @return true if the update was successful, false if the update failed
-     * @throws UserNotFoundException if no user exists with the specified ID
-     * @throws IllegalArgumentException if either parameter is null or contains invalid data
+     * @param userId  the ID of the user to update (must not be null).
+     * @param userDto the DTO containing the new role and version information.
+     * @return {@code true} if the update was successful.
+     * @throws UserNotFoundException    if no user exists with the specified ID.
+     * @throws IllegalArgumentException if input parameters are null or invalid.
+     * @throws OptimisticLockException  if a version conflict is detected during update.
      */
     @Override
+    @CacheEvict(value = "users", key = "#userId", allEntries = true)
     public boolean updateUserRole(Long userId, UserDto userDto) {
         User user = userRepository.findById(userId);
         if (user == null) {
             throw new UserNotFoundException("User with ID " + userId + " not found");
         }
-        Role newRole = userDto.getRole();
+        Role newRole = Role.valueOf(userDto.getRole());
         user.setRole(newRole);
-        user.setVersion(user.getVersion() + 1);
-        return userRepository.update(user);
+        user.setVersion(userDto.getVersion());
+        if (!userRepository.update(user)) {
+            throw new OptimisticLockException("User with ID " + userId + " was modified. Check version number.");
+        }
+        tokenService.invalidateUserToken(userId);
+        return true;
     }
 
     /**
-     * Updates the blocked status for a specified user.
+     * Updates the blocked status of a specified user.
      * <p>
-     * This method performs the following operations:
+     * This method performs the following steps:
      * <ol>
-     *   <li>Retrieves the user by ID from the repository</li>
-     *   <li>Updates the user's blocked status with the value from the provided {@link UserDto}</li>
-     *   <li>Increments the version for optimistic locking</li>
-     *   <li>Persists the updated user</li>
+     *   <li>Retrieves the user by ID from the repository.</li>
+     *   <li>Updates the user's blocked status using the value from the provided {@link UserDto}.</li>
+     *   <li>Sets the version field to support optimistic locking.</li>
+     *   <li>Persists the updated user entity back to the repository.</li>
+     *   <li>Invalidates the user's JWT token to prevent access if the account was blocked.</li>
      * </ol>
+     * If the update fails due to a version mismatch (indicating concurrent modification),
+     * an {@link OptimisticLockException} is thrown to handle the conflict.
      *
-     * @param userId  the ID of the user to update (must not be null)
-     * @param userDto the DTO containing the new blocked status (must contain a valid status)
-     * @return true if the update was successful, false if the update failed
-     * @throws UserNotFoundException if no user exists with the specified ID
-     * @throws IllegalArgumentException if either parameter is null or contains invalid data
+     * @param userId  the ID of the user to update (must not be null).
+     * @param userDto the DTO containing the new blocked status and version information.
+     * @return {@code true} if the update was successful.
+     * @throws UserNotFoundException    if no user exists with the specified ID.
+     * @throws IllegalArgumentException if input parameters are null or invalid.
+     * @throws OptimisticLockException  if a version conflict is detected during update.
      */
     @Override
+    @CacheEvict(value = "users", key = "#userId", allEntries = true)
     public boolean blockOrUnblockUser(Long userId, UserDto userDto) {
         User user = userRepository.findById(userId);
         if (user == null) {
             throw new UserNotFoundException("User with ID " + userId + " not found");
         }
-        boolean blocked = userDto.isBlocked();
-        user.setBlocked(blocked);
-        user.setVersion(user.getVersion() + 1);
-        return userRepository.update(user);
+        user.setBlocked(userDto.isBlocked());
+        user.setVersion(userDto.getVersion());
+        if (!userRepository.update(user)) {
+            throw new OptimisticLockException("User with ID " + userId + " was modified. Check version number.");
+        }
+        tokenService.invalidateUserToken(userId);
+        return true;
     }
 
     /**
      * Deletes a specific user from the system based on their unique user ID.
+     * If deletion is successful, the user's JWT token is also invalidated to revoke access immediately.
      *
      * @param userId the unique identifier of the user to delete
      * @return {@code true} if the deletion was successful, {@code false} otherwise
      */
     @Override
+    @CacheEvict(value = "users", key = "#userId", allEntries = true)
     public boolean deleteUser(Long userId) {
-        return userRepository.delete(userId);
+        boolean deleted = userRepository.delete(userId);
+        if (deleted) {
+            tokenService.invalidateUserToken(userId);
+        }
+        return deleted;
     }
 }

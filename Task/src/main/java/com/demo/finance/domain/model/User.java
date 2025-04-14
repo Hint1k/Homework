@@ -1,6 +1,7 @@
 package com.demo.finance.domain.model;
 
 import com.demo.finance.domain.utils.GeneratedKey;
+import com.demo.finance.domain.utils.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

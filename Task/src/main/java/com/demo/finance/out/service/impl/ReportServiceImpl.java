@@ -5,7 +5,8 @@ import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.Type;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.ReportService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,19 +22,10 @@ import java.util.stream.Collectors;
  * creating user-specific reports and analyzing expenses by category.
  */
 @Service
+@RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
 
     private final TransactionRepository transactionRepository;
-
-    /**
-     * Constructs a new instance of {@code ReportServiceImpl} with the provided repository.
-     *
-     * @param transactionRepository the repository used to interact with transaction data in the database
-     */
-    @Autowired
-    public ReportServiceImpl(TransactionRepository transactionRepository) {
-        this.transactionRepository = transactionRepository;
-    }
 
     /**
      * Generates a comprehensive financial report for a specific user based on all their transactions.
@@ -42,6 +34,7 @@ public class ReportServiceImpl implements ReportService {
      * @return a {@link Report} object containing the user's total income and expenses
      */
     @Override
+    @Cacheable(value = "reports", key = "#userId")
     public Report generateUserReport(Long userId) {
         List<Transaction> transactions = transactionRepository.findByUserId(userId);
         return generateReportFromTransactions(userId, transactions);
@@ -56,6 +49,7 @@ public class ReportServiceImpl implements ReportService {
      * @return a {@link Report} object containing the user's total income and expenses within the specified date range
      */
     @Override
+    @Cacheable(value = "reports", key = "#userId + '-' + #from.toString() + '-' + #to.toString()")
     public Report generateReportByDate(Long userId, LocalDate from, LocalDate to) {
         List<Transaction> transactions = transactionRepository.findByUserId(userId).stream()
                 .filter(t -> t.isWithinDateRange(from, to))
@@ -72,6 +66,7 @@ public class ReportServiceImpl implements ReportService {
      * @return a {@link Map} where the keys represent expense categories and the values represent the total amount spent in each category
      */
     @Override
+    @Cacheable(value = "reports", key = "#userId + '-expenses-' + #from.toString() + '-' + #to.toString()")
     public Map<String, BigDecimal> analyzeExpensesByCategory(Long userId, LocalDate from, LocalDate to) {
         return transactionRepository.findByUserId(userId).stream()
                 .filter(t -> t.getType() == Type.EXPENSE)

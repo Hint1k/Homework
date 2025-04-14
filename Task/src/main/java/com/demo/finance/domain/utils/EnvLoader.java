@@ -1,5 +1,6 @@
 package com.demo.finance.domain.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -7,8 +8,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A utility class for loading environment variables from a .env file.
@@ -18,9 +17,8 @@ import java.util.logging.Logger;
  * or duplicate keys.
  */
 @Component
+@Slf4j
 public class EnvLoader {
-
-    private static final Logger log = Logger.getLogger(EnvLoader.class.getName());
 
     /**
      * Loads environment variables from a .env file.
@@ -47,7 +45,7 @@ public class EnvLoader {
                 // Split line into key-value pair
                 String[] parts = line.split("=", 2);
                 if (parts.length != 2) {
-                    log.severe("Malformed line in .env file at line " + lineNumber + ": " + line);
+                    log.error("Malformed line in .env file at line {}: {}", lineNumber, line);
                     throw new RuntimeException("Malformed line in .env file at line " + lineNumber + ": " + line);
                 }
 
@@ -56,18 +54,18 @@ public class EnvLoader {
 
                 // Check for duplicate keys
                 if (envVars.containsKey(key)) {
-                    log.severe("Duplicate key found in .env file at line " + lineNumber + ": " + key);
+                    log.error("Duplicate key found in .env file at line {}: {}", lineNumber, key);
                     throw new RuntimeException("Duplicate key found in .env file: " + key);
                 }
 
                 envVars.put(key, value);
             }
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Error loading .env file: " + filePath, e);
+            log.error("Error loading .env file: {}", filePath, e);
             throw new RuntimeException("Unable to find or read .env file: " + filePath, e);
         }
 
-        log.info("Successfully loaded " + envVars.size() + " environment variables from " + filePath);
+        log.info("Successfully loaded {} environment variables from {}", envVars.size(), filePath);
         return envVars;
     }
 }

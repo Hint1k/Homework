@@ -8,8 +8,9 @@ import com.demo.finance.domain.utils.Mode;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.PaginationParams;
 import com.demo.finance.domain.utils.ValidationUtils;
-import com.demo.finance.exception.UserNotFoundException;
-import com.demo.finance.exception.ValidationException;
+import com.demo.finance.exception.custom.OptimisticLockException;
+import com.demo.finance.exception.custom.UserNotFoundException;
+import com.demo.finance.exception.custom.ValidationException;
 import com.demo.finance.out.service.AdminService;
 import com.demo.finance.out.service.TransactionService;
 import com.demo.finance.out.service.UserService;
@@ -18,8 +19,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +61,7 @@ import static com.demo.finance.domain.utils.SwaggerExamples.Admin.USER_NOT_FOUND
  */
 @RestController
 @RequestMapping("/api/admin/users")
+@RequiredArgsConstructor
 public class AdminController extends BaseController {
 
     private final AdminService adminService;
@@ -67,25 +69,6 @@ public class AdminController extends BaseController {
     private final TransactionService transactionService;
     private final ValidationUtils validationUtils;
     private final UserMapper userMapper;
-
-    /**
-     * Constructs a new {@code AdminController} instance with the required dependencies.
-     *
-     * @param adminService       the service responsible for admin-specific operations
-     * @param userService        the service responsible for user-related operations
-     * @param transactionService the service responsible for transaction-related operations
-     * @param validationUtils    the utility for validating request parameters and DTOs
-     * @param userMapper         the mapper for converting between user entities and DTOs
-     */
-    @Autowired
-    public AdminController(AdminService adminService, UserService userService, TransactionService transactionService,
-                           ValidationUtils validationUtils, UserMapper userMapper) {
-        this.adminService = adminService;
-        this.userService = userService;
-        this.transactionService = transactionService;
-        this.validationUtils = validationUtils;
-        this.userMapper = userMapper;
-    }
 
     /**
      * Retrieves a paginated list of all users in the system.
@@ -159,7 +142,6 @@ public class AdminController extends BaseController {
      */
     @GetMapping("/{userId}")
     @Operation(summary = "Get user", description = "Returns user details by ID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "User details retrieved successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = GET_USER_SUCCESS)))
@@ -186,22 +168,27 @@ public class AdminController extends BaseController {
      * This endpoint validates the user ID and the request body containing the block status. It then delegates
      * the request to the admin service to update the user's blocked status. If the operation succeeds, a success
      * response is returned; otherwise, an error response is returned.
+     * <p>
+     * If the update fails due to a version mismatch (indicating that the user was modified by another operation),
+     * an {@link OptimisticLockException} is caught, and a 409 Conflict response is returned
+     * to handle the concurrency conflict.
      *
      * @param userId     the ID of the user to block or unblock
      * @param userDtoNew the request body containing the updated block status
      * @return a success response if the operation succeeds or an error response if validation fails
+     * or a concurrency conflict occurs
      */
     @PatchMapping("/block/{userId}")
     @Operation(summary = "Block/unblock user", description = "Updates user's blocked status")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Block status", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
-            requiredProperties = {"blocked"}, example = BLOCK_USER_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = BLOCK_USER_REQUEST)))
     @ApiResponse(responseCode = "200", description = "User blocked/unblocked successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = BLOCK_USER_SUCCESS)))
-    @ApiResponse(responseCode = "400", description = "Bad request - Default admin can't be changed", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "DefaultAdmin",
-            value = BLOCK_DEFAULT_ADMIN_RESPONSE)))
+    @ApiResponse(responseCode = "400", description = "Bad request - Default admin can't be changed",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(name = "DefaultAdmin", value = BLOCK_DEFAULT_ADMIN_RESPONSE)))
     public ResponseEntity<Map<String, Object>> blockUnblockUser(
             @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
         try {
@@ -209,12 +196,20 @@ public class AdminController extends BaseController {
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.BLOCK_UNBLOCK);
             boolean success = adminService.blockOrUnblockUser(userIdLong, userDto);
             if (success) {
-                return buildSuccessResponse(HttpStatus.OK,
-                        "User blocked/unblocked status changed successfully", UserDto.removePassword(userDto));
+                User updatedUser = userService.getUserById(userIdLong);
+                if (updatedUser != null) {
+                    UserDto updatedUserDto = UserDto.removePassword(userMapper.toDto(updatedUser));
+                    return buildSuccessResponse(HttpStatus.OK,
+                            "User blocked/unblocked status changed successfully", updatedUserDto);
+                }
+                return buildErrorResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve updated user details.");
             }
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Failed to block/unblock user.");
         } catch (ValidationException | UserNotFoundException | IllegalArgumentException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (OptimisticLockException e) {
+            return buildErrorResponse(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 
@@ -224,35 +219,49 @@ public class AdminController extends BaseController {
      * This endpoint validates the user ID and the request body containing the updated role. It then delegates
      * the request to the admin service to update the user's role. If the operation succeeds, a success response
      * is returned; otherwise, an error response is returned.
+     * <p>
+     * If the update fails due to a version mismatch (indicating that the user was modified by another operation),
+     * an {@link OptimisticLockException} is caught, and a 409 Conflict response is returned
+     * to handle the concurrency conflict.
      *
      * @param userId     the ID of the user whose role is being updated
      * @param userDtoNew the request body containing the updated role
      * @return a success response if the operation succeeds or an error response if validation fails
+     * or a concurrency conflict occurs
      */
     @PatchMapping("/role/{userId}")
     @Operation(summary = "Update user role", description = "Updates user's role")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Role update data", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class,
-            requiredProperties = {"role"}, example = UPDATE_ROLE_REQUEST)))
+            mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
+            examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_ROLE_REQUEST)))
     @ApiResponse(responseCode = "200", description = "User role updated successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class),
             examples = @ExampleObject(name = "SuccessResponse", value = UPDATE_ROLE_SUCCESS)))
-    @ApiResponse(responseCode = "400", description = "Bad request - Default admin can't be changed", content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE, examples = @ExampleObject(name = "DefaultAdmin",
-            value = UPDATE_DEFAULT_ADMIN_RESPONSE)))
+    @ApiResponse(responseCode = "400", description = "Bad request - Default admin can't be changed",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(name = "DefaultAdmin", value = UPDATE_DEFAULT_ADMIN_RESPONSE)))
     public ResponseEntity<Map<String, Object>> updateUserRole(
             @PathVariable("userId") String userId, @RequestBody UserDto userDtoNew) {
         try {
+            userDtoNew.setRole(userDtoNew.getRole().toUpperCase());
             Long userIdLong = validationUtils.parseUserId(userId, Mode.UPDATE_ROLE);
             UserDto userDto = validationUtils.validateRequest(userDtoNew, Mode.UPDATE_ROLE);
             boolean success = adminService.updateUserRole(userIdLong, userDto);
             if (success) {
-                return buildSuccessResponse(
-                        HttpStatus.OK, "User role updated successfully", UserDto.removePassword(userDto));
+                User updatedUser = userService.getUserById(userIdLong);
+                if (updatedUser != null) {
+                    UserDto updatedUserDto = UserDto.removePassword(userMapper.toDto(updatedUser));
+                    return buildSuccessResponse(
+                            HttpStatus.OK, "User role updated successfully", updatedUserDto);
+                }
+                return buildErrorResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve updated user details.");
             }
             return buildErrorResponse(HttpStatus.BAD_REQUEST, "Failed to update role.");
         } catch (ValidationException | UserNotFoundException | IllegalArgumentException e) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (OptimisticLockException e) {
+            return buildErrorResponse(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 
@@ -267,7 +276,6 @@ public class AdminController extends BaseController {
      */
     @DeleteMapping("/{userId}")
     @Operation(summary = "Delete user", description = "Permanently deletes user account")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
     @ApiResponse(responseCode = "200", description = "User deleted successfully", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class),
             examples = @ExampleObject(name = "SuccessResponse", value = DELETE_USER_SUCCESS)))

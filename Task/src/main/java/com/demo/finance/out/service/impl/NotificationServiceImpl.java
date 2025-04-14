@@ -12,7 +12,7 @@ import com.demo.finance.domain.model.Budget;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.EmailService;
 import com.demo.finance.out.service.NotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,6 +26,7 @@ import java.util.List;
  * It interacts with various repositories and utilities to generate and send notifications to users.
  */
 @Service
+@RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
     private final BudgetRepository budgetRepository;
@@ -34,29 +35,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserRepository userRepository;
     private final BalanceUtils balanceUtils;
     private final EmailService emailService;
-
-    /**
-     * Constructs a new instance of {@code NotificationServiceImpl} with the provided repositories,
-     * utilities, and services.
-     *
-     * @param budgetRepository      the repository used to interact with budget data in the database
-     * @param goalRepository        the repository used to interact with goal data in the database
-     * @param transactionRepository the repository used to interact with transaction data in the database
-     * @param userRepository        the repository used to interact with user data in the database
-     * @param balanceUtils          the utility class used for balance calculations
-     * @param emailService          the service used to send emails to users
-     */
-    @Autowired
-    public NotificationServiceImpl(BudgetRepository budgetRepository, GoalRepository goalRepository,
-                                   TransactionRepository transactionRepository, UserRepository userRepository,
-                                   BalanceUtils balanceUtils, EmailService emailService) {
-        this.budgetRepository = budgetRepository;
-        this.goalRepository = goalRepository;
-        this.transactionRepository = transactionRepository;
-        this.userRepository = userRepository;
-        this.balanceUtils = balanceUtils;
-        this.emailService = emailService;
-    }
 
     /**
      * Fetches a budget-related notification for a specific user and sends it via email.

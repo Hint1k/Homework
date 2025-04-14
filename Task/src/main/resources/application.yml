@@ -3,3 +3,51 @@ app:
     url: "jdbc:postgresql://postgres:5432/financedb"
 server:
   port: 8080
+logging:
+  level:
+    root: INFO
+    com.demo.finance: INFO
+    com.demo.finance.app.config: INFO
+    com.demo.finance.in.controller: INFO
+    com.demo.finance.out.repository: WARN
+    com.demo.finance.domain.model: ERROR
+    com.demo.finance.exception: ERROR
+    com.demo.finance.in.filter: INFO
+    liquibase: WARN
+    org.springframework.web: WARN
+    org.springframework.boot: WARN
+    org.springdoc: WARN
+    org.springdoc.core: WARN
+    org.springdoc.api: WARN
+    org.springdoc.webmvc: WARN
+    org.eclipse.jetty: WARN
+    org.eclipse.jetty.server: WARN
+    org.eclipse.jetty.client: WARN
+    org.springframework.cache.interceptor.CacheInterceptor: TRACE
+  file:
+    name: /app/logs/app.log
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss}","level":"%-5level","class":"%logger{36}","message":"%msg"}%n'
+    file: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss}","level":"%-5level","class":"%logger{36}","message":"%msg"}%n'
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 5
+logging-aspect:
+  slow-method-threshold-ms: 500
+jwt:
+  secret: jwtSecretSuperSecureKeyThatIsAtLeast64CharactersLongForHS512Algorithm
+  expiration: 3600000
+spring:
+  cache:
+    type: caffeine
+    cache-names:
+      - users
+      - transactions
+      - goals
+      - budgets
+      - reports
+      - tokens
+      - invalidTokens
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=60m

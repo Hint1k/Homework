@@ -3,7 +3,6 @@ package com.demo.finance.out.repository.impl;
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.model.Goal;
 import com.demo.finance.out.repository.GoalRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
@@ -40,7 +39,6 @@ public class GoalRepositoryImpl extends BaseRepository implements GoalRepository
      *
      * @param dataSourceManager the manager responsible for providing database connections
      */
-    @Autowired
     public GoalRepositoryImpl(DataSourceManager dataSourceManager) {
         super(dataSourceManager);
     }

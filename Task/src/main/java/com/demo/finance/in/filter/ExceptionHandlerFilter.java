@@ -6,12 +6,11 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A global exception handling filter that intercepts and processes uncaught exceptions
@@ -28,11 +27,20 @@ import java.util.logging.Logger;
  */
 @Component
 @Order(Integer.MIN_VALUE)
+@Slf4j
 public class ExceptionHandlerFilter implements Filter {
 
-    private static final Logger log = Logger.getLogger(ExceptionHandlerFilter.class.getName());
     private static final String ERROR_RESPONSE_FORMAT = "{\"error\": \"%s\"}";
 
+    /**
+     * Creates and returns a new {@link ResponseWrapper} instance to wrap the given
+     * {@link HttpServletResponse}. This wrapper is used to track whether the response
+     * has been committed, ensuring proper handling of exceptions without modifying
+     * already-committed responses.
+     *
+     * @param response the original HTTP response to be wrapped
+     * @return a new {@link ResponseWrapper} instance wrapping the provided response
+     */
     ResponseWrapper createResponseWrapper(HttpServletResponse response) {
         return new ResponseWrapper(response);
     }
@@ -82,21 +90,21 @@ public class ExceptionHandlerFilter implements Filter {
                     : HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
             String message = ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage()
                     : "An unexpected error occurred.";
-            log.log(Level.SEVERE, "Unhandled exception: " + ex.getMessage(), ex);
+            log.error("Unhandled exception: {}", ex.getMessage(), ex);
             httpResponse.setStatus(statusCode);
             httpResponse.setContentType("application/json");
             String jsonResponse = String.format(ERROR_RESPONSE_FORMAT, message);
             httpResponse.getWriter().write(jsonResponse);
-            log.log(Level.INFO, "7: JSON response written to the output stream");
+            log.info("7: JSON response written to the output stream");
         } catch (Exception handlerEx) {
-            log.log(Level.SEVERE, "Failed to handle exception: " + handlerEx.getMessage(), handlerEx);
+            log.error("Failed to handle exception: {}", handlerEx.getMessage(), handlerEx);
             if (response instanceof HttpServletResponse) {
                 ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             try {
                 response.getWriter().write(String.format(ERROR_RESPONSE_FORMAT, "An unexpected error occurred"));
             } catch (IOException e) {
-                log.log(Level.SEVERE, "Completely failed to write error response", e);
+                log.error("Completely failed to write error response", e);
             }
         }
     }

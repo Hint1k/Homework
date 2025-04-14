@@ -6,7 +6,9 @@ import com.demo.finance.domain.model.Goal;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.out.repository.GoalRepository;
 import com.demo.finance.out.service.GoalService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,23 +21,11 @@ import java.util.List;
  * retrieving, updating, deleting, and paginating goals for users.
  */
 @Service
+@RequiredArgsConstructor
 public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
     private final GoalMapper goalMapper;
-
-    /**
-     * Constructs a new {@code GoalServiceImpl} instance with the required dependencies
-     * for managing goal-related operations.
-     *
-     * @param goalRepository the repository responsible for persisting and retrieving goal data
-     * @param goalMapper     the mapper for converting between {@link GoalDto} and {@link Goal} entities
-     */
-    @Autowired
-    public GoalServiceImpl(GoalRepository goalRepository, GoalMapper goalMapper) {
-        this.goalRepository = goalRepository;
-        this.goalMapper = goalMapper;
-    }
 
     /**
      * Creates a new financial goal in the system based on the provided goal data.
@@ -43,7 +33,6 @@ public class GoalServiceImpl implements GoalService {
      * This method maps the provided {@link GoalDto} to a {@link Goal} entity, associates the goal
      * with the specified user ID, initializes the saved amount to zero, and saves it to the database.
      * The goal details include the target amount, duration, start time, and goal name.
-     * <p>
      *
      * @param goalDto the {@link GoalDto} object containing the details of the goal to create
      * @param userId  the unique identifier of the user associated with the goal
@@ -51,6 +40,7 @@ public class GoalServiceImpl implements GoalService {
      * @throws IllegalArgumentException if the provided goal data is invalid or incomplete
      */
     @Override
+    @CacheEvict(value = "goals", key = "#userId")
     public Long createGoal(GoalDto goalDto, Long userId) {
         Goal goal = goalMapper.toEntity(goalDto);
         goal.setUserId(userId);
@@ -65,7 +55,8 @@ public class GoalServiceImpl implements GoalService {
      * @return the {@link Goal} object matching the provided goal ID
      */
     @Override
-    public Goal getGoal(Long goalId) {
+    @Cacheable(value = "goals", key = "#userId")
+    public Goal getGoal(Long goalId, Long userId) {
         return goalRepository.findById(goalId);
     }
 
@@ -77,6 +68,7 @@ public class GoalServiceImpl implements GoalService {
      * @return the {@link Goal} object matching the provided user ID and goal ID
      */
     @Override
+    @Cacheable(value = "goals", key = "#userId")
     public Goal getGoalByUserIdAndGoalId(Long userId, Long goalId) {
         return goalRepository.findByUserIdAndGoalId(userId, goalId);
     }
@@ -89,6 +81,7 @@ public class GoalServiceImpl implements GoalService {
      * @return {@code true} if the update was successful, {@code false} otherwise
      */
     @Override
+    @CacheEvict(value = "goals", key = "#userId")
     public boolean updateGoal(GoalDto goalDto, Long userId) {
         Long goalId = goalDto.getGoalId();
         Goal goal = goalRepository.findByUserIdAndGoalId(userId, goalId);
@@ -110,6 +103,7 @@ public class GoalServiceImpl implements GoalService {
      * @return {@code true} if the deletion was successful, {@code false} otherwise
      */
     @Override
+    @CacheEvict(value = "goals", key = "#userId")
     public boolean deleteGoal(Long userId, Long goalId) {
         Goal goal = goalRepository.findByUserIdAndGoalId(userId, goalId);
         if (goal != null) {

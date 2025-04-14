@@ -6,7 +6,10 @@ import com.demo.finance.domain.model.Transaction;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.out.repository.TransactionRepository;
 import com.demo.finance.out.service.TransactionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,21 +21,11 @@ import java.util.List;
  * retrieving, updating, deleting, and paginating transactions.
  */
 @Service
+@RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
-
-    /**
-     * Constructs a new instance of {@code TransactionServiceImpl} with the provided repository.
-     *
-     * @param transactionRepository the repository used to interact with transaction data in the database
-     */
-    @Autowired
-    public TransactionServiceImpl(TransactionRepository transactionRepository, TransactionMapper transactionMapper) {
-        this.transactionRepository = transactionRepository;
-        this.transactionMapper = transactionMapper;
-    }
 
     /**
      * Creates a new transaction in the system based on the provided transaction data.
@@ -40,7 +33,6 @@ public class TransactionServiceImpl implements TransactionService {
      * This method maps the provided {@link TransactionDto} to a {@link Transaction} entity,
      * associates the transaction with the specified user ID, and saves it to the database.
      * The transaction details include the amount, category, date, description, and type.
-     * <p>
      *
      * @param dto    the {@link TransactionDto} object containing the details of the transaction to create
      * @param userId the unique identifier of the user associated with the transaction
@@ -48,6 +40,8 @@ public class TransactionServiceImpl implements TransactionService {
      * @throws IllegalArgumentException if the provided transaction data is invalid or incomplete
      */
     @Override
+    @Caching(evict = {@CacheEvict(value = "transactions", key = "#userId"),
+            @CacheEvict(value = "reports", key = "#userId")})
     public Long createTransaction(TransactionDto dto, Long userId) {
         Transaction transaction = transactionMapper.toEntity(dto);
         transaction.setUserId(userId);
@@ -59,9 +53,11 @@ public class TransactionServiceImpl implements TransactionService {
      *
      * @param userId        the unique identifier of the user
      * @param transactionId the unique identifier of the transaction
-     * @return the {@link Transaction} object matching the provided user ID and transaction ID, or {@code null} if not found
+     * @return the {@link Transaction} object matching the provided user ID and transaction ID,
+     * or {@code null} if not found
      */
     @Override
+    @Cacheable(value = "transactions", key = "#userId")
     public Transaction getTransactionByUserIdAndTransactionId(Long userId, Long transactionId) {
         return transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
     }
@@ -73,7 +69,8 @@ public class TransactionServiceImpl implements TransactionService {
      * @return the {@link Transaction} object matching the provided transaction ID, or {@code null} if not found
      */
     @Override
-    public Transaction getTransaction(Long transactionId) {
+    @Cacheable(value = "transactions", key = "#userId")
+    public Transaction getTransaction(Long transactionId, Long userId) {
         return transactionRepository.findById(transactionId);
     }
 
@@ -85,6 +82,8 @@ public class TransactionServiceImpl implements TransactionService {
      * @return {@code true} if the update was successful, {@code false} otherwise
      */
     @Override
+    @Caching(evict = {@CacheEvict(value = "transactions", key = "#userId"),
+            @CacheEvict(value = "reports", key = "#userId")})
     public boolean updateTransaction(TransactionDto dto, Long userId) {
         Long transactionId = dto.getTransactionId();
         Transaction transaction = transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
@@ -106,6 +105,8 @@ public class TransactionServiceImpl implements TransactionService {
      * @return {@code true} if the deletion was successful, {@code false} otherwise
      */
     @Override
+    @Caching(evict = {@CacheEvict(value = "transactions", key = "#userId"),
+            @CacheEvict(value = "reports", key = "#userId")})
     public boolean deleteTransaction(Long userId, Long transactionId) {
         Transaction transaction = transactionRepository.findByUserIdAndTransactionId(userId, transactionId);
         if (transaction != null) {

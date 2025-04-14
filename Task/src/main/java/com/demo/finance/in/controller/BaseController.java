@@ -64,18 +64,15 @@ public abstract class BaseController {
      * additional key-value pairs representing error details. It is useful for returning more granular
      * error information to the client.
      *
-     * @param status       the HTTP status code for the response
-     * @param errorMessage the error message to include in the response
-     * @param details      a map of additional error details to include in the response
+     * @param details a map of additional error details to include in the response
      * @return a {@link ResponseEntity} containing the detailed error response
      */
-    protected ResponseEntity<Map<String, Object>> buildErrorResponse(
-            HttpStatus status, String errorMessage, Map<String, String> details) {
+    protected ResponseEntity<Map<String, Object>> buildErrorResponse(Map<String, String> details) {
         Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("error", errorMessage);
+        errorResponse.put("error", "Invalid request parameters");
         errorResponse.putAll(details);
         errorResponse.put("timestamp", Instant.now().toString());
-        return new ResponseEntity<>(errorResponse, status);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     /**

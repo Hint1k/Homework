@@ -1,6 +1,7 @@
 package com.demo.finance.in.filter;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -16,11 +17,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
 class ExceptionHandlerFilterTest {
@@ -38,67 +39,61 @@ class ExceptionHandlerFilterTest {
 
     @Test
     @DisplayName("Normal request should pass through filter chain without modification")
-    void normalRequest_ShouldPassThrough() {
-        try {
-            ArgumentCaptor<ExceptionHandlerFilter.ResponseWrapper> responseCaptor =
-                    ArgumentCaptor.forClass(ExceptionHandlerFilter.ResponseWrapper.class);
+    void normalRequest_ShouldPassThrough() throws ServletException, IOException {
+        ArgumentCaptor<ExceptionHandlerFilter.ResponseWrapper> responseCaptor =
+                ArgumentCaptor.forClass(ExceptionHandlerFilter.ResponseWrapper.class);
 
-            filter.doFilter(request, response, chain);
+        filter.doFilter(request, response, chain);
 
-            verify(chain).doFilter(Mockito.eq(request), responseCaptor.capture());
-            assertThat(responseCaptor.getValue()).isNotNull();
-        } catch (Exception e) {
-            fail("Normal request should not throw exceptions: " + e.getMessage());
-        }
+        verify(chain, times(1)).doFilter(Mockito.eq(request), responseCaptor.capture());
+        assertThat(responseCaptor.getValue()).isNotNull();
+        verify(response, times(0)).setStatus(anyInt());
+        verify(response, times(0)).getWriter();
     }
 
     @Test
     @DisplayName("Should return 500 with error message when exception occurs")
-    void thrownException_ShouldReturn500() {
-        try {
-            when(response.getWriter()).thenReturn(writer);
-            ExceptionHandlerFilter.ResponseWrapper realResponseWrapper = new ExceptionHandlerFilter.ResponseWrapper(response);
-            ExceptionHandlerFilter spyFilter = Mockito.spy(filter);
-            when(spyFilter.createResponseWrapper(response)).thenReturn(realResponseWrapper);
-            doThrow(new RuntimeException("Test error")).when(chain).doFilter(request, realResponseWrapper);
+    void thrownException_ShouldReturn500() throws ServletException, IOException {
+        when(response.getWriter()).thenReturn(writer);
+        ExceptionHandlerFilter.ResponseWrapper realResponseWrapper =
+                new ExceptionHandlerFilter.ResponseWrapper(response);
+        ExceptionHandlerFilter spyFilter = Mockito.spy(filter);
+        when(spyFilter.createResponseWrapper(response)).thenReturn(realResponseWrapper);
+        doThrow(new RuntimeException("Test error")).when(chain).doFilter(request, realResponseWrapper);
 
-            spyFilter.doFilter(request, response, chain);
+        spyFilter.doFilter(request, response, chain);
 
-            verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            verify(writer).write("{\"error\": \"Test error\"}");
-        } catch (Exception e) {
-            fail("Should handle exceptions and return 500: " + e.getMessage());
-        }
+        verify(response, times(1)).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        verify(writer, times(1)).write("{\"error\": \"Test error\"}");
+        verify(response, times(1)).getWriter();
     }
 
     @Test
     @DisplayName("Should still set status code when error occurs during response writing")
-    void errorDuringHandling_ShouldStillRespond() {
-        try {
-            when(response.getWriter()).thenThrow(new IOException("Writer failed"));
-            doThrow(new RuntimeException("Original error")).when(chain).doFilter(request, response);
+    void errorDuringHandling_ShouldStillRespond() throws ServletException, IOException {
+        PrintWriter writer = Mockito.mock(PrintWriter.class);
+        when(response.getWriter()).thenReturn(writer);
+        ExceptionHandlerFilter.ResponseWrapper responseWrapper = new ExceptionHandlerFilter.ResponseWrapper(response);
+        doThrow(new RuntimeException("Original error")).when(chain).doFilter(request, responseWrapper);
 
-            filter.doFilter(request, response, chain);
+        filter.doFilter(request, response, chain);
 
-            verify(response, times(2)).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            fail("Should handle errors during error handling: " + e.getMessage());
-        }
+        verify(response, times(1)).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        verify(response, times(1)).getWriter();
+        verify(writer, times(1)).write(Mockito.anyString());
     }
 
     @Test
     @DisplayName("Should preserve existing HTTP status code when exception occurs")
-    void preservesExistingStatusCode() {
-        try {
-            when(response.getStatus()).thenReturn(404);
-            when(response.getWriter()).thenReturn(writer);
-            doThrow(new RuntimeException("Not found")).when(chain).doFilter(request, response);
+    void preservesExistingStatusCode() throws ServletException, IOException {
+        when(response.getStatus()).thenReturn(404);
+        when(response.getWriter()).thenReturn(writer);
+        ExceptionHandlerFilter.ResponseWrapper responseWrapper = new ExceptionHandlerFilter.ResponseWrapper(response);
+        doThrow(new RuntimeException("Not found")).when(chain).doFilter(request, responseWrapper);
 
-            filter.doFilter(request, response, chain);
+        filter.doFilter(request, response, chain);
 
-            verify(response).setStatus(404);
-        } catch (Exception e) {
-            fail("Should preserve existing status code: " + e.getMessage());
-        }
+        verify(response, times(1)).setStatus(404);
+        verify(response, times(1)).getWriter();
     }
 }

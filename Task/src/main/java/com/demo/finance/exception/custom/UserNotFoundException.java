@@ -1,4 +1,4 @@
-package com.demo.finance.exception;
+package com.demo.finance.exception.custom;
 
 /**
  * Exception thrown when a requested user entity is not found in the system.

@@ -1,14 +1,13 @@
 package com.demo.finance.app.config;
 
-import com.demo.finance.exception.DatabaseConnectionException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.demo.finance.exception.custom.DatabaseConnectionException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The {@code DataSourceManager} class is responsible for managing database connections.
@@ -19,23 +18,11 @@ import java.util.logging.Logger;
  * wrapped in a custom exception for better error handling.
  */
 @Component
+@Slf4j
+@RequiredArgsConstructor
 public class DataSourceManager {
 
-    private static final Logger log = Logger.getLogger(DataSourceManager.class.getName());
     private final DatabaseConfig config;
-
-    /**
-     * Constructs a new {@code DataSourceManager} instance with the provided database configuration.
-     * <p>
-     * This constructor is annotated with {@code @Autowired}, enabling Spring to inject
-     * the required {@link DatabaseConfig} dependency automatically.
-     *
-     * @param config the database configuration containing URL, username, and password
-     */
-    @Autowired
-    public DataSourceManager(DatabaseConfig config) {
-        this.config = config;
-    }
 
     /**
      * Establishes and returns a connection to the database using the configured URL,
@@ -56,7 +43,7 @@ public class DataSourceManager {
             return DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
             String errorMessage = "Failed to establish a database connection. URL: " + url + ", Username: " + username;
-            log.log(Level.SEVERE, errorMessage, e);
+            log.error(errorMessage, e);
             throw new DatabaseConnectionException(errorMessage, e);
         }
     }

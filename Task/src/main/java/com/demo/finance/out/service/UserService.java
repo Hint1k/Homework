@@ -19,6 +19,14 @@ public interface UserService {
     User getUserByEmail(String email);
 
     /**
+     * Retrieves a {@link User} object by their unique identifier.
+     *
+     * @param userId the unique identifier of the user to retrieve
+     * @return the {@link User} object associated with the provided user ID
+     */
+    User getUserById(Long userId);
+
+    /**
      * Updates the account details of the user with the specified user ID.
      * This method maps the provided {@link UserDto} to a {@link User} entity,
      * preserves the existing role and increments the version, and updates the password

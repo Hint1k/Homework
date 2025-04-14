@@ -3,7 +3,6 @@ package com.demo.finance.out.repository.impl;
 import com.demo.finance.app.config.DataSourceManager;
 import com.demo.finance.domain.model.Budget;
 import com.demo.finance.out.repository.BudgetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
@@ -22,8 +21,6 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
             + "VALUES (?, ?, ?)";
     private static final String UPDATE_SQL = "UPDATE finance.budgets SET user_id = ?, monthly_limit = ?, "
             + "current_expenses = ? WHERE budget_id = ?";
-    private static final String DELETE_SQL = "DELETE FROM finance.budgets WHERE budget_id = ?";
-    private static final String FIND_BY_ID_SQL = "SELECT * FROM finance.budgets WHERE budget_id = ?";
     private static final String FIND_BY_USER_ID_SQL = "SELECT * FROM finance.budgets WHERE user_id = ?";
 
     /**
@@ -32,7 +29,6 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
      *
      * @param dataSourceManager the manager responsible for providing database connections
      */
-    @Autowired
     public BudgetRepositoryImpl(DataSourceManager dataSourceManager) {
         super(dataSourceManager);
     }
@@ -65,29 +61,6 @@ public class BudgetRepositoryImpl extends BaseRepository implements BudgetReposi
             setBudgetParameters(stmt, budget);
             stmt.setLong(4, budget.getBudgetId());
         });
-    }
-
-    /**
-     * Deletes a budget from the database based on its unique budget ID.
-     *
-     * @param budgetId the unique identifier of the budget to delete
-     * @return {@code true} if the deletion was successful, {@code false} otherwise
-     */
-    @Override
-    public boolean delete(Long budgetId) {
-        return updateRecord(DELETE_SQL, stmt -> stmt.setLong(1, budgetId));
-    }
-
-    /**
-     * Retrieves a specific budget by its unique budget ID.
-     *
-     * @param budgetId the unique identifier of the budget
-     * @return the {@link Budget} object matching the provided budget ID, or {@code null} if not found
-     */
-    @Override
-    public Budget findById(Long budgetId) {
-        return findRecordByCriteria(FIND_BY_ID_SQL, stmt -> stmt.setLong(1, budgetId),
-                this::mapResultSetToBudget).orElse(null);
     }
 
     /**

@@ -1,7 +1,6 @@
 package com.demo.finance.domain.dto;
 
-import com.demo.finance.domain.model.Role;
-
+import com.demo.finance.starter.audit.AuditableUser;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class UserDto implements AuditableUser {
 
     @Schema(description = "Unique identifier of the user", example = "2")
     private Long userId;
@@ -34,7 +33,7 @@ public class UserDto {
     private boolean blocked;
 
     @Schema(description = "User's role in the system (user or admin)", example = "user")
-    private Role role;
+    private String role;
 
     @Schema(description = "Optimistic locking version number", example = "1")
     private Long version;

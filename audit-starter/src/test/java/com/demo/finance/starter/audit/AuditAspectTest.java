@@ -1,6 +1,5 @@
-package com.demo.finance.aop;
+package com.demo.finance.starter.audit;
 
-import com.demo.finance.domain.dto.UserDto;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,11 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 
-import java.util.logging.Logger;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuditAspectTest {
@@ -36,8 +38,8 @@ class AuditAspectTest {
     @Test
     @DisplayName("Should process UserDto argument - Verifies user ID extraction")
     void testLogAudit_WithUserDto() {
-        UserDto userDto = new UserDto();
-        userDto.setUserId(123L);
+        AuditableUser userDto = Mockito.mock(AuditableUser.class);
+        when(userDto.getUserId()).thenReturn(123L);
         Object[] args = new Object[]{userDto};
 
         when(mockJoinPoint.getArgs()).thenReturn(args);

@@ -4,10 +4,14 @@ import com.demo.finance.domain.dto.UserDto;
 import com.demo.finance.domain.model.User;
 import com.demo.finance.domain.utils.PaginatedResponse;
 import com.demo.finance.domain.utils.impl.PasswordUtilsImpl;
+import com.demo.finance.exception.custom.OptimisticLockException;
 import com.demo.finance.out.repository.UserRepository;
+import com.demo.finance.out.service.TokenService;
 import com.demo.finance.out.service.UserService;
 import com.demo.finance.domain.mapper.UserMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,27 +23,17 @@ import java.util.List;
  * updating, deleting, and paginating users.
  */
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordUtilsImpl passwordUtils;
     private final UserMapper userMapper;
-
-    /**
-     * Constructs a new instance of {@code UserServiceImpl} with the provided repository and password utility.
-     *
-     * @param userRepository the repository used to interact with user data in the database
-     * @param passwordUtils  the utility class used for password hashing and validation
-     */
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordUtilsImpl passwordUtils, UserMapper userMapper) {
-        this.userRepository = userRepository;
-        this.passwordUtils = passwordUtils;
-        this.userMapper = userMapper;
-    }
+    private final TokenService tokenService;
 
     /**
      * Retrieves a user from the database by their email address.
+     * The result is cached using the email as the key.
      *
      * @param email the email address of the user to retrieve
      * @return the {@link User} object associated with the provided email, or {@code null} if not found
@@ -50,16 +44,31 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * Retrieves a user from the database by their unique identifier.
+     * The result is cached using the user ID as the key.
+     *
+     * @param userId the unique identifier of the user to retrieve
+     * @return the {@link User} object associated with the provided user ID, or {@code null} if not found
+     */
+    @Override
+    @Cacheable(value = "users", key = "#userId")
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId);
+    }
+
+    /**
      * Updates the account details of the user with the specified user ID.
      * This method maps the provided {@link UserDto} to a {@link User} entity,
      * preserves the existing role and increments the version, and updates the password
-     * only if a new one is provided. Returns true if the update is successful.
+     * only if a new one is provided. Upon successful update, the current user's JWT token
+     * is invalidated to prevent continued use of the old token.
      *
      * @param userDto the {@link UserDto} containing updated user details
      * @param userId  the unique identifier of the user whose account is being updated
      * @return true if the account is successfully updated, false otherwise
      */
     @Override
+    @CacheEvict(value = "users", key = "#userId")
     public boolean updateOwnAccount(UserDto userDto, Long userId) {
         User user = userMapper.toEntity(userDto);
         User existingUser = userRepository.findById(userId);
@@ -73,19 +82,29 @@ public class UserServiceImpl implements UserService {
         }
         user.setUserId(userId);
         user.setRole(existingUser.getRole());
-        user.setVersion(existingUser.getVersion() + 1);
-        return userRepository.update(user);
+        user.setVersion(userDto.getVersion());
+        if (!userRepository.update(user)) {
+            throw new OptimisticLockException("Your account was modified. Check version number.");
+        }
+        tokenService.invalidateCurrentToken(userId);
+        return true;
     }
 
     /**
      * Deletes the account of the currently authenticated user from the database.
+     * If deletion is successful, the current user's JWT token is invalidated.
      *
      * @param userId the unique identifier of the user to delete
      * @return {@code true} if the deletion was successful, {@code false} otherwise
      */
     @Override
+    @CacheEvict(value = "users", key = "#userId")
     public boolean deleteOwnAccount(Long userId) {
-        return userRepository.delete(userId);
+        boolean deleted = userRepository.delete(userId);
+        if (deleted) {
+            tokenService.invalidateCurrentToken(userId);
+        }
+        return deleted;
     }
 
     /**
@@ -103,7 +122,6 @@ public class UserServiceImpl implements UserService {
         int totalUsers = userRepository.getTotalUserCount();
         List<UserDto> dtoList = users.stream().map(user ->
                 UserDto.removePassword(userMapper.toDto(user))).toList();
-
         return new PaginatedResponse<>(dtoList, totalUsers, (int) Math.ceil((double) totalUsers / size), page, size);
     }
 }

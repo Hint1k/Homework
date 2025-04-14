@@ -1,4 +1,4 @@
-package com.demo.finance.exception;
+package com.demo.finance.exception.custom;
 
 /**
  * The {@code ValidationException} class extends {@link RuntimeException} and represents an exception
